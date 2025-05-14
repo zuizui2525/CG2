@@ -965,6 +965,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Release();
 	wvpResource->Release();
 	textureResource->Release();
+	intermediateResource->Release();
 
 	//  出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello, DirectX!\n");
