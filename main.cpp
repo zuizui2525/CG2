@@ -277,7 +277,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 
-	//PSO用のヒープを作成する
+	//PSOを作成する
+	PSO* pso = new PSO(device, dxcUtils, dxcCompiler, includeHandler, logStream);
+	assert(SUCCEEDED(hr));
+
 	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
 	// マテリアルにデータを書き込む
@@ -294,10 +297,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	// 単位行列を書き込んでおく
 	*wvpData = MakeIdentity4x4();
-
-	//PSOを作成する
-	PSO* pso = new PSO(device, dxcUtils, dxcCompiler, includeHandler, logStream);
-	assert(SUCCEEDED(hr));
 
 	// 実際に頂点リソースを作る
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
