@@ -23,6 +23,7 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include "Struct.h"
 #include "Matrix.h"
+#include "PSO.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "Dbghelp.lib")
