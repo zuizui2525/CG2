@@ -16,8 +16,6 @@ public:
     ID3D12RootSignature* GetRootSignature() const { return rootSignature; }
     ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState; }
 
-    // 解放はmain.cppで行うため、デストラクタは空にするか、解放しない
-
 public:
     // 生ポインタで管理
     ID3D12RootSignature* rootSignature = nullptr;
