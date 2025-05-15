@@ -681,33 +681,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// PSO の解放
 	if (pso) {
-		// psoの中身にマップしたリソースがあればUnmap処理を忘れずに（もしpso側でマップしているなら）
-		// 例:
-		// if(pso->materialResource) pso->materialResource->Unmap(0, nullptr);
-		// if(pso->wvpResource) pso->wvpResource->Unmap(0, nullptr);
-
-		// PSOのリソース解放（main.cpp側で責任を持つなら）
-		if (pso->materialResource) {
-			pso->materialResource->Release();
-			pso->materialResource = nullptr;
-		}
-		if (pso->wvpResource) {
-			pso->wvpResource->Release();
-			pso->wvpResource = nullptr;
-		}
-		if (pso->graphicsPipelineState) {
-			pso->graphicsPipelineState->Release();
-			pso->graphicsPipelineState = nullptr;
-		}
-		if (pso->rootSignature) {
-			pso->rootSignature->Release();
-			pso->rootSignature = nullptr;
-		}
-
 		delete pso;
 		pso = nullptr;
 	}
-
 
 	//  出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello, DirectX!\n");

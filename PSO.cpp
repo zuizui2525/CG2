@@ -134,5 +134,20 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
 }
 
 PSO::~PSO() {
-    // ここではReleaseしない（main.cppで解放する）
+    if (materialResource) {
+        materialResource->Release();
+        materialResource = nullptr;
+    }
+    if (wvpResource) {
+        wvpResource->Release();
+        wvpResource = nullptr;
+    }
+    if (graphicsPipelineState) {
+        graphicsPipelineState->Release();
+        graphicsPipelineState = nullptr;
+    }
+    if (rootSignature) {
+        rootSignature->Release();
+        rootSignature = nullptr;
+    }
 }
