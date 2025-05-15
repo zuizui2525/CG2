@@ -278,47 +278,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 	//PSO用のヒープを作成する
-	// 1.RootSignature
-	// RootSignature作成
-	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-	descriptionRootSignature.Flags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	
-	// Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // バイリニアフィルタ
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // U方向のアドレスモード。0~1の範囲外をリピート
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // V方向のアドレスモード。0~1の範囲外をリピート
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W方向のアドレスモード。0~1の範囲外をリピート
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数。比較しない
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX; // ありったけのMipmapを使う
-	staticSamplers[0].ShaderRegister = 0; // シェーダーで使うレジスタ番号。レジスタ番号0を使う
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	descriptionRootSignature.pStaticSamplers = staticSamplers; // StaticSamplerの配列へのポインタ
-	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers); // StaticSamplerの数
-	
-	// DescriptorRange作成。
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0; // レジスタ番号0を使う
-	descriptorRange[0].NumDescriptors = 1; // 1つだけ使う
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // 先頭から使う
-
-	// RootParameter作成。複数設定できるので配列。今回は結果１つだけなので長さ1の配列
-	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0; // レジスタ番号0を使う
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // VertexShaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 0; // レジスタ番号0を使う
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブルを使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // ディスクリプタテーブルの配列へのポインタ
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // ディスクリプタテーブルの長さ
-	descriptionRootSignature.pParameters = rootParameters; // ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = _countof(rootParameters); // 配列の長さ
 	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
 	// マテリアルにデータを書き込む
@@ -336,99 +295,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 単位行列を書き込んでおく
 	*wvpData = MakeIdentity4x4();
 
-	// シリアライズしてバイナリにする
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature,
-		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Log(logStream, reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-		assert(false);
-	}
-	// バイナリを元に生成
-	ID3D12RootSignature* rootSignature = nullptr;
-	hr = device->CreateRootSignature(0,
-		signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootSignature));
-	assert(SUCCEEDED(hr));
-
-	// 2.InputLayout
-	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-
-	// 3.BlendState
-	// BlendStateの設定
-	D3D12_BLEND_DESC blendDesc{};
-	// 全ての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	// 4.RasterizerState
-	// RasterizerStateの設定
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	// 裏面(時計回り)を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	// 三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-
-	// 5.VertexShader
-	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = CompileShader(logStream, L"Object3D.VS.hlsl",
-		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexShaderBlob != nullptr);
-
-	// 6.PixelShader
-	IDxcBlob* pixelShaderBlob = CompileShader(logStream, L"Object3D.PS.hlsl",
-		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob != nullptr);
-
-	// 7.DepthStencilState
-	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込み
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
-	// PSOを生成する
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature; // RootSignature
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc; // InputLayout
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() }; // VertexShader
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	pixelShaderBlob->GetBufferSize() }; // PixelShader
-	graphicsPipelineStateDesc.BlendState = blendDesc; // BlendState
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc; // RasterizerState
-	// 書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	// 利用するトポロジ(形状)のタイプ。三角形
-	graphicsPipelineStateDesc.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	// どのように画面に色を打ち込むかの設定(気にしない良い)
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	// DepthStencilStateの設定
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT; // DepthStencilViewのフォーマット
-	// 実際に生成
-	ID3D12PipelineState* graphicsPipelineState = nullptr;
-	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
-		IID_PPV_ARGS(&graphicsPipelineState));
+	//PSOを作成する
+	PSO* pso = new PSO(device, dxcUtils, dxcCompiler, includeHandler, logStream);
 	assert(SUCCEEDED(hr));
 
 	// 実際に頂点リソースを作る
@@ -641,8 +509,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->RSSetViewports(1, &viewport); // Viewportを設定
 			commandList->RSSetScissorRects(1, &scissorRect); // Scissorを設定
 			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-			commandList->SetGraphicsRootSignature(rootSignature);
-			commandList->SetPipelineState(graphicsPipelineState); // PSOを設定
+			commandList->SetGraphicsRootSignature(pso->GetRootSignature());
+			commandList->SetPipelineState(pso->GetPipelineState()); // PSOを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定するトポロジ考えておけばいい。
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -704,42 +572,143 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	// 解放処理
-	CloseHandle(fenceEvent);
-	fence->Release();
-	rtvDescriptorHeap->Release();
-	srvDescriptorHeap->Release();
-	swapChainResources[0]->Release();
-	swapChainResources[1]->Release();
-	swapChain->Release();
-	commandList->Release();
-	commandAllocator->Release();
-	commandQueue->Release();
-	device->Release();
-	useAdapter->Release();
-	dxgiFactory->Release();
-#ifdef _DEBUG
-	debugController->Release();
-#endif
-	CloseWindow(hwnd);
-
-	vertexResource->Release();
-	graphicsPipelineState->Release();
-	signatureBlob->Release();
-	if (errorBlob) {
-		errorBlob->Release();
+	// マッピング解除が必要なリソースはUnmapを行う（例：materialResource, wvpResource）
+	if (materialResource) {
+		materialResource->Unmap(0, nullptr);
+		materialResource->Release();
+		materialResource = nullptr;
 	}
-	rootSignature->Release();
-	pixelShaderBlob->Release();
-	vertexShaderBlob->Release();
-	materialResource->Release();
-	wvpResource->Release();
-	textureResource->Release();
-	intermediateResource->Release();
-	depthStencilResource->Release();
-	dsvDescriptorHeap->Release();
-	vertexResourceSprite->Release();
-	transformationMatrixResourceSprite->Release();
+	if (wvpResource) {
+		wvpResource->Unmap(0, nullptr);
+		wvpResource->Release();
+		wvpResource = nullptr;
+	}
+
+	// そのほかのリソース
+	if (vertexResource) {
+		vertexResource->Release();
+		vertexResource = nullptr;
+	}
+	if (textureResource) {
+		textureResource->Release();
+		textureResource = nullptr;
+	}
+	if (intermediateResource) {
+		intermediateResource->Release();
+		intermediateResource = nullptr;
+	}
+	if (depthStencilResource) {
+		depthStencilResource->Release();
+		depthStencilResource = nullptr;
+	}
+	if (dsvDescriptorHeap) {
+		dsvDescriptorHeap->Release();
+		dsvDescriptorHeap = nullptr;
+	}
+	if (vertexResourceSprite) {
+		vertexResourceSprite->Release();
+		vertexResourceSprite = nullptr;
+	}
+	if (transformationMatrixResourceSprite) {
+		transformationMatrixResourceSprite->Release();
+		transformationMatrixResourceSprite = nullptr;
+	}
+
+	// DXGI / D3D12関連リソースも同様に
+	if (fenceEvent) {
+		CloseHandle(fenceEvent);
+		fenceEvent = nullptr;
+	}
+	if (fence) {
+		fence->Release();
+		fence = nullptr;
+	}
+	if (rtvDescriptorHeap) {
+		rtvDescriptorHeap->Release();
+		rtvDescriptorHeap = nullptr;
+	}
+	if (srvDescriptorHeap) {
+		srvDescriptorHeap->Release();
+		srvDescriptorHeap = nullptr;
+	}
+	if (swapChainResources[0]) {
+		swapChainResources[0]->Release();
+		swapChainResources[0] = nullptr;
+	}
+	if (swapChainResources[1]) {
+		swapChainResources[1]->Release();
+		swapChainResources[1] = nullptr;
+	}
+	if (swapChain) {
+		swapChain->Release();
+		swapChain = nullptr;
+	}
+	if (commandList) {
+		commandList->Release();
+		commandList = nullptr;
+	}
+	if (commandAllocator) {
+		commandAllocator->Release();
+		commandAllocator = nullptr;
+	}
+	if (commandQueue) {
+		commandQueue->Release();
+		commandQueue = nullptr;
+	}
+	if (device) {
+		device->Release();
+		device = nullptr;
+	}
+	if (useAdapter) {
+		useAdapter->Release();
+		useAdapter = nullptr;
+	}
+	if (dxgiFactory) {
+		dxgiFactory->Release();
+		dxgiFactory = nullptr;
+	}
+#ifdef _DEBUG
+	if (debugController) {
+		debugController->Release();
+		debugController = nullptr;
+	}
+#endif
+
+	// ウィンドウのクローズは最後に行うのが無難
+	if (hwnd) {
+		CloseWindow(hwnd);
+		hwnd = nullptr;
+	}
+
+	// PSO の解放
+	if (pso) {
+		// psoの中身にマップしたリソースがあればUnmap処理を忘れずに（もしpso側でマップしているなら）
+		// 例:
+		// if(pso->materialResource) pso->materialResource->Unmap(0, nullptr);
+		// if(pso->wvpResource) pso->wvpResource->Unmap(0, nullptr);
+
+		// PSOのリソース解放（main.cpp側で責任を持つなら）
+		if (pso->materialResource) {
+			pso->materialResource->Release();
+			pso->materialResource = nullptr;
+		}
+		if (pso->wvpResource) {
+			pso->wvpResource->Release();
+			pso->wvpResource = nullptr;
+		}
+		if (pso->graphicsPipelineState) {
+			pso->graphicsPipelineState->Release();
+			pso->graphicsPipelineState = nullptr;
+		}
+		if (pso->rootSignature) {
+			pso->rootSignature->Release();
+			pso->rootSignature = nullptr;
+		}
+
+		delete pso;
+		pso = nullptr;
+	}
+
 
 	//  出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello, DirectX!\n");
