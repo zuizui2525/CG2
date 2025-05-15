@@ -45,6 +45,9 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Function.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
@@ -80,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Function.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
