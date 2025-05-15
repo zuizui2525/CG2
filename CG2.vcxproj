@@ -101,7 +101,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
-    <ClCompile Include="PSO.cpp" />
+    <ClCompile Include="PipelineStateObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.PS.hlsl">
@@ -129,7 +129,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Function.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Matrix.h" />
-    <ClInclude Include="PSO.h" />
+    <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Struct.h" />
   </ItemGroup>
   <ItemGroup>

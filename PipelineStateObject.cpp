@@ -1,4 +1,4 @@
-#include "PSO.h"
+#include "PipelineStateObject.h"
 #include "Function.h"
 
 PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, std::ofstream& logStream) {
