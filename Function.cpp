@@ -305,3 +305,21 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 	assert(SUCCEEDED(hr)); // 失敗したらassertで止める
 	return resource; // Resourceのポインタを返す
 }
+
+// ディスクリプタヒープの先頭から指定したインデックスのCPUディスクリプタハンドルを取得する
+D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	// ディスクリプタヒープの先頭を取得する
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	// ディスクリプタのサイズを取得する
+	handleCPU.ptr += descriptorSize * index; // インデックス分だけずらす
+	return handleCPU; // CPUディスクリプタハンドルを返す
+}
+
+// ディスクリプタヒープの先頭から指定したインデックスのGPUディスクリプタハンドルを取得する
+D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	// ディスクリプタヒープの先頭を取得する
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	// ディスクリプタのサイズを取得する
+	handleGPU.ptr += descriptorSize * index; // インデックス分だけずらす
+	return handleGPU; // GPUディスクリプタハンドルを返す
+}
