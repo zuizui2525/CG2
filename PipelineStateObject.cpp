@@ -50,13 +50,13 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     // ============================
     // 定数バッファ（CBV）の生成とマッピング
     // ============================
-    materialResource = CreateBufferResource(device, sizeof(Vector4));
-    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-    *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 白色マテリアル
+    materialResource_ = CreateBufferResource(device, sizeof(Vector4));
+    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+    *materialData_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 白色マテリアル
 
-    wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
-    wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-    *wvpData = MakeIdentity4x4(); // 単位行列を初期値とする
+    wvpResource_ = CreateBufferResource(device, sizeof(Matrix4x4));
+    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
+    *wvpData_ = MakeIdentity4x4(); // 単位行列を初期値とする
     // ComPtrの代わりに生ポインタを使って作成
     ID3DBlob* signatureBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
@@ -66,7 +66,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
         assert(false);
     }
 
-    hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+    hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
     assert(SUCCEEDED(hr));
 
     // ============================
@@ -115,7 +115,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     // パイプラインステートの構築
     // ============================
     D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
-    desc.pRootSignature = rootSignature;
+    desc.pRootSignature = rootSignature_;
     desc.InputLayout = inputLayoutDesc;
     desc.VS = { vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize() };
     desc.PS = { pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize() };
@@ -129,25 +129,25 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     desc.SampleDesc.Count = 1;
     desc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-    hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&graphicsPipelineState));
+    hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&graphicsPipelineState_));
     assert(SUCCEEDED(hr));
 }
 
 PSO::~PSO() {
-    if (materialResource) {
-        materialResource->Release();
-        materialResource = nullptr;
+    if (materialResource_) {
+        materialResource_->Release();
+        materialResource_ = nullptr;
     }
-    if (wvpResource) {
-        wvpResource->Release();
-        wvpResource = nullptr;
+    if (wvpResource_) {
+        wvpResource_->Release();
+        wvpResource_ = nullptr;
     }
-    if (graphicsPipelineState) {
-        graphicsPipelineState->Release();
-        graphicsPipelineState = nullptr;
+    if (graphicsPipelineState_) {
+        graphicsPipelineState_->Release();
+        graphicsPipelineState_ = nullptr;
     }
-    if (rootSignature) {
-        rootSignature->Release();
-        rootSignature = nullptr;
+    if (rootSignature_) {
+        rootSignature_->Release();
+        rootSignature_ = nullptr;
     }
 }
