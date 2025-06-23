@@ -1,6 +1,8 @@
 #pragma once
 #pragma warning(push)
 #pragma warning(disable:4023)
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <cstdint>
 #include <string>
 #include <format>
