@@ -8,6 +8,7 @@
 #include <format>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <chrono>
 #include <cassert>
 #include <vector>

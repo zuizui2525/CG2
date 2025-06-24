@@ -30,7 +30,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
     // ルートパラメータ：CBV（マテリアルとWVP）、テクスチャSRV
-    D3D12_ROOT_PARAMETER rootParameters[3] = {};
+    D3D12_ROOT_PARAMETER rootParameters[4] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     rootParameters[0].Descriptor.ShaderRegister = 0;
@@ -44,6 +44,10 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
     rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
 
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
+	rootParameters[3].Descriptor.ShaderRegister = 1; // register 1を使用
+
     descriptionRootSignature.pParameters = rootParameters;
     descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -56,7 +60,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
 
     wvpResource_ = CreateBufferResource(device, sizeof(Matrix4x4));
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-    *wvpData_ = MakeIdentity4x4(); // 単位行列を初期値とする
+    *wvpData_ = Math::MakeIdentity(); // 単位行列を初期値とする
     // ComPtrの代わりに生ポインタを使って作成
     ID3DBlob* signatureBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
@@ -72,7 +76,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     // ============================
     // 入力レイアウトの設定（POSITION, TEXCOORD）
     // ============================
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
     inputElementDescs[0].SemanticName = "POSITION";
     inputElementDescs[0].SemanticIndex = 0;
     inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -82,6 +86,11 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     inputElementDescs[1].SemanticIndex = 0;
     inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
     inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticIndex = 0;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
     D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
     inputLayoutDesc.pInputElementDescs = inputElementDescs;

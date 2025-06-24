@@ -53,3 +53,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 
 // ディスクリプタヒープの先頭から指定したインデックスのGPUディスクリプタハンドルを取得する
 D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+// mtlファイルを読む関数
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+
+// Objファイルを読む関数
+ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
