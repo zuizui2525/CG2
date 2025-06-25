@@ -369,18 +369,15 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		if (identifier == "v") {
 			Vector4 position{};
 			s >> position.x >> position.y >> position.z;
-			position.x *= -1.0f;
 			position.w = 1.0f;
 			positions.push_back(position);
 		} else if (identifier == "vt") {
 			Vector2 texcoord{};
 			s >> texcoord.x >> texcoord.y;
-			texcoord.y = 1.0f - texcoord.y; // y軸方向を反転
 			texcoords.push_back(texcoord);
 		} else if (identifier == "vn") {
 			Vector3 normal{};
 			s >> normal.x >> normal.y >> normal.z;
-			normal.x *= -1.0f;
 			normals.push_back(normal);
 		} else if (identifier == "f") {
 			VertexData triangle[3];
@@ -400,8 +397,13 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				VertexData vertex = { position, texcoord, normal };
-				modelData.vertices.push_back(vertex);
+				//VertexData vertex = { position, texcoord, normal };
+				//modelData.vertices.push_back(vertex);
+
+				position.x *= -1.0f;
+				texcoord.y = 1.0f - texcoord.y; // y軸方向を反転
+				normal.x *= -1.0f;
+
 				triangle[faceVertex] = { position, texcoord, normal };
 			}
 			modelData.vertices.push_back(triangle[2]);
