@@ -646,6 +646,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metadata3 = mipImages.GetMetadata();
 	ID3D12Resource* textureResource3 = CreateTextureResource(device, metadata3);
 	ID3D12Resource* intermediateResource3 = UploadTextureData(textureResource3, mipImages3, device, commandList);
+	// ModelのTextureを読んで転送する(Model)
+	DirectX::ScratchImage mipImagesModel = LoadTexture(modelData.material.textureFilePath);
+	const DirectX::TexMetadata& metadataModel = mipImages.GetMetadata();
+	ID3D12Resource* textureResourceModel = CreateTextureResource(device, metadataModel);
+	ID3D12Resource* intermediateResourceModel = UploadTextureData(textureResourceModel, mipImagesModel, device, commandList);
+
 
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -665,6 +671,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
 	srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
 	srvDesc3.Texture2D.MipLevels = UINT(metadata3.mipLevels); // ミップマップの数
+	// metaDataを基にSRVの設定(Model)
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescModel{};
+	srvDescModel.Format = metadataModel.format; // フォーマット
+	srvDescModel.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
+	srvDescModel.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDescModel.Texture2D.MipLevels = UINT(metadataModel.mipLevels); // ミップマップの数
 
 	// SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 1);
@@ -690,6 +702,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		textureResource3, // テクスチャリソース
 		&srvDesc3, // SRVの設定
 		textureSrvHandleCPU3); // SRVのディスクリプタハンドル
+	// SRVを作成するDescriptorHeapの場所を決める(Model)
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 4);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 4);
+	// SRVを作成する(Model)
+	device->CreateShaderResourceView(
+		textureResourceModel, // テクスチャリソース
+		&srvDescModel, // SRVの設定
+		textureSrvHandleCPUModel); // SRVのディスクリプタハンドル
 
 	// DepthStencil用のリソースを作成する
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
@@ -706,6 +726,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useUvChecker = true; // UVCheckerを使うかどうかのフラグ
 	bool useMonsterBall = false; // モンスターボールを使うかどうかのフラグ
+	bool useModelTexture = false; // Modelのtextureを使うかどうかのフラグ
 	bool isRotate = true; // 回転するかどうかのフラグ
 	bool isRotate2 = true; // 回転するかどうかのフラグ
 
@@ -767,6 +788,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Text("TextureChange"); // Title
 			ImGui::Checkbox("useUvChecker", &useUvChecker); // UvCheckerを使うかどうかのUI
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall); // モンスターボールを使うかどうかのUI
+			ImGui::Checkbox("useModelTexture", &useModelTexture); // Modelのtextureを使うかどうかのUI
 			ImGui::End();
 			// ImGuiのデモ用のUIを表示している
 			// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
@@ -874,6 +896,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 			} else if (useMonsterBall) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+			} else if (useModelTexture) {
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel);
 			} else {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
 			}
@@ -1078,6 +1102,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		textureResource3->Release();
 		textureResource3 = nullptr;
 	}
+	if (textureResourceModel) {
+		textureResourceModel->Release();
+		textureResourceModel = nullptr;
+	}
 	if (intermediateResource) {
 		intermediateResource->Release();
 		intermediateResource = nullptr;
@@ -1089,6 +1117,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (intermediateResource3) {
 		intermediateResource3->Release();
 		intermediateResource3 = nullptr;
+	}
+	if (intermediateResourceModel) {
+		intermediateResourceModel->Release();
+		intermediateResourceModel = nullptr;
 	}
 	if (depthStencilResource) {
 		depthStencilResource->Release();
