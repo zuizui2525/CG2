@@ -579,7 +579,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpDataModel->WVP = Math::MakeIdentity();
 	wvpDataModel->world = Math::MakeIdentity();
 	// モデル読み込み
-	ModelData modelData = LoadObjFile("resources", "plane.obj");
+	ModelData modelData = LoadObjFile("resources", "axis.obj");
 	// 頂点リソースを作る
 	ID3D12Resource* vertexResourceModel = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 	// 頂点バッファビューを作成する
