@@ -3,14 +3,14 @@
 
 class PSO {
 public:
-    // 生ポインタで管理
-    ID3D12RootSignature* rootSignature_ = nullptr;
-    ID3D12PipelineState* graphicsPipelineState_ = nullptr;
+    // ComPtrで管理
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
 
-    ID3D12Resource* materialResource_ = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
     Vector4* materialData_ = nullptr;
 
-    ID3D12Resource* wvpResource_ = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
     Matrix4x4* wvpData_ = nullptr;
 
 public:
@@ -22,8 +22,9 @@ public:
         std::ofstream& logStream
     );
 
-    ~PSO();
+    // デストラクタはComPtrが自動で解放するため空で良い
+    ~PSO() = default;
 
-    ID3D12RootSignature* GetRootSignature() const { return rootSignature_; }
-    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_; }
+    ID3D12RootSignature* GetRootSignature() const { return rootSignature_.Get(); }
+    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_.Get(); }
 };

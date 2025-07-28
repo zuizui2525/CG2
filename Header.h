@@ -18,6 +18,7 @@
 #include <dbghelp.h>
 #include <strsafe.h>
 #include <dxgidebug.h>
+#include <wrl.h>
 #include <dxcapi.h>
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"

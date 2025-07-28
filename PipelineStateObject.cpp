@@ -1,5 +1,6 @@
 #include "PipelineStateObject.h"
 #include "Function.h"
+#include <wrl.h> // ComPtrを使用するためにインクルード
 
 PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, std::ofstream& logStream) {
     // ============================
@@ -8,7 +9,6 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
     descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-    // スタティックサンプラー（テクスチャ用のフィルタリング設定）
     D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
     staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
     staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -22,14 +22,12 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     descriptionRootSignature.pStaticSamplers = staticSamplers;
     descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
-    // SRV（Shader Resource View）のディスクリプタレンジ設定
     D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
     descriptorRange[0].BaseShaderRegister = 0;
     descriptorRange[0].NumDescriptors = 1;
     descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-    // ルートパラメータ：CBV（マテリアルとWVP）、テクスチャSRV
     D3D12_ROOT_PARAMETER rootParameters[4] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
@@ -44,9 +42,9 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
     rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
 
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[3].Descriptor.ShaderRegister = 1; // register 1を使用
+    rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    rootParameters[3].Descriptor.ShaderRegister = 1;
 
     descriptionRootSignature.pParameters = rootParameters;
     descriptionRootSignature.NumParameters = _countof(rootParameters);
@@ -56,14 +54,14 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     // ============================
     materialResource_ = CreateBufferResource(device, sizeof(Vector4));
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-    *materialData_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 白色マテリアル
+    *materialData_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
     wvpResource_ = CreateBufferResource(device, sizeof(Matrix4x4));
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-    *wvpData_ = Math::MakeIdentity(); // 単位行列を初期値とする
-    // ComPtrの代わりに生ポインタを使って作成
-    ID3DBlob* signatureBlob = nullptr;
-    ID3DBlob* errorBlob = nullptr;
+    *wvpData_ = Math::MakeIdentity();
+
+    Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
     HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
     if (FAILED(hr)) {
         Log(logStream, reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
@@ -74,7 +72,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     assert(SUCCEEDED(hr));
 
     // ============================
-    // 入力レイアウトの設定（POSITION, TEXCOORD）
+    // 入力レイアウトの設定
     // ============================
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
     inputElementDescs[0].SemanticName = "POSITION";
@@ -87,10 +85,10 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
     inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputElementDescs[2].SemanticName = "NORMAL";
-	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+    inputElementDescs[2].SemanticName = "NORMAL";
+    inputElementDescs[2].SemanticIndex = 0;
+    inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
     D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
     inputLayoutDesc.pInputElementDescs = inputElementDescs;
@@ -112,19 +110,19 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
     // ============================
-    // シェーダのコンパイル（VS, PS）
+    // シェーダのコンパイル
     // ============================
-    IDxcBlob* vertexShaderBlob = CompileShader(logStream, L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+    Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob = CompileShader(logStream, L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(vertexShaderBlob != nullptr);
 
-    IDxcBlob* pixelShaderBlob = CompileShader(logStream, L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+    Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob = CompileShader(logStream, L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(pixelShaderBlob != nullptr);
 
     // ============================
     // パイプラインステートの構築
     // ============================
     D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
-    desc.pRootSignature = rootSignature_;
+    desc.pRootSignature = rootSignature_.Get(); // .Get()で生ポインタを取得
     desc.InputLayout = inputLayoutDesc;
     desc.VS = { vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize() };
     desc.PS = { pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize() };
@@ -142,21 +140,5 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     assert(SUCCEEDED(hr));
 }
 
-PSO::~PSO() {
-    if (materialResource_) {
-        materialResource_->Release();
-        materialResource_ = nullptr;
-    }
-    if (wvpResource_) {
-        wvpResource_->Release();
-        wvpResource_ = nullptr;
-    }
-    if (graphicsPipelineState_) {
-        graphicsPipelineState_->Release();
-        graphicsPipelineState_ = nullptr;
-    }
-    if (rootSignature_) {
-        rootSignature_->Release();
-        rootSignature_ = nullptr;
-    }
-}
+// PSOのデストラクタは空で良い。ComPtrが自動でRelease()を呼び出す。
+// PSO::~PSO() {} // PipelineStateObject.hでdefault指定したため不要
