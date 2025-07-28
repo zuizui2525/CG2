@@ -291,6 +291,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(hr));
 
+	// DirectInputの初期化
+	Microsoft::WRL::ComPtr<IDirectInput8> directInput;
+	hr = DirectInput8Create(
+		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		(void**)&directInput, nullptr);
+	// キーボードデバイスの生成
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
+	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	assert(SUCCEEDED(hr));
+	// 入力データ形式のセット
+	hr = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
+	assert(SUCCEEDED(hr));
+	// 排他制御レベルのセット
+	hr = keyboard->SetCooperativeLevel(
+		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	assert(SUCCEEDED(hr));
+
 	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = CreateBufferResource(device.Get(), sizeof(Material));
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource2 = CreateBufferResource(device.Get(), sizeof(Material));
@@ -805,8 +822,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
+			// キーボード情報の取得開始
+			keyboard->Acquire();
+			// 全キーの入力状態を取得する
+			BYTE key[256] = {};
+			keyboard->GetDeviceState(sizeof(key), key);
+
 			//directionalLightの正規化
 			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
+
+			if (key[DIK_0]) {
+				//cameraTransform.rotate.x += 0.01f;
+			}
 
 			// 三角形の回転処理
 			if (isRotate) {

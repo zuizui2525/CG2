@@ -2,6 +2,7 @@
 #pragma warning(push)
 #pragma warning(disable:4023)
 #define _USE_MATH_DEFINES
+#define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
 #include <math.h>
 #include <cstdint>
 #include <string>
@@ -21,6 +22,7 @@
 #include <wrl.h>
 #include <dxcapi.h>
 #include <xaudio2.h>
+#include <dinput.h>
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -32,6 +34,7 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "Dbghelp.lib")
+#pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxcompiler.lib")
 #pragma comment(lib, "xaudio2.lib")
