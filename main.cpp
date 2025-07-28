@@ -12,6 +12,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 誰も補足しなかった場合に(Unhandled)、補足する関数を登録
 	SetUnhandledExceptionFilter(ExportDump);
 
+	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
+	IXAudio2MasteringVoice* masterVoice;
+
 	// ログのディレクトリ
 	std::filesystem::create_directory("logs");
 	// 現在時刻を取得
@@ -280,6 +283,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//PSOを作成する
 	PSO* pso = new PSO(device.Get(), dxcUtils.Get(), dxcCompiler.Get(), includeHandler.Get(), logStream);
 	// assert(SUCCEEDED(hr)); // PSOのコンストラクタはHRESULTを返さないので削除
+
+	// XAudioエンジンのインスタンスを生成
+	hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	assert(SUCCEEDED(hr));
+	// マスターボイスを生成
+	hr = xAudio2->CreateMasteringVoice(&masterVoice);
+	assert(SUCCEEDED(hr));
 
 	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = CreateBufferResource(device.Get(), sizeof(Material));
@@ -598,8 +608,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f},
 	};
 
-
-
 	// DirectionalLight
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(device.Get(), sizeof(DirectionalLight));
 	DirectionalLight* directionalLightData;
@@ -607,8 +615,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 1.0f;
-
-
 
 	// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
 	// こういうもん
@@ -721,6 +727,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		depthStencilResource.Get(), // テクスチャリソース
 		&dsvDesc, // DSVの設定
 		dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart()); // DSVのディスクリプタハンドル
+
+	// 音声読み込み
+	SoundData soundData1 = SoundLoadWave("resources/fanfare.wav");
+	// 音声再生
+	SoundPlayWave(xAudio2.Get(), soundData1);
 
 	bool useUvChecker = true; // UVCheckerを使うかどうかのフラグ
 	bool useMonsterBall = false; // モンスターボールを使うかどうかのフラグ
@@ -1043,6 +1054,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (indexResourceSphere) {
 		indexResourceSphere->Unmap(0, nullptr);
 	}
+
+	// XAudio2解放
+	xAudio2.Reset();
+	// 音声データ解放
+	SoundUnload(&soundData1);
 
 	// ComPtrを使用しているため、明示的なReleaseやnullptr代入は不要です。
 	// スコープを抜ける際に自動的に解放されます。
