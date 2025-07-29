@@ -308,6 +308,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
 
+	// マウスデバイスの生成
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> mouse;
+	hr = directInput->CreateDevice(GUID_SysMouse, &mouse, NULL);
+	assert(SUCCEEDED(hr));
+	// 入力データ形式のセット
+	// c_dfDIMouse2 はマウスホイールなどの追加情報をサポートする標準形式です。
+	hr = mouse->SetDataFormat(&c_dfDIMouse2);
+	assert(SUCCEEDED(hr));
+	// 排他制御レベルのセット
+	// マウスの場合、DISCL_NOWINKEY は不要です。
+	hr = mouse->SetCooperativeLevel(
+		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	assert(SUCCEEDED(hr));
+
 	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = CreateBufferResource(device.Get(), sizeof(Material));
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource2 = CreateBufferResource(device.Get(), sizeof(Material));
@@ -827,6 +841,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 全キーの入力状態を取得する
 			BYTE key[256] = {};
 			keyboard->GetDeviceState(sizeof(key), key);
+
+			// マウス情報の取得開始
+			mouse->Acquire();
+			// マウスの入力状態を取得する
+			// DIMOUSESTATE2構造体は、マウスの移動量(X, Y, Z)とボタンの状態を保持します。
+			DIMOUSESTATE2 mouseState = {};
+			mouse->GetDeviceState(sizeof(mouseState), &mouseState);
 
 			//directionalLightの正規化
 			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
