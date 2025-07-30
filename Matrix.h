@@ -24,7 +24,11 @@ namespace Math {
 	Vector3 ClosestPoint(const Vector3& lineStart, const Vector3& lineEnd, const Vector3& point);
 	// ベクトルの長さを求める関数
 	Vector3 Perpendicular(const Vector3& vector);
+	// 指定されたVector3（ベクトル）を、与えられたMatrix4x4（行列）の回転成分のみを使って変換するための関数
+	Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 
+	// カメラの「ビュー行列（View Matrix）」を作るための関数
+	Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up);
 	// 逆行列(Matrix4x4)
 	Matrix4x4 Inverse(const Matrix4x4& m);
 	// 平行移動行列(Matrix4x4)

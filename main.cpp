@@ -764,11 +764,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 音声再生
 	SoundPlayWave(xAudio2.Get(), soundData1);
 
+	// DebugCameraのインスタンス化
+	DebugCamera debugCamera;
+	debugCamera.Initialize();
+
 	bool useUvChecker = true; // UVCheckerを使うかどうかのフラグ
 	bool useMonsterBall = false; // モンスターボールを使うかどうかのフラグ
 	bool useModelTexture = false; // Modelのtextureを使うかどうかのフラグ
 	bool isRotate = true; // 回転するかどうかのフラグ
 	bool isRotate2 = true; // 回転するかどうかのフラグ
+	bool useDebugCamera = false;
+
+	bool wasDebugCameraLastFrame = useDebugCamera; // 毎フレームの最後に更新
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -833,6 +840,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ImGuiのデモ用のUIを表示している
 			// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 			//ImGui::ShowDemoWindow();
+			
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
@@ -853,7 +861,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
 
 			if (key[DIK_0]) {
-				//cameraTransform.rotate.x += 0.01f;
+				if (useDebugCamera) {
+					useDebugCamera = false;
+				} else {
+					useDebugCamera = true;
+				}
 			}
 
 			// 三角形の回転処理
@@ -867,9 +879,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			} else {
 				transform2.rotate.y = 0.0f;
 			}
+
 			// 各種行列の処理
 			// カメラ
 			Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			
+			Matrix4x4 viewMatrix1;
+			Matrix4x4 projectionMatrix1;
+			if (useDebugCamera) {
+				if (!wasDebugCameraLastFrame) {
+					debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
+				}
+				debugCamera.HideCursor();
+				debugCamera.Update(key, mouseState);
+				viewMatrix1 = debugCamera.GetViewMatrix();
+				projectionMatrix1 = debugCamera.GetProjectionMatrix();
+			} else {
+				debugCamera.ShowCursorBack();
+				viewMatrix1 = Math::Inverse(cameraMatrix);
+				projectionMatrix1 = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+			}
+			// フレーム最後に更新して次フレームに備える
+			wasDebugCameraLastFrame = useDebugCamera;
 
 			// 三角形
 			Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -902,8 +933,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// モデル
 			Matrix4x4 worldMatrixModel = Math::MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
-			Matrix4x4 viewMatrixModel = Math::Inverse(cameraMatrix);
-			Matrix4x4 projectionMatrixModel = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 viewMatrixModel = viewMatrix1;
+			Matrix4x4 projectionMatrixModel = projectionMatrix1;
 			Matrix4x4 worldViewProjectionMatrixModel = Math::Multiply(Math::Multiply(worldMatrixModel, viewMatrixModel), projectionMatrixModel);
 			wvpDataModel->WVP = worldViewProjectionMatrixModel;
 			wvpDataModel->world = worldMatrixModel;

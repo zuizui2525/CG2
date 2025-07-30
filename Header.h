@@ -30,6 +30,7 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include "Struct.h"
 #include "Matrix.h"
+#include "DebugCamera.h"
 #include "PipelineStateObject.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")

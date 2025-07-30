@@ -93,6 +93,31 @@ namespace Math {
 		}
 		return { 0.0f, -vector.z, vector.y };
 	}
+	// 指定されたVector3（ベクトル）を、与えられたMatrix4x4（行列）の回転成分のみを使って変換するための関数
+	Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
+		Vector3 result;
+		result.x = v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0];
+		result.y = v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1];
+		result.z = v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2];
+		return result;
+	}
+
+	// カメラの「ビュー行列（View Matrix）」を作るための関数
+	Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up) {
+		Vector3 z = Normalize(Subtract(target,eye));
+		Vector3 x = Normalize(Cross(up, z));
+		Vector3 y = Cross(z, x);
+
+		Matrix4x4 m = {};
+		m.m[0][0] = x.x; m.m[0][1] = y.x; m.m[0][2] = z.x; m.m[0][3] = 0.0f;
+		m.m[1][0] = x.y; m.m[1][1] = y.y; m.m[1][2] = z.y; m.m[1][3] = 0.0f;
+		m.m[2][0] = x.z; m.m[2][1] = y.z; m.m[2][2] = z.z; m.m[2][3] = 0.0f;
+		m.m[3][0] = -Dot(x, eye);
+		m.m[3][1] = -Dot(y, eye);
+		m.m[3][2] = -Dot(z, eye);
+		m.m[3][3] = 1.0f;
+		return m;
+	}
 
 	// 逆行列(Matrix4x4)
 	Matrix4x4 Inverse(const Matrix4x4& m) {
