@@ -9,34 +9,30 @@ void DebugCamera::Update(BYTE key[], DIMOUSESTATE2 mouseState) {
     center.x = 640;
     center.y = 360;
 
-    POINT currentPos;
-    GetCursorPos(&currentPos);
     // 1フレームだけマウス移動による回転をスキップする
     if (skipNextMouseUpdate_) {
         skipNextMouseUpdate_ = false;
-
-        // カーソルを中央に戻す（差分をリセット）
         ClientToScreen(hwnd_, &center);
         SetCursorPos(center.x, center.y);
-        return; // このフレームのカメラ更新はスキップ
+        return;
     }
-    ScreenToClient(hwnd_, &currentPos); // ← hwndはWindowハンドル
 
-    // 差分取得（中央との差）
-    int dx = currentPos.x - center.x;
-    int dy = currentPos.y - center.y;
+    // 右クリック中のみ視点回転
+    if (mouseState.rgbButtons[1] & 0x80) {
+        POINT currentPos;
+        GetCursorPos(&currentPos);
+        ScreenToClient(hwnd_, &currentPos);
 
-    // 回転角度を加算
-    rotation_.x += static_cast<float>(dy) * rotateSpeed;
-    rotation_.y += static_cast<float>(dx) * rotateSpeed;
+        int dx = currentPos.x - center.x;
+        int dy = currentPos.y - center.y;
 
-    // 角度制限
-    rotation_.x = std::clamp(rotation_.x, -1.57f, 1.57f);
-    
-    // ロール固定（Z軸の傾きを防ぐ）
-    rotation_.z = 0.0f;
+        rotation_.x += static_cast<float>(dy) * rotateSpeed;
+        rotation_.y += static_cast<float>(dx) * rotateSpeed;
+        rotation_.x = std::clamp(rotation_.x, -1.57f, 1.57f);
+        rotation_.z = 0.0f;
+    }
 
-    // カーソルを中央に戻す
+    // 毎フレーム カーソルを中央に戻す（右クリックしていなくても！）
     ClientToScreen(hwnd_, &center);
     SetCursorPos(center.x, center.y);
 

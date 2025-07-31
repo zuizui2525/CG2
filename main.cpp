@@ -680,6 +680,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f},
 	};
 
+	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel3 = CreateBufferResource(device.Get(), sizeof(Material));
+	// マテリアルにデータを書き込む
+	Material* materialDataModel3;
+	// 書き込むためのアドレスを取得
+	materialResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel3));
+	// 今回は白を書き込んでみる
+	materialDataModel3->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataModel3->enableLighting = true;
+	materialDataModel3->uvtransform = Math::MakeIdentity();
+	// WVP用のリソースを作る。１つ分のサイズを用意する。
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel3 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
+	// データを書き込む
+	TransformationMatrix* wvpDataModel3;
+	// 書き込むためのアドレスを取得
+	wvpResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel3));
+	// 単位行列を書き込んでおく
+	wvpDataModel3->WVP = Math::MakeIdentity();
+	wvpDataModel3->world = Math::MakeIdentity();
+	// モデル読み込み
+	ModelData modelData3 = LoadObjFile("resources", "bunny.obj");
+	// 頂点リソースを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel3 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData3.vertices.size());
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel3{};
+	vertexBufferViewModel3.BufferLocation = vertexResourceModel3->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
+	vertexBufferViewModel3.SizeInBytes = UINT(sizeof(VertexData) * modelData3.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
+	vertexBufferViewModel3.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
+	// 頂点リソースにデータを書き込む
+	VertexData* vertexDataModel3;
+	vertexResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel3)); // 書き込むためのアドレスを取得
+	std::memcpy(vertexDataModel3, modelData3.vertices.data(), sizeof(VertexData)* modelData3.vertices.size()); // 頂点データをリソースにコピー
+	// CPUで動かす用のTransformを作る
+	Transform transformModel3 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	// uvTransformSprite
+	Transform uvTransformModel3{
+		{1.0f,1.0f,1.0f},
+		{0.0f,0.0f,0.0f},
+		{0.0f,0.0f,0.0f},
+	};
+
 	// DirectionalLight
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(device.Get(), sizeof(DirectionalLight));
 	DirectionalLight* directionalLightData;
@@ -727,11 +768,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metadataModel = mipImagesModel.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel = CreateTextureResource(device.Get(), metadataModel);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel = UploadTextureData(textureResourceModel.Get(), mipImagesModel, device.Get(), commandList.Get());
-	// ModelのTextureを読んで転送する(Model)
+	// ModelのTextureを読んで転送する(Model2)
 	DirectX::ScratchImage mipImagesModel2 = LoadTexture(modelData2.material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel2 = mipImagesModel2.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel2 = CreateTextureResource(device.Get(), metadataModel2);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel2 = UploadTextureData(textureResourceModel2.Get(), mipImagesModel2, device.Get(), commandList.Get());
+	// ModelのTextureを読んで転送する(Model3)
+	DirectX::ScratchImage mipImagesModel3 = LoadTexture(modelData3.material.textureFilePath);
+	const DirectX::TexMetadata& metadataModel3 = mipImagesModel3.GetMetadata(); // mipImagesからmipImagesModelに変更
+	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel3 = CreateTextureResource(device.Get(), metadataModel3);
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel3 = UploadTextureData(textureResourceModel3.Get(), mipImagesModel3, device.Get(), commandList.Get());
 
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -763,6 +809,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDescModel2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
 	srvDescModel2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
 	srvDescModel2.Texture2D.MipLevels = UINT(metadataModel2.mipLevels); // ミップマップの数
+	// metaDataを基にSRVの設定(Model3)
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescModel3{};
+	srvDescModel3.Format = metadataModel3.format; // フォーマット
+	srvDescModel3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
+	srvDescModel3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDescModel3.Texture2D.MipLevels = UINT(metadataModel3.mipLevels); // ミップマップの数
 
 	// SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 1);
@@ -799,11 +851,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// SRVを作成するDescriptorHeapの場所を決める(Model2)
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel2 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel2 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
-	// SRVを作成する(Model)
+	// SRVを作成する(Model2)
 	device->CreateShaderResourceView(
 		textureResourceModel2.Get(), // テクスチャリソース
 		&srvDescModel2, // SRVの設定
 		textureSrvHandleCPUModel2); // SRVのディスクリプタハンドル
+	// SRVを作成するDescriptorHeapの場所を決める(Model3)
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel3 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel3 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
+	// SRVを作成する(Model3)
+	device->CreateShaderResourceView(
+		textureResourceModel3.Get(), // テクスチャリソース
+		&srvDescModel3, // SRVの設定
+		textureSrvHandleCPUModel3); // SRVのディスクリプタハンドル
 
 	// DepthStencil用のリソースを作成する
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight);
@@ -830,7 +890,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useUvChecker = true; // UVCheckerを使うかどうかのフラグ
 	bool useMonsterBall = false; // モンスターボールを使うかどうかのフラグ
 	bool useModelTexture = false; // Modelのtextureを使うかどうかのフラグ
-	bool useModelTexture2 = false; // Modelのtextureを使うかどうかのフラグ
+	bool useModelTexture2 = false; // Modelのtextureを使うかどうかの
+	bool useModelTexture3 = false; // Modelのtextureを使うかどうかのフラグ
 	bool isRotate = true; // 回転するかどうかのフラグ
 	bool isRotate2 = true; // 回転するかどうかのフラグ
 	bool useDebugCamera = false;
@@ -843,6 +904,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawSphere = false;
 	bool drawModel = false;
 	bool drawModel2 = false;
+	bool drawModel3 = false;
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -916,12 +978,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("Translate(Model2)", &transformModel2.translate.x, 0.01f); // 球の位置を変更するUI
 				ImGui::DragFloat3("Rotate(Model2)", &transformModel2.rotate.x, 0.01f); // 球の回転を変更するUI
 				ImGui::Separator();
+				ImGui::Checkbox("Draw(Model3)", &drawModel3);
+				ImGui::DragFloat3("Scale(Model3)", &transformModel3.scale.x, 0.01f); // 球の拡縮を変更するUI
+				ImGui::DragFloat3("Translate(Model3)", &transformModel3.translate.x, 0.01f); // 球の位置を変更するUI
+				ImGui::DragFloat3("Rotate(Model3)", &transformModel3.rotate.x, 0.01f); // 球の回転を変更するUI
+				ImGui::Separator();
 			}
 			if (ImGui::CollapsingHeader("TextureChange")) {
 				ImGui::Checkbox("useUvChecker", &useUvChecker); // UvCheckerを使うかどうかのUI
 				ImGui::Checkbox("useMonsterBall", &useMonsterBall); // モンスターボールを使うかどうかのUI
 				ImGui::Checkbox("useModelTexture", &useModelTexture); // Modelのtextureを使うかどうかのUI
-				ImGui::Checkbox("useModelTexture2", &useModelTexture2); // Modelのtextureを使うかどうかのUI
+				ImGui::Checkbox("useModelTexture2", &useModelTexture2); // Modelのtextureを使うかどうかの
+				ImGui::Checkbox("useModelTexture3", &useModelTexture2); // Modelのtextureを使うかどうかのUI
 				ImGui::Separator();
 			}
 			ImGui::End();
@@ -932,23 +1000,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
+			
+			// 全キーの入力状態を取得する
+			static BYTE key[256]{};
+			static BYTE preKey[256]{};
+			// preKeyに現在のkeyの情報をコピーする
+			memcpy(preKey, key, 256);
 			// キーボード情報の取得開始
 			keyboard->Acquire();
-			// 全キーの入力状態を取得する
-			BYTE key[256] = {};
 			keyboard->GetDeviceState(sizeof(key), key);
 
-			// マウス情報の取得開始
-			mouse->Acquire();
+			// 全マウスの入力状態を取得する
+			static DIMOUSESTATE2 mouseState{};
+			static DIMOUSESTATE2 preMouseState{};
 			// マウスの入力状態を取得する
-			// DIMOUSESTATE2構造体は、マウスの移動量(X, Y, Z)とボタンの状態を保持します。
-			DIMOUSESTATE2 mouseState = {};
+			memcpy(&preMouseState, &mouseState, sizeof(DIMOUSESTATE2));
+			mouse->Acquire();
 			mouse->GetDeviceState(sizeof(mouseState), &mouseState);
 
 			//directionalLightの正規化
 			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
 
-			if (key[DIK_0]) {
+			if (key[DIK_TAB] && !preKey[DIK_TAB]) {
 				if (useDebugCamera) {
 					useDebugCamera = false;
 				} else {
@@ -1035,6 +1108,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpDataModel2->WVP = worldViewProjectionMatrixModel2;
 			wvpDataModel2->world = worldMatrixModel2;
 
+			// モデル
+			Matrix4x4 worldMatrixModel3 = Math::MakeAffineMatrix(transformModel3.scale, transformModel3.rotate, transformModel3.translate);
+			Matrix4x4 viewMatrixModel3 = viewMatrix1;
+			Matrix4x4 projectionMatrixModel3 = projectionMatrix1;
+			Matrix4x4 worldViewProjectionMatrixModel3 = Math::Multiply(Math::Multiply(worldMatrixModel3, viewMatrixModel3), projectionMatrixModel3);
+			wvpDataModel3->WVP = worldViewProjectionMatrixModel3;
+			wvpDataModel3->world = worldMatrixModel3;
+
 			// uv(sprite)
 			Matrix4x4 uvTransformSpriteMatrix = Math::MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformSpriteMatrix = Math::Multiply(uvTransformSpriteMatrix, Math::MakeRotateZMatrix(uvTransformSprite.rotate.z));
@@ -1085,6 +1166,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel);
 			} else if (useModelTexture2) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel2);
+			} else if (useModelTexture3) {
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel3);
 			} else {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
 			}
@@ -1171,6 +1254,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->DrawInstanced(UINT(modelData2.vertices.size()), 1, 0, 0);
 			}
 
+			// Model3の描画
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel3);
+			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel3->GetGPUVirtualAddress());
+			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel3->GetGPUVirtualAddress());
+			// directionalLight
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			// 描画コマンド
+			if (drawModel3) {
+				commandList->DrawInstanced(UINT(modelData3.vertices.size()), 1, 0, 0);
+			}
+
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
@@ -1235,6 +1331,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (materialResourceModel2) {
 		materialResourceModel2->Unmap(0, nullptr);
 	}
+	if (materialResourceModel3) {
+		materialResourceModel3->Unmap(0, nullptr);
+	}
 	if (wvpResource) {
 		wvpResource->Unmap(0, nullptr);
 	}
@@ -1252,6 +1351,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	if (wvpResourceModel2) {
 		wvpResourceModel2->Unmap(0, nullptr);
+	}
+	if (wvpResourceModel3) {
+		wvpResourceModel3->Unmap(0, nullptr);
 	}
 	if (indexResourceSprite) {
 		indexResourceSprite->Unmap(0, nullptr);
