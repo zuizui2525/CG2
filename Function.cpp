@@ -384,31 +384,43 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			normals.push_back(normal);
 		} else if (identifier == "f") {
 			VertexData triangle[3];
-			// 面は三角形限定。その他は未対応
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
-				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得する
 				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/'); // 区切りでインデックスを読んでいく
-					elementIndices[element] = std::stoi(index);
+
+				std::string indexStr;
+				uint32_t posIndex = 0, uvIndex = 0, normIndex = 0;
+
+				// v/t/n, v//n, v/t, v などに対応
+				if (std::getline(v, indexStr, '/')) {
+					posIndex = std::stoi(indexStr);
 				}
-				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-				//VertexData vertex = { position, texcoord, normal };
-				//modelData.vertices.push_back(vertex);
+
+				if (std::getline(v, indexStr, '/')) {
+					if (!indexStr.empty()) {
+						uvIndex = std::stoi(indexStr);
+					}
+				}
+
+				if (std::getline(v, indexStr, '/')) {
+					if (!indexStr.empty()) {
+						normIndex = std::stoi(indexStr);
+					}
+				}
+
+				// 実データ取得（存在するか確認）
+				Vector4 position = positions[posIndex - 1];
+				Vector2 texcoord = uvIndex > 0 ? texcoords[uvIndex - 1] : Vector2{ 0.0f, 0.0f };
+				Vector3 normal = normIndex > 0 ? normals[normIndex - 1] : Vector3{ 0.0f, 0.0f, 1.0f };
 
 				position.x *= -1.0f;
-				texcoord.y = 1.0f - texcoord.y; // y軸方向を反転
+				texcoord.y = 1.0f - texcoord.y;
 				normal.x *= -1.0f;
 
 				triangle[faceVertex] = { position, texcoord, normal };
 			}
+			// 反転して左手系 → 右手系
 			modelData.vertices.push_back(triangle[2]);
 			modelData.vertices.push_back(triangle[1]);
 			modelData.vertices.push_back(triangle[0]);

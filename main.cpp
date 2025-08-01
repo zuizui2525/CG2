@@ -333,10 +333,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource2->Map(0, nullptr, reinterpret_cast<void**>(&materialData2));
 	// 今回は赤を書き込んでみる
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData->enableLighting = false;
+	materialData->enableLighting = 0;
 	materialData->uvtransform = Math::MakeIdentity();
 	materialData2->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData2->enableLighting = false;
+	materialData2->enableLighting = 0;
 	materialData2->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。１つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -376,17 +376,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 一つ目の三角形
 	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f }; // 左下
 	vertexData[0].texcoord = { 0.0f,1.0f };
+	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
 	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f }; // 上
 	vertexData[1].texcoord = { 0.5f,0.0f };
+	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
 	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f }; // 右下
 	vertexData[2].texcoord = { 1.0f,1.0f };
+	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
 	// 二つ目の三角形
 	vertexData2[0].position = { -0.5f,-0.5f,0.5f,1.0f }; // 左下
 	vertexData2[0].texcoord = { 0.0f,1.0f };
+	vertexData2[0].normal = { 0.0f,0.0f,-1.0f };
 	vertexData2[1].position = { 0.0f,0.0f,0.0f,1.0f }; // 上
 	vertexData2[1].texcoord = { 0.5f,0.0f };
+	vertexData2[1].normal = { 0.0f,0.0f,-1.0f };
 	vertexData2[2].position = { 0.5f,-0.5f,-0.5f,1.0f }; // 右下
 	vertexData2[2].texcoord = { 1.0f,1.0f };
+	vertexData2[2].normal = { 0.0f,0.0f,-1.0f };
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
 	// クライアント領域のサイズと一緒にして画面全体に表示
@@ -429,7 +435,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	// 今回は白を書き込んでみる
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataSprite->enableLighting = false;
+	materialDataSprite->enableLighting = 0;
 	materialDataSprite->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。 １つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSprite = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -514,7 +520,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
 	// 今回は白を書き込んでみる
 	materialDataSphere->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataSphere->enableLighting = true;
+	materialDataSphere->enableLighting = 1;
 	materialDataSphere->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。１つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSphere = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -606,7 +612,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel));
 	// 今回は白を書き込んでみる
 	materialDataModel->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel->enableLighting = true;
+	materialDataModel->enableLighting = 2;
 	materialDataModel->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。１つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -647,7 +653,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceModel2->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel2));
 	// 今回は白を書き込んでみる
 	materialDataModel2->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel2->enableLighting = true;
+	materialDataModel2->enableLighting = 2;
 	materialDataModel2->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。１つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel2 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -688,7 +694,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel3));
 	// 今回は白を書き込んでみる
 	materialDataModel3->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel3->enableLighting = true;
+	materialDataModel3->enableLighting = 2;
 	materialDataModel3->uvtransform = Math::MakeIdentity();
 	// WVP用のリソースを作る。１つ分のサイズを用意する。
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel3 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
@@ -700,7 +706,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpDataModel3->WVP = Math::MakeIdentity();
 	wvpDataModel3->world = Math::MakeIdentity();
 	// モデル読み込み
-	ModelData modelData3 = LoadObjFile("resources", "bunny.obj");
+	ModelData modelData3 = LoadObjFile("resources", "suzanne.obj");
 	// 頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel3 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData3.vertices.size());
 	// 頂点バッファビューを作成する
@@ -716,6 +722,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformModel3 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	// uvTransformSprite
 	Transform uvTransformModel3{
+		{1.0f,1.0f,1.0f},
+		{0.0f,0.0f,0.0f},
+		{0.0f,0.0f,0.0f},
+	};
+
+	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel4 = CreateBufferResource(device.Get(), sizeof(Material));
+	// マテリアルにデータを書き込む
+	Material* materialDataModel4;
+	// 書き込むためのアドレスを取得
+	materialResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel4));
+	// 今回は白を書き込んでみる
+	materialDataModel4->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataModel4->enableLighting = 2;
+	materialDataModel4->uvtransform = Math::MakeIdentity();
+	// WVP用のリソースを作る。１つ分のサイズを用意する。
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel4 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
+	// データを書き込む
+	TransformationMatrix* wvpDataModel4;
+	// 書き込むためのアドレスを取得
+	wvpResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel4));
+	// 単位行列を書き込んでおく
+	wvpDataModel4->WVP = Math::MakeIdentity();
+	wvpDataModel4->world = Math::MakeIdentity();
+	// モデル読み込み
+	ModelData modelData4 = LoadObjFile("resources", "bunny.obj");
+	// 頂点リソースを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel4 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData4.vertices.size());
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel4{};
+	vertexBufferViewModel4.BufferLocation = vertexResourceModel4->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
+	vertexBufferViewModel4.SizeInBytes = UINT(sizeof(VertexData) * modelData4.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
+	vertexBufferViewModel4.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
+	// 頂点リソースにデータを書き込む
+	VertexData* vertexDataModel4;
+	vertexResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel4)); // 書き込むためのアドレスを取得
+	std::memcpy(vertexDataModel4, modelData4.vertices.data(), sizeof(VertexData)* modelData4.vertices.size()); // 頂点データをリソースにコピー
+	// CPUで動かす用のTransformを作る
+	Transform transformModel4 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	// uvTransformSprite
+	Transform uvTransformModel4{
 		{1.0f,1.0f,1.0f},
 		{0.0f,0.0f,0.0f},
 		{0.0f,0.0f,0.0f},
@@ -774,10 +821,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel2 = CreateTextureResource(device.Get(), metadataModel2);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel2 = UploadTextureData(textureResourceModel2.Get(), mipImagesModel2, device.Get(), commandList.Get());
 	// ModelのTextureを読んで転送する(Model3)
-	DirectX::ScratchImage mipImagesModel3 = LoadTexture(modelData3.material.textureFilePath);
-	const DirectX::TexMetadata& metadataModel3 = mipImagesModel3.GetMetadata(); // mipImagesからmipImagesModelに変更
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel3 = CreateTextureResource(device.Get(), metadataModel3);
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel3 = UploadTextureData(textureResourceModel3.Get(), mipImagesModel3, device.Get(), commandList.Get());
+	// 分岐の外で宣言（←ここが重要）
+	DirectX::ScratchImage mipImagesModel3;
+	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel3;
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel3;
+	if (modelData3.material.textureFilePath.empty()) {
+		// テクスチャがない場合：白画像を使う
+		mipImagesModel3 = LoadTexture("resources/white.png");
+	} else {
+		// テクスチャがある場合
+		mipImagesModel3 = LoadTexture(modelData3.material.textureFilePath);
+	}
+	// 共通処理（読み込んだ mipImages を使ってリソースを作る）
+	const DirectX::TexMetadata& metadataModel3 = mipImagesModel3.GetMetadata();
+	textureResourceModel3 = CreateTextureResource(device.Get(), metadataModel3);
+	intermediateResourceModel3 = UploadTextureData(
+		textureResourceModel3.Get(), mipImagesModel3, device.Get(), commandList.Get()
+	);
+
+	// ModelのTextureを読んで転送する(Model4)
+	DirectX::ScratchImage mipImagesModel4 = LoadTexture(modelData4.material.textureFilePath);
+	const DirectX::TexMetadata& metadataModel4 = mipImagesModel4.GetMetadata(); // mipImagesからmipImagesModelに変更
+	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel4 = CreateTextureResource(device.Get(), metadataModel4);
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel4 = UploadTextureData(textureResourceModel4.Get(), mipImagesModel4, device.Get(), commandList.Get());
 
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -815,6 +881,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDescModel3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
 	srvDescModel3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
 	srvDescModel3.Texture2D.MipLevels = UINT(metadataModel3.mipLevels); // ミップマップの数
+	// metaDataを基にSRVの設定(Model4)
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescModel4{};
+	srvDescModel4.Format = metadataModel4.format; // フォーマット
+	srvDescModel4.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーのコンポーネントマッピング
+	srvDescModel4.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDescModel4.Texture2D.MipLevels = UINT(metadataModel4.mipLevels); // ミップマップの数
 
 	// SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 1);
@@ -849,21 +921,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		&srvDescModel, // SRVの設定
 		textureSrvHandleCPUModel); // SRVのディスクリプタハンドル
 	// SRVを作成するDescriptorHeapの場所を決める(Model2)
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel2 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel2 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel2 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 5);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel2 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 5);
 	// SRVを作成する(Model2)
 	device->CreateShaderResourceView(
 		textureResourceModel2.Get(), // テクスチャリソース
 		&srvDescModel2, // SRVの設定
 		textureSrvHandleCPUModel2); // SRVのディスクリプタハンドル
 	// SRVを作成するDescriptorHeapの場所を決める(Model3)
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel3 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel3 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 4);
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel3 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 6);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel3 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 6);
 	// SRVを作成する(Model3)
 	device->CreateShaderResourceView(
 		textureResourceModel3.Get(), // テクスチャリソース
 		&srvDescModel3, // SRVの設定
 		textureSrvHandleCPUModel3); // SRVのディスクリプタハンドル
+	// SRVを作成するDescriptorHeapの場所を決める(Model4)
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPUModel4 = GetCPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 7);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPUModel4 = GetGPUDescriptorHandle(srvDescriptorHeap.Get(), descriptorSizeSRV, 7);
+	// SRVを作成する(Model4)
+	device->CreateShaderResourceView(
+		textureResourceModel4.Get(), // テクスチャリソース
+		&srvDescModel4, // SRVの設定
+		textureSrvHandleCPUModel4); // SRVのディスクリプタハンドル
 
 	// DepthStencil用のリソースを作成する
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight);
@@ -887,11 +967,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
-	bool useUvChecker = true; // UVCheckerを使うかどうかのフラグ
-	bool useMonsterBall = false; // モンスターボールを使うかどうかのフラグ
-	bool useModelTexture = false; // Modelのtextureを使うかどうかのフラグ
-	bool useModelTexture2 = false; // Modelのtextureを使うかどうかの
-	bool useModelTexture3 = false; // Modelのtextureを使うかどうかのフラグ
+	int useTextureTriangle = 0;
+	int useTextureTriangle2 = 0;
+	int useTextureSprite = 1;
+	int useTextureSphere = 2;
+	int useTextureModel = 3;
+	int useTextureModel2 = 3;
+	int useTextureModel3 = 3;
+	int useTextureModel4 = 3;
 	bool isRotate = true; // 回転するかどうかのフラグ
 	bool isRotate2 = true; // 回転するかどうかのフラグ
 	bool useDebugCamera = false;
@@ -902,9 +985,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawTriangle2 = false;
 	bool drawSprite = false;
 	bool drawSphere = false;
-	bool drawModel = false;
+	bool drawModel = true;
 	bool drawModel2 = false;
 	bool drawModel3 = false;
+	bool drawModel4 = false;
+
+	transformModel.rotate.y = 3.0f;
+	transformModel2.rotate.y = 3.0f;
+	transformModel3.rotate.y = 3.0f;
+	transformModel4.rotate.y = 3.0f;
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -920,79 +1009,238 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 			ImGui::Begin("infomation");
-			if (ImGui::CollapsingHeader("Camera")) {
-				ImGui::DragFloat3("scale(Camera)", &cameraTransform.scale.x, 0.01f); // カメラの拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Camera)", &cameraTransform.translate.x, 0.01f); // カメラの位置を変更するUI
-				ImGui::DragFloat3("Rotate(Camera)", &cameraTransform.rotate.x, 0.01f); // カメラの回転を変更するUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("DirectionalLight")) {
-				ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
-				ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
-				ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f); // 光度を変更するUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("Triangle")) {
-				ImGui::Text("[1]");
-				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
-				ImGui::DragFloat3("scale(Triangle)", &transform.scale.x, 0.01f); // Triangleの拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Triangle)", &transform.translate.x, 0.01f); // Triangleの位置を変更するUI
-				ImGui::ColorEdit4("Color(Triangle)", &materialData->color.x, true); // 色の値を変更するUI
-				ImGui::Checkbox("isRotate(Triangle)", &isRotate); // 回転するかどうかのUI
-				ImGui::Separator();
-				ImGui::Text("[2]");
-				ImGui::Checkbox("Draw(Triangle2)", &drawTriangle2);
-				ImGui::DragFloat3("scale(Triangle2)", &transform2.scale.x, 0.01f); // Triangleの拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Triangle2)", &transform2.translate.x, 0.01f); // Triangleの位置を変更するUI
-				ImGui::ColorEdit4("Color(Triangle2)", &materialData2->color.x, true); // 色の値を変更するUI
-				ImGui::Checkbox("isRotate(Triangle2)", &isRotate2); // 回転するかどうかのUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("Sphere")) {
-				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
-				ImGui::DragFloat3("Scale(sphere)", &transformSphere.scale.x, 0.01f); // 球の拡縮を変更するUI
-				ImGui::DragFloat3("Translate(sphere)", &transformSphere.translate.x, 0.01f); // 球の位置を変更するUI
-				ImGui::DragFloat3("Rotate(sphere)", &transformSphere.rotate.x, 0.01f); // 球の回転を変更するUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("Sprite")) {
-				ImGui::Checkbox("Draw(Sprite)", &drawSprite);
-				ImGui::DragFloat3("Scale(sprite)", &transformSprite.scale.x, 0.01f); // 球の拡縮を変更するUI
-				ImGui::DragFloat3("Translate(sprite)", &transformSprite.translate.x, 1.0f); // 球の位置を変更するUI
-				ImGui::DragFloat3("Rotate(sprite)", &transformSprite.rotate.x, 0.01f); // 球の回転を変更するUI
-				ImGui::Separator();
-				ImGui::Text("uvTransform(sprite)");
-				ImGui::DragFloat2("uvScale(sprite)", &uvTransformSprite.scale.x, 0.01f); // uv球の拡縮を変更するUI
-				ImGui::DragFloat2("uvTranslate(sprite)", &uvTransformSprite.translate.x, 0.01f); // uv球の位置を変更するUI
-				ImGui::DragFloat("uvRotate(sprite)", &uvTransformSprite.rotate.z, 0.01f); // uv球の回転を変更するUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("Model")) {
-				ImGui::Checkbox("Draw(Model)", &drawModel);
-				ImGui::DragFloat3("Scale(Model)", &transformModel.scale.x, 0.01f); // 球の拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Model)", &transformModel.translate.x, 0.01f); // 球の位置を変更するUI
-				ImGui::DragFloat3("Rotate(Model)", &transformModel.rotate.x, 0.01f); // 球の回転を変更するUI
-				ImGui::Separator();
-				ImGui::Checkbox("Draw(Model2)", &drawModel2);
-				ImGui::DragFloat3("Scale(Model2)", &transformModel2.scale.x, 0.01f); // 球の拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Model2)", &transformModel2.translate.x, 0.01f); // 球の位置を変更するUI
-				ImGui::DragFloat3("Rotate(Model2)", &transformModel2.rotate.x, 0.01f); // 球の回転を変更するUI
-				ImGui::Separator();
-				ImGui::Checkbox("Draw(Model3)", &drawModel3);
-				ImGui::DragFloat3("Scale(Model3)", &transformModel3.scale.x, 0.01f); // 球の拡縮を変更するUI
-				ImGui::DragFloat3("Translate(Model3)", &transformModel3.translate.x, 0.01f); // 球の位置を変更するUI
-				ImGui::DragFloat3("Rotate(Model3)", &transformModel3.rotate.x, 0.01f); // 球の回転を変更するUI
-				ImGui::Separator();
-			}
-			if (ImGui::CollapsingHeader("TextureChange")) {
-				ImGui::Checkbox("useUvChecker", &useUvChecker); // UvCheckerを使うかどうかのUI
-				ImGui::Checkbox("useMonsterBall", &useMonsterBall); // モンスターボールを使うかどうかのUI
-				ImGui::Checkbox("useModelTexture", &useModelTexture); // Modelのtextureを使うかどうかのUI
-				ImGui::Checkbox("useModelTexture2", &useModelTexture2); // Modelのtextureを使うかどうかの
-				ImGui::Checkbox("useModelTexture3", &useModelTexture2); // Modelのtextureを使うかどうかのUI
-				ImGui::Separator();
+			if (ImGui::BeginTabBar("infomation")) {
+				if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
+					ImGui::Text("Camera");
+					ImGui::DragFloat3("scale(Camera)", &cameraTransform.scale.x, 0.01f); // カメラの拡縮を変更するUI
+					ImGui::DragFloat3("Rotate(Camera)", &cameraTransform.rotate.x, 0.01f); // カメラの回転を変更するUI
+					ImGui::DragFloat3("Translate(Camera)", &cameraTransform.translate.x, 0.01f); // カメラの位置を変更するUI
+					ImGui::Separator();
+					ImGui::Text("DirectionalLight");
+					ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
+					ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
+					ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f); // 光度を変更するUI
+					ImGui::Separator();
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Triangle")) {
+					ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
+					if (drawTriangle) {
+						if (ImGui::CollapsingHeader("texture(1)")) {
+							ImGui::RadioButton("useWhite(1)", &useTextureTriangle, 0);
+							ImGui::RadioButton("useUvChecker(1)", &useTextureTriangle, 1);
+							ImGui::RadioButton("useMonsterBall(1)", &useTextureTriangle, 2);
+						}
+						if (ImGui::CollapsingHeader("SRT(1)")) {
+							ImGui::DragFloat3("scale(1)", &transform.scale.x, 0.01f); // Triangleの拡縮を変更するUI
+							ImGui::DragFloat3("rotate(1)", &transform.rotate.x, 0.01f); // Triangleの回転を変更するUI
+							ImGui::DragFloat3("Translate(1)", &transform.translate.x, 0.01f); // Triangleの位置を変更するUI
+							ImGui::Checkbox("isRotate(1)", &isRotate); // 回転するかどうかのUI
+						}
+						if (ImGui::CollapsingHeader("color(1)")) {
+							ImGui::ColorEdit4("Color(1)", &materialData->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(1)")) {
+							ImGui::RadioButton("None(1)", &materialData->enableLighting, 0);
+							ImGui::RadioButton("Lambert(1)", &materialData->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(1)", &materialData->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::Checkbox("Draw(Triangle2)", &drawTriangle2);
+					if (drawTriangle2) {
+						if (ImGui::CollapsingHeader("texture(2)")) {
+							ImGui::RadioButton("useWhite(2)", &useTextureTriangle2, 0);
+							ImGui::RadioButton("useUvChecker(2)", &useTextureTriangle2, 1);
+							ImGui::RadioButton("useMonsterBall(2)", &useTextureTriangle2, 2);
+						}
+						if (ImGui::CollapsingHeader("SRT(2)")) {
+							ImGui::DragFloat3("scale(2)", &transform2.scale.x, 0.01f); // Triangleの拡縮を変更するUI
+							ImGui::DragFloat3("rotate(2)", &transform2.rotate.x, 0.01f); // Triangleの回転を変更するUI
+							ImGui::DragFloat3("Translate(2)", &transform2.translate.x, 0.01f); // Triangleの位置を変更するUI
+							ImGui::Checkbox("isRotate(2)", &isRotate2); // 回転するかどうかのUI
+						}
+						if (ImGui::CollapsingHeader("color(2)")) {
+							ImGui::ColorEdit4("Color(Triangle2)", &materialData2->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(2)")) {
+							ImGui::RadioButton("None(2)", &materialData2->enableLighting, 0);
+							ImGui::RadioButton("Lambert(2)", &materialData2->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(2)", &materialData2->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Sphere")) {
+					ImGui::Checkbox("Draw(Sphere)", &drawSphere);
+					if (drawSphere) {
+						if (ImGui::CollapsingHeader("texture")) {
+							ImGui::RadioButton("useWhite", &useTextureSphere, 0);
+							ImGui::RadioButton("useUvChecker", &useTextureSphere, 1);
+							ImGui::RadioButton("useMonsterBall", &useTextureSphere, 2);
+						}
+						if (ImGui::CollapsingHeader("SRT")) {
+							ImGui::DragFloat3("Scale", &transformSphere.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate", &transformSphere.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate", &transformSphere.translate.x, 0.01f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color")) {
+							ImGui::ColorEdit4("Color", &materialDataSphere->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting")) {
+							ImGui::RadioButton("None", &materialDataSphere->enableLighting, 0);
+							ImGui::RadioButton("Lambert", &materialDataSphere->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert", &materialDataSphere->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Sprite")) {
+					ImGui::Checkbox("Draw(Sprite)", &drawSprite);
+					if (drawSprite) {
+						if (ImGui::CollapsingHeader("texture")) {
+							ImGui::RadioButton("useWhite", &useTextureSprite, 0);
+							ImGui::RadioButton("useUvChecker", &useTextureSprite, 1);
+							ImGui::RadioButton("useMonsterBall", &useTextureSprite, 2);
+						}
+						if (ImGui::CollapsingHeader("SRT")) {
+							ImGui::DragFloat3("Scale", &transformSprite.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate", &transformSprite.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate", &transformSprite.translate.x, 1.0f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color")) {
+							ImGui::ColorEdit4("Color", &materialDataSprite->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting")) {
+							ImGui::RadioButton("None", &materialDataSprite->enableLighting, 0);
+							ImGui::RadioButton("Lambert", &materialDataSprite->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert", &materialDataSprite->enableLighting, 2);
+						}
+						ImGui::Separator();
+						ImGui::Text("uvTransform(sprite)");
+						if (ImGui::CollapsingHeader("SRT(uv)")) {
+							ImGui::DragFloat2("uvScale", &uvTransformSprite.scale.x, 0.01f); // uv球の拡縮を変更するUI
+							ImGui::DragFloat("uvRotate", &uvTransformSprite.rotate.z, 0.01f); // uv球の回転を変更するUI
+							ImGui::DragFloat2("uvTranslate", &uvTransformSprite.translate.x, 0.01f); // uv球の位置を変更するUI
+						}
+					}
+					ImGui::Separator();
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Model")) {
+					ImGui::Checkbox("Draw(teapot)", &drawModel);
+					if (drawModel) {
+						if (ImGui::CollapsingHeader("texture(1)")) {
+							ImGui::RadioButton("useWhite(1)", &useTextureModel, 0);
+							ImGui::RadioButton("useUvChecker(1)", &useTextureModel, 1);
+							ImGui::RadioButton("useMonsterBall(1)", &useTextureModel, 2);
+							ImGui::RadioButton("useModelTexture(1)", &useTextureModel, 3);
+						}
+						if (ImGui::CollapsingHeader("SRT(1)")) {
+							ImGui::DragFloat3("Scale(1)", &transformModel.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(1)", &transformModel.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(1)", &transformModel.translate.x, 0.01f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color(1)")) {
+							ImGui::ColorEdit4("Color(1)", &materialDataModel->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(1)")) {
+							ImGui::RadioButton("None(1)", &materialDataModel->enableLighting, 0);
+							ImGui::RadioButton("Lambert(1)", &materialDataModel->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(1)", &materialDataModel->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
+					if (drawModel2) {
+						if (ImGui::CollapsingHeader("texture(2)")) {
+							ImGui::RadioButton("useWhite(2)", &useTextureModel2, 0);
+							ImGui::RadioButton("useUvChecker(2)", &useTextureModel2, 1);
+							ImGui::RadioButton("useMonsterBall(2)", &useTextureModel2, 2);
+							ImGui::RadioButton("useModelTexture(2)", &useTextureModel2, 3);
+						}
+						if (ImGui::CollapsingHeader("SRT(2)")) {
+							ImGui::DragFloat3("Scale(2)", &transformModel2.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(2)", &transformModel2.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(2)", &transformModel2.translate.x, 0.01f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color(2)")) {
+							ImGui::ColorEdit4("Color(2)", &materialDataModel2->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(2)")) {
+							ImGui::RadioButton("None(2)", &materialDataModel2->enableLighting, 0);
+							ImGui::RadioButton("Lambert(2)", &materialDataModel2->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(2)", &materialDataModel2->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::Checkbox("Draw(suzanne)", &drawModel3);
+					if (drawModel3) {
+						if (ImGui::CollapsingHeader("texture(3)")) {
+							ImGui::RadioButton("useWhite(3)", &useTextureModel3, 0);
+							ImGui::RadioButton("useUvChecker(3)", &useTextureModel3, 1);
+							ImGui::RadioButton("useMonsterBall(3)", &useTextureModel3, 2);
+							ImGui::RadioButton("useModelTexture(3)", &useTextureModel3, 3);
+						}
+						if (ImGui::CollapsingHeader("SRT(3)")) {
+							ImGui::DragFloat3("Scale(3)", &transformModel3.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(3)", &transformModel3.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(3)", &transformModel3.translate.x, 0.01f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color(3)")) {
+							ImGui::ColorEdit4("Color(3)", &materialDataModel3->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(3)")) {
+							ImGui::RadioButton("None(3)", &materialDataModel3->enableLighting, 0);
+							ImGui::RadioButton("Lambert(3)", &materialDataModel3->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(3)", &materialDataModel3->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::Checkbox("Draw(bunny)", &drawModel4);
+					if (drawModel4) {
+						if (ImGui::CollapsingHeader("texture(4)")) {
+							ImGui::RadioButton("useWhite(4)", &useTextureModel4, 0);
+							ImGui::RadioButton("useUvChecker(4)", &useTextureModel4, 1);
+							ImGui::RadioButton("useMonsterBall(4)", &useTextureModel4, 2);
+							ImGui::RadioButton("useModelTexture(4)", &useTextureModel4, 3);
+						}
+						if (ImGui::CollapsingHeader("SRT(4)")) {
+							ImGui::DragFloat3("Scale(4)", &transformModel4.scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(4)", &transformModel4.rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(4)", &transformModel4.translate.x, 0.01f); // 球の位置を変更するUI
+						}
+						if (ImGui::CollapsingHeader("color(4)")) {
+							ImGui::ColorEdit4("Color(4)", &materialDataModel4->color.x, true); // 色の値を変更するUI
+						}
+						if (ImGui::CollapsingHeader("lighting(4)")) {
+							ImGui::RadioButton("None(4)", &materialDataModel4->enableLighting, 0);
+							ImGui::RadioButton("Lambert(4)", &materialDataModel4->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(4)", &materialDataModel4->enableLighting, 2);
+						}
+					}
+					ImGui::Separator();
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
 			}
 			ImGui::End();
+
+			ImGui::Begin("DebugCamera");
+			if (useDebugCamera) {
+				ImGui::Text("Debug Camera Running");
+				ImGui::Text("Press [Tab] to exit the debug camera");
+				ImGui::Text("Press [R] to reset the debug camera position");
+				ImGui::Text("Press [W][A][S][D] to move");
+				ImGui::Text("[Right-click and move] to move the viewpoint");
+			} else {
+				ImGui::Text("Debug Camera Disabled");
+				ImGui::Text("Press [Tab] to launch the debug camera");
+			}
+			ImGui::End();
+
 			// ImGuiのデモ用のUIを表示している
 			// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 			//ImGui::ShowDemoWindow();
@@ -1066,8 +1314,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 三角形
 			Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 worldMatrix2 = Math::MakeAffineMatrix(transform2.scale, transform2.rotate, transform2.translate);
-			Matrix4x4 viewMatrix = Math::Inverse(cameraMatrix);
-			Matrix4x4 projectionMatrix = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 viewMatrix = viewMatrix1;
+			Matrix4x4 projectionMatrix = projectionMatrix1;
 			Matrix4x4 worldViewProjectionMatrix = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
 			Matrix4x4 worldViewProjectionMatrix2 = Math::Multiply(Math::Multiply(worldMatrix2, viewMatrix), projectionMatrix);
 			wvpData->WVP = worldViewProjectionMatrix;
@@ -1086,8 +1334,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// 球
 			Matrix4x4 worldMatrixSphere = Math::MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			Matrix4x4 viewMatrixSphere = Math::Inverse(cameraMatrix);
-			Matrix4x4 projectionMatrixSphere = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 viewMatrixSphere = viewMatrix1;
+			Matrix4x4 projectionMatrixSphere = projectionMatrix1;
 			Matrix4x4 worldViewProjectionMatrixSphere = Math::Multiply(Math::Multiply(worldMatrixSphere, viewMatrixSphere), projectionMatrixSphere);
 			wvpDataSphere->WVP = worldViewProjectionMatrixSphere;
 			wvpDataSphere->world = worldMatrixSphere;
@@ -1100,7 +1348,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpDataModel->WVP = worldViewProjectionMatrixModel;
 			wvpDataModel->world = worldMatrixModel;
 
-			// モデル
+			// モデル2
 			Matrix4x4 worldMatrixModel2 = Math::MakeAffineMatrix(transformModel2.scale, transformModel2.rotate, transformModel2.translate);
 			Matrix4x4 viewMatrixModel2 = viewMatrix1;
 			Matrix4x4 projectionMatrixModel2 = projectionMatrix1;
@@ -1108,13 +1356,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpDataModel2->WVP = worldViewProjectionMatrixModel2;
 			wvpDataModel2->world = worldMatrixModel2;
 
-			// モデル
+			// モデル3
 			Matrix4x4 worldMatrixModel3 = Math::MakeAffineMatrix(transformModel3.scale, transformModel3.rotate, transformModel3.translate);
 			Matrix4x4 viewMatrixModel3 = viewMatrix1;
 			Matrix4x4 projectionMatrixModel3 = projectionMatrix1;
 			Matrix4x4 worldViewProjectionMatrixModel3 = Math::Multiply(Math::Multiply(worldMatrixModel3, viewMatrixModel3), projectionMatrixModel3);
 			wvpDataModel3->WVP = worldViewProjectionMatrixModel3;
 			wvpDataModel3->world = worldMatrixModel3;
+
+			// モデル4
+			Matrix4x4 worldMatrixModel4 = Math::MakeAffineMatrix(transformModel4.scale, transformModel4.rotate, transformModel4.translate);
+			Matrix4x4 viewMatrixModel4 = viewMatrix1;
+			Matrix4x4 projectionMatrixModel4 = projectionMatrix1;
+			Matrix4x4 worldViewProjectionMatrixModel4 = Math::Multiply(Math::Multiply(worldMatrixModel4, viewMatrixModel4), projectionMatrixModel4);
+			wvpDataModel4->WVP = worldViewProjectionMatrixModel4;
+			wvpDataModel4->world = worldMatrixModel4;
 
 			// uv(sprite)
 			Matrix4x4 uvTransformSpriteMatrix = Math::MakeScaleMatrix(uvTransformSprite.scale);
@@ -1157,20 +1413,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetPipelineState(pso->GetPipelineState()); // PSOを設定
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定するトポロジ考えておけばいい。
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-			if (useUvChecker) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			} else if (useMonsterBall) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			} else if (useModelTexture) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel);
-			} else if (useModelTexture2) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel2);
-			} else if (useModelTexture3) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel3);
-			} else {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-			}
 
 			// 1つ目の三角形の描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
@@ -1180,6 +1422,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 			// directionalLight
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureTriangle) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			}
 			// 描画！(DrawCall/ドローコール)。6頂点で1つのインスタンス。インスタンスについては今後
 			if (drawTriangle) {
 				commandList->DrawInstanced(3, 1, 0, 0);
@@ -1193,6 +1447,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource2->GetGPUVirtualAddress());
 			// directionalLight
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureTriangle2) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			}
 			// 描画！(DrawCall/ドローコール)。6頂点で1つのインスタンス。インスタンスについては今後
 			if (drawTriangle2) {
 				commandList->DrawInstanced(3, 1, 0, 0);
@@ -1204,10 +1470,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 			// TransformationMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSprite->GetGPUVirtualAddress());
-			// directionalLight (Spriteは通常ライティングしないが、仮に設定)
+			// directionalLight 
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 			// インデックスバッファ設定
 			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			//texture
+			switch (useTextureSprite) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			}
 			// 描画！(DrawCall/ドローコール)。6頂点で1つのインスタンス。インスタンスについては今後
 			if (drawSprite) {
 				commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
@@ -1223,6 +1501,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 			// インデックスバッファ設定
 			commandList->IASetIndexBuffer(&indexBufferViewSphere);
+			//texture
+			switch (useTextureSphere) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			}
 			// 描画コマンド
 			if (drawSphere) {
 				commandList->DrawIndexedInstanced(kIndexCount, 1, 0, 0, 0);
@@ -1236,6 +1526,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
 			// directionalLight
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureModel) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			case 3:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel);
+				break;
+			}
 			// 描画コマンド
 			if (drawModel) {
 				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
@@ -1249,6 +1554,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel2->GetGPUVirtualAddress());
 			// directionalLight
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureModel2) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			case 3:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel2);
+				break;
+			}
 			// 描画コマンド
 			if (drawModel2) {
 				commandList->DrawInstanced(UINT(modelData2.vertices.size()), 1, 0, 0);
@@ -1262,9 +1582,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel3->GetGPUVirtualAddress());
 			// directionalLight
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureModel3) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			case 3:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel3);
+				break;
+			}
 			// 描画コマンド
 			if (drawModel3) {
 				commandList->DrawInstanced(UINT(modelData3.vertices.size()), 1, 0, 0);
+			}
+
+			// Model4の描画
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel4);
+			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel4->GetGPUVirtualAddress());
+			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel4->GetGPUVirtualAddress());
+			// directionalLight
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//texture
+			switch (useTextureModel4) {
+			case 0:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+				break;
+			case 1:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				break;
+			case 2:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				break;
+			case 3:
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel4);
+				break;
+			}
+			// 描画コマンド
+			if (drawModel4) {
+				commandList->DrawInstanced(UINT(modelData4.vertices.size()), 1, 0, 0);
 			}
 
 
@@ -1334,6 +1697,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (materialResourceModel3) {
 		materialResourceModel3->Unmap(0, nullptr);
 	}
+	if (materialResourceModel4) {
+		materialResourceModel4->Unmap(0, nullptr);
+	}
 	if (wvpResource) {
 		wvpResource->Unmap(0, nullptr);
 	}
@@ -1354,6 +1720,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	if (wvpResourceModel3) {
 		wvpResourceModel3->Unmap(0, nullptr);
+	}
+	if (wvpResourceModel4) {
+		wvpResourceModel4->Unmap(0, nullptr);
 	}
 	if (indexResourceSprite) {
 		indexResourceSprite->Unmap(0, nullptr);

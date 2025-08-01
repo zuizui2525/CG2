@@ -26,7 +26,13 @@ PixelShaderOutput main(VertexShaderOutput input)
     PixelShaderOutput output;
     float4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
-    if (gMaterial.enableLighting != 0) // Lightingする場合
+    if (gMaterial.enableLighting == 1) // ランバート反射する場合
+    {
+        // lambert
+        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+    }
+    else if (gMaterial.enableLighting == 2) // ハーフランバートする場合
     {
         // half lambert
         float NdotL = dot(normalize(input.normal), -gDirectionalLight.direction);
