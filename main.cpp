@@ -990,6 +990,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel3 = false;
 	bool drawModel4 = false;
 
+	transformSphere.rotate.y = 4.7f;
 	transformModel.rotate.y = 3.0f;
 	transformModel2.rotate.y = 3.0f;
 	transformModel3.rotate.y = 3.0f;
