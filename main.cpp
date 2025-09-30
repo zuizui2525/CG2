@@ -1,4 +1,6 @@
 #include "Function.h"
+#include "Object3D.h"
+#include "ModelObject.h"
 
 // クライアント領域のサイズ
 const int32_t kClientWidth = 1280;
@@ -602,171 +604,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f},
 	};
 
+	// モデル生成（例: teapot.obj を読み込む）
+	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(device.Get(), "resources", "teapot.obj");
 
+	// モデル生成（例: multiMaterial.obj を読み込む）
+	std::unique_ptr<ModelObject> multiMaterial = std::make_unique<ModelObject>(device.Get(), "resources", "multiMaterial.obj");
 
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialDataModel;
-	// 書き込むためのアドレスを取得
-	materialResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel));
-	// 今回は白を書き込んでみる
-	materialDataModel->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel->enableLighting = 2;
-	materialDataModel->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpDataModel;
-	// 書き込むためのアドレスを取得
-	wvpResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel));
-	// 単位行列を書き込んでおく
-	wvpDataModel->WVP = Math::MakeIdentity();
-	wvpDataModel->world = Math::MakeIdentity();
-	// モデル読み込み
-	ModelData modelData = LoadObjFile("resources", "teapot.obj");
-	// 頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData.vertices.size());
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel{};
-	vertexBufferViewModel.BufferLocation = vertexResourceModel->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
-	vertexBufferViewModel.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
-	vertexBufferViewModel.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexDataModel;
-	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel)); // 書き込むためのアドレスを取得
-	std::memcpy(vertexDataModel, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
-	// CPUで動かす用のTransformを作る
-	Transform transformModel = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	// uvTransformSprite
-	Transform uvTransformModel{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
+	// モデル生成（例: suzanne.obj を読み込む）
+	std::unique_ptr<ModelObject> suzanne = std::make_unique<ModelObject>(device.Get(), "resources", "suzanne.obj");
 
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel2 = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialDataModel2;
-	// 書き込むためのアドレスを取得
-	materialResourceModel2->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel2));
-	// 今回は白を書き込んでみる
-	materialDataModel2->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel2->enableLighting = 2;
-	materialDataModel2->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel2 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpDataModel2;
-	// 書き込むためのアドレスを取得
-	wvpResourceModel2->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel2));
-	// 単位行列を書き込んでおく
-	wvpDataModel2->WVP = Math::MakeIdentity();
-	wvpDataModel2->world = Math::MakeIdentity();
-	// モデル読み込み
-	ModelData modelData2 = LoadObjFile("resources", "multiMaterial.obj");
-	// 頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel2 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData2.vertices.size());
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel2{};
-	vertexBufferViewModel2.BufferLocation = vertexResourceModel2->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
-	vertexBufferViewModel2.SizeInBytes = UINT(sizeof(VertexData) * modelData2.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
-	vertexBufferViewModel2.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexDataModel2;
-	vertexResourceModel2->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel2)); // 書き込むためのアドレスを取得
-	std::memcpy(vertexDataModel2, modelData2.vertices.data(), sizeof(VertexData) * modelData2.vertices.size()); // 頂点データをリソースにコピー
-	// CPUで動かす用のTransformを作る
-	Transform transformModel2 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	// uvTransformSprite
-	Transform uvTransformModel2{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
-
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel3 = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialDataModel3;
-	// 書き込むためのアドレスを取得
-	materialResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel3));
-	// 今回は白を書き込んでみる
-	materialDataModel3->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel3->enableLighting = 2;
-	materialDataModel3->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel3 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpDataModel3;
-	// 書き込むためのアドレスを取得
-	wvpResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel3));
-	// 単位行列を書き込んでおく
-	wvpDataModel3->WVP = Math::MakeIdentity();
-	wvpDataModel3->world = Math::MakeIdentity();
-	// モデル読み込み
-	ModelData modelData3 = LoadObjFile("resources", "suzanne.obj");
-	// 頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel3 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData3.vertices.size());
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel3{};
-	vertexBufferViewModel3.BufferLocation = vertexResourceModel3->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
-	vertexBufferViewModel3.SizeInBytes = UINT(sizeof(VertexData) * modelData3.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
-	vertexBufferViewModel3.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexDataModel3;
-	vertexResourceModel3->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel3)); // 書き込むためのアドレスを取得
-	std::memcpy(vertexDataModel3, modelData3.vertices.data(), sizeof(VertexData)* modelData3.vertices.size()); // 頂点データをリソースにコピー
-	// CPUで動かす用のTransformを作る
-	Transform transformModel3 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	// uvTransformSprite
-	Transform uvTransformModel3{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
-
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel4 = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialDataModel4;
-	// 書き込むためのアドレスを取得
-	materialResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel4));
-	// 今回は白を書き込んでみる
-	materialDataModel4->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataModel4->enableLighting = 2;
-	materialDataModel4->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel4 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpDataModel4;
-	// 書き込むためのアドレスを取得
-	wvpResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel4));
-	// 単位行列を書き込んでおく
-	wvpDataModel4->WVP = Math::MakeIdentity();
-	wvpDataModel4->world = Math::MakeIdentity();
-	// モデル読み込み
-	ModelData modelData4 = LoadObjFile("resources", "bunny.obj");
-	// 頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel4 = CreateBufferResource(device.Get(), sizeof(VertexData) * modelData4.vertices.size());
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel4{};
-	vertexBufferViewModel4.BufferLocation = vertexResourceModel4->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
-	vertexBufferViewModel4.SizeInBytes = UINT(sizeof(VertexData) * modelData4.vertices.size()); // 使用するリソースのサイズは頂点のサイズ
-	vertexBufferViewModel4.StrideInBytes = sizeof(VertexData); // 1頂点あたりのサイズ
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexDataModel4;
-	vertexResourceModel4->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel4)); // 書き込むためのアドレスを取得
-	std::memcpy(vertexDataModel4, modelData4.vertices.data(), sizeof(VertexData)* modelData4.vertices.size()); // 頂点データをリソースにコピー
-	// CPUで動かす用のTransformを作る
-	Transform transformModel4 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	// uvTransformSprite
-	Transform uvTransformModel4{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
+	// モデル生成（例: bunny.obj を読み込む）
+	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(device.Get(), "resources", "bunny.obj");
 
 	// DirectionalLight
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(device.Get(), sizeof(DirectionalLight));
@@ -811,12 +659,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource3 = CreateTextureResource(device.Get(), metadata3);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource3 = UploadTextureData(textureResource3.Get(), mipImages3, device.Get(), commandList.Get());
 	// ModelのTextureを読んで転送する(Model)
-	DirectX::ScratchImage mipImagesModel = LoadTexture(modelData.material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel = LoadTexture(teapot->GetModelData().material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel = mipImagesModel.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel = CreateTextureResource(device.Get(), metadataModel);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel = UploadTextureData(textureResourceModel.Get(), mipImagesModel, device.Get(), commandList.Get());
 	// ModelのTextureを読んで転送する(Model2)
-	DirectX::ScratchImage mipImagesModel2 = LoadTexture(modelData2.material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel2 = LoadTexture(multiMaterial->GetModelData().material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel2 = mipImagesModel2.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel2 = CreateTextureResource(device.Get(), metadataModel2);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel2 = UploadTextureData(textureResourceModel2.Get(), mipImagesModel2, device.Get(), commandList.Get());
@@ -825,12 +673,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectX::ScratchImage mipImagesModel3;
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel3;
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel3;
-	if (modelData3.material.textureFilePath.empty()) {
+	if (suzanne->GetModelData().material.textureFilePath.empty()) {
 		// テクスチャがない場合：白画像を使う
 		mipImagesModel3 = LoadTexture("resources/white.png");
 	} else {
 		// テクスチャがある場合
-		mipImagesModel3 = LoadTexture(modelData3.material.textureFilePath);
+		mipImagesModel3 = LoadTexture(suzanne->GetModelData().material.textureFilePath);
 	}
 	// 共通処理（読み込んだ mipImages を使ってリソースを作る）
 	const DirectX::TexMetadata& metadataModel3 = mipImagesModel3.GetMetadata();
@@ -840,7 +688,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	);
 
 	// ModelのTextureを読んで転送する(Model4)
-	DirectX::ScratchImage mipImagesModel4 = LoadTexture(modelData4.material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel4 = LoadTexture(bunny->GetModelData().material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel4 = mipImagesModel4.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel4 = CreateTextureResource(device.Get(), metadataModel4);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel4 = UploadTextureData(textureResourceModel4.Get(), mipImagesModel4, device.Get(), commandList.Get());
@@ -991,10 +839,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel4 = false;
 
 	transformSphere.rotate.y = 4.7f;
-	transformModel.rotate.y = 3.0f;
-	transformModel2.rotate.y = 3.0f;
-	transformModel3.rotate.y = 3.0f;
-	transformModel4.rotate.y = 3.0f;
+	teapot->GetTransform().rotate.y = 3.0f;
+	multiMaterial->GetTransform().rotate.y = 3.0f;
+	suzanne->GetTransform().rotate.y = 3.0f;
+	bunny->GetTransform().rotate.y = 3.0f;
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -1140,17 +988,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 							ImGui::RadioButton("useModelTexture(1)", &useTextureModel, 3);
 						}
 						if (ImGui::CollapsingHeader("SRT(1)")) {
-							ImGui::DragFloat3("Scale(1)", &transformModel.scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(1)", &transformModel.rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(1)", &transformModel.translate.x, 0.01f); // 球の位置を変更するUI
+							ImGui::DragFloat3("Scale(1)", &teapot->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(1)", &teapot->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(1)", &teapot->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
 						}
 						if (ImGui::CollapsingHeader("color(1)")) {
-							ImGui::ColorEdit4("Color(1)", &materialDataModel->color.x, true); // 色の値を変更するUI
+							ImGui::ColorEdit4("Color(1)", &teapot->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
 						if (ImGui::CollapsingHeader("lighting(1)")) {
-							ImGui::RadioButton("None(1)", &materialDataModel->enableLighting, 0);
-							ImGui::RadioButton("Lambert(1)", &materialDataModel->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(1)", &materialDataModel->enableLighting, 2);
+							ImGui::RadioButton("None(1)", &teapot->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert(1)", &teapot->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(1)", &teapot->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -1163,17 +1011,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 							ImGui::RadioButton("useModelTexture(2)", &useTextureModel2, 3);
 						}
 						if (ImGui::CollapsingHeader("SRT(2)")) {
-							ImGui::DragFloat3("Scale(2)", &transformModel2.scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(2)", &transformModel2.rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(2)", &transformModel2.translate.x, 0.01f); // 球の位置を変更するUI
+							ImGui::DragFloat3("Scale(2)", &multiMaterial->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(2)", &multiMaterial->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(2)", &multiMaterial->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
 						}
 						if (ImGui::CollapsingHeader("color(2)")) {
-							ImGui::ColorEdit4("Color(2)", &materialDataModel2->color.x, true); // 色の値を変更するUI
+							ImGui::ColorEdit4("Color(2)", &multiMaterial->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
 						if (ImGui::CollapsingHeader("lighting(2)")) {
-							ImGui::RadioButton("None(2)", &materialDataModel2->enableLighting, 0);
-							ImGui::RadioButton("Lambert(2)", &materialDataModel2->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(2)", &materialDataModel2->enableLighting, 2);
+							ImGui::RadioButton("None(2)", &multiMaterial->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -1186,17 +1034,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 							ImGui::RadioButton("useModelTexture(3)", &useTextureModel3, 3);
 						}
 						if (ImGui::CollapsingHeader("SRT(3)")) {
-							ImGui::DragFloat3("Scale(3)", &transformModel3.scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(3)", &transformModel3.rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(3)", &transformModel3.translate.x, 0.01f); // 球の位置を変更するUI
+							ImGui::DragFloat3("Scale(3)", &suzanne->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(3)", &suzanne->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(3)", &suzanne->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
 						}
 						if (ImGui::CollapsingHeader("color(3)")) {
-							ImGui::ColorEdit4("Color(3)", &materialDataModel3->color.x, true); // 色の値を変更するUI
+							ImGui::ColorEdit4("Color(3)", &suzanne->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
 						if (ImGui::CollapsingHeader("lighting(3)")) {
-							ImGui::RadioButton("None(3)", &materialDataModel3->enableLighting, 0);
-							ImGui::RadioButton("Lambert(3)", &materialDataModel3->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(3)", &materialDataModel3->enableLighting, 2);
+							ImGui::RadioButton("None(3)", &suzanne->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert(3)", &suzanne->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(3)", &suzanne->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -1209,17 +1057,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 							ImGui::RadioButton("useModelTexture(4)", &useTextureModel4, 3);
 						}
 						if (ImGui::CollapsingHeader("SRT(4)")) {
-							ImGui::DragFloat3("Scale(4)", &transformModel4.scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(4)", &transformModel4.rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(4)", &transformModel4.translate.x, 0.01f); // 球の位置を変更するUI
+							ImGui::DragFloat3("Scale(4)", &bunny->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate(4)", &bunny->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate(4)", &bunny->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
 						}
 						if (ImGui::CollapsingHeader("color(4)")) {
-							ImGui::ColorEdit4("Color(4)", &materialDataModel4->color.x, true); // 色の値を変更するUI
+							ImGui::ColorEdit4("Color(4)", &bunny->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
 						if (ImGui::CollapsingHeader("lighting(4)")) {
-							ImGui::RadioButton("None(4)", &materialDataModel4->enableLighting, 0);
-							ImGui::RadioButton("Lambert(4)", &materialDataModel4->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(4)", &materialDataModel4->enableLighting, 2);
+							ImGui::RadioButton("None(4)", &bunny->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert(4)", &bunny->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert(4)", &bunny->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -1342,36 +1190,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpDataSphere->world = worldMatrixSphere;
 
 			// モデル
-			Matrix4x4 worldMatrixModel = Math::MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
-			Matrix4x4 viewMatrixModel = viewMatrix1;
-			Matrix4x4 projectionMatrixModel = projectionMatrix1;
-			Matrix4x4 worldViewProjectionMatrixModel = Math::Multiply(Math::Multiply(worldMatrixModel, viewMatrixModel), projectionMatrixModel);
-			wvpDataModel->WVP = worldViewProjectionMatrixModel;
-			wvpDataModel->world = worldMatrixModel;
+			teapot->Update(viewMatrix1, projectionMatrix1);
 
 			// モデル2
-			Matrix4x4 worldMatrixModel2 = Math::MakeAffineMatrix(transformModel2.scale, transformModel2.rotate, transformModel2.translate);
-			Matrix4x4 viewMatrixModel2 = viewMatrix1;
-			Matrix4x4 projectionMatrixModel2 = projectionMatrix1;
-			Matrix4x4 worldViewProjectionMatrixModel2 = Math::Multiply(Math::Multiply(worldMatrixModel2, viewMatrixModel2), projectionMatrixModel2);
-			wvpDataModel2->WVP = worldViewProjectionMatrixModel2;
-			wvpDataModel2->world = worldMatrixModel2;
+			multiMaterial->Update(viewMatrix1, projectionMatrix1);
 
 			// モデル3
-			Matrix4x4 worldMatrixModel3 = Math::MakeAffineMatrix(transformModel3.scale, transformModel3.rotate, transformModel3.translate);
-			Matrix4x4 viewMatrixModel3 = viewMatrix1;
-			Matrix4x4 projectionMatrixModel3 = projectionMatrix1;
-			Matrix4x4 worldViewProjectionMatrixModel3 = Math::Multiply(Math::Multiply(worldMatrixModel3, viewMatrixModel3), projectionMatrixModel3);
-			wvpDataModel3->WVP = worldViewProjectionMatrixModel3;
-			wvpDataModel3->world = worldMatrixModel3;
+			suzanne->Update(viewMatrix1, projectionMatrix1);
 
 			// モデル4
-			Matrix4x4 worldMatrixModel4 = Math::MakeAffineMatrix(transformModel4.scale, transformModel4.rotate, transformModel4.translate);
-			Matrix4x4 viewMatrixModel4 = viewMatrix1;
-			Matrix4x4 projectionMatrixModel4 = projectionMatrix1;
-			Matrix4x4 worldViewProjectionMatrixModel4 = Math::Multiply(Math::Multiply(worldMatrixModel4, viewMatrixModel4), projectionMatrixModel4);
-			wvpDataModel4->WVP = worldViewProjectionMatrixModel4;
-			wvpDataModel4->world = worldMatrixModel4;
+			bunny->Update(viewMatrix1, projectionMatrix1);
 
 			// uv(sprite)
 			Matrix4x4 uvTransformSpriteMatrix = Math::MakeScaleMatrix(uvTransformSprite.scale);
@@ -1520,116 +1348,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 			// Modelの描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
-			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress());
-			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			switch (useTextureModel) {
-			case 0:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-				break;
-			case 1:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				break;
-			case 2:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-				break;
-			case 3:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel);
-				break;
-			}
-			// 描画コマンド
-			if (drawModel) {
-				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-			}
+			teapot->Draw(commandList.Get(),
+				teapot->GetMaterialResource(),
+				teapot->GetWVPResource(),
+				directionalLightResource.Get(),
+				textureSrvHandleGPUModel,
+				drawModel);
 
 			// Model2の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel2);
-			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel2->GetGPUVirtualAddress());
-			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel2->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			switch (useTextureModel2) {
-			case 0:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-				break;
-			case 1:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				break;
-			case 2:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-				break;
-			case 3:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel2);
-				break;
-			}
-			// 描画コマンド
-			if (drawModel2) {
-				commandList->DrawInstanced(UINT(modelData2.vertices.size()), 1, 0, 0);
-			}
+			multiMaterial->Draw(commandList.Get(),
+				multiMaterial->GetMaterialResource(),
+				multiMaterial->GetWVPResource(),
+				directionalLightResource.Get(),
+				textureSrvHandleGPUModel2,
+				drawModel2);
 
 			// Model3の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel3);
-			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel3->GetGPUVirtualAddress());
-			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel3->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			switch (useTextureModel3) {
-			case 0:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-				break;
-			case 1:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				break;
-			case 2:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-				break;
-			case 3:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel3);
-				break;
-			}
-			// 描画コマンド
-			if (drawModel3) {
-				commandList->DrawInstanced(UINT(modelData3.vertices.size()), 1, 0, 0);
-			}
+			suzanne->Draw(commandList.Get(),
+				suzanne->GetMaterialResource(),
+				suzanne->GetWVPResource(),
+				directionalLightResource.Get(),
+				textureSrvHandleGPUModel3,
+				drawModel3);
 
 			// Model4の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel4);
-			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel4->GetGPUVirtualAddress());
-			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel4->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			switch (useTextureModel4) {
-			case 0:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-				break;
-			case 1:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				break;
-			case 2:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-				break;
-			case 3:
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPUModel4);
-				break;
-			}
-			// 描画コマンド
-			if (drawModel4) {
-				commandList->DrawInstanced(UINT(modelData4.vertices.size()), 1, 0, 0);
-			}
+			bunny->Draw(commandList.Get(),
+				bunny->GetMaterialResource(),
+				bunny->GetWVPResource(),
+				directionalLightResource.Get(),
+				textureSrvHandleGPUModel4,
+				drawModel4);
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -1689,18 +1437,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (materialResourceSphere) {
 		materialResourceSphere->Unmap(0, nullptr);
 	}
-	if (materialResourceModel) {
-		materialResourceModel->Unmap(0, nullptr);
-	}
-	if (materialResourceModel2) {
-		materialResourceModel2->Unmap(0, nullptr);
-	}
-	if (materialResourceModel3) {
-		materialResourceModel3->Unmap(0, nullptr);
-	}
-	if (materialResourceModel4) {
-		materialResourceModel4->Unmap(0, nullptr);
-	}
 	if (wvpResource) {
 		wvpResource->Unmap(0, nullptr);
 	}
@@ -1712,18 +1448,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	if (wvpResourceSphere) {
 		wvpResourceSphere->Unmap(0, nullptr);
-	}
-	if (wvpResourceModel) {
-		wvpResourceModel->Unmap(0, nullptr);
-	}
-	if (wvpResourceModel2) {
-		wvpResourceModel2->Unmap(0, nullptr);
-	}
-	if (wvpResourceModel3) {
-		wvpResourceModel3->Unmap(0, nullptr);
-	}
-	if (wvpResourceModel4) {
-		wvpResourceModel4->Unmap(0, nullptr);
 	}
 	if (indexResourceSprite) {
 		indexResourceSprite->Unmap(0, nullptr);
