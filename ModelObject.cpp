@@ -3,25 +3,28 @@
 
 ModelObject::ModelObject(ID3D12Device* device,
     const std::string& directory,
-    const std::string& filename)
-    : Object3D(device, 2) // 2 = モデル用 Lighting 設定
+    const std::string& filename,
+    const Vector3& initialPosition)
+    : Object3D(device, 2) // 2 = ライティング有効
 {
-    // objファイル読み込み
+    // 初期位置をセット
+    transform_.translate = initialPosition;
+
+    // モデルデータ読み込み
     modelData_ = LoadObjFile(directory, filename);
 
     // 頂点リソース作成
     vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_.vertices.size());
-
     vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-    vbv_.SizeInBytes = UINT(sizeof(VertexData) * modelData_.vertices.size());
+    vbv_.SizeInBytes = sizeof(VertexData) * (UINT)modelData_.vertices.size();
     vbv_.StrideInBytes = sizeof(VertexData);
 
-    VertexData* vData = nullptr;
-    vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vData));
-    memcpy(vData, modelData_.vertices.data(),
-        sizeof(VertexData) * modelData_.vertices.size());
+    // 頂点データ転送
+    VertexData* vertexData = nullptr;
+    vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+    memcpy(vertexData, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 
-    // Object3D で作成済みの materialResource_ を Map してポインタを保持
+    // マテリアル用のポインタ取得
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 }
 

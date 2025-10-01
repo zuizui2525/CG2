@@ -18,6 +18,7 @@ Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     mtl->uvtransform = Math::MakeIdentity();
 
     // Transform 初期化
-    transform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
+    transform_.scale = { 1,1,1 };
+    transform_.rotate = { 0,0,0 };
     uvTransform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
 }
