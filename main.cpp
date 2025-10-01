@@ -1141,21 +1141,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 各種行列の処理
 			// カメラ
 			Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			
-			Matrix4x4 viewMatrix1;
-			Matrix4x4 projectionMatrix1;
+			Matrix4x4 viewMatrix2D = Math::MakeIdentity();
+			Matrix4x4 projectionMatrix2D = Math::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(kClientWidth), static_cast<float>(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 viewMatrix3D;
+			Matrix4x4 projectionMatrix3D;
 			if (useDebugCamera) {
 				if (!wasDebugCameraLastFrame) {
 					debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
 				}
 				debugCamera.HideCursor();
 				debugCamera.Update(key, mouseState);
-				viewMatrix1 = debugCamera.GetViewMatrix();
-				projectionMatrix1 = debugCamera.GetProjectionMatrix();
+				viewMatrix3D = debugCamera.GetViewMatrix();
+				projectionMatrix3D = debugCamera.GetProjectionMatrix();
 			} else {
 				debugCamera.ShowCursorBack();
-				viewMatrix1 = Math::Inverse(cameraMatrix);
-				projectionMatrix1 = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+				viewMatrix3D = Math::Inverse(cameraMatrix);
+				projectionMatrix3D = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
 			}
 			// フレーム最後に更新して次フレームに備える
 			wasDebugCameraLastFrame = useDebugCamera;
@@ -1163,8 +1164,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 三角形
 			Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 worldMatrix2 = Math::MakeAffineMatrix(transform2.scale, transform2.rotate, transform2.translate);
-			Matrix4x4 viewMatrix = viewMatrix1;
-			Matrix4x4 projectionMatrix = projectionMatrix1;
+			Matrix4x4 viewMatrix = viewMatrix3D;
+			Matrix4x4 projectionMatrix = projectionMatrix3D;
 			Matrix4x4 worldViewProjectionMatrix = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
 			Matrix4x4 worldViewProjectionMatrix2 = Math::Multiply(Math::Multiply(worldMatrix2, viewMatrix), projectionMatrix);
 			wvpData->WVP = worldViewProjectionMatrix;
@@ -1175,31 +1176,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// スプライト
 			Matrix4x4 worldMatrixSprite = Math::MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			// Spriteは2D表示のため、カメラ行列とプロジェクション行列は別途計算
-			Matrix4x4 viewMatrixSprite = Math::MakeIdentity(); // 2Dなのでビュー変換は不要
-			Matrix4x4 projectionMatrixSprite = Math::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(kClientWidth), static_cast<float>(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 viewMatrixSprite = viewMatrix2D; // 2Dなのでビュー変換は不要
+			Matrix4x4 projectionMatrixSprite = projectionMatrix2D;
 			Matrix4x4 worldViewProjectionMatrixSprite = Math::Multiply(worldMatrixSprite, projectionMatrixSprite); // 2Dはworld * projection
 			wvpDataSprite->WVP = worldViewProjectionMatrixSprite;
 			wvpDataSprite->world = worldMatrixSprite;
 
 			// 球
 			Matrix4x4 worldMatrixSphere = Math::MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			Matrix4x4 viewMatrixSphere = viewMatrix1;
-			Matrix4x4 projectionMatrixSphere = projectionMatrix1;
+			Matrix4x4 viewMatrixSphere = viewMatrix3D;
+			Matrix4x4 projectionMatrixSphere = projectionMatrix3D;
 			Matrix4x4 worldViewProjectionMatrixSphere = Math::Multiply(Math::Multiply(worldMatrixSphere, viewMatrixSphere), projectionMatrixSphere);
 			wvpDataSphere->WVP = worldViewProjectionMatrixSphere;
 			wvpDataSphere->world = worldMatrixSphere;
 
 			// モデル
-			teapot->Update(viewMatrix1, projectionMatrix1);
+			teapot->Update(viewMatrix3D, projectionMatrix3D);
 
 			// モデル2
-			multiMaterial->Update(viewMatrix1, projectionMatrix1);
+			multiMaterial->Update(viewMatrix3D, projectionMatrix3D);
 
 			// モデル3
-			suzanne->Update(viewMatrix1, projectionMatrix1);
+			suzanne->Update(viewMatrix3D, projectionMatrix3D);
 
 			// モデル4
-			bunny->Update(viewMatrix1, projectionMatrix1);
+			bunny->Update(viewMatrix3D, projectionMatrix3D);
 
 			// uv(sprite)
 			Matrix4x4 uvTransformSpriteMatrix = Math::MakeScaleMatrix(uvTransformSprite.scale);
