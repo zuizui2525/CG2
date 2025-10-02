@@ -1,6 +1,7 @@
 #include "Function.h"
 #include "Object3D.h"
 #include "SpriteObject.h"
+#include "SphereObject.h"
 #include "ModelObject.h"
 
 // クライアント領域のサイズ
@@ -428,107 +429,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f},
 	};
 
-	// 初期化
+	// スプライトの初期化
 	std::unique_ptr<SpriteObject> sprite = std::make_unique<SpriteObject>(device.Get(), 640, 360);
 
 	// 球の初期化
-	Sphere sphere = {};
-	sphere.center = { 0.0f, 0.0f, 0.0f };
-	sphere.radius = 1.0f;
-	const uint32_t kSubdivision = 16;
-	const uint32_t kVertexCount = (kSubdivision + 1) * (kSubdivision + 1);
-	const uint32_t kIndexCount = kSubdivision * kSubdivision * 6;
-	const float kLonEvery = static_cast<float>(M_PI * 2.0f / kSubdivision);
-	const float kLatEvery = static_cast<float>(M_PI / kSubdivision);
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSphere = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialDataSphere;
-	// 書き込むためのアドレスを取得
-	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
-	// 今回は白を書き込んでみる
-	materialDataSphere->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDataSphere->enableLighting = 1;
-	materialDataSphere->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSphere = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpDataSphere;
-	// 書き込むためのアドレスを取得
-	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataSphere));
-	// 単位行列を書き込んでおく
-	wvpDataSphere->WVP = Math::MakeIdentity();
-	wvpDataSphere->world = Math::MakeIdentity();
-	// Sphere用の頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSphere = CreateBufferResource(device.Get(), sizeof(VertexData) * kVertexCount);
-	// Sphere用の頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSphere{};
-	// リソースの先頭のアドレスから使う
-	vertexBufferViewSphere.BufferLocation = vertexResourceSphere->GetGPUVirtualAddress();
-	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSphere.SizeInBytes = sizeof(VertexData) * kVertexCount;
-	// 1頂点あたりのサイズ
-	vertexBufferViewSphere.StrideInBytes = sizeof(VertexData);
-	// Sphere用の頂点リソースにデータを書き込む
-	VertexData* vertexDataSphere;
-	// 書き込むためのアドレスを取得
-	vertexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSphere));
-	// CPU用インデックス配列（スタック確保）
-	uint32_t indexDataSphereCPU[kIndexCount];
-	// 頂点生成
-	for (uint32_t latIndex = 0; latIndex <= kSubdivision; ++latIndex) {
-		float lat = static_cast<float>(-M_PI / 2.0f + kLatEvery * latIndex);
-		for (uint32_t lonIndex = 0; lonIndex <= kSubdivision; ++lonIndex) {
-			float lon = kLonEvery * lonIndex;
-
-			float x = cosf(lat) * cosf(lon) * sphere.radius + sphere.center.x;
-			float y = sinf(lat) * sphere.radius + sphere.center.y;
-			float z = cosf(lat) * sinf(lon) * sphere.radius + sphere.center.z;
-
-			uint32_t index = latIndex * (kSubdivision + 1) + lonIndex;
-			vertexDataSphere[index].position = { x, y, z, 1.0f };
-			vertexDataSphere[index].texcoord = { (float)lonIndex / kSubdivision, 1.0f - (float)latIndex / kSubdivision };
-			vertexDataSphere[index].normal = { vertexDataSphere[index].position.x, vertexDataSphere[index].position.y, vertexDataSphere[index].position.z };
-		}
-	}
-	// インデックス生成（三角形2つで四角形1枚）
-	uint32_t idx = 0;
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t current = latIndex * (kSubdivision + 1) + lonIndex;
-			uint32_t next = current + kSubdivision + 1;
-
-			// 三角形1
-			indexDataSphereCPU[idx++] = current;
-			indexDataSphereCPU[idx++] = next;
-			indexDataSphereCPU[idx++] = current + 1;
-
-			// 三角形2
-			indexDataSphereCPU[idx++] = current + 1;
-			indexDataSphereCPU[idx++] = next;
-			indexDataSphereCPU[idx++] = next + 1;
-		}
-	}
-	// インデックス用のGPUリソースを作成（バッファのサイズは uint32_t の個数×サイズ）
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResourceSphere = CreateBufferResource(device.Get(), sizeof(uint32_t) * kIndexCount);
-	// インデックスバッファビューの作成
-	D3D12_INDEX_BUFFER_VIEW indexBufferViewSphere{};
-	indexBufferViewSphere.BufferLocation = indexResourceSphere->GetGPUVirtualAddress();
-	indexBufferViewSphere.SizeInBytes = sizeof(uint32_t) * kIndexCount;
-	indexBufferViewSphere.Format = DXGI_FORMAT_R32_UINT; // 32bitインデックスを使う場合
-	// 書き込み用のポインタを取得
-	uint32_t* indexDataSphereGPU;
-	indexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSphereGPU));
-	// CPU側で作成したインデックスデータをGPUリソースにコピー
-	memcpy(indexDataSphereGPU, indexDataSphereCPU, sizeof(uint32_t) * kIndexCount);
-	// CPUで動かす用のTransformを作る
-	Transform transformSphere = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	// uvTransformSphere
-	Transform uvTransformSphere{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
+	std::unique_ptr<SphereObject> sphere = std::make_unique<SphereObject>(device.Get(), 16, 1.0f);
 
 	// モデル生成（例: teapot.obj を読み込む）
 	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(device.Get(), "resources", "teapot.obj", Vector3{1.0f, 0.0f, 0.0f});
@@ -756,7 +661,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel3 = false;
 	bool drawModel4 = false;
 
-	transformSphere.rotate.y = 4.7f;
+	sphere->GetTransform().rotate.y = 4.7f;
 	teapot->GetTransform().rotate.y = 3.0f;
 	multiMaterial->GetTransform().rotate.y = 3.0f;
 	suzanne->GetTransform().rotate.y = 3.0f;
@@ -833,17 +738,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::Checkbox("Draw(Sphere)", &drawSphere);
 					if (drawSphere) {
 						if (ImGui::CollapsingHeader("SRT")) {
-							ImGui::DragFloat3("Scale", &transformSphere.scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate", &transformSphere.rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate", &transformSphere.translate.x, 0.01f); // 球の位置を変更するUI
+							ImGui::DragFloat3("Scale", &sphere->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+							ImGui::DragFloat3("Rotate", &sphere->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+							ImGui::DragFloat3("Translate", &sphere->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
 						}
 						if (ImGui::CollapsingHeader("color")) {
-							ImGui::ColorEdit4("Color", &materialDataSphere->color.x, true); // 色の値を変更するUI
+							ImGui::ColorEdit4("Color", &sphere->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
 						if (ImGui::CollapsingHeader("lighting")) {
-							ImGui::RadioButton("None", &materialDataSphere->enableLighting, 0);
-							ImGui::RadioButton("Lambert", &materialDataSphere->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert", &materialDataSphere->enableLighting, 2);
+							ImGui::RadioButton("None", &sphere->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert", &sphere->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert", &sphere->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -1051,12 +956,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Update(viewMatrix2D, projectionMatrix2D);
 
 			// 球
-			Matrix4x4 worldMatrixSphere = Math::MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			Matrix4x4 viewMatrixSphere = viewMatrix3D;
-			Matrix4x4 projectionMatrixSphere = projectionMatrix3D;
-			Matrix4x4 worldViewProjectionMatrixSphere = Math::Multiply(Math::Multiply(worldMatrixSphere, viewMatrixSphere), projectionMatrixSphere);
-			wvpDataSphere->WVP = worldViewProjectionMatrixSphere;
-			wvpDataSphere->world = worldMatrixSphere;
+			sphere->Update(viewMatrix3D, projectionMatrix3D);
 
 			// モデル
 			teapot->Update(viewMatrix3D, projectionMatrix3D);
@@ -1140,17 +1040,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Draw(commandList.Get(), textureSrvHandleGPU, directionalLightResource.Get(), drawSprite);
 
 			// Sphereの描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			// マテリアルカラーなどの定数バッファ（スロット0にマテリアルリソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress());
-			// WVP行列などの定数バッファ（スロット1に変換行列リソースを設定）
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			// インデックスバッファ設定
-			commandList->IASetIndexBuffer(&indexBufferViewSphere);
-			//texture
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+			sphere->Draw(commandList.Get(), textureSrvHandleGPU2, directionalLightResource.Get(), drawSphere);
 
 			// Modelの描画
 			teapot->Draw(commandList.Get(),
@@ -1236,20 +1126,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (materialResource2) {
 		materialResource2->Unmap(0, nullptr);
 	}
-	if (materialResourceSphere) {
-		materialResourceSphere->Unmap(0, nullptr);
-	}
 	if (wvpResource) {
 		wvpResource->Unmap(0, nullptr);
 	}
 	if (wvpResource2) {
 		wvpResource2->Unmap(0, nullptr);
-	}
-	if (wvpResourceSphere) {
-		wvpResourceSphere->Unmap(0, nullptr);
-	}
-	if (indexResourceSphere) {
-		indexResourceSphere->Unmap(0, nullptr);
 	}
 
 	// XAudio2解放
