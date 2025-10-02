@@ -4,7 +4,7 @@ void DebugCamera::Initialize() {
     projectionMatrix_ = Math::MakePerspectiveFovMatrix(0.45f, 16.0f / 9.0f, 0.1f, 1000.0f); // 仮の値
 }
 
-void DebugCamera::Update(BYTE key[], DIMOUSESTATE2 mouseState) {
+void DebugCamera::Update(Input* input) {
     POINT center;
     center.x = 640;
     center.y = 360;
@@ -18,7 +18,7 @@ void DebugCamera::Update(BYTE key[], DIMOUSESTATE2 mouseState) {
     }
 
     // 右クリック中のみ視点回転
-    if (mouseState.rgbButtons[1] & 0x80) {
+    if (input->MousePress(1)) {
         POINT currentPos;
         GetCursorPos(&currentPos);
         ScreenToClient(hwnd_, &currentPos);
@@ -37,45 +37,45 @@ void DebugCamera::Update(BYTE key[], DIMOUSESTATE2 mouseState) {
     SetCursorPos(center.x, center.y);
 
     // Wキーが押されている場合、前方へ移動
-    if (key[DIK_W] & 0x80) {
+    if (input->Press(DIK_W)) {
         translation_.x += forwardVector_.x * moveSpeed_;
         translation_.y += forwardVector_.y * moveSpeed_;
         translation_.z += forwardVector_.z * moveSpeed_;
     }
 
     // Sキーが押されている場合、後方へ移動
-    if (key[DIK_S] & 0x80) {
+    if (input->Press(DIK_S)) {
         translation_.x -= forwardVector_.x * moveSpeed_;
         translation_.y -= forwardVector_.y * moveSpeed_;
         translation_.z -= forwardVector_.z * moveSpeed_;
     }
 
     // Aキーが押されている場合、左へ移動
-    if (key[DIK_A] & 0x80) {
+    if (input->Press(DIK_A)) {
         translation_.x -= rightVector_.x * moveSpeed_;
         translation_.y -= rightVector_.y * moveSpeed_;
         translation_.z -= rightVector_.z * moveSpeed_;
     }
 
     // Dキーが押されている場合、右へ移動
-    if (key[DIK_D] & 0x80) {
+    if (input->Press(DIK_D)) {
         translation_.x += rightVector_.x * moveSpeed_;
         translation_.y += rightVector_.y * moveSpeed_;
         translation_.z += rightVector_.z * moveSpeed_;
     }
 
     // SPACEキーが押されている場合、上昇
-    if (key[DIK_SPACE] & 0x80) {
+    if (input->Press(DIK_SPACE)) {
         translation_.y += upVector_.y * moveSpeed_; // Y軸プラス方向へ移動
     }
 
     // LSHIFTキーが押されている場合、下降
-    if (key[DIK_LSHIFT] & 0x80) {
+    if (input->Press(DIK_LSHIFT)) {
         translation_.y -= upVector_.y * moveSpeed_; // Y軸マイナス方向へ移動
     }
 
     // Rキー押されたら初期化
-    if (key[DIK_R] & 0x80) {
+    if (input->Press(DIK_R)) {
         ResetPosition();
 
         // もし必要ならマウスカーソル位置も中央に戻す

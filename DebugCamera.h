@@ -1,5 +1,6 @@
 #pragma once
 #include "Function.h"
+#include "Input.h"
 
 class DebugCamera {
 private:
@@ -21,7 +22,7 @@ private:
 public:
 	bool skipNextMouseUpdate_ = false; // 初回回転スキップ用
 	void Initialize();
-	void Update(BYTE key[], DIMOUSESTATE2 mouseState);
+	void Update(Input* input);
 	const Matrix4x4& GetViewMatrix() { return viewMatrix_; }
 	const Matrix4x4& GetProjectionMatrix() { return projectionMatrix_; }
 	// ウィンドウハンドル設定

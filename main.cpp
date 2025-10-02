@@ -1,5 +1,7 @@
 #include "Function.h"
+#include "Input.h"
 #include "Object3D.h"
+#include "TriangleObject.h"
 #include "SpriteObject.h"
 #include "SphereObject.h"
 #include "ModelObject.h"
@@ -295,139 +297,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(hr));
 
-	// DirectInputの初期化
-	Microsoft::WRL::ComPtr<IDirectInput8> directInput;
-	hr = DirectInput8Create(
-		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput, nullptr);
-	// キーボードデバイスの生成
-	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
-	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(hr));
-	// 入力データ形式のセット
-	hr = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
-	assert(SUCCEEDED(hr));
-	// 排他制御レベルのセット
-	hr = keyboard->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(hr));
+	// Inputの初期化
+	std::unique_ptr<Input> input = std::make_unique<Input>();
+	input->Initialize(wc.hInstance, hwnd);
 
-	// マウスデバイスの生成
-	Microsoft::WRL::ComPtr<IDirectInputDevice8> mouse;
-	hr = directInput->CreateDevice(GUID_SysMouse, &mouse, NULL);
-	assert(SUCCEEDED(hr));
-	// 入力データ形式のセット
-	// c_dfDIMouse2 はマウスホイールなどの追加情報をサポートする標準形式です。
-	hr = mouse->SetDataFormat(&c_dfDIMouse2);
-	assert(SUCCEEDED(hr));
-	// 排他制御レベルのセット
-	// マウスの場合、DISCL_NOWINKEY は不要です。
-	hr = mouse->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-	assert(SUCCEEDED(hr));
+	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
 
-	// マテリアル用のリソースを作る。今回はcolor１つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = CreateBufferResource(device.Get(), sizeof(Material));
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource2 = CreateBufferResource(device.Get(), sizeof(Material));
-	// マテリアルにデータを書き込む
-	Material* materialData;
-	Material* materialData2;
-	// 書き込むためのアドレスを取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	materialResource2->Map(0, nullptr, reinterpret_cast<void**>(&materialData2));
-	// 今回は赤を書き込んでみる
-	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData->enableLighting = 0;
-	materialData->uvtransform = Math::MakeIdentity();
-	materialData2->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData2->enableLighting = 0;
-	materialData2->uvtransform = Math::MakeIdentity();
-	// WVP用のリソースを作る。１つ分のサイズを用意する。
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource2 = CreateBufferResource(device.Get(), sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* wvpData;
-	TransformationMatrix* wvpData2;
-	// 書き込むためのアドレスを取得
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	wvpResource2->Map(0, nullptr, reinterpret_cast<void**>(&wvpData2));
-	// 単位行列を書き込んでおく
-	wvpData->WVP = Math::MakeIdentity();
-	wvpData->world = Math::MakeIdentity();
-	wvpData2->WVP = Math::MakeIdentity();
-	wvpData2->world = Math::MakeIdentity();
-	// 実際に頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = CreateBufferResource(device.Get(), sizeof(VertexData) * 3);
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource2 = CreateBufferResource(device.Get(), sizeof(VertexData) * 3);
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView2{};
-	// リソースの先頭のアドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	vertexBufferView2.BufferLocation = vertexResource2->GetGPUVirtualAddress();
-	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3;
-	vertexBufferView2.SizeInBytes = sizeof(VertexData) * 3;
-	// 1頂点あたりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
-	vertexBufferView2.StrideInBytes = sizeof(VertexData);
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexData;
-	VertexData* vertexData2;
-	// 書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	vertexResource2->Map(0, nullptr, reinterpret_cast<void**>(&vertexData2));
-	// 一つ目の三角形
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f }; // 左下
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
-	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f }; // 上
-	vertexData[1].texcoord = { 0.5f,0.0f };
-	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f }; // 右下
-	vertexData[2].texcoord = { 1.0f,1.0f };
-	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
-	// 二つ目の三角形
-	vertexData2[0].position = { -0.5f,-0.5f,0.5f,1.0f }; // 左下
-	vertexData2[0].texcoord = { 0.0f,1.0f };
-	vertexData2[0].normal = { 0.0f,0.0f,-1.0f };
-	vertexData2[1].position = { 0.0f,0.0f,0.0f,1.0f }; // 上
-	vertexData2[1].texcoord = { 0.5f,0.0f };
-	vertexData2[1].normal = { 0.0f,0.0f,-1.0f };
-	vertexData2[2].position = { 0.5f,-0.5f,-0.5f,1.0f }; // 右下
-	vertexData2[2].texcoord = { 1.0f,1.0f };
-	vertexData2[2].normal = { 0.0f,0.0f,-1.0f };
-	// ビューポート
 	D3D12_VIEWPORT viewport{};
-	// クライアント領域のサイズと一緒にして画面全体に表示
 	viewport.Width = kClientWidth;
 	viewport.Height = kClientHeight;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-	// シザー矩形
+
 	D3D12_RECT scissorRect{};
-	// 基本的にビューポートと同じ矩形が構成されるようにする
 	scissorRect.left = 0;
 	scissorRect.right = kClientWidth;
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
-	// Transform変数を作る。
-	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform transform2 = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
-	// uvTransform
-	Transform uvTransform{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
-	Transform uvTransform2{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,0.0f},
-	};
+
+	// 三角形の初期化
+	std::unique_ptr<TriangleObject> triangle = std::make_unique<TriangleObject>(device.Get());
 
 	// スプライトの初期化
 	std::unique_ptr<SpriteObject> sprite = std::make_unique<SpriteObject>(device.Get(), 640, 360);
@@ -647,13 +538,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	debugCamera.Initialize();
 
 	bool isRotate = true; // 回転するかどうかのフラグ
-	bool isRotate2 = true; // 回転するかどうかのフラグ
 	bool useDebugCamera = false;
 
 	bool wasDebugCameraLastFrame = useDebugCamera; // 毎フレームの最後に更新
 
 	bool drawTriangle = false;
-	bool drawTriangle2 = false;
 	bool drawSprite = false;
 	bool drawSphere = false;
 	bool drawModel = true;
@@ -698,37 +587,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				if (ImGui::BeginTabItem("Triangle")) {
 					ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
 					if (drawTriangle) {
-						if (ImGui::CollapsingHeader("SRT(1)")) {
-							ImGui::DragFloat3("scale(1)", &transform.scale.x, 0.01f); // Triangleの拡縮を変更するUI
-							ImGui::DragFloat3("rotate(1)", &transform.rotate.x, 0.01f); // Triangleの回転を変更するUI
-							ImGui::DragFloat3("Translate(1)", &transform.translate.x, 0.01f); // Triangleの位置を変更するUI
-							ImGui::Checkbox("isRotate(1)", &isRotate); // 回転するかどうかのUI
+						if (ImGui::CollapsingHeader("SRT")) {
+							ImGui::DragFloat3("scale", &triangle->GetTransform().scale.x, 0.01f); // Triangleの拡縮を変更するUI
+							ImGui::DragFloat3("rotate", &triangle->GetTransform().rotate.x, 0.01f); // Triangleの回転を変更するUI
+							ImGui::DragFloat3("Translate", &triangle->GetTransform().translate.x, 0.01f); // Triangleの位置を変更するUI
+							ImGui::Checkbox("isRotate", &isRotate); // 回転するかどうかのUI
 						}
-						if (ImGui::CollapsingHeader("color(1)")) {
-							ImGui::ColorEdit4("Color(1)", &materialData->color.x, true); // 色の値を変更するUI
+						if (ImGui::CollapsingHeader("color")) {
+							ImGui::ColorEdit4("Color", &triangle->GetMaterialData()->color.x, true); // 色の値を変更するUI
 						}
-						if (ImGui::CollapsingHeader("lighting(1)")) {
-							ImGui::RadioButton("None(1)", &materialData->enableLighting, 0);
-							ImGui::RadioButton("Lambert(1)", &materialData->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(1)", &materialData->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::Checkbox("Draw(Triangle2)", &drawTriangle2);
-					if (drawTriangle2) {
-						if (ImGui::CollapsingHeader("SRT(2)")) {
-							ImGui::DragFloat3("scale(2)", &transform2.scale.x, 0.01f); // Triangleの拡縮を変更するUI
-							ImGui::DragFloat3("rotate(2)", &transform2.rotate.x, 0.01f); // Triangleの回転を変更するUI
-							ImGui::DragFloat3("Translate(2)", &transform2.translate.x, 0.01f); // Triangleの位置を変更するUI
-							ImGui::Checkbox("isRotate(2)", &isRotate2); // 回転するかどうかのUI
-						}
-						if (ImGui::CollapsingHeader("color(2)")) {
-							ImGui::ColorEdit4("Color(Triangle2)", &materialData2->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting(2)")) {
-							ImGui::RadioButton("None(2)", &materialData2->enableLighting, 0);
-							ImGui::RadioButton("Lambert(2)", &materialData2->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(2)", &materialData2->enableLighting, 2);
+						if (ImGui::CollapsingHeader("lighting")) {
+							ImGui::RadioButton("None", &triangle->GetMaterialData()->enableLighting, 0);
+							ImGui::RadioButton("Lambert", &triangle->GetMaterialData()->enableLighting, 1);
+							ImGui::RadioButton("HalfLambert", &triangle->GetMaterialData()->enableLighting, 2);
 						}
 					}
 					ImGui::Separator();
@@ -876,28 +747,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
-			
-			// 全キーの入力状態を取得する
-			static BYTE key[256]{};
-			static BYTE preKey[256]{};
-			// preKeyに現在のkeyの情報をコピーする
-			memcpy(preKey, key, 256);
-			// キーボード情報の取得開始
-			keyboard->Acquire();
-			keyboard->GetDeviceState(sizeof(key), key);
-
-			// 全マウスの入力状態を取得する
-			static DIMOUSESTATE2 mouseState{};
-			static DIMOUSESTATE2 preMouseState{};
-			// マウスの入力状態を取得する
-			memcpy(&preMouseState, &mouseState, sizeof(DIMOUSESTATE2));
-			mouse->Acquire();
-			mouse->GetDeviceState(sizeof(mouseState), &mouseState);
+			 // Inputの更新処理
+			input->Update();
 
 			//directionalLightの正規化
 			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
 
-			if (key[DIK_TAB] && !preKey[DIK_TAB]) {
+			if (input->Trigger(DIK_TAB)) {
 				if (useDebugCamera) {
 					useDebugCamera = false;
 				} else {
@@ -907,14 +763,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// 三角形の回転処理
 			if (isRotate) {
-				transform.rotate.y += 0.03f;
+				triangle->GetTransform().rotate.y += 0.03f;
 			} else {
-				transform.rotate.y = 0.0f;
-			}
-			if (isRotate2) {
-				transform2.rotate.y += 0.03f;
-			} else {
-				transform2.rotate.y = 0.0f;
+				triangle->GetTransform().rotate.y = 0.0f;
 			}
 
 			// 各種行列の処理
@@ -929,7 +780,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
 				}
 				debugCamera.HideCursor();
-				debugCamera.Update(key, mouseState);
+				debugCamera.Update(input.get());
 				viewMatrix3D = debugCamera.GetViewMatrix();
 				projectionMatrix3D = debugCamera.GetProjectionMatrix();
 			} else {
@@ -941,16 +792,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wasDebugCameraLastFrame = useDebugCamera;
 
 			// 三角形
-			Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-			Matrix4x4 worldMatrix2 = Math::MakeAffineMatrix(transform2.scale, transform2.rotate, transform2.translate);
-			Matrix4x4 viewMatrix = viewMatrix3D;
-			Matrix4x4 projectionMatrix = projectionMatrix3D;
-			Matrix4x4 worldViewProjectionMatrix = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
-			Matrix4x4 worldViewProjectionMatrix2 = Math::Multiply(Math::Multiply(worldMatrix2, viewMatrix), projectionMatrix);
-			wvpData->WVP = worldViewProjectionMatrix;
-			wvpData->world = worldMatrix;
-			wvpData2->WVP = worldViewProjectionMatrix2;
-			wvpData2->world = worldMatrix2;
+			triangle->Update(viewMatrix3D, projectionMatrix3D);
 
 			// スプライト
 			sprite->Update(viewMatrix2D, projectionMatrix2D);
@@ -1006,35 +848,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定するトポロジ考えておけばいい。
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			// 1つ目の三角形の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
-			// マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			// wvp用のCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-			// 描画！(DrawCall/ドローコール)。6頂点で1つのインスタンス。インスタンスについては今後
-			if (drawTriangle) {
-				commandList->DrawInstanced(3, 1, 0, 0);
-			}
-
-			// 2つ目の三角形の描画
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferView2); //VBVを設定
-			// マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource2->GetGPUVirtualAddress());
-			// wvp用のCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResource2->GetGPUVirtualAddress());
-			// directionalLight
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-			//texture
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-			// 描画！(DrawCall/ドローコール)。6頂点で1つのインスタンス。インスタンスについては今後
-			if (drawTriangle2) {
-				commandList->DrawInstanced(3, 1, 0, 0);
-			}
+			// 三角形の描画
+			triangle->Draw(commandList.Get(), textureSrvHandleGPU3, directionalLightResource.Get(), drawTriangle);
 
 			// Spriteの描画
 			sprite->Draw(commandList.Get(), textureSrvHandleGPU, directionalLightResource.Get(), drawSprite);
@@ -1119,27 +934,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	// マッピング解除が必要なリソースはUnmapを行う（例：materialResource, wvpResource）
-	if (materialResource) {
-		materialResource->Unmap(0, nullptr);
-	}
-	if (materialResource2) {
-		materialResource2->Unmap(0, nullptr);
-	}
-	if (wvpResource) {
-		wvpResource->Unmap(0, nullptr);
-	}
-	if (wvpResource2) {
-		wvpResource2->Unmap(0, nullptr);
-	}
-
 	// XAudio2解放
 	xAudio2.Reset();
 	// 音声データ解放
 	SoundUnload(&soundData1);
-
-	// ComPtrを使用しているため、明示的なReleaseやnullptr代入は不要です。
-	// スコープを抜ける際に自動的に解放されます。
 
 	// ウィンドウのクローズは最後に行うのが無難
 	if (hwnd) {
@@ -1150,9 +948,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (pso) {
 		delete pso;
 	}
-
-	//  出力ウィンドウへの文字出力
-	OutputDebugStringA("Hello, DirectX!\n");
 
 	// 警告時に止まる
 	//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true); // infoQueueがスコープ外でアクセスされるためコメントアウト
