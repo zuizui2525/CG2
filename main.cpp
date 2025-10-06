@@ -16,7 +16,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Window
 	WindowApp window;
-	if (!window.Initialize(L"CG2")) return -1;
+	if (!window.Initialize(L"CreateEngine!!")) return -1;
 	window.Show();
 
 	// Audio
