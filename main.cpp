@@ -1,4 +1,5 @@
 #include "Function.h"
+#include "WindowApp.h"
 #include "Input.h"
 #include "Object3D.h"
 #include "TriangleObject.h"
@@ -18,6 +19,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 誰も補足しなかった場合に(Unhandled)、補足する関数を登録
 	SetUnhandledExceptionFilter(ExportDump);
 
+	// Window
+	WindowApp window;
+	if (!window.Initialize(L"CG2")) return -1;
+	window.Show();
+
+	// Audio
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
 
@@ -36,35 +43,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ファイルを作って書き込み準備
 	std::ofstream logStream(logFileName);
 
-	WNDCLASS wc = {};
-	// ウィンドウプロシージャ
-	wc.lpfnWndProc = WindowProc;
-	// ウィンドウクラス名(何でも良い)
-	wc.lpszClassName = L"CG2WindowClass";
-	// インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
-	// カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	// ウィンドウクラスを登録する
-	RegisterClass(&wc);
-
-	// クライアント領域を元に実際のサイズにwrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	// ウィンドウの生成
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName, // ウィンドウクラス名
-		L"CG2", // ウィンドウ名
-		WS_OVERLAPPEDWINDOW, // ウィンドウスタイル
-		CW_USEDEFAULT, // 表示X座標(Windowsに任せる)
-		CW_USEDEFAULT, // 表示Y座標(WindowsOSに任せる)
-		wrc.right - wrc.left, // ウィンドウ横幅
-		wrc.bottom - wrc.top, // ウィンドウ縦横
-		nullptr, // 親ウィンドウハンドル
-		nullptr, // メニューハンドル
-		wc.hInstance, // インスタンスハンドル
-		nullptr); // オプション
-
 	// エラー放置ダメ絶対
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController; // デバッグ用のコントローラ
@@ -76,9 +54,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
 #endif
-
-	// ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
 
 	// DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
@@ -213,7 +188,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
 	hr = dxgiFactory->CreateSwapChainForHwnd(
 		commandQueue.Get(), // コマンドキュー
-		hwnd, // ウィンドウハンドル
+		window.GetHWND(), // ウィンドウハンドル
 		&swapChainDesc, // スワップチェインの設定
 		nullptr, // モニタのハンドル。nullptrはモニタを指定しない
 		nullptr, // スワップチェインのオプション。nullptrはオプションなし
@@ -299,7 +274,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Inputの初期化
 	std::unique_ptr<Input> input = std::make_unique<Input>();
-	input->Initialize(wc.hInstance, hwnd);
+	input->Initialize(window.GetInstance(), window.GetHWND());
 
 	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
 
@@ -327,7 +302,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<SphereObject> sphere = std::make_unique<SphereObject>(device.Get(), 16, 1.0f);
 
 	// モデル生成（例: teapot.obj を読み込む）
-	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(device.Get(), "resources", "teapot.obj", Vector3{1.0f, 0.0f, 0.0f});
+	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(device.Get(), "resources", "teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
 
 	// モデル生成（例: multiMaterial.obj を読み込む）
 	std::unique_ptr<ModelObject> multiMaterial = std::make_unique<ModelObject>(device.Get(), "resources", "multiMaterial.obj", Vector3{ 0.0f, 0.0f, 0.0f });
@@ -351,7 +326,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplWin32_Init(window.GetHWND());
 	ImGui_ImplDX12_Init(device.Get(),
 		swapChainDesc.BufferCount,
 		rtvDesc.Format,
@@ -556,377 +531,370 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	suzanne->GetTransform().rotate.y = 3.0f;
 	bunny->GetTransform().rotate.y = 3.0f;
 
-	MSG msg{};
-	// ウィンドウの×ボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		// Windowにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		} else {
-			// ゲームの処理
-			// フレームが始まる
-			ImGui_ImplDX12_NewFrame();
-			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
-			ImGui::Begin("infomation");
-			if (ImGui::BeginTabBar("infomation")) {
-				if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
-					ImGui::Text("Camera");
-					ImGui::DragFloat3("scale(Camera)", &cameraTransform.scale.x, 0.01f); // カメラの拡縮を変更するUI
-					ImGui::DragFloat3("Rotate(Camera)", &cameraTransform.rotate.x, 0.01f); // カメラの回転を変更するUI
-					ImGui::DragFloat3("Translate(Camera)", &cameraTransform.translate.x, 0.01f); // カメラの位置を変更するUI
-					ImGui::Separator();
-					ImGui::Text("DirectionalLight");
-					ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
-					ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
-					ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f); // 光度を変更するUI
-					ImGui::Separator();
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Triangle")) {
-					ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
-					if (drawTriangle) {
-						if (ImGui::CollapsingHeader("SRT")) {
-							ImGui::DragFloat3("scale", &triangle->GetTransform().scale.x, 0.01f); // Triangleの拡縮を変更するUI
-							ImGui::DragFloat3("rotate", &triangle->GetTransform().rotate.x, 0.01f); // Triangleの回転を変更するUI
-							ImGui::DragFloat3("Translate", &triangle->GetTransform().translate.x, 0.01f); // Triangleの位置を変更するUI
-							ImGui::Checkbox("isRotate", &isRotate); // 回転するかどうかのUI
-						}
-						if (ImGui::CollapsingHeader("color")) {
-							ImGui::ColorEdit4("Color", &triangle->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting")) {
-							ImGui::RadioButton("None", &triangle->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert", &triangle->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert", &triangle->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Sphere")) {
-					ImGui::Checkbox("Draw(Sphere)", &drawSphere);
-					if (drawSphere) {
-						if (ImGui::CollapsingHeader("SRT")) {
-							ImGui::DragFloat3("Scale", &sphere->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate", &sphere->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate", &sphere->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color")) {
-							ImGui::ColorEdit4("Color", &sphere->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting")) {
-							ImGui::RadioButton("None", &sphere->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert", &sphere->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert", &sphere->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Sprite")) {
-					ImGui::Checkbox("Draw(Sprite)", &drawSprite);
-					if (drawSprite) {
-						if (ImGui::CollapsingHeader("SRT")) {
-							ImGui::DragFloat3("Scale", &sprite->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate", &sprite->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate", &sprite->GetTransform().translate.x, 1.0f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color")) {
-							ImGui::ColorEdit4("Color", &sprite->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting")) {
-							ImGui::RadioButton("None", &sprite->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert", &sprite->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert", &sprite->GetMaterialData()->enableLighting, 2);
-						}
-						ImGui::Separator();
-						ImGui::Text("uvTransform(sprite)");
-						if (ImGui::CollapsingHeader("SRT(uv)")) {
-							ImGui::DragFloat2("uvScale", &sprite->GetUVTransform().scale.x, 0.01f); // uv球の拡縮を変更するUI
-							ImGui::DragFloat("uvRotate", &sprite->GetUVTransform().rotate.z, 0.01f); // uv球の回転を変更するUI
-							ImGui::DragFloat2("uvTranslate", &sprite->GetUVTransform().translate.x, 0.01f); // uv球の位置を変更するUI
-						}
-					}
-					ImGui::Separator();
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Model")) {
-					ImGui::Checkbox("Draw(teapot)", &drawModel);
-					if (drawModel) {
-						if (ImGui::CollapsingHeader("SRT(1)")) {
-							ImGui::DragFloat3("Scale(1)", &teapot->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(1)", &teapot->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(1)", &teapot->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color(1)")) {
-							ImGui::ColorEdit4("Color(1)", &teapot->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting(1)")) {
-							ImGui::RadioButton("None(1)", &teapot->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert(1)", &teapot->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(1)", &teapot->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
-					if (drawModel2) {
-						if (ImGui::CollapsingHeader("SRT(2)")) {
-							ImGui::DragFloat3("Scale(2)", &multiMaterial->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(2)", &multiMaterial->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(2)", &multiMaterial->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color(2)")) {
-							ImGui::ColorEdit4("Color(2)", &multiMaterial->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting(2)")) {
-							ImGui::RadioButton("None(2)", &multiMaterial->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::Checkbox("Draw(suzanne)", &drawModel3);
-					if (drawModel3) {
-						if (ImGui::CollapsingHeader("SRT(3)")) {
-							ImGui::DragFloat3("Scale(3)", &suzanne->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(3)", &suzanne->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(3)", &suzanne->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color(3)")) {
-							ImGui::ColorEdit4("Color(3)", &suzanne->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting(3)")) {
-							ImGui::RadioButton("None(3)", &suzanne->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert(3)", &suzanne->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(3)", &suzanne->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::Checkbox("Draw(bunny)", &drawModel4);
-					if (drawModel4) {
-						if (ImGui::CollapsingHeader("SRT(4)")) {
-							ImGui::DragFloat3("Scale(4)", &bunny->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-							ImGui::DragFloat3("Rotate(4)", &bunny->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-							ImGui::DragFloat3("Translate(4)", &bunny->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-						}
-						if (ImGui::CollapsingHeader("color(4)")) {
-							ImGui::ColorEdit4("Color(4)", &bunny->GetMaterialData()->color.x, true); // 色の値を変更するUI
-						}
-						if (ImGui::CollapsingHeader("lighting(4)")) {
-							ImGui::RadioButton("None(4)", &bunny->GetMaterialData()->enableLighting, 0);
-							ImGui::RadioButton("Lambert(4)", &bunny->GetMaterialData()->enableLighting, 1);
-							ImGui::RadioButton("HalfLambert(4)", &bunny->GetMaterialData()->enableLighting, 2);
-						}
-					}
-					ImGui::Separator();
-					ImGui::EndTabItem();
-				}
-				ImGui::EndTabBar();
+	// ゲームループ
+	while (window.ProcessMessage()) {
+		// ゲームの処理
+		// フレームが始まる
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+		ImGui::Begin("infomation");
+		if (ImGui::BeginTabBar("infomation")) {
+			if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
+				ImGui::Text("Camera");
+				ImGui::DragFloat3("scale(Camera)", &cameraTransform.scale.x, 0.01f); // カメラの拡縮を変更するUI
+				ImGui::DragFloat3("Rotate(Camera)", &cameraTransform.rotate.x, 0.01f); // カメラの回転を変更するUI
+				ImGui::DragFloat3("Translate(Camera)", &cameraTransform.translate.x, 0.01f); // カメラの位置を変更するUI
+				ImGui::Separator();
+				ImGui::Text("DirectionalLight");
+				ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
+				ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
+				ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f); // 光度を変更するUI
+				ImGui::Separator();
+				ImGui::EndTabItem();
 			}
-			ImGui::End();
-
-			ImGui::Begin("DebugCamera");
-			if (useDebugCamera) {
-				ImGui::Text("Debug Camera Running");
-				ImGui::Text("Press [Tab] to exit the debug camera");
-				ImGui::Text("Press [R] to reset the debug camera position");
-				ImGui::Text("Press [W][A][S][D] to move");
-				ImGui::Text("[Right-click and move] to move the viewpoint");
-			} else {
-				ImGui::Text("Debug Camera Disabled");
-				ImGui::Text("Press [Tab] to launch the debug camera");
-			}
-			ImGui::End();
-
-			// ImGuiのデモ用のUIを表示している
-			// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-			//ImGui::ShowDemoWindow();
-			
-			// ImGuiの内部コマンドを生成する
-			ImGui::Render();
-
-			 // Inputの更新処理
-			input->Update();
-
-			//directionalLightの正規化
-			directionalLightData->direction = Math::Normalize(directionalLightData->direction);
-
-			if (input->Trigger(DIK_TAB)) {
-				if (useDebugCamera) {
-					useDebugCamera = false;
-				} else {
-					useDebugCamera = true;
+			if (ImGui::BeginTabItem("Triangle")) {
+				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
+				if (drawTriangle) {
+					if (ImGui::CollapsingHeader("SRT")) {
+						ImGui::DragFloat3("scale", &triangle->GetTransform().scale.x, 0.01f); // Triangleの拡縮を変更するUI
+						ImGui::DragFloat3("rotate", &triangle->GetTransform().rotate.x, 0.01f); // Triangleの回転を変更するUI
+						ImGui::DragFloat3("Translate", &triangle->GetTransform().translate.x, 0.01f); // Triangleの位置を変更するUI
+						ImGui::Checkbox("isRotate", &isRotate); // 回転するかどうかのUI
+					}
+					if (ImGui::CollapsingHeader("color")) {
+						ImGui::ColorEdit4("Color", &triangle->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting")) {
+						ImGui::RadioButton("None", &triangle->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert", &triangle->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert", &triangle->GetMaterialData()->enableLighting, 2);
+					}
 				}
+				ImGui::Separator();
+				ImGui::EndTabItem();
 			}
-
-			// 三角形の回転処理
-			if (isRotate) {
-				triangle->GetTransform().rotate.y += 0.03f;
-			} else {
-				triangle->GetTransform().rotate.y = 0.0f;
-			}
-
-			// 各種行列の処理
-			// カメラ
-			Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			Matrix4x4 viewMatrix2D = Math::MakeIdentity();
-			Matrix4x4 projectionMatrix2D = Math::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(kClientWidth), static_cast<float>(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 viewMatrix3D;
-			Matrix4x4 projectionMatrix3D;
-			if (useDebugCamera) {
-				if (!wasDebugCameraLastFrame) {
-					debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
+			if (ImGui::BeginTabItem("Sphere")) {
+				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
+				if (drawSphere) {
+					if (ImGui::CollapsingHeader("SRT")) {
+						ImGui::DragFloat3("Scale", &sphere->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate", &sphere->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate", &sphere->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color")) {
+						ImGui::ColorEdit4("Color", &sphere->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting")) {
+						ImGui::RadioButton("None", &sphere->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert", &sphere->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert", &sphere->GetMaterialData()->enableLighting, 2);
+					}
 				}
-				debugCamera.HideCursor();
-				debugCamera.Update(input.get());
-				viewMatrix3D = debugCamera.GetViewMatrix();
-				projectionMatrix3D = debugCamera.GetProjectionMatrix();
-			} else {
-				debugCamera.ShowCursorBack();
-				viewMatrix3D = Math::Inverse(cameraMatrix);
-				projectionMatrix3D = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+				ImGui::Separator();
+				ImGui::EndTabItem();
 			}
-			// フレーム最後に更新して次フレームに備える
-			wasDebugCameraLastFrame = useDebugCamera;
-
-			// 三角形
-			triangle->Update(viewMatrix3D, projectionMatrix3D);
-
-			// スプライト
-			sprite->Update(viewMatrix2D, projectionMatrix2D);
-
-			// 球
-			sphere->Update(viewMatrix3D, projectionMatrix3D);
-
-			// モデル
-			teapot->Update(viewMatrix3D, projectionMatrix3D);
-
-			// モデル2
-			multiMaterial->Update(viewMatrix3D, projectionMatrix3D);
-
-			// モデル3
-			suzanne->Update(viewMatrix3D, projectionMatrix3D);
-
-			// モデル4
-			bunny->Update(viewMatrix3D, projectionMatrix3D);
-
-			// これから書き込むバックバッファのインデックスを取得
-			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-			// TransitionBarrierを設定する
-			D3D12_RESOURCE_BARRIER barrier{};
-			// 今回のバリアはTransition
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			// Noneにしておく
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			// バリアを張る対象のリソース。現在のバックバッファに対して行う
-			barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
-			// 遷移前(現在)のResourceState。
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-			// 遷移後のResourceState。描画を行うためにレンダーターゲットとして使用する。
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			// TransitionBarrierを張る
-			commandList->ResourceBarrier(1, &barrier);
-			// 描画先のRTVを設定する
-			// 描画先のRTVとDSVを設定する
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-			// 指定した深度で画面全体をクリアする
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			// 指定した色で画面全体をクリアにする
-			float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-			//描画用のDescriptorHeapの設定
-			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
-			commandList->SetDescriptorHeaps(1, descriptorHeaps);
-			commandList->RSSetViewports(1, &viewport); // Viewportを設定
-			commandList->RSSetScissorRects(1, &scissorRect); // Scissorを設定
-			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-			commandList->SetGraphicsRootSignature(pso->GetRootSignature());
-			commandList->SetPipelineState(pso->GetPipelineState()); // PSOを設定
-			//形状を設定。PSOに設定しているものとはまた別。同じものを設定するトポロジ考えておけばいい。
-			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-			// 三角形の描画
-			triangle->Draw(commandList.Get(), textureSrvHandleGPU3, directionalLightResource.Get(), drawTriangle);
-
-			// Spriteの描画
-			sprite->Draw(commandList.Get(), textureSrvHandleGPU, directionalLightResource.Get(), drawSprite);
-
-			// Sphereの描画
-			sphere->Draw(commandList.Get(), textureSrvHandleGPU2, directionalLightResource.Get(), drawSphere);
-
-			// Modelの描画
-			teapot->Draw(commandList.Get(),
-				teapot->GetMaterialResource(),
-				teapot->GetWVPResource(),
-				directionalLightResource.Get(),
-				textureSrvHandleGPUModel,
-				drawModel);
-
-			// Model2の描画
-			multiMaterial->Draw(commandList.Get(),
-				multiMaterial->GetMaterialResource(),
-				multiMaterial->GetWVPResource(),
-				directionalLightResource.Get(),
-				textureSrvHandleGPUModel2,
-				drawModel2);
-
-			// Model3の描画
-			suzanne->Draw(commandList.Get(),
-				suzanne->GetMaterialResource(),
-				suzanne->GetWVPResource(),
-				directionalLightResource.Get(),
-				textureSrvHandleGPUModel3,
-				drawModel3);
-
-			// Model4の描画
-			bunny->Draw(commandList.Get(),
-				bunny->GetMaterialResource(),
-				bunny->GetWVPResource(),
-				directionalLightResource.Get(),
-				textureSrvHandleGPUModel4,
-				drawModel4);
-
-
-			// 実際のcommandListのImGuiの描画コマンドを積む
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
-			// 画面に描く処理は全て終わり、画面に移すので、状態を遷移
-			// 今回はRenderTargetからPresentにする
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-			// TransitionBarrierを張る
-			commandList->ResourceBarrier(1, &barrier);
-
-			// コマンドリストの内容を確定させる。全てのコマンドを積んでからCloseすること
-			hr = commandList->Close();
-			// コマンドリストの確定がうまくいかなかったので起動できない
-			assert(SUCCEEDED(hr));
-
-			// GPUにコマンドリストの実行を行わせる
-			ID3D12CommandList* commandLists[] = { commandList.Get() }; // コマンドリストの配列
-			commandQueue->ExecuteCommandLists(1, commandLists); // コマンドリストを実行する
-			// GPUとOSに画面の交換を行うよう通知する
-			swapChain->Present(1, 0); // 1はV-Syncのための待機。0は何もしない
-			// Fenceの値を更新
-			fenceValue++;
-			// GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalを送る
-			commandQueue->Signal(fence.Get(), fenceValue);
-			// Fenceの値が指定した値にたどり着いているか確認する
-			// GetCompletedValueの初期値はFence作成時に渡した初期値
-			if (fence->GetCompletedValue() < fenceValue) {
-				// 指定した値にたどり着いていないので、イベントが発生するまで待機する
-				fence->SetEventOnCompletion(fenceValue, fenceEvent);
-				// イベントが発生するまで待機する
-				WaitForSingleObject(fenceEvent, INFINITE);
+			if (ImGui::BeginTabItem("Sprite")) {
+				ImGui::Checkbox("Draw(Sprite)", &drawSprite);
+				if (drawSprite) {
+					if (ImGui::CollapsingHeader("SRT")) {
+						ImGui::DragFloat3("Scale", &sprite->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate", &sprite->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate", &sprite->GetTransform().translate.x, 1.0f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color")) {
+						ImGui::ColorEdit4("Color", &sprite->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting")) {
+						ImGui::RadioButton("None", &sprite->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert", &sprite->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert", &sprite->GetMaterialData()->enableLighting, 2);
+					}
+					ImGui::Separator();
+					ImGui::Text("uvTransform(sprite)");
+					if (ImGui::CollapsingHeader("SRT(uv)")) {
+						ImGui::DragFloat2("uvScale", &sprite->GetUVTransform().scale.x, 0.01f); // uv球の拡縮を変更するUI
+						ImGui::DragFloat("uvRotate", &sprite->GetUVTransform().rotate.z, 0.01f); // uv球の回転を変更するUI
+						ImGui::DragFloat2("uvTranslate", &sprite->GetUVTransform().translate.x, 0.01f); // uv球の位置を変更するUI
+					}
+				}
+				ImGui::Separator();
+				ImGui::EndTabItem();
 			}
-
-			// 次のフレーム用のコマンドリストを準備
-			hr = commandList->Reset(commandAllocator.Get(), nullptr); // コマンドリストをリセットする
-			// コマンドリストのリセットがうまくいかなかったので起動できない
-			assert(SUCCEEDED(hr));
+			if (ImGui::BeginTabItem("Model")) {
+				ImGui::Checkbox("Draw(teapot)", &drawModel);
+				if (drawModel) {
+					if (ImGui::CollapsingHeader("SRT(1)")) {
+						ImGui::DragFloat3("Scale(1)", &teapot->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate(1)", &teapot->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate(1)", &teapot->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color(1)")) {
+						ImGui::ColorEdit4("Color(1)", &teapot->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting(1)")) {
+						ImGui::RadioButton("None(1)", &teapot->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert(1)", &teapot->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert(1)", &teapot->GetMaterialData()->enableLighting, 2);
+					}
+				}
+				ImGui::Separator();
+				ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
+				if (drawModel2) {
+					if (ImGui::CollapsingHeader("SRT(2)")) {
+						ImGui::DragFloat3("Scale(2)", &multiMaterial->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate(2)", &multiMaterial->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate(2)", &multiMaterial->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color(2)")) {
+						ImGui::ColorEdit4("Color(2)", &multiMaterial->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting(2)")) {
+						ImGui::RadioButton("None(2)", &multiMaterial->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 2);
+					}
+				}
+				ImGui::Separator();
+				ImGui::Checkbox("Draw(suzanne)", &drawModel3);
+				if (drawModel3) {
+					if (ImGui::CollapsingHeader("SRT(3)")) {
+						ImGui::DragFloat3("Scale(3)", &suzanne->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate(3)", &suzanne->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate(3)", &suzanne->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color(3)")) {
+						ImGui::ColorEdit4("Color(3)", &suzanne->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting(3)")) {
+						ImGui::RadioButton("None(3)", &suzanne->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert(3)", &suzanne->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert(3)", &suzanne->GetMaterialData()->enableLighting, 2);
+					}
+				}
+				ImGui::Separator();
+				ImGui::Checkbox("Draw(bunny)", &drawModel4);
+				if (drawModel4) {
+					if (ImGui::CollapsingHeader("SRT(4)")) {
+						ImGui::DragFloat3("Scale(4)", &bunny->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
+						ImGui::DragFloat3("Rotate(4)", &bunny->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
+						ImGui::DragFloat3("Translate(4)", &bunny->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
+					}
+					if (ImGui::CollapsingHeader("color(4)")) {
+						ImGui::ColorEdit4("Color(4)", &bunny->GetMaterialData()->color.x, true); // 色の値を変更するUI
+					}
+					if (ImGui::CollapsingHeader("lighting(4)")) {
+						ImGui::RadioButton("None(4)", &bunny->GetMaterialData()->enableLighting, 0);
+						ImGui::RadioButton("Lambert(4)", &bunny->GetMaterialData()->enableLighting, 1);
+						ImGui::RadioButton("HalfLambert(4)", &bunny->GetMaterialData()->enableLighting, 2);
+					}
+				}
+				ImGui::Separator();
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
 		}
+		ImGui::End();
+
+		ImGui::Begin("DebugCamera");
+		if (useDebugCamera) {
+			ImGui::Text("Debug Camera Running");
+			ImGui::Text("Press [Tab] to exit the debug camera");
+			ImGui::Text("Press [R] to reset the debug camera position");
+			ImGui::Text("Press [W][A][S][D] to move");
+			ImGui::Text("[Right-click and move] to move the viewpoint");
+		} else {
+			ImGui::Text("Debug Camera Disabled");
+			ImGui::Text("Press [Tab] to launch the debug camera");
+		}
+		ImGui::End();
+
+		// ImGuiのデモ用のUIを表示している
+		// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
+		//ImGui::ShowDemoWindow();
+
+		// ImGuiの内部コマンドを生成する
+		ImGui::Render();
+
+		// Inputの更新処理
+		input->Update();
+
+		//directionalLightの正規化
+		directionalLightData->direction = Math::Normalize(directionalLightData->direction);
+
+		if (input->Trigger(DIK_TAB)) {
+			if (useDebugCamera) {
+				useDebugCamera = false;
+			} else {
+				useDebugCamera = true;
+			}
+		}
+
+		// 三角形の回転処理
+		if (isRotate) {
+			triangle->GetTransform().rotate.y += 0.03f;
+		} else {
+			triangle->GetTransform().rotate.y = 0.0f;
+		}
+
+		// 各種行列の処理
+		// カメラ
+		Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+		Matrix4x4 viewMatrix2D = Math::MakeIdentity();
+		Matrix4x4 projectionMatrix2D = Math::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(kClientWidth), static_cast<float>(kClientHeight), 0.0f, 100.0f);
+		Matrix4x4 viewMatrix3D;
+		Matrix4x4 projectionMatrix3D;
+		if (useDebugCamera) {
+			if (!wasDebugCameraLastFrame) {
+				debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
+			}
+			debugCamera.HideCursor();
+			debugCamera.Update(input.get());
+			viewMatrix3D = debugCamera.GetViewMatrix();
+			projectionMatrix3D = debugCamera.GetProjectionMatrix();
+		} else {
+			debugCamera.ShowCursorBack();
+			viewMatrix3D = Math::Inverse(cameraMatrix);
+			projectionMatrix3D = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 100.0f);
+		}
+		// フレーム最後に更新して次フレームに備える
+		wasDebugCameraLastFrame = useDebugCamera;
+
+		// 三角形
+		triangle->Update(viewMatrix3D, projectionMatrix3D);
+
+		// スプライト
+		sprite->Update(viewMatrix2D, projectionMatrix2D);
+
+		// 球
+		sphere->Update(viewMatrix3D, projectionMatrix3D);
+
+		// モデル
+		teapot->Update(viewMatrix3D, projectionMatrix3D);
+
+		// モデル2
+		multiMaterial->Update(viewMatrix3D, projectionMatrix3D);
+
+		// モデル3
+		suzanne->Update(viewMatrix3D, projectionMatrix3D);
+
+		// モデル4
+		bunny->Update(viewMatrix3D, projectionMatrix3D);
+
+		// これから書き込むバックバッファのインデックスを取得
+		UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+		// TransitionBarrierを設定する
+		D3D12_RESOURCE_BARRIER barrier{};
+		// 今回のバリアはTransition
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		// Noneにしておく
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		// バリアを張る対象のリソース。現在のバックバッファに対して行う
+		barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+		// 遷移前(現在)のResourceState。
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		// 遷移後のResourceState。描画を行うためにレンダーターゲットとして使用する。
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		// TransitionBarrierを張る
+		commandList->ResourceBarrier(1, &barrier);
+		// 描画先のRTVを設定する
+		// 描画先のRTVとDSVを設定する
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+		// 指定した深度で画面全体をクリアする
+		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		// 指定した色で画面全体をクリアにする
+		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
+		commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+		//描画用のDescriptorHeapの設定
+		ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
+		commandList->SetDescriptorHeaps(1, descriptorHeaps);
+		commandList->RSSetViewports(1, &viewport); // Viewportを設定
+		commandList->RSSetScissorRects(1, &scissorRect); // Scissorを設定
+		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		commandList->SetGraphicsRootSignature(pso->GetRootSignature());
+		commandList->SetPipelineState(pso->GetPipelineState()); // PSOを設定
+		//形状を設定。PSOに設定しているものとはまた別。同じものを設定するトポロジ考えておけばいい。
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// 三角形の描画
+		triangle->Draw(commandList.Get(), textureSrvHandleGPU3, directionalLightResource.Get(), drawTriangle);
+
+		// Spriteの描画
+		sprite->Draw(commandList.Get(), textureSrvHandleGPU, directionalLightResource.Get(), drawSprite);
+
+		// Sphereの描画
+		sphere->Draw(commandList.Get(), textureSrvHandleGPU2, directionalLightResource.Get(), drawSphere);
+
+		// Modelの描画
+		teapot->Draw(commandList.Get(),
+			teapot->GetMaterialResource(),
+			teapot->GetWVPResource(),
+			directionalLightResource.Get(),
+			textureSrvHandleGPUModel,
+			drawModel);
+
+		// Model2の描画
+		multiMaterial->Draw(commandList.Get(),
+			multiMaterial->GetMaterialResource(),
+			multiMaterial->GetWVPResource(),
+			directionalLightResource.Get(),
+			textureSrvHandleGPUModel2,
+			drawModel2);
+
+		// Model3の描画
+		suzanne->Draw(commandList.Get(),
+			suzanne->GetMaterialResource(),
+			suzanne->GetWVPResource(),
+			directionalLightResource.Get(),
+			textureSrvHandleGPUModel3,
+			drawModel3);
+
+		// Model4の描画
+		bunny->Draw(commandList.Get(),
+			bunny->GetMaterialResource(),
+			bunny->GetWVPResource(),
+			directionalLightResource.Get(),
+			textureSrvHandleGPUModel4,
+			drawModel4);
+
+
+		// 実際のcommandListのImGuiの描画コマンドを積む
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
+		// 画面に描く処理は全て終わり、画面に移すので、状態を遷移
+		// 今回はRenderTargetからPresentにする
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		// TransitionBarrierを張る
+		commandList->ResourceBarrier(1, &barrier);
+
+		// コマンドリストの内容を確定させる。全てのコマンドを積んでからCloseすること
+		hr = commandList->Close();
+		// コマンドリストの確定がうまくいかなかったので起動できない
+		assert(SUCCEEDED(hr));
+
+		// GPUにコマンドリストの実行を行わせる
+		ID3D12CommandList* commandLists[] = { commandList.Get() }; // コマンドリストの配列
+		commandQueue->ExecuteCommandLists(1, commandLists); // コマンドリストを実行する
+		// GPUとOSに画面の交換を行うよう通知する
+		swapChain->Present(1, 0); // 1はV-Syncのための待機。0は何もしない
+		// Fenceの値を更新
+		fenceValue++;
+		// GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalを送る
+		commandQueue->Signal(fence.Get(), fenceValue);
+		// Fenceの値が指定した値にたどり着いているか確認する
+		// GetCompletedValueの初期値はFence作成時に渡した初期値
+		if (fence->GetCompletedValue() < fenceValue) {
+			// 指定した値にたどり着いていないので、イベントが発生するまで待機する
+			fence->SetEventOnCompletion(fenceValue, fenceEvent);
+			// イベントが発生するまで待機する
+			WaitForSingleObject(fenceEvent, INFINITE);
+		}
+
+		// 次のフレーム用のコマンドリストを準備
+		hr = commandList->Reset(commandAllocator.Get(), nullptr); // コマンドリストをリセットする
+		// コマンドリストのリセットがうまくいかなかったので起動できない
+		assert(SUCCEEDED(hr));
 	}
 
 	// ImGuiの終了処理
@@ -938,11 +906,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	xAudio2.Reset();
 	// 音声データ解放
 	SoundUnload(&soundData1);
-
-	// ウィンドウのクローズは最後に行うのが無難
-	if (hwnd) {
-		CloseWindow(hwnd);
-	}
 
 	// PSO の解放
 	if (pso) {
