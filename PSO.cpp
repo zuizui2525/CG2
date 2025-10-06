@@ -1,6 +1,13 @@
-#include "PipelineStateObject.h"
+#include "PSO.h"
 #include "Function.h"
-#include <wrl.h> // ComPtrを使用するためにインクルード
+
+#include <dxcapi.h>
+#include <dxgi1_6.h>
+#include <cassert>
+#include <format>
+#include <string>
+#include <Windows.h>
+#include "externals/DirectXTex/d3dx12.h"
 
 PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, std::ofstream& logStream) {
     // ============================

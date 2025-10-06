@@ -1,5 +1,13 @@
 #pragma once
-#include "Header.h"
+#include <d3d12.h>
+#include <wrl.h>
+#include <fstream>
+#include "Struct.h"
+#include "Matrix.h"
+
+struct IDxcUtils;
+struct IDxcCompiler3;
+struct IDxcIncludeHandler;
 
 class PSO {
 public:

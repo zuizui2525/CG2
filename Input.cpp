@@ -1,6 +1,8 @@
 #include "Input.h"
 #include <cassert>
-#include <cstring> // memcpy
+#include <cstring>
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
 
 Input::Input() {
     memset(key_, 0, sizeof(key_));

@@ -1,5 +1,12 @@
 #pragma once
-#include "Header.h"
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <cassert>
+#include <wrl.h>
+#include <d3d12.h>
+#include "Matrix.h"
+#include "Struct.h"
+#include "Function.h"
 
 class TriangleObject {
 public:

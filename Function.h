@@ -1,5 +1,41 @@
 #pragma once
-#include "Header.h"
+
+#define DIRECTINPUT_VERSION 0x0800 // 念のため（DirectXTex 内で参照される可能性）
+
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <fstream>
+#include <filesystem>
+#include <cassert>
+
+#include <Windows.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <dbghelp.h>
+#include <strsafe.h>
+#include <dxgidebug.h>
+#include <wrl.h>
+#include <dxcapi.h>
+#include <xaudio2.h>
+
+#include "externals/DirectXTex/DirectXTex.h"
+#include "externals/DirectXTex/d3dx12.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+
+#include "Struct.h"
+#include "Matrix.h"
+
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "Dbghelp.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxcompiler.lib")
+#pragma comment(lib, "xaudio2.lib")
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // string->wstring変換
 std::wstring ConvertString(const std::string& str);

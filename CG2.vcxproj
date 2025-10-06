@@ -146,7 +146,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="Object3D.cpp" />
-    <ClCompile Include="PipelineStateObject.cpp" />
+    <ClCompile Include="PSO.cpp" />
     <ClCompile Include="SphereObject.cpp" />
     <ClCompile Include="SpriteObject.cpp" />
     <ClCompile Include="TriangleObject.cpp" />
@@ -181,12 +181,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Function.h" />
-    <ClInclude Include="Header.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="Object3D.h" />
-    <ClInclude Include="PipelineStateObject.h" />
+    <ClInclude Include="PSO.h" />
     <ClInclude Include="SphereObject.h" />
     <ClInclude Include="SpriteObject.h" />
     <ClInclude Include="Struct.h" />

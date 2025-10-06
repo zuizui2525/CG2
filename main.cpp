@@ -1,11 +1,12 @@
 #include "Function.h"
 #include "WindowApp.h"
 #include "Input.h"
-#include "Object3D.h"
+#include "PSO.h"
 #include "TriangleObject.h"
 #include "SpriteObject.h"
 #include "SphereObject.h"
 #include "ModelObject.h"
+#include "DebugCamera.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
