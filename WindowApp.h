@@ -5,8 +5,8 @@
 class WindowApp {
 public:
     // 定数
-    static const int kClientWidth = 1280;
-    static const int kClientHeight = 720;
+    static const int32_t kClientWidth = 1280;
+    static const int32_t kClientHeight = 720;
 
     // コンストラクタ・デストラクタ
     WindowApp();
