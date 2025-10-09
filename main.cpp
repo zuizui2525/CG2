@@ -314,6 +314,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ゲームループ
 	while (window.ProcessMessage()) {
 		// ゲームの処理
+		// フレームの開始時刻を記録
+		dxCommon.FrameStart();
 		// フレームが始まる
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -489,6 +491,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		ImGui::End();
 
+		ImGui::Begin("FPS");
+		ImGui::Text("FPS: %.1f", 1.0f / dxCommon.GetDeltaTime());
+		ImGui::End();
 		// ImGuiのデモ用のUIを表示している
 		// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 		//ImGui::ShowDemoWindow();
@@ -616,6 +621,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// 描画後処理
 		dxCommon.EndFrame();
+
+		// 待機処理を行い、FPS固定
+		dxCommon.FrameEnd(60);
 	}
 
 	// ImGuiの終了処理

@@ -1,6 +1,8 @@
 #include "WindowApp.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include <cassert>
+#pragma comment(lib, "winmm.lib")
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 WindowApp::WindowApp() {}
@@ -11,6 +13,7 @@ WindowApp::~WindowApp() {
 }
 
 bool WindowApp::Initialize(const wchar_t* title) {
+    timeBeginPeriod(1);
     wc_.lpfnWndProc = WindowProc;
     wc_.lpszClassName = L"MyWindowClass";
     wc_.hInstance = GetModuleHandle(nullptr);

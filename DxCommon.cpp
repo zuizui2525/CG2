@@ -1,5 +1,6 @@
 #include "DxCommon.h"
 #include <iostream>
+#include <thread>
 
 void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
 	CreateAdapter();
@@ -85,6 +86,35 @@ void DxCommon::DrawImGui() {
 	commandList_->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList_.Get());
+}
+
+void DxCommon::FrameStart() {
+	frameStartTime_ = std::chrono::steady_clock::now();
+}
+
+// FPS固定＋経過時間更新
+void DxCommon::FrameEnd(int targetFps) {
+	using namespace std::chrono;
+
+	if (targetFps <= 0) { targetFps = 60; }
+
+	// 目標フレーム時間（例: 16.666ms）
+	const microseconds targetFrameTime(1000000 / targetFps);
+
+	// フレーム終了時刻
+	auto endTime = steady_clock::now();
+
+	// 経過時間を計算
+	auto elapsed = duration_cast<microseconds>(endTime - frameStartTime_);
+
+	// deltaTime_を秒単位で更新（実測）
+	deltaTime_ = static_cast<float>(elapsed.count()) / 1'000'000.0f;
+
+	// もし目標より短ければスリープして調整
+	if (elapsed < targetFrameTime) {
+		std::this_thread::sleep_for(targetFrameTime - elapsed);
+		deltaTime_ = static_cast<float>(targetFrameTime.count()) / 1'000'000.0f;
+	}
 }
 
 void DxCommon::CreateAdapter() {

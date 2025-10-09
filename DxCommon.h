@@ -8,6 +8,8 @@ public:
 	void EndFrame();
 	void PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature, const D3D12_VIEWPORT& viewport, const D3D12_RECT& scissorRect);
 	void DrawImGui();
+	void FrameStart();
+	void FrameEnd(int targetFps);
 public:
 	// --- 基本系 ---
 	ID3D12Device* GetDevice() const { return device_.Get(); }
@@ -35,6 +37,8 @@ public:
 	UINT GetBackBufferIndex() const { return backBufferIndex_; }
 	UINT GetBackBufferCount() const { return backBufferCount_; }
 	DXGI_FORMAT GetRtvFormat() const { return rtvFormat_; }
+	// FPS固定
+	float GetDeltaTime() const { return deltaTime_; }
 private:
 	void CreateAdapter();
 	void CreateDevice();
@@ -74,4 +78,7 @@ private:
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
+	// FPS固定
+	std::chrono::steady_clock::time_point frameStartTime_;
+	float deltaTime_ = 0.0f;
 };
