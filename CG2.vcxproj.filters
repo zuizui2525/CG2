@@ -16,12 +16,93 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{4c0bfc0a-ee81-46dc-864f-dd30cc12b875}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine">
+      <UniqueIdentifier>{8907dc1b-ad16-43d7-8a63-44fcc1892742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\2d">
+      <UniqueIdentifier>{443133e6-b5c4-40d8-bd9f-5034f3b8dd54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\3d">
+      <UniqueIdentifier>{175429c3-dd04-482b-bc55-a8aa63577951}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\2d\Sprite">
+      <UniqueIdentifier>{d7136c12-cab6-4670-8bf8-e236ee75fca8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\3d\Model">
+      <UniqueIdentifier>{90ba0313-5777-4c42-86e7-c26ebdf8635e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\3d\Sphere">
+      <UniqueIdentifier>{ab86ef6e-0dd1-4cab-8030-41e2842510e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\3d\Triangle">
+      <UniqueIdentifier>{0916df0b-4229-4968-9a8f-8724d861b443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\DebugCamera">
+      <UniqueIdentifier>{85b900e5-3f55-428f-979d-cc98825847e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\DxCommon">
+      <UniqueIdentifier>{cf70c79b-60c3-4fcd-b89c-1b69c719ed33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Function">
+      <UniqueIdentifier>{edf406d4-2357-4189-beb4-3650195c92c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Input">
+      <UniqueIdentifier>{96fe3271-bd57-4ea5-aece-a4e5a70ddcca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\WindowApp">
+      <UniqueIdentifier>{ff7b5d76-ac8d-4aaf-a694-b786239ff48a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Matrix">
+      <UniqueIdentifier>{3a19006a-00d0-45e4-bc57-8c5b9c31e51e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\PSO">
+      <UniqueIdentifier>{5c94eec4-3423-41ee-90ef-ddae9aae446e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine">
+      <UniqueIdentifier>{09f132a1-8250-4760-bb5d-c0c7c23adddc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\2d">
+      <UniqueIdentifier>{b3c5ea77-1930-4ffd-8408-b7a2990b1c96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\2d\Sprite">
+      <UniqueIdentifier>{ec5df459-5965-43cc-a5de-ed62c53ad06b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3d">
+      <UniqueIdentifier>{541dc078-bc77-4853-a186-b4036be65344}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3d\Model">
+      <UniqueIdentifier>{2adebea1-1f38-4a51-acff-55e1ca200f66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3d\Triangle">
+      <UniqueIdentifier>{1ec972ba-cff6-4de4-8791-b03a995a3b6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3d\Sphere">
+      <UniqueIdentifier>{9212f0ac-637f-47b2-b76c-61e1492a0315}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\DebugCamera">
+      <UniqueIdentifier>{5787715a-f7d4-4c24-9ee8-478865bd6d6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\DxCommon">
+      <UniqueIdentifier>{56ff62cc-b40d-493a-8e5f-ec46b6768065}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Input">
+      <UniqueIdentifier>{1078fb93-9512-4844-9089-74b901078c30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Function">
+      <UniqueIdentifier>{a1a5fc04-c6bb-4a46-b209-b4574c4f748e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Matrix">
+      <UniqueIdentifier>{af30cf84-bf33-4041-a399-5eccbec6bd91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\PSO">
+      <UniqueIdentifier>{7d357dd7-b36b-44a8-9e91-39155997c0d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\WindowApp">
+      <UniqueIdentifier>{738a8b18-8f14-4575-b072-d2fde2b31eed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Matrix\Matrix.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
@@ -45,38 +126,41 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Function\Function.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\PSO\PSO.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DebugCamera\DebugCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\3d\Object3D.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="Engine\2d\Sprite\SpriteObject.cpp">
+      <Filter>ソース ファイル\Engine\2d\Sprite</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\ModelObject.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\2d\Sprite\SpriteObject.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\3d\Model</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Sphere\SphereObject.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\3d\Sphere</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Triangle\TriangleObject.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\3d\Triangle</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Input\Input.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="Engine\3d\Object3D.cpp">
+      <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\WindowApp\WindowApp.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="Engine\DebugCamera\DebugCamera.cpp">
+      <Filter>ソース ファイル\Engine\DebugCamera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DxCommon\DxCommon.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\DxCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Function\Function.cpp">
+      <Filter>ソース ファイル\Engine\Function</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Input\Input.cpp">
+      <Filter>ソース ファイル\Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\WindowApp\WindowApp.cpp">
+      <Filter>ソース ファイル\Engine\WindowApp</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Matrix\Matrix.cpp">
+      <Filter>ソース ファイル\Engine\Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\PSO\PSO.cpp">
+      <Filter>ソース ファイル\Engine\PSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -84,12 +168,6 @@
     <FxCompile Include="Object3d.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Struct.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Matrix\Matrix.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
       <Filter>imgui</Filter>
     </ClInclude>
@@ -114,38 +192,44 @@
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Function\Function.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\PSO\PSO.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\DebugCamera\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Object3D.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Engine\2d\Sprite\SpriteObject.h">
+      <Filter>ヘッダー ファイル\Engine\2d\Sprite</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\ModelObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\2d\Sprite\SpriteObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Sphere\SphereObject.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Triangle\TriangleObject.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\3d\Triangle</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Input\Input.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Engine\3d\Sphere\SphereObject.h">
+      <Filter>ヘッダー ファイル\Engine\3d\Sphere</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\WindowApp\WindowApp.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Engine\3d\Object3D.h">
+      <Filter>ヘッダー ファイル\Engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DebugCamera\DebugCamera.h">
+      <Filter>ヘッダー ファイル\Engine\DebugCamera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DxCommon\DxCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\DxCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Input\Input.h">
+      <Filter>ヘッダー ファイル\Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Function\Function.h">
+      <Filter>ヘッダー ファイル\Engine\Function</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Matrix\Matrix.h">
+      <Filter>ヘッダー ファイル\Engine\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\PSO\PSO.h">
+      <Filter>ヘッダー ファイル\Engine\PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Struct.h">
+      <Filter>ヘッダー ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\WindowApp\WindowApp.h">
+      <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
