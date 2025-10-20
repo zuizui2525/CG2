@@ -1,6 +1,6 @@
 #pragma once
-#include "Function.h"
-#include "Input.h"
+#include "../Function/Function.h"
+#include "../Input/Input.h"
 
 class DebugCamera {
 private:

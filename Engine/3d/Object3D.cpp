@@ -1,5 +1,6 @@
 #include "Object3D.h"
-#include "Function.h"
+#include "../Function/Function.h"
+#include "../Matrix/Matrix.h"
 
 Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     // WVPリソース作成

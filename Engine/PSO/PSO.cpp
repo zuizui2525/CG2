@@ -1,5 +1,5 @@
 #include "PSO.h"
-#include "Function.h"
+#include "../Function/Function.h"
 
 #include <dxcapi.h>
 #include <dxgi1_6.h>
@@ -7,7 +7,7 @@
 #include <format>
 #include <string>
 #include <Windows.h>
-#include "externals/DirectXTex/d3dx12.h"
+#include "../../externals/DirectXTex/d3dx12.h"
 
 PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, std::ofstream& logStream) {
     // ============================

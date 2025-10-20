@@ -1,13 +1,13 @@
-#include "Function.h"
-#include "DxCommon.h"
-#include "WindowApp.h"
-#include "Input.h"
-#include "PSO.h"
-#include "TriangleObject.h"
-#include "SpriteObject.h"
-#include "SphereObject.h"
-#include "ModelObject.h"
-#include "DebugCamera.h"
+#include "Engine/Function/Function.h"
+#include "Engine/DxCommon/DxCommon.h"
+#include "Engine/WindowApp/WindowApp.h"
+#include "Engine/Input/Input.h"
+#include "Engine/PSO/PSO.h"
+#include "Engine/3d/Triangle/TriangleObject.h"
+#include "Engine/2d/Sprite/SpriteObject.h"
+#include "Engine/3d/Sphere/SphereObject.h"
+#include "Engine/3d/Model/ModelObject.h"
+#include "Engine/DebugCamera/DebugCamera.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {

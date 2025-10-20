@@ -4,9 +4,7 @@
 #include <cassert>
 #include <wrl.h>
 #include <d3d12.h>
-#include "Matrix.h"
-#include "Struct.h"
-#include "Function.h"
+#include "../../Struct.h"
 
 class SphereObject {
 public:

@@ -4,19 +4,17 @@
 #include <cassert>
 #include <wrl.h>
 #include <d3d12.h>
-#include "Matrix.h"
-#include "Struct.h"
-#include "Function.h"
+#include "../../Struct.h"
 
-class SpriteObject {
+class TriangleObject {
 public:
-    SpriteObject(ID3D12Device* device, int width, int height);
-    ~SpriteObject();
+    TriangleObject(ID3D12Device* device);
+    ~TriangleObject();
 
-    // 更新（ModelObjectと揃える）
+    // 更新処理（view, projectionを渡す）
     void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
 
-    // 描画
+    // 描画処理
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
         ID3D12Resource* directionalLightResource,
@@ -28,17 +26,19 @@ public:
     Material* GetMaterialData() { return materialData_; }
 
 private:
+    // GPUリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-    Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 
+    // バッファビュー
+    D3D12_VERTEX_BUFFER_VIEW vbView_{};
+
+    // CPUから触る用のポインタ
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
 
-    D3D12_VERTEX_BUFFER_VIEW vbView_{};
-    D3D12_INDEX_BUFFER_VIEW ibView_{};
-
+    // Transform
     Transform transform_{ {1,1,1}, {0,0,0}, {0,0,0} };
     Transform uvTransform_{ {1,1,1}, {0,0,0}, {0,0,0} };
 };

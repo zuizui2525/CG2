@@ -2,8 +2,8 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <fstream>
-#include "Struct.h"
-#include "Matrix.h"
+#include "../Struct.h"
+#include "../Matrix/Matrix.h"
 
 struct IDxcUtils;
 struct IDxcCompiler3;

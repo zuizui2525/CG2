@@ -1,5 +1,5 @@
 #pragma once
-#include "Struct.h"
+#include "../Struct.h"
 
 namespace Math {
 	// ベクトルの加算を計算する関数

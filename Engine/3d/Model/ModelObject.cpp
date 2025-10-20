@@ -1,5 +1,5 @@
 #include "ModelObject.h"
-#include "Function.h"
+#include "../../Function/Function.h"
 
 ModelObject::ModelObject(ID3D12Device* device,
     const std::string& directory,

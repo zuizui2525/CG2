@@ -1,7 +1,7 @@
 #pragma once
 #include <wrl.h>
 #include <d3d12.h>
-#include "Struct.h"
+#include "../Struct.h"
 
 // 3Dオブジェクトの基底クラス
 class Object3D {

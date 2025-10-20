@@ -1,4 +1,5 @@
 #include "SphereObject.h"
+#include "../../Function/Function.h"
 
 SphereObject::SphereObject(ID3D12Device* device, uint32_t subdivision, float radius)
     : subdivision_(subdivision), radius_(radius) {
