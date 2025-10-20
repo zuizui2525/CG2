@@ -5,8 +5,6 @@
 #include <vector>
 #include <wrl.h>          // ComPtr
 #include <dxgidebug.h>    // DXGI デバッグ
-
-// 必要なヘッダーを追加
 #include <dxgi1_3.h>      // DXGIGetDebugInterface1 のため
 
 #pragma comment(lib, "dxguid.lib") // DXGI デバッグ用ライブラリ

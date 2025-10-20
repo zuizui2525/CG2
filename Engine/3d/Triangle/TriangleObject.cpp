@@ -1,4 +1,5 @@
 #include "TriangleObject.h"
+#include "../../Function/Function.h"
 
 TriangleObject::TriangleObject(ID3D12Device* device) {
     // Material

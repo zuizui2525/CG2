@@ -1,5 +1,5 @@
 #pragma once
-#include "Function.h"
+#include "../Function/Function.h"
 
 class DxCommon {
 public:

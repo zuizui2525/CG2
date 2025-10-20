@@ -1,6 +1,6 @@
 #pragma once
-#include "Object3D.h"
-#include "Struct.h"
+#include "../Object3D.h"
+#include "../../Struct.h"
 #include <string>
 #include <vector>
 
