@@ -65,7 +65,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(hr));
 
-	// Inputの初期化
+	// Inputの初期化 //
 	std::unique_ptr<Input> input = std::make_unique<Input>();
 	input->Initialize(window.GetInstance(), window.GetHWND());
 
