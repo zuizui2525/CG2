@@ -162,6 +162,9 @@
     <ClCompile Include="Engine\PSO\PSO.cpp">
       <Filter>ソース ファイル\Engine\PSO</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\3d\Model\ModelManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
@@ -230,6 +233,9 @@
     </ClInclude>
     <ClInclude Include="Engine\WindowApp\WindowApp.h">
       <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\3d\Model\ModelManager.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -149,12 +149,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource3 = CreateTextureResource(dxCommon.GetDevice(), metadata3);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource3 = UploadTextureData(textureResource3.Get(), mipImages3, dxCommon.GetDevice(), dxCommon.GetCommandList());
 	// ModelのTextureを読んで転送する(Model)
-	DirectX::ScratchImage mipImagesModel = LoadTexture(teapot->GetModelData().material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel = LoadTexture(teapot->GetModelData()->material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel = mipImagesModel.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel = CreateTextureResource(dxCommon.GetDevice(), metadataModel);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel = UploadTextureData(textureResourceModel.Get(), mipImagesModel, dxCommon.GetDevice(), dxCommon.GetCommandList());
 	// ModelのTextureを読んで転送する(Model2)
-	DirectX::ScratchImage mipImagesModel2 = LoadTexture(multiMaterial->GetModelData().material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel2 = LoadTexture(multiMaterial->GetModelData()->material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel2 = mipImagesModel2.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel2 = CreateTextureResource(dxCommon.GetDevice(), metadataModel2);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel2 = UploadTextureData(textureResourceModel2.Get(), mipImagesModel2, dxCommon.GetDevice(), dxCommon.GetCommandList());
@@ -163,12 +163,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectX::ScratchImage mipImagesModel3;
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel3;
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel3;
-	if (suzanne->GetModelData().material.textureFilePath.empty()) {
+	if (suzanne->GetModelData()->material.textureFilePath.empty()) {
 		// テクスチャがない場合：白画像を使う
 		mipImagesModel3 = LoadTexture("resources/white.png");
 	} else {
 		// テクスチャがある場合
-		mipImagesModel3 = LoadTexture(suzanne->GetModelData().material.textureFilePath);
+		mipImagesModel3 = LoadTexture(suzanne->GetModelData()->material.textureFilePath);
 	}
 	// 共通処理（読み込んだ mipImages を使ってリソースを作る）
 	const DirectX::TexMetadata& metadataModel3 = mipImagesModel3.GetMetadata();
@@ -178,7 +178,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	);
 
 	// ModelのTextureを読んで転送する(Model4)
-	DirectX::ScratchImage mipImagesModel4 = LoadTexture(bunny->GetModelData().material.textureFilePath);
+	DirectX::ScratchImage mipImagesModel4 = LoadTexture(bunny->GetModelData()->material.textureFilePath);
 	const DirectX::TexMetadata& metadataModel4 = mipImagesModel4.GetMetadata(); // mipImagesからmipImagesModelに変更
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResourceModel4 = CreateTextureResource(dxCommon.GetDevice(), metadataModel4);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceModel4 = UploadTextureData(textureResourceModel4.Get(), mipImagesModel4, dxCommon.GetDevice(), dxCommon.GetCommandList());

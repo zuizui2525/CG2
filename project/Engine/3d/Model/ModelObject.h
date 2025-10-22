@@ -1,6 +1,7 @@
 #pragma once
 #include "../Object3D.h"
 #include "../../Struct.h"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -16,7 +17,7 @@ public:
     D3D12_VERTEX_BUFFER_VIEW GetVBV() const { return vbv_; }
 
     // モデルデータ取得（テクスチャパスなどを参照する用）
-    const ModelData& GetModelData() const { return modelData_; }
+    const std::shared_ptr<ModelData>& GetModelData() const { return modelData_; }
 
     // マテリアルデータを直接触る（ImGui用）
     Material* GetMaterialData() { return materialData_; }
@@ -35,7 +36,7 @@ public:
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
     D3D12_VERTEX_BUFFER_VIEW vbv_{};
-    ModelData modelData_;
+    std::shared_ptr<ModelData> modelData_;
 
     // マテリアルのCPU側ポインタ（ImGui編集用）
     Material* materialData_ = nullptr;

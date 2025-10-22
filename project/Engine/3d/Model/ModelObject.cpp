@@ -1,4 +1,5 @@
 #include "ModelObject.h"
+#include "ModelManager.h"
 #include "../../Function/Function.h"
 
 ModelObject::ModelObject(ID3D12Device* device,
@@ -11,18 +12,18 @@ ModelObject::ModelObject(ID3D12Device* device,
     transform_.translate = initialPosition;
 
     // モデルデータ読み込み
-    modelData_ = LoadObjFile(directory, filename);
+    modelData_ = ModelManager::GetInstance().LoadModel(device, directory, filename);
 
     // 頂点リソース作成
-    vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_.vertices.size());
+    vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_->vertices.size());
     vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-    vbv_.SizeInBytes = sizeof(VertexData) * (UINT)modelData_.vertices.size();
+    vbv_.SizeInBytes = sizeof(VertexData) * (UINT)modelData_->vertices.size();
     vbv_.StrideInBytes = sizeof(VertexData);
 
     // 頂点データ転送
     VertexData* vertexData = nullptr;
     vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-    memcpy(vertexData, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+    memcpy(vertexData, modelData_->vertices.data(), sizeof(VertexData) * modelData_->vertices.size());
 
     // マテリアル用のポインタ取得
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
@@ -65,6 +66,6 @@ void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,
 
     // 描画
     if (draw) {
-        commandList->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
+        commandList->DrawInstanced(UINT(modelData_->vertices.size()), 1, 0, 0);
     }
 }

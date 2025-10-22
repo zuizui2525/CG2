@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\Sprite\SpriteObject.cpp" />
     <ClCompile Include="Engine\3d\Triangle\TriangleObject.cpp" />
     <ClCompile Include="Engine\WindowApp\WindowApp.cpp" />
+    <ClCompile Include="Engine\3d\Model\ModelManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.PS.hlsl">
@@ -205,6 +206,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Struct.h" />
     <ClInclude Include="Engine\3d\Triangle\TriangleObject.h" />
     <ClInclude Include="Engine\WindowApp\WindowApp.h" />
+    <ClInclude Include="Engine\3d\Model\ModelManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
