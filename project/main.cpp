@@ -50,20 +50,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
 
-	D3D12_VIEWPORT viewport{};
-	viewport.Width = WindowApp::kClientWidth;
-	viewport.Height = WindowApp::kClientHeight;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	D3D12_RECT scissorRect{};
-	scissorRect.left = 0;
-	scissorRect.right = WindowApp::kClientWidth;
-	scissorRect.top = 0;
-	scissorRect.bottom = WindowApp::kClientHeight;
-
 	// 三角形の初期化
 	std::unique_ptr<TriangleObject> triangle = std::make_unique<TriangleObject>(dxCommon.GetDevice());
 
@@ -412,9 +398,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dxCommon.BeginFrame();
 		dxCommon.PreDraw(
 			pso->GetPipelineState(),
-			pso->GetRootSignature(),
-			viewport,
-			scissorRect
+			pso->GetRootSignature()
 		);
 
 		// 三角形の描画
