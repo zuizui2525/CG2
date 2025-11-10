@@ -320,3 +320,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/project/imgui.ini
+/project/logs
+/project/Dumps/2025-202516-1718.dmp
