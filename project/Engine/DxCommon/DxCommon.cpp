@@ -82,6 +82,7 @@ void DxCommon::PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* 
 }
 
 void DxCommon::DrawImGui() {
+#ifdef _DEBUG
 	ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
 	commandList_->SetDescriptorHeaps(1, heaps);
 
@@ -89,6 +90,7 @@ void DxCommon::DrawImGui() {
 	commandList_->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList_.Get());
+#endif
 }
 
 void DxCommon::FrameStart() {

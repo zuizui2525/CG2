@@ -2,6 +2,7 @@
 #include "DxCommon/DxCommon.h"
 #include "WindowApp/WindowApp.h"
 #include "Log/Log.h"
+#include "Imgui/ImguiManager.h"
 #include "Input/Input.h"
 #include "PSO/PSO.h"
 #include "3d/Triangle/TriangleObject.h"
@@ -78,18 +79,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 1.0f;
 
-	// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
-	// こういうもん
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(window.GetHWND());
-	ImGui_ImplDX12_Init(dxCommon.GetDevice(),
+	// Imgui
+#ifdef _DEBUG
+	std::unique_ptr<ImguiManager> imgui = std::make_unique<ImguiManager>();
+	imgui->Initialize(
+		window.GetHWND(),
+		dxCommon.GetDevice(),
 		dxCommon.GetBackBufferCount(),
 		dxCommon.GetRtvFormat(),
 		dxCommon.GetRtvHeap(),
-		dxCommon.GetSrvHeap()->GetCPUDescriptorHandleForHeapStart(),
-		dxCommon.GetSrvHeap()->GetGPUDescriptorHandleForHeapStart());
+		dxCommon.GetSrvHeap());
+#endif
 
 	// DescriptorSizeを取得しておく
 	const uint32_t descriptorSizeSRV = dxCommon.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -143,10 +143,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// ゲームの処理
 		// フレームの開始時刻を記録
 		dxCommon.FrameStart();
-		// フレームが始まる
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
+		// 開始
+#ifdef _DEBUG
+		imgui->Begin();
 		ImGui::Begin("infomation");
 		if (ImGui::BeginTabBar("infomation")) {
 			if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
@@ -321,12 +320,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("FPS");
 		ImGui::Text("FPS: %.1f", 1.0f / dxCommon.GetDeltaTime());
 		ImGui::End();
-		// ImGuiのデモ用のUIを表示している
-		// 開発用のUIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-		//ImGui::ShowDemoWindow();
-
-		// ImGuiの内部コマンドを生成する
-		ImGui::Render();
+		
+		// 終了
+		imgui->End();
+#endif
 
 		// Inputの更新処理
 		input->Update();
@@ -452,10 +449,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	// ImGuiの終了処理
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-
+#ifdef _DEBUG
+	imgui->Shutdown();
+#endif
 	// XAudio2解放
 	xAudio2.Reset();
 	// 音声データ解放
