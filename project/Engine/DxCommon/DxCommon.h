@@ -40,6 +40,7 @@ public:
 	// FPS固定
 	float GetDeltaTime() const { return deltaTime_; }
 private:
+	void EnableDebugLayer();
 	void CreateAdapter();
 	void CreateDevice();
 	void CreateCommandObject();

@@ -40,18 +40,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ファイルを作って書き込み準備
 	std::ofstream logStream(logFileName);
 
-	// エラー放置ダメ絶対
-#ifdef _DEBUG
-	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController; // デバッグ用のコントローラ
-	// デバッグレイヤーのインターフェースを取得する
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())))) {
-		// デバッグレイヤーを有効にする
-		debugController->EnableDebugLayer();
-		// コンプライアンスのチェックを行う
-		debugController->SetEnableGPUBasedValidation(TRUE);
-	}
-#endif
-
 	// dxCommonを用意
 	DxCommon dxCommon;
 	dxCommon.Initialize(window.GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
@@ -504,9 +492,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	if (pso) {
 		delete pso;
 	}
-
-	// 警告時に止まる
-	//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true); // infoQueueがスコープ外でアクセスされるためコメントアウト
 
 	// COMの終了処理
 	CoUninitialize();

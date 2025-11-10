@@ -3,6 +3,7 @@
 #include <thread>
 
 void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
+	EnableDebugLayer();
 	CreateAdapter();
 	CreateDevice();
 	CreateCommandObject();
@@ -115,6 +116,20 @@ void DxCommon::FrameEnd(int targetFps) {
 		std::this_thread::sleep_for(targetFrameTime - elapsed);
 		deltaTime_ = static_cast<float>(targetFrameTime.count()) / 1'000'000.0f;
 	}
+}
+
+void DxCommon::EnableDebugLayer() {
+	// エラー放置ダメ絶対
+#ifdef _DEBUG
+	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController; // デバッグ用のコントローラ
+	// デバッグレイヤーのインターフェースを取得する
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())))) {
+		// デバッグレイヤーを有効にする
+		debugController->EnableDebugLayer();
+		// コンプライアンスのチェックを行う
+		debugController->SetEnableGPUBasedValidation(TRUE);
+	}
+#endif
 }
 
 void DxCommon::CreateAdapter() {
