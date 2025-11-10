@@ -6,7 +6,7 @@ public:
 	void Initialize(HWND hwnd, int32_t width, int32_t height);
 	void BeginFrame();
 	void EndFrame();
-	void PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature, const D3D12_VIEWPORT& viewport, const D3D12_RECT& scissorRect);
+	void PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature);
 	void DrawImGui();
 	void FrameStart();
 	void FrameEnd(int targetFps);
@@ -40,6 +40,8 @@ public:
 	// FPS固定
 	float GetDeltaTime() const { return deltaTime_; }
 private:
+	void InitializeViewport(int32_t width, int32_t height);
+	void InitializeScissorRect(int32_t width, int32_t height);
 	void EnableDebugLayer();
 	void CreateAdapter();
 	void CreateDevice();
@@ -82,4 +84,8 @@ private:
 	// FPS固定
 	std::chrono::steady_clock::time_point frameStartTime_;
 	float deltaTime_ = 0.0f;
+	// viewport
+	D3D12_VIEWPORT viewport_{};
+	// scissorRect
+	D3D12_RECT scissorRect_{};
 };

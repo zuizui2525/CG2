@@ -3,6 +3,8 @@
 #include <thread>
 
 void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
+	InitializeViewport(width, height);
+	InitializeScissorRect(width, height);
 	EnableDebugLayer();
 	CreateAdapter();
 	CreateDevice();
@@ -70,11 +72,11 @@ void DxCommon::EndFrame() {
 }
 
 
-void DxCommon::PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature, const D3D12_VIEWPORT& viewport, const D3D12_RECT& scissorRect) {
+void DxCommon::PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature) {
 	ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
 	commandList_->SetDescriptorHeaps(1, heaps);
-	commandList_->RSSetViewports(1, &viewport);
-	commandList_->RSSetScissorRects(1, &scissorRect); commandList_->SetGraphicsRootSignature(rootSignature);
+	commandList_->RSSetViewports(1, &viewport_);
+	commandList_->RSSetScissorRects(1, &scissorRect_); commandList_->SetGraphicsRootSignature(rootSignature);
 	commandList_->SetPipelineState(pipelineState);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -116,6 +118,22 @@ void DxCommon::FrameEnd(int targetFps) {
 		std::this_thread::sleep_for(targetFrameTime - elapsed);
 		deltaTime_ = static_cast<float>(targetFrameTime.count()) / 1'000'000.0f;
 	}
+}
+
+void DxCommon::InitializeViewport(int32_t width, int32_t height) {
+	viewport_.Width = static_cast<float>(width);
+	viewport_.Height = static_cast<float>(height);
+	viewport_.TopLeftX = 0;
+	viewport_.TopLeftY = 0;
+	viewport_.MinDepth = 0.0f;
+	viewport_.MaxDepth = 1.0f;
+}
+
+void DxCommon::InitializeScissorRect(int32_t width, int32_t height) {
+	scissorRect_.left = 0;
+	scissorRect_.right = width;
+	scissorRect_.top = 0;
+	scissorRect_.bottom = height;
 }
 
 void DxCommon::EnableDebugLayer() {
