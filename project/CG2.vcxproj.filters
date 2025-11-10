@@ -163,7 +163,7 @@
       <Filter>ソース ファイル\Engine\PSO</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\ModelManager.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\3d\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +235,7 @@
       <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\ModelManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
