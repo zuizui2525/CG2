@@ -43,9 +43,6 @@ std::wstring ConvertString(const std::string& str);
 // wstring->string変換
 std::string ConvertString(const std::wstring& str);
 
-// 出力ウィンドウに文字を出す
-void Log(std::ostream& os, const std::string& message);
-
 // ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
