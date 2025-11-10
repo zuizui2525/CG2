@@ -100,6 +100,12 @@
     <Filter Include="ヘッダー ファイル\Engine\WindowApp">
       <UniqueIdentifier>{738a8b18-8f14-4575-b072-d2fde2b31eed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\Texture">
+      <UniqueIdentifier>{64e9b7cd-531f-404a-a37a-e3a9608f79da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Texture">
+      <UniqueIdentifier>{8f0bcfe2-2374-4ac3-a562-79c4602200f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -163,7 +169,13 @@
       <Filter>ソース ファイル\Engine\PSO</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\ModelManager.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\3d\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Texture\Texture.cpp">
+      <Filter>ソース ファイル\Engine\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Texture\TextureManager.cpp">
+      <Filter>ソース ファイル\Engine\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +247,13 @@
       <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\ModelManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Texture\Texture.h">
+      <Filter>ヘッダー ファイル\Engine\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Texture\TextureManager.h">
+      <Filter>ヘッダー ファイル\Engine\Texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
