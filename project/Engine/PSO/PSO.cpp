@@ -71,7 +71,7 @@ PSO::PSO(ID3D12Device* device, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, 
     Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
     HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
     if (FAILED(hr)) {
-        Log(logStream, reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
+        logger.Write(logStream, reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
         assert(false);
     }
 

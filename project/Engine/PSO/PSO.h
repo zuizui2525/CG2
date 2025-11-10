@@ -4,6 +4,7 @@
 #include <fstream>
 #include "../Struct.h"
 #include "../Matrix/Matrix.h"
+#include "../Log/Log.h"
 
 struct IDxcUtils;
 struct IDxcCompiler3;
@@ -21,6 +22,7 @@ public:
     Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
     Matrix4x4* wvpData_ = nullptr;
 
+    Log logger;
 public:
     PSO(
         ID3D12Device* device,

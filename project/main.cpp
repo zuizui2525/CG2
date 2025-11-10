@@ -1,6 +1,7 @@
 #include "Function/Function.h"
 #include "DxCommon/DxCommon.h"
 #include "WindowApp/WindowApp.h"
+#include "Log/Log.h"
 #include "Input/Input.h"
 #include "PSO/PSO.h"
 #include "3d/Triangle/TriangleObject.h"
@@ -25,27 +26,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
 
-	// ログのディレクトリ
-	std::filesystem::create_directory("logs");
-	// 現在時刻を取得
-	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-	// ログファイルの名前にコンマ何秒はいらないので、削って秒にする
-	std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-	// 日本時間(PCの設定時間)に変換
-	std::chrono::zoned_time localTime{ std::chrono::current_zone(), nowSeconds };
-	// formalを使って年月日_時分秒の文字列に変換
-	std::string dateString = std::format("{:%Y%m%d_%H%M%S}", localTime);
-	// 時刻を使ってファイル名を決定
-	std::string logFileName = std::string("logs/") + dateString + ".log";
-	// ファイルを作って書き込み準備
-	std::ofstream logStream(logFileName);
+	// Log
+	Log logger;
+	logger.Write("Engine Start");
 
 	// dxCommonを用意
 	DxCommon dxCommon;
 	dxCommon.Initialize(window.GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
 
 	//PSOを作成する
-	PSO* pso = new PSO(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logStream);
+	PSO* pso = new PSO(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
 
 	// XAudioエンジンのインスタンスを生成
 	HRESULT hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);

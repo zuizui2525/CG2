@@ -1,4 +1,7 @@
 #include "Function.h"
+#include "../Log/Log.h"
+
+Log logger;
 
 // string->wstring変換
 std::wstring ConvertString(const std::string& str) {
@@ -27,12 +30,6 @@ std::string ConvertString(const std::wstring& str) {
 	std::string result(sizeNeeded, 0);
 	WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), sizeNeeded, NULL, NULL);
 	return result;
-}
-
-// 出力ウィンドウに文字を出す
-void Log(std::ostream& os, const std::string& message) {
-	os << message << std::endl;
-	OutputDebugStringA(message.c_str());
 }
 
 // ウィンドウプロシージャ
@@ -199,7 +196,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 	IDxcIncludeHandler* includeHandler) {
 	// 1.hlslファイルを読む
 	// これからシェーダーをコンパイルする旨をログに出す
-	Log(os, ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
+	logger.Write(os, ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
@@ -237,7 +234,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Log(os, shaderError->GetStringPointer());
+		logger.Write(os, shaderError->GetStringPointer());
 		// 警告・エラーダメ絶対
 		assert(false);
 	}
@@ -248,7 +245,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	// 成功したログを出す
-	Log(os, ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
+	logger.Write(os, ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
 
 	// ComPtrが自動でRelease()を呼ぶので、手動での解放は不要
 	// shaderSource->Release();
