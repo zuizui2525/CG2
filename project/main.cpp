@@ -33,7 +33,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("DxCommon Initialize");
 
 	//PSOを作成する
-	PSO* pso = new PSO(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
+	std::unique_ptr<PSO> pso = std::make_unique<PSO>(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
 	logger.Write("PSO Initialize");
 
 	// Audio
@@ -334,6 +334,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("FPS");
 		ImGui::Text("FPS: %.1f", 1.0f / dxCommon.GetDeltaTime());
 		ImGui::End();
+
+
+		ImGui::Begin("BlendMode");
+		int blendIndex = static_cast<int>(pso->blendMode_);
+		ImGui::Combo("BlendMode", &blendIndex, "None\0Normal\0Add\0Subtract\0Multiply\0Screen\0");
+		pso->blendMode_ = static_cast<BlendMode>(blendIndex);
+		ImGui::End();
 		
 		// 終了
 		imgui->End();
@@ -470,11 +477,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	xAudio2.Reset();
 	// 音声データ解放
 	SoundUnload(&soundData1);
-
-	// PSO の解放
-	if (pso) {
-		delete pso;
-	}
 
 	// COMの終了処理
 	CoUninitialize();

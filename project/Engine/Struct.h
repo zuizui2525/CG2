@@ -122,3 +122,14 @@ struct SoundData {
     BYTE* pBuffer;
     unsigned int bufferSize;
 };
+
+// ブレンドモード
+enum BlendMode {
+    kBlendModeNone,       // ブレンドなし
+    kBlendModeNormal,     // 通常αブレンド
+    kBlendModeAdd,        // 加算
+    kBlendModeSubtract,   // 減算
+    kBlendModeMultiply,   // 乗算
+    kBlendModeScreen,     // スクリーン
+    kCountOfBlendMode,    // カウント用:使うためのものではない
+};

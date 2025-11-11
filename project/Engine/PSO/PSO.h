@@ -14,7 +14,7 @@ class PSO {
 public:
     // ComPtrで管理
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
-    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_[kCountOfBlendMode];
 
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
     Vector4* materialData_ = nullptr;
@@ -23,6 +23,8 @@ public:
     Matrix4x4* wvpData_ = nullptr;
 
     Log logger;
+    BlendMode blendMode_ = kBlendModeNormal;
+
 public:
     PSO(
         ID3D12Device* device,
@@ -36,5 +38,5 @@ public:
     ~PSO() = default;
 
     ID3D12RootSignature* GetRootSignature() const { return rootSignature_.Get(); }
-    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_.Get(); }
+    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_[blendMode_].Get(); }
 };
