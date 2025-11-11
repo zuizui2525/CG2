@@ -30,9 +30,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// dxCommonを用意
 	DxCommon dxCommon;
 	dxCommon.Initialize(window.GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
+	logger.Write("DxCommon Initialize");
 
 	//PSOを作成する
 	PSO* pso = new PSO(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
+	logger.Write("PSO Initialize");
 
 	// Audio
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
@@ -47,29 +49,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Inputの初期化
 	std::unique_ptr<Input> input = std::make_unique<Input>();
 	input->Initialize(window.GetInstance(), window.GetHWND());
+	logger.Write("Input Initialize");
 
 	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
 
 	// 三角形の初期化
 	std::unique_ptr<TriangleObject> triangle = std::make_unique<TriangleObject>(dxCommon.GetDevice());
+	logger.Write("Triangle Initialize");
 
 	// スプライトの初期化
 	std::unique_ptr<SpriteObject> sprite = std::make_unique<SpriteObject>(dxCommon.GetDevice(), 640, 360);
+	logger.Write("Sprite Initialize");
 
 	// 球の初期化
 	std::unique_ptr<SphereObject> sphere = std::make_unique<SphereObject>(dxCommon.GetDevice(), 16, 1.0f);
+	logger.Write("Sphere Initialize");
 
 	// モデル生成（例: teapot.obj を読み込む）
 	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
+	logger.Write("teapot Initialize");
 
 	// モデル生成（例: multiMaterial.obj を読み込む）
 	std::unique_ptr<ModelObject> multiMaterial = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "multiMaterial.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	logger.Write("MultiMaterial Initialize");
 
 	// モデル生成（例: suzanne.obj を読み込む）
 	std::unique_ptr<ModelObject> suzanne = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "suzanne.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	logger.Write("Suzanne Initialize");
 
 	// モデル生成（例: bunny.obj を読み込む）
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	logger.Write("Bunny Initialize");
 
 	// DirectionalLight
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(dxCommon.GetDevice(), sizeof(DirectionalLight));
@@ -78,6 +88,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 1.0f;
+	logger.Write("DirectionalLight Initialize");
 
 	// Imgui
 #ifdef _DEBUG
@@ -89,6 +100,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dxCommon.GetRtvFormat(),
 		dxCommon.GetRtvHeap(),
 		dxCommon.GetSrvHeap());
+	logger.Write("Imgui Initialize");
 #endif
 
 	// DescriptorSizeを取得しておく
@@ -109,6 +121,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("multiMaterial", multiMaterial->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("suzanne", suzanne->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("bunny", bunny->GetModelData()->material.textureFilePath);
+	logger.Write("Texture Initialize");
 
 	// 音声読み込み
 	SoundData soundData1 = SoundLoadWave("resources/fanfare.wav");
@@ -118,6 +131,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// DebugCameraのインスタンス化
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
+	logger.Write("DebugCamera Initialize");
 
 	bool isRotate = true; // 回転するかどうかのフラグ
 	bool useDebugCamera = false;
