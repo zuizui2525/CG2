@@ -36,6 +36,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<PSO> pso = std::make_unique<PSO>(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
 	logger.Write("PSO Initialize");
 
+	// Inputの初期化
+	std::unique_ptr<Input> input = std::make_unique<Input>();
+	input->Initialize(window.GetInstance(), window.GetHWND());
+	logger.Write("Input Initialize");
+
 	// Audio
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
@@ -45,11 +50,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// マスターボイスを生成
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(hr));
-
-	// Inputの初期化
-	std::unique_ptr<Input> input = std::make_unique<Input>();
-	input->Initialize(window.GetInstance(), window.GetHWND());
-	logger.Write("Input Initialize");
 
 	// Camera
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
@@ -94,8 +94,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
 
-	// Imgui
 #ifdef _DEBUG
+	// Imgui
 	std::unique_ptr<ImguiManager> imgui = std::make_unique<ImguiManager>();
 	imgui->Initialize(
 		window.GetHWND(),
@@ -116,6 +116,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// テクスチャ関連
 	std::unique_ptr<TextureManager> textureManager = std::make_unique<TextureManager>();
 	textureManager->Initialize(dxCommon.GetDevice(), dxCommon.GetCommandList(), dxCommon.GetSrvHeap());
+	logger.Write("Texture Initialize");
 
 	textureManager->LoadTexture("uvChecker", "resources/uvChecker.png");
 	textureManager->LoadTexture("monsterball", "resources/monsterball.png");
@@ -125,7 +126,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("multiMaterial", multiMaterial->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("suzanne", suzanne->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("bunny", bunny->GetModelData()->material.textureFilePath);
-	logger.Write("Texture Initialize");
 
 	// 音声読み込み
 	SoundData soundData1 = SoundLoadWave("resources/fanfare.wav");
