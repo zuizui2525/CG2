@@ -112,6 +112,12 @@
     <Filter Include="ヘッダー ファイル\Engine\Log">
       <UniqueIdentifier>{58b4361d-eab6-4041-9743-9a77cfbecfe4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\ImGui">
+      <UniqueIdentifier>{cb2410f4-1ca5-4adc-bf19-4f2f02da68e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\ImGui">
+      <UniqueIdentifier>{055ae4a7-893a-4eca-ab2f-91285abb783f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -187,7 +193,7 @@
       <Filter>ソース ファイル\Engine\Log</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Imgui\ImguiManager.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -271,7 +277,7 @@
       <Filter>ヘッダー ファイル\Engine\Log</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Imgui\ImguiManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
