@@ -1,7 +1,7 @@
 #pragma once
 #include "../Function/Function.h"
 #include "../Input/Input.h"
-#include "../DebugCamera/DebugCamera.h"
+#include "../Camera/DebugCamera/DebugCamera.h"
 #include "../WindowApp/WindowApp.h"
 
 class Camera {

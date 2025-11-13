@@ -131,6 +131,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Camera
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
 	camera->Initialize();
+	logger.Write("Camera Initialize");
 
 	bool isRotate = true; // 回転するかどうかのフラグ
 

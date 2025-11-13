@@ -159,7 +159,7 @@
     <ClCompile Include="Engine\3d\Object3D.cpp">
       <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DebugCamera\DebugCamera.cpp">
+    <ClCompile Include="Engine\Camera\DebugCamera\DebugCamera.cpp">
       <Filter>ソース ファイル\Engine\DebugCamera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DxCommon\DxCommon.cpp">
@@ -243,7 +243,7 @@
     <ClInclude Include="Engine\3d\Object3D.h">
       <Filter>ヘッダー ファイル\Engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DebugCamera\DebugCamera.h">
+    <ClInclude Include="Engine\Camera\DebugCamera\DebugCamera.h">
       <Filter>ヘッダー ファイル\Engine\DebugCamera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DxCommon\DxCommon.h">

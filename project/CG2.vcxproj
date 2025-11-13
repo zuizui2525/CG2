@@ -148,7 +148,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Camera\Camera.cpp" />
-    <ClCompile Include="Engine\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="Engine\Camera\DebugCamera\DebugCamera.cpp" />
     <ClCompile Include="Engine\DxCommon\DxCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
@@ -194,7 +194,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Camera\Camera.h" />
-    <ClInclude Include="Engine\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="Engine\Camera\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Engine\DxCommon\DxCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
