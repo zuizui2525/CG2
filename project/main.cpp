@@ -4,6 +4,7 @@
 #include "Log/Log.h"
 #include "Imgui/ImguiManager.h"
 #include "Input/Input.h"
+#include "Audio/Audio.h"
 #include "PSO/PSO.h"
 #include "3d/Triangle/TriangleObject.h"
 #include "2d/Sprite/SpriteObject.h"
@@ -42,14 +43,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("Input Initialize");
 
 	// Audio
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-	IXAudio2MasteringVoice* masterVoice;
-	// XAudioエンジンのインスタンスを生成
-	HRESULT hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	assert(SUCCEEDED(hr));
-	// マスターボイスを生成
-	hr = xAudio2->CreateMasteringVoice(&masterVoice);
-	assert(SUCCEEDED(hr));
+	Audio audio;
+	audio.Initialize();
+	logger.Write("Audio Initialize");
 
 	// Camera
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
@@ -127,10 +123,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("suzanne", suzanne->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("bunny", bunny->GetModelData()->material.textureFilePath);
 
-	// 音声読み込み
-	SoundData soundData1 = SoundLoadWave("resources/fanfare.wav");
-	// 音声再生
-	SoundPlayWave(xAudio2.Get(), soundData1);
+	// 音声出力
+	SoundData soundData1 = audio.LoadSound("resources/bgm.mp3");
+	audio.PlaySound(soundData1);
 
 	bool isRotate = true; // 回転するかどうかのフラグ
 
@@ -403,10 +398,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 	imgui->Shutdown();
 #endif
-	// XAudio2解放
-	xAudio2.Reset();
-	// 音声データ解放
-	SoundUnload(&soundData1);
+	// 音の終了処理
+	audio.Unload(soundData1);
 
 	// COMの終了処理
 	CoUninitialize();

@@ -92,12 +92,3 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 // Objファイルを読む関数
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
-
-// 音声データの読み込み
-SoundData SoundLoadWave(const char* filename);
-
-// 音声データの解放
-void SoundUnload(SoundData* soundData);
-
-// 音声再生
-void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);

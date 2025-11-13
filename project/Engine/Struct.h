@@ -6,9 +6,16 @@
 #include <wrl.h>          // ComPtr
 #include <dxgidebug.h>    // DXGI デバッグ
 #include <dxgi1_3.h>      // DXGIGetDebugInterface1 のため
+#include <d3d12.h>
+#include <d3d12sdklayers.h>
+#include <xaudio2.h>
 
 #pragma comment(lib, "dxguid.lib") // DXGI デバッグ用ライブラリ
 #pragma comment(lib, "dxgi.lib")   // DXGI ライブラリ
+#pragma comment(lib, "xaudio2.lib") // XAudio2ライブラリ
+#pragma comment(lib, "mfplat.lib")  // Media Foundation
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
 
 // Vector2
 struct Vector2 {
@@ -118,9 +125,9 @@ struct FormatChunk {
 
 // 音声データ
 struct SoundData {
-    WAVEFORMATEX wfex;
-    BYTE* pBuffer;
-    unsigned int bufferSize;
+    std::vector<BYTE> audioData;     //!< 音声データ本体
+    WAVEFORMATEX* wfex = nullptr;    //!< フォーマット情報
+    IXAudio2SourceVoice* sourceVoice = nullptr; //!< ソースボイス
 };
 
 // ブレンドモード
