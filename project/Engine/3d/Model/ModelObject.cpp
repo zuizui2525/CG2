@@ -48,17 +48,15 @@ void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectio
 }
 
 void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,
-    ID3D12Resource* materialResource,
-    ID3D12Resource* wvpResource,
-    ID3D12Resource* directionalLightResource,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
+    ID3D12Resource* directionalLightResource,
     bool draw) {
     // VBV設定
     commandList->IASetVertexBuffers(0, 1, &vbv_);
 
     // 定数バッファ設定
-    commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
     // テクスチャ

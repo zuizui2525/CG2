@@ -27,10 +27,8 @@ public:
 
     // モデル描画用関数
     void Draw(ID3D12GraphicsCommandList* commandList,
-        ID3D12Resource* materialResource,
-        ID3D12Resource* wvpResource,
-        ID3D12Resource* directionalLightResource,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
+        ID3D12Resource* directionalLightResource,
         bool draw = true);
 
 private:

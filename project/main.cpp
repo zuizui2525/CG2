@@ -9,7 +9,7 @@
 #include "2d/Sprite/SpriteObject.h"
 #include "3d/Sphere/SphereObject.h"
 #include "3d/Model/ModelObject.h"
-#include "DebugCamera/DebugCamera.h"
+#include "Camera/Camera.h"
 #include "Texture/TextureManager.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -128,15 +128,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 音声再生
 	SoundPlayWave(xAudio2.Get(), soundData1);
 
-	// DebugCameraのインスタンス化
-	DebugCamera debugCamera;
-	debugCamera.Initialize();
-	logger.Write("DebugCamera Initialize");
+	// Camera
+	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
+	camera->Initialize();
 
 	bool isRotate = true; // 回転するかどうかのフラグ
-	bool useDebugCamera = false;
-
-	bool wasDebugCameraLastFrame = useDebugCamera; // 毎フレームの最後に更新
 
 	bool drawTriangle = false;
 	bool drawSprite = false;
@@ -163,11 +159,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("infomation");
 		if (ImGui::BeginTabBar("infomation")) {
 			if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
-				ImGui::Text("Camera");
-				ImGui::DragFloat3("scale(Camera)", &cameraTransform.scale.x, 0.01f); // カメラの拡縮を変更するUI
-				ImGui::DragFloat3("Rotate(Camera)", &cameraTransform.rotate.x, 0.01f); // カメラの回転を変更するUI
-				ImGui::DragFloat3("Translate(Camera)", &cameraTransform.translate.x, 0.01f); // カメラの位置を変更するUI
-				ImGui::Separator();
+				camera->ImGuiControl();
 				ImGui::Text("DirectionalLight");
 				ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
 				ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
@@ -318,19 +310,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		ImGui::End();
 
-		ImGui::Begin("DebugCamera");
-		if (useDebugCamera) {
-			ImGui::Text("Debug Camera Running");
-			ImGui::Text("Press [Tab] to exit the debug camera");
-			ImGui::Text("Press [R] to reset the debug camera position");
-			ImGui::Text("Press [W][A][S][D] to move");
-			ImGui::Text("[Right-click and move] to move the viewpoint");
-		} else {
-			ImGui::Text("Debug Camera Disabled");
-			ImGui::Text("Press [Tab] to launch the debug camera");
-		}
-		ImGui::End();
-
 		ImGui::Begin("FPS");
 		ImGui::Text("FPS: %.1f", 1.0f / dxCommon.GetDeltaTime());
 		ImGui::End();
@@ -352,14 +331,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//directionalLightの正規化
 		directionalLightData->direction = Math::Normalize(directionalLightData->direction);
 
-		if (input->Trigger(DIK_TAB)) {
-			if (useDebugCamera) {
-				useDebugCamera = false;
-			} else {
-				useDebugCamera = true;
-			}
-		}
-
 		// 三角形の回転処理
 		if (isRotate) {
 			triangle->GetTransform().rotate.y += 0.03f;
@@ -367,49 +338,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			triangle->GetTransform().rotate.y = 0.0f;
 		}
 
-		// 各種行列の処理
-		// カメラ
-		Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-		Matrix4x4 viewMatrix2D = Math::MakeIdentity();
-		Matrix4x4 projectionMatrix2D = Math::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(WindowApp::kClientWidth), static_cast<float>(WindowApp::kClientHeight), 0.0f, 100.0f);
-		Matrix4x4 viewMatrix3D;
-		Matrix4x4 projectionMatrix3D;
-		if (useDebugCamera) {
-			if (!wasDebugCameraLastFrame) {
-				debugCamera.skipNextMouseUpdate_ = true; // 初回だけフラグON
-			}
-			debugCamera.HideCursor();
-			debugCamera.Update(input.get());
-			viewMatrix3D = debugCamera.GetViewMatrix();
-			projectionMatrix3D = debugCamera.GetProjectionMatrix();
-		} else {
-			debugCamera.ShowCursorBack();
-			viewMatrix3D = Math::Inverse(cameraMatrix);
-			projectionMatrix3D = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(WindowApp::kClientWidth) / static_cast<float>(WindowApp::kClientHeight), 0.1f, 100.0f);
-		}
-		// フレーム最後に更新して次フレームに備える
-		wasDebugCameraLastFrame = useDebugCamera;
+		// Camera
+		camera->Update(input.get());
 
 		// 三角形
-		triangle->Update(viewMatrix3D, projectionMatrix3D);
+		triangle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// スプライト
-		sprite->Update(viewMatrix2D, projectionMatrix2D);
+		sprite->Update(camera->GetViewMatrix2D(), camera->GetProjectionMatrix2D());
 
 		// 球
-		sphere->Update(viewMatrix3D, projectionMatrix3D);
+		sphere->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// モデル
-		teapot->Update(viewMatrix3D, projectionMatrix3D);
+		teapot->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// モデル2
-		multiMaterial->Update(viewMatrix3D, projectionMatrix3D);
+		multiMaterial->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// モデル3
-		suzanne->Update(viewMatrix3D, projectionMatrix3D);
+		suzanne->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// モデル4
-		bunny->Update(viewMatrix3D, projectionMatrix3D);
+		bunny->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// 描画前処理
 		dxCommon.BeginFrame();
@@ -428,36 +379,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), directionalLightResource.Get(), drawSphere);
 
 		// Modelの描画
-		teapot->Draw(dxCommon.GetCommandList(),
-			teapot->GetMaterialResource(),
-			teapot->GetWVPResource(),
-			directionalLightResource.Get(),
-			textureManager->GetGpuHandle("teapot"),
-			drawModel);
+		teapot->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("teapot"), directionalLightResource.Get(), drawModel);
 
 		// Model2の描画
-		multiMaterial->Draw(dxCommon.GetCommandList(),
-			multiMaterial->GetMaterialResource(),
-			multiMaterial->GetWVPResource(),
-			directionalLightResource.Get(),
-			textureManager->GetGpuHandle("multiMaterial"),
-			drawModel2);
+		multiMaterial->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("multiMaterial"), directionalLightResource.Get(), drawModel2);
 
 		// Model3の描画
-		suzanne->Draw(dxCommon.GetCommandList(),
-			suzanne->GetMaterialResource(),
-			suzanne->GetWVPResource(),
-			directionalLightResource.Get(),
-			textureManager->GetGpuHandle("suzanne"),
-			drawModel3);
+		suzanne->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("suzanne"), directionalLightResource.Get(), drawModel3);
 
 		// Model4の描画
-		bunny->Draw(dxCommon.GetCommandList(),
-			bunny->GetMaterialResource(),
-			bunny->GetWVPResource(),
-			directionalLightResource.Get(),
-			textureManager->GetGpuHandle("bunny"),
-			drawModel4);
+		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), directionalLightResource.Get(), drawModel4);
 
 		// ImGui表示
 		dxCommon.DrawImGui();
