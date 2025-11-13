@@ -124,8 +124,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("bunny", bunny->GetModelData()->material.textureFilePath);
 
 	// 音声出力
-	SoundData soundData1 = audio.LoadSound("resources/bgm.mp3");
-	audio.PlaySound(soundData1);
+	SoundData soundData1 = audio.LoadSound("resources/fanfare.wav");
+	audio.PlaySound(soundData1, true);
 
 	bool isRotate = true; // 回転するかどうかのフラグ
 

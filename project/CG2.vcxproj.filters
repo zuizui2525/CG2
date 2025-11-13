@@ -124,6 +124,12 @@
     <Filter Include="ヘッダー ファイル\Engine\Camera\DebugCamera">
       <UniqueIdentifier>{5787715a-f7d4-4c24-9ee8-478865bd6d6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\Audio">
+      <UniqueIdentifier>{a07873cd-17b7-4baf-a3c1-e7ac6e01127c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Audio">
+      <UniqueIdentifier>{463e3776-6ea8-4516-b56c-493dd08ac996}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -205,7 +211,7 @@
       <Filter>ソース ファイル\Engine\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Audio\Audio.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -295,7 +301,7 @@
       <Filter>ヘッダー ファイル\Engine\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Audio.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
