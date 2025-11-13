@@ -37,9 +37,6 @@
     <Filter Include="ソース ファイル\Engine\3d\Triangle">
       <UniqueIdentifier>{0916df0b-4229-4968-9a8f-8724d861b443}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\DebugCamera">
-      <UniqueIdentifier>{85b900e5-3f55-428f-979d-cc98825847e4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\Engine\DxCommon">
       <UniqueIdentifier>{cf70c79b-60c3-4fcd-b89c-1b69c719ed33}</UniqueIdentifier>
     </Filter>
@@ -79,9 +76,6 @@
     <Filter Include="ヘッダー ファイル\Engine\3d\Sphere">
       <UniqueIdentifier>{9212f0ac-637f-47b2-b76c-61e1492a0315}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\DebugCamera">
-      <UniqueIdentifier>{5787715a-f7d4-4c24-9ee8-478865bd6d6e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダー ファイル\Engine\DxCommon">
       <UniqueIdentifier>{56ff62cc-b40d-493a-8e5f-ec46b6768065}</UniqueIdentifier>
     </Filter>
@@ -117,6 +111,18 @@
     </Filter>
     <Filter Include="ヘッダー ファイル\Engine\ImGui">
       <UniqueIdentifier>{055ae4a7-893a-4eca-ab2f-91285abb783f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Camera">
+      <UniqueIdentifier>{22e6714d-2200-4237-a42e-a398a5ae5a22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Camera\DebugCamera">
+      <UniqueIdentifier>{85b900e5-3f55-428f-979d-cc98825847e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Camera">
+      <UniqueIdentifier>{a4cedd2c-d37b-4540-a54a-3196e32a410f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Camera\DebugCamera">
+      <UniqueIdentifier>{5787715a-f7d4-4c24-9ee8-478865bd6d6e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -160,7 +166,7 @@
       <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Camera\DebugCamera\DebugCamera.cpp">
-      <Filter>ソース ファイル\Engine\DebugCamera</Filter>
+      <Filter>ソース ファイル\Engine\Camera\DebugCamera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DxCommon\DxCommon.cpp">
       <Filter>ソース ファイル\Engine\DxCommon</Filter>
@@ -196,7 +202,7 @@
       <Filter>ソース ファイル\Engine\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Camera\Camera.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,7 +250,7 @@
       <Filter>ヘッダー ファイル\Engine\3d</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Camera\DebugCamera\DebugCamera.h">
-      <Filter>ヘッダー ファイル\Engine\DebugCamera</Filter>
+      <Filter>ヘッダー ファイル\Engine\Camera\DebugCamera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DxCommon\DxCommon.h">
       <Filter>ヘッダー ファイル\Engine\DxCommon</Filter>
@@ -283,7 +289,7 @@
       <Filter>ヘッダー ファイル\Engine\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Camera\Camera.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\Engine\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

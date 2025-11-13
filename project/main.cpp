@@ -51,7 +51,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input->Initialize(window.GetInstance(), window.GetHWND());
 	logger.Write("Input Initialize");
 
-	Transform cameraTransform = { { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-7.0f } };
+	// Camera
+	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
+	camera->Initialize();
+	logger.Write("Camera Initialize");
+
+	// DirectionalLight
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(dxCommon.GetDevice(), sizeof(DirectionalLight));
+	DirectionalLight* directionalLightData;
+	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
+	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
+	directionalLightData->intensity = 1.0f;
+	directionalLightResource->Unmap(0, nullptr);
+	logger.Write("DirectionalLight Initialize");
 
 	// 三角形の初期化
 	std::unique_ptr<TriangleObject> triangle = std::make_unique<TriangleObject>(dxCommon.GetDevice());
@@ -80,15 +93,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// モデル生成（例: bunny.obj を読み込む）
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
-
-	// DirectionalLight
-	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(dxCommon.GetDevice(), sizeof(DirectionalLight));
-	DirectionalLight* directionalLightData;
-	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
-	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
-	directionalLightData->intensity = 1.0f;
-	logger.Write("DirectionalLight Initialize");
 
 	// Imgui
 #ifdef _DEBUG
@@ -128,11 +132,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 音声再生
 	SoundPlayWave(xAudio2.Get(), soundData1);
 
-	// Camera
-	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-	camera->Initialize();
-	logger.Write("Camera Initialize");
-
 	bool isRotate = true; // 回転するかどうかのフラグ
 
 	bool drawTriangle = false;
@@ -155,6 +154,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// フレームの開始時刻を記録
 		dxCommon.FrameStart();
 		// 開始
+		// Inputの更新処理
+		input->Update();
+
+		// Camera
+		camera->Update(input.get());
 #ifdef _DEBUG
 		imgui->Begin();
 		ImGui::Begin("infomation");
@@ -326,9 +330,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		imgui->End();
 #endif
 
-		// Inputの更新処理
-		input->Update();
-
 		//directionalLightの正規化
 		directionalLightData->direction = Math::Normalize(directionalLightData->direction);
 
@@ -338,9 +339,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		} else {
 			triangle->GetTransform().rotate.y = 0.0f;
 		}
-
-		// Camera
-		camera->Update(input.get());
 
 		// 三角形
 		triangle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
