@@ -66,3 +66,27 @@ void SpriteObject::Draw(ID3D12GraphicsCommandList* commandList,
 
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
+
+void SpriteObject::ImGuiControl() {
+    if (ImGui::CollapsingHeader("SRT")) {
+        ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f); // 球の拡縮を変更するUI
+        ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f); // 球の回転を変更するUI
+        ImGui::DragFloat3("Translate", &transform_.translate.x, 1.0f); // 球の位置を変更するUI
+    }
+    if (ImGui::CollapsingHeader("Color")) {
+        ImGui::ColorEdit4("Color", &materialData_->color.x, true); // 色の値を変更するUI
+    }
+    if (ImGui::CollapsingHeader("Lighting")) {
+        ImGui::RadioButton("None", &materialData_->enableLighting, 0);
+        ImGui::RadioButton("Lambert", &materialData_->enableLighting, 1);
+        ImGui::RadioButton("HalfLambert", &materialData_->enableLighting, 2);
+    }
+    ImGui::Separator();
+    ImGui::Text("uvTransform");
+    if (ImGui::CollapsingHeader("uvSRT")) {
+        ImGui::DragFloat2("uvScale", &uvTransform_.scale.x, 0.01f); // uv球の拡縮を変更するUI
+        ImGui::DragFloat("uvRotate", &uvTransform_.rotate.z, 0.01f); // uv球の回転を変更するUI
+        ImGui::DragFloat2("uvTranslate", &uvTransform_.translate.x, 0.01f); // uv球の位置を変更するUI
+    }
+    ImGui::Separator();
+}

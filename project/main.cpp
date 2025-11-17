@@ -169,28 +169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Sprite")) {
 				ImGui::Checkbox("Draw(Sprite)", &drawSprite);
 				if (drawSprite) {
-					if (ImGui::CollapsingHeader("SRT")) {
-						ImGui::DragFloat3("Scale", &sprite->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate", &sprite->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate", &sprite->GetTransform().translate.x, 1.0f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color")) {
-						ImGui::ColorEdit4("Color", &sprite->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting")) {
-						ImGui::RadioButton("None", &sprite->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert", &sprite->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert", &sprite->GetMaterialData()->enableLighting, 2);
-					}
-					ImGui::Separator();
-					ImGui::Text("uvTransform(sprite)");
-					if (ImGui::CollapsingHeader("SRT(uv)")) {
-						ImGui::DragFloat2("uvScale", &sprite->GetUVTransform().scale.x, 0.01f); // uv球の拡縮を変更するUI
-						ImGui::DragFloat("uvRotate", &sprite->GetUVTransform().rotate.z, 0.01f); // uv球の回転を変更するUI
-						ImGui::DragFloat2("uvTranslate", &sprite->GetUVTransform().translate.x, 0.01f); // uv球の位置を変更するUI
-					}
+					sprite->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Model")) {

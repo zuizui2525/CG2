@@ -22,6 +22,9 @@ public:
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
         bool enableDraw);
 
+    // ImGui
+    void ImGuiControl();
+
     // getter
     Transform& GetTransform() { return transform_; }
     Transform& GetUVTransform() { return uvTransform_; }
