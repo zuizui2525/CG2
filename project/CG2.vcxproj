@@ -81,7 +81,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>Engine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>ZuizuiEngine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>Engine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>ZuizuiEngine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,7 +133,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>Engine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>ZuizuiEngine/;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,11 +148,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Light\DirectionalLight\DirectionalLight.cpp" />
-    <ClCompile Include="Engine\Audio\Audio.cpp" />
-    <ClCompile Include="Engine\Camera\Camera.cpp" />
-    <ClCompile Include="Engine\Camera\DebugCamera\DebugCamera.cpp" />
-    <ClCompile Include="Engine\DxCommon\DxCommon.cpp" />
+    <ClCompile Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.cpp" />
+    <ClCompile Include="ZuizuiEngine\Audio\Audio.cpp" />
+    <ClCompile Include="ZuizuiEngine\Camera\Camera.cpp" />
+    <ClCompile Include="ZuizuiEngine\Camera\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="ZuizuiEngine\DxCommon\DxCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -160,22 +160,23 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Engine\Function\Function.cpp" />
-    <ClCompile Include="Engine\Input\Input.cpp" />
-    <ClCompile Include="Engine\Log\Log.cpp" />
-    <ClCompile Include="Engine\Imgui\ImguiManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Function\Function.cpp" />
+    <ClCompile Include="ZuizuiEngine\Input\Input.cpp" />
+    <ClCompile Include="ZuizuiEngine\Log\Log.cpp" />
+    <ClCompile Include="ZuizuiEngine\Imgui\ImguiManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Matrix\Matrix.cpp" />
-    <ClCompile Include="Engine\3d\Model\ModelObject.cpp" />
-    <ClCompile Include="Engine\3d\Object3D.cpp" />
-    <ClCompile Include="Engine\PSO\PSO.cpp" />
-    <ClCompile Include="Engine\3d\Sphere\SphereObject.cpp" />
-    <ClCompile Include="Engine\2d\Sprite\SpriteObject.cpp" />
-    <ClCompile Include="Engine\3d\Triangle\TriangleObject.cpp" />
-    <ClCompile Include="Engine\WindowApp\WindowApp.cpp" />
-    <ClCompile Include="Engine\3d\Model\ModelManager.cpp" />
-    <ClCompile Include="Engine\Texture\Texture.cpp" />
-    <ClCompile Include="Engine\Texture\TextureManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Matrix\Matrix.cpp" />
+    <ClCompile Include="ZuizuiEngine\3d\Model\ModelObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\3d\Object3D.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\PSO.cpp" />
+    <ClCompile Include="ZuizuiEngine\3d\Sphere\SphereObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\2d\Sprite\SpriteObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\3d\Triangle\TriangleObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\WindowApp\WindowApp.cpp" />
+    <ClCompile Include="ZuizuiEngine\3d\Model\ModelManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Texture\Texture.cpp" />
+    <ClCompile Include="ZuizuiEngine\Texture\TextureManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Zuizui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.PS.hlsl">
@@ -196,11 +197,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Light\DirectionalLight\DirectionalLight.h" />
-    <ClInclude Include="Engine\Audio\Audio.h" />
-    <ClInclude Include="Engine\Camera\Camera.h" />
-    <ClInclude Include="Engine\Camera\DebugCamera\DebugCamera.h" />
-    <ClInclude Include="Engine\DxCommon\DxCommon.h" />
+    <ClInclude Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.h" />
+    <ClInclude Include="ZuizuiEngine\Audio\Audio.h" />
+    <ClInclude Include="ZuizuiEngine\Camera\Camera.h" />
+    <ClInclude Include="ZuizuiEngine\Camera\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="ZuizuiEngine\DxCommon\DxCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -209,22 +210,23 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="Engine\Function\Function.h" />
-    <ClInclude Include="Engine\Input\Input.h" />
-    <ClInclude Include="Engine\Matrix\Matrix.h" />
-    <ClInclude Include="Engine\3d\Model\ModelObject.h" />
-    <ClInclude Include="Engine\3d\Object3D.h" />
-    <ClInclude Include="Engine\PSO\PSO.h" />
-    <ClInclude Include="Engine\3d\Sphere\SphereObject.h" />
-    <ClInclude Include="Engine\2d\Sprite\SpriteObject.h" />
-    <ClInclude Include="Engine\Struct.h" />
-    <ClInclude Include="Engine\3d\Triangle\TriangleObject.h" />
-    <ClInclude Include="Engine\WindowApp\WindowApp.h" />
-    <ClInclude Include="Engine\3d\Model\ModelManager.h" />
-    <ClInclude Include="Engine\Texture\Texture.h" />
-    <ClInclude Include="Engine\Texture\TextureManager.h" />
-    <ClInclude Include="Engine\Log\Log.h" />
-    <ClInclude Include="Engine\Imgui\ImguiManager.h" />
+    <ClInclude Include="ZuizuiEngine\Function\Function.h" />
+    <ClInclude Include="ZuizuiEngine\Input\Input.h" />
+    <ClInclude Include="ZuizuiEngine\Matrix\Matrix.h" />
+    <ClInclude Include="ZuizuiEngine\3d\Model\ModelObject.h" />
+    <ClInclude Include="ZuizuiEngine\3d\Object3D.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\PSO.h" />
+    <ClInclude Include="ZuizuiEngine\3d\Sphere\SphereObject.h" />
+    <ClInclude Include="ZuizuiEngine\2d\Sprite\SpriteObject.h" />
+    <ClInclude Include="ZuizuiEngine\Struct.h" />
+    <ClInclude Include="ZuizuiEngine\3d\Triangle\TriangleObject.h" />
+    <ClInclude Include="ZuizuiEngine\WindowApp\WindowApp.h" />
+    <ClInclude Include="ZuizuiEngine\3d\Model\ModelManager.h" />
+    <ClInclude Include="ZuizuiEngine\Texture\Texture.h" />
+    <ClInclude Include="ZuizuiEngine\Texture\TextureManager.h" />
+    <ClInclude Include="ZuizuiEngine\Log\Log.h" />
+    <ClInclude Include="ZuizuiEngine\Imgui\ImguiManager.h" />
+    <ClInclude Include="ZuizuiEngine\Zuizui.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
