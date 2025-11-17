@@ -1,20 +1,7 @@
 #include "TriangleObject.h"
 #include "../../Function/Function.h"
 
-TriangleObject::TriangleObject(ID3D12Device* device) {
-    // Material
-    materialResource_ = CreateBufferResource(device, sizeof(Material));
-    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-    materialData_->color = { 1, 1, 1, 1 }; // 白
-    materialData_->enableLighting = 0;   // ライティング無効
-    materialData_->uvtransform = Math::MakeIdentity();
-
-    // WVP
-    wvpResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
-    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-    wvpData_->WVP = Math::MakeIdentity();
-    wvpData_->world = Math::MakeIdentity();
-
+TriangleObject::TriangleObject(ID3D12Device* device) : Object3D(device, 0) {
     // Vertex (三角形3頂点)
     vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * 3);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();

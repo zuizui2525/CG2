@@ -26,4 +26,5 @@ void DirectionalLightObject::ImGuiControl() {
     ImGui::ColorEdit4("Color", &lightData_->color.x);
     ImGui::DragFloat3("Direction", &lightData_->direction.x, 0.01f);
     ImGui::DragFloat("Intensity", &lightData_->intensity, 0.01f);
+    ImGui::Separator();
 }

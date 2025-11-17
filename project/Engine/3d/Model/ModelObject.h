@@ -19,9 +19,6 @@ public:
     // モデルデータ取得（テクスチャパスなどを参照する用）
     const std::shared_ptr<ModelData>& GetModelData() const { return modelData_; }
 
-    // マテリアルデータを直接触る（ImGui用）
-    Material* GetMaterialData() { return materialData_; }
-
     // 毎フレーム更新（Transform から行列計算して WVP 反映）
     void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
 
@@ -35,7 +32,4 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
     D3D12_VERTEX_BUFFER_VIEW vbv_{};
     std::shared_ptr<ModelData> modelData_;
-
-    // マテリアルのCPU側ポインタ（ImGui編集用）
-    Material* materialData_ = nullptr;
 };

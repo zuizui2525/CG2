@@ -14,6 +14,8 @@ public:
     ID3D12Resource* GetMaterialResource() const { return materialResource_.Get(); }
     Transform& GetTransform() { return transform_; }
     Transform& GetUVTransform() { return uvTransform_; }
+    Material* GetMaterialData() { return materialData_; }
+    TransformationMatrix* GetWvpData() { return wvpData_; }
 
 protected:
     // GPUリソース
@@ -23,4 +25,6 @@ protected:
     // CPU 側 Transform
     Transform transform_{};
     Transform uvTransform_{};
+    Material* materialData_ = nullptr;
+    TransformationMatrix* wvpData_ = nullptr;
 };

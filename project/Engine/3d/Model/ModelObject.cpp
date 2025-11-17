@@ -24,9 +24,6 @@ ModelObject::ModelObject(ID3D12Device* device,
     VertexData* vertexData = nullptr;
     vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
     memcpy(vertexData, modelData_->vertices.data(), sizeof(VertexData) * modelData_->vertices.size());
-
-    // マテリアル用のポインタ取得
-    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 }
 
 void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
@@ -41,10 +38,9 @@ void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectio
     Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
 
     // 定数バッファに書き込み
-    TransformationMatrix* wvpData = nullptr;
-    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-    wvpData->WVP = worldViewProjection;
-    wvpData->world = worldMatrix;
+    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
+    wvpData_->WVP = worldViewProjection;
+    wvpData_->world = worldMatrix;
 }
 
 void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,

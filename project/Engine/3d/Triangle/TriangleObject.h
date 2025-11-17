@@ -5,8 +5,9 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "../../Struct.h"
+#include "../Object3D.h"
 
-class TriangleObject {
+class TriangleObject: public Object3D {
 public:
     TriangleObject(ID3D12Device* device);
     ~TriangleObject();
@@ -20,11 +21,9 @@ public:
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
         bool enableDraw);
 
-    // getter
-    Transform& GetTransform() { return transform_; }
-    Transform& GetUVTransform() { return uvTransform_; }
-    Material* GetMaterialData() { return materialData_; }
-
+    // ImGui
+    void ImGuiControl();
+    
 private:
     // GPUリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
@@ -33,12 +32,4 @@ private:
 
     // バッファビュー
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
-
-    // CPUから触る用のポインタ
-    Material* materialData_ = nullptr;
-    TransformationMatrix* wvpData_ = nullptr;
-
-    // Transform
-    Transform transform_{ {1,1,1}, {0,0,0}, {0,0,0} };
-    Transform uvTransform_{ {1,1,1}, {0,0,0}, {0,0,0} };
 };

@@ -152,7 +152,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
 				camera->ImGuiControl();
 				dirLight->ImGuiControl();
-				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Triangle")) {
@@ -301,7 +300,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("FPS");
 		ImGui::Text("FPS: %.1f", 1.0f / dxCommon.GetDeltaTime());
 		ImGui::End();
-
 
 		ImGui::Begin("BlendMode");
 		int blendIndex = static_cast<int>(pso->blendMode_);

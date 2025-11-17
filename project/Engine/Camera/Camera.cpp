@@ -60,7 +60,6 @@ void Camera::ImGuiControl() {
     ImGui::DragFloat3("Scale(Camera)", &transform_.scale.x, 0.01f);
     ImGui::DragFloat3("Rotate(Camera)", &transform_.rotate.x, 0.01f);
     ImGui::DragFloat3("Translate(Camera)", &transform_.translate.x, 0.01f);
-
     ImGui::Separator();
     ImGui::Text("DebugCamera");
     if (useDebugCamera_) {
@@ -68,5 +67,6 @@ void Camera::ImGuiControl() {
     } else {
         ImGui::Text("Disabled (TAB to enable)");
     }
+    ImGui::Separator();
 #endif
 }

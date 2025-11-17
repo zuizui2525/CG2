@@ -2,25 +2,12 @@
 #include "../../Function/Function.h"
 
 SphereObject::SphereObject(ID3D12Device* device, uint32_t subdivision, float radius)
-    : subdivision_(subdivision), radius_(radius) {
+    : Object3D(device, 2), subdivision_(subdivision), radius_(radius) {
     // 頂点数とインデックス数を計算
     uint32_t kVertexCount = (subdivision_ + 1) * (subdivision_ + 1);
     uint32_t kIndexCount = subdivision_ * subdivision_ * 6;
     float kLonEvery = static_cast<float>(M_PI * 2.0f / subdivision_);
     float kLatEvery = static_cast<float>(M_PI / subdivision_);
-
-    // Material
-    materialResource_ = CreateBufferResource(device, sizeof(Material));
-    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-    materialData_->color = { 1,1,1,1 };
-    materialData_->enableLighting = 2;
-    materialData_->uvtransform = Math::MakeIdentity();
-
-    // WVP
-    wvpResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
-    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-    wvpData_->WVP = Math::MakeIdentity();
-    wvpData_->world = Math::MakeIdentity();
 
     // Vertex
     vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
