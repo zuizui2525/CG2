@@ -3,7 +3,6 @@
 #include "../../Function/Function.h"
 
 ModelObject::ModelObject(ID3D12Device* device,
-    const std::string& directory,
     const std::string& filename,
     const Vector3& initialPosition)
     : Object3D(device, 2) // 2 = ライティング有効
@@ -12,7 +11,7 @@ ModelObject::ModelObject(ID3D12Device* device,
     transform_.translate = initialPosition;
 
     // モデルデータ読み込み
-    modelData_ = ModelManager::GetInstance().LoadModel(device, directory, filename);
+    modelData_ = ModelManager::GetInstance().LoadModel(device, filename);
 
     // 頂点リソース作成
     vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_->vertices.size());

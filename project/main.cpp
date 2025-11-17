@@ -71,19 +71,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("Sphere Initialize");
 
 	// モデル生成（例: teapot.obj を読み込む）
-	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
+	std::unique_ptr<ModelObject> teapot = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/teapot/teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
 	logger.Write("teapot Initialize");
 
 	// モデル生成（例: multiMaterial.obj を読み込む）
-	std::unique_ptr<ModelObject> multiMaterial = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "multiMaterial.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	std::unique_ptr<ModelObject> multiMaterial = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/multiMaterial/multiMaterial.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("MultiMaterial Initialize");
 
 	// モデル生成（例: suzanne.obj を読み込む）
-	std::unique_ptr<ModelObject> suzanne = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "suzanne.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	std::unique_ptr<ModelObject> suzanne = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/suzanne/suzanne.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Suzanne Initialize");
 
 	// モデル生成（例: bunny.obj を読み込む）
-	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources", "bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
+	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/bunny/bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
 
 #ifdef _DEBUG

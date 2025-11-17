@@ -9,7 +9,6 @@
 class ModelObject : public Object3D {
 public:
     ModelObject(ID3D12Device* device,
-        const std::string& directory,
         const std::string& filename,
         const Vector3& initialPosition = { 0.0f, 0.0f, 0.0f }); // ★ 初期位置追加
 

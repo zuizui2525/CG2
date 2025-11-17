@@ -350,7 +350,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 }
 
 // Objファイルを読む関数
-ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename) {
+ModelData LoadObjFile(const std::string& filename) {
 	//1. 中で必要となる変数の宣言
 	ModelData modelData; // 構築するModelData
 	std::vector<Vector4> positions; // 位置
@@ -358,7 +358,9 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::vector<Vector2> texcoords; // テクスチャ座標
 	std::string line; // ファイルから読んだ1行を格納するもの
 	//2. ファイルを開く
-	std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
+	std::filesystem::path fullPath(filename);
+	std::string directoryPath = fullPath.parent_path().string();
+	std::ifstream file(filename); // ファイルを開く
 	assert(file.is_open()); // とりあえず開けなかったら止める
 	//3. 実際にファイルを読み、ModelDataを構築していく
 	while (std::getline(file, line)) {

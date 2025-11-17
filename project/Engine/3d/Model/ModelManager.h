@@ -8,7 +8,7 @@
 class ModelManager {
 public:
     static ModelManager& GetInstance();
-    std::shared_ptr<ModelData> LoadModel(ID3D12Device* device, const std::string& directory, const std::string& filename);
+    std::shared_ptr<ModelData> LoadModel(ID3D12Device* device, const std::string& filename);
     void Clear();
 
 private:
