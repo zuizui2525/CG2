@@ -20,14 +20,9 @@ public:
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
         bool enableDraw);
-
-    // ImGui
-    void ImGuiControl();
-    
+  
 private:
     // GPUリソース
-    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
-    Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 
     // バッファビュー

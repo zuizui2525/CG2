@@ -40,7 +40,7 @@ SphereObject::SphereObject(ID3D12Device* device, uint32_t subdivision, float rad
     ibView_.SizeInBytes = sizeof(uint32_t) * kIndexCount;
     ibView_.Format = DXGI_FORMAT_R32_UINT;
 
-    uint32_t* idxGPU;
+    uint32_t* idxGPU = nullptr;
     indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&idxGPU));
 
     uint32_t idx = 0;

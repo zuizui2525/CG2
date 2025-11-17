@@ -9,6 +9,9 @@ public:
     Object3D(ID3D12Device* device, int lightingMode);
     virtual ~Object3D() = default;
 
+    // ImGui
+    void ImGuiControl();
+
     // 共通アクセサ
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
     ID3D12Resource* GetMaterialResource() const { return materialResource_.Get(); }

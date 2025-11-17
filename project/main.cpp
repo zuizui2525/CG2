@@ -123,8 +123,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SoundData soundData1 = audio.LoadSound("resources/fanfare.wav");
 	audio.PlaySound(soundData1, true);
 
-	bool isRotate = true; // 回転するかどうかのフラグ
-
 	bool drawTriangle = false;
 	bool drawSprite = false;
 	bool drawSphere = false;
@@ -157,42 +155,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Triangle")) {
 				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
 				if (drawTriangle) {
-					if (ImGui::CollapsingHeader("SRT")) {
-						ImGui::DragFloat3("scale", &triangle->GetTransform().scale.x, 0.01f); // Triangleの拡縮を変更するUI
-						ImGui::DragFloat3("rotate", &triangle->GetTransform().rotate.x, 0.01f); // Triangleの回転を変更するUI
-						ImGui::DragFloat3("Translate", &triangle->GetTransform().translate.x, 0.01f); // Triangleの位置を変更するUI
-						ImGui::Checkbox("isRotate", &isRotate); // 回転するかどうかのUI
-					}
-					if (ImGui::CollapsingHeader("color")) {
-						ImGui::ColorEdit4("Color", &triangle->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting")) {
-						ImGui::RadioButton("None", &triangle->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert", &triangle->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert", &triangle->GetMaterialData()->enableLighting, 2);
-					}
+					triangle->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Sphere")) {
 				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
 				if (drawSphere) {
-					if (ImGui::CollapsingHeader("SRT")) {
-						ImGui::DragFloat3("Scale", &sphere->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate", &sphere->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate", &sphere->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color")) {
-						ImGui::ColorEdit4("Color", &sphere->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting")) {
-						ImGui::RadioButton("None", &sphere->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert", &sphere->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert", &sphere->GetMaterialData()->enableLighting, 2);
-					}
+					sphere->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Sprite")) {
@@ -225,72 +196,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Model")) {
 				ImGui::Checkbox("Draw(teapot)", &drawModel);
 				if (drawModel) {
-					if (ImGui::CollapsingHeader("SRT(1)")) {
-						ImGui::DragFloat3("Scale(1)", &teapot->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate(1)", &teapot->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate(1)", &teapot->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color(1)")) {
-						ImGui::ColorEdit4("Color(1)", &teapot->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting(1)")) {
-						ImGui::RadioButton("None(1)", &teapot->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert(1)", &teapot->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert(1)", &teapot->GetMaterialData()->enableLighting, 2);
-					}
+					teapot->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
 				if (drawModel2) {
-					if (ImGui::CollapsingHeader("SRT(2)")) {
-						ImGui::DragFloat3("Scale(2)", &multiMaterial->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate(2)", &multiMaterial->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate(2)", &multiMaterial->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color(2)")) {
-						ImGui::ColorEdit4("Color(2)", &multiMaterial->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting(2)")) {
-						ImGui::RadioButton("None(2)", &multiMaterial->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert(2)", &multiMaterial->GetMaterialData()->enableLighting, 2);
-					}
+					multiMaterial->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::Checkbox("Draw(suzanne)", &drawModel3);
 				if (drawModel3) {
-					if (ImGui::CollapsingHeader("SRT(3)")) {
-						ImGui::DragFloat3("Scale(3)", &suzanne->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate(3)", &suzanne->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate(3)", &suzanne->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color(3)")) {
-						ImGui::ColorEdit4("Color(3)", &suzanne->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting(3)")) {
-						ImGui::RadioButton("None(3)", &suzanne->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert(3)", &suzanne->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert(3)", &suzanne->GetMaterialData()->enableLighting, 2);
-					}
+					suzanne->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::Checkbox("Draw(bunny)", &drawModel4);
 				if (drawModel4) {
-					if (ImGui::CollapsingHeader("SRT(4)")) {
-						ImGui::DragFloat3("Scale(4)", &bunny->GetTransform().scale.x, 0.01f); // 球の拡縮を変更するUI
-						ImGui::DragFloat3("Rotate(4)", &bunny->GetTransform().rotate.x, 0.01f); // 球の回転を変更するUI
-						ImGui::DragFloat3("Translate(4)", &bunny->GetTransform().translate.x, 0.01f); // 球の位置を変更するUI
-					}
-					if (ImGui::CollapsingHeader("color(4)")) {
-						ImGui::ColorEdit4("Color(4)", &bunny->GetMaterialData()->color.x, true); // 色の値を変更するUI
-					}
-					if (ImGui::CollapsingHeader("lighting(4)")) {
-						ImGui::RadioButton("None(4)", &bunny->GetMaterialData()->enableLighting, 0);
-						ImGui::RadioButton("Lambert(4)", &bunny->GetMaterialData()->enableLighting, 1);
-						ImGui::RadioButton("HalfLambert(4)", &bunny->GetMaterialData()->enableLighting, 2);
-					}
+					bunny->ImGuiControl();
 				}
-				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
@@ -321,11 +240,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dirLight->Update();
 
 		// 三角形の回転処理
-		if (isRotate) {
-			triangle->GetTransform().rotate.y += 0.03f;
-		} else {
-			triangle->GetTransform().rotate.y = 0.0f;
-		}
+		triangle->GetTransform().rotate.y += 0.03f;
 
 		// 三角形
 		triangle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
