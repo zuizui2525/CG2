@@ -130,6 +130,18 @@
     <Filter Include="ヘッダー ファイル\Engine\Audio">
       <UniqueIdentifier>{463e3776-6ea8-4516-b56c-493dd08ac996}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Light">
+      <UniqueIdentifier>{cfea3fa3-76d7-4dbf-a711-8e2986b57ec8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Light\DirectionalLight">
+      <UniqueIdentifier>{456c2cdb-874a-40c5-9076-57208801c58e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Light">
+      <UniqueIdentifier>{e79faa9d-de84-43e3-a672-ae0799426ecc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Light\DirectionalLight">
+      <UniqueIdentifier>{cd660541-a823-4b43-b8a5-7b34fef83bf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -212,6 +224,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Audio\Audio.cpp">
       <Filter>ソース ファイル\Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Light\DirectionalLight\DirectionalLight.cpp">
+      <Filter>ソース ファイル\Engine\Light\DirectionalLight</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -302,6 +317,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Audio\Audio.h">
       <Filter>ヘッダー ファイル\Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Light\DirectionalLight\DirectionalLight.h">
+      <Filter>ヘッダー ファイル\Engine\Light\DirectionalLight</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

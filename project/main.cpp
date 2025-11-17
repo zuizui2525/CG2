@@ -6,6 +6,7 @@
 #include "Input/Input.h"
 #include "Audio/Audio.h"
 #include "PSO/PSO.h"
+#include "Light/DirectionalLight/DirectionalLight.h"
 #include "3d/Triangle/TriangleObject.h"
 #include "2d/Sprite/SpriteObject.h"
 #include "3d/Sphere/SphereObject.h"
@@ -28,16 +29,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Log logger;
 	logger.Write("Engine Start");
 
-	// dxCommonを用意
+	// DxCommon
 	DxCommon dxCommon;
 	dxCommon.Initialize(window.GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
 	logger.Write("DxCommon Initialize");
 
-	//PSOを作成する
+	//PSO
 	std::unique_ptr<PSO> pso = std::make_unique<PSO>(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
 	logger.Write("PSO Initialize");
 
-	// Inputの初期化
+	// Input
 	std::unique_ptr<Input> input = std::make_unique<Input>();
 	input->Initialize(window.GetInstance(), window.GetHWND());
 	logger.Write("Input Initialize");
@@ -53,13 +54,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("Camera Initialize");
 
 	// DirectionalLight
-	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = CreateBufferResource(dxCommon.GetDevice(), sizeof(DirectionalLight));
-	DirectionalLight* directionalLightData;
-	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
-	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
-	directionalLightData->intensity = 1.0f;
-	directionalLightResource->Unmap(0, nullptr);
+	std::unique_ptr<DirectionalLightObject> dirLight = std::make_unique<DirectionalLightObject>();
+	dirLight->Initialize(dxCommon.GetDevice());
 	logger.Write("DirectionalLight Initialize");
 
 	// 三角形の初期化
@@ -149,21 +145,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// フレームの開始時刻を記録
 		dxCommon.FrameStart();
 		// 開始
-		// Inputの更新処理
-		input->Update();
-
-		// Camera
-		camera->Update(input.get());
 #ifdef _DEBUG
 		imgui->Begin();
 		ImGui::Begin("infomation");
 		if (ImGui::BeginTabBar("infomation")) {
 			if (ImGui::BeginTabItem("Camera & DirectionalLight")) {
 				camera->ImGuiControl();
-				ImGui::Text("DirectionalLight");
-				ImGui::ColorEdit4("LightColor", &directionalLightData->color.x, true); // 色の値を変更するUI
-				ImGui::DragFloat3("LightDirection", &directionalLightData->direction.x, 0.01f); // 角度を変更するUI
-				ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f); // 光度を変更するUI
+				dirLight->ImGuiControl();
 				ImGui::Separator();
 				ImGui::EndTabItem();
 			}
@@ -325,8 +313,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		imgui->End();
 #endif
 
-		//directionalLightの正規化
-		directionalLightData->direction = Math::Normalize(directionalLightData->direction);
+		// Inputの更新処理
+		input->Update();
+
+		// Camera
+		camera->Update(input.get());
+
+		//directionalLight
+		dirLight->Update();
 
 		// 三角形の回転処理
 		if (isRotate) {
@@ -364,25 +358,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		);
 
 		// 三角形の描画
-		triangle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("white"), directionalLightResource.Get(), drawTriangle);
+		triangle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("white"), dirLight->GetGPUVirtualAddress(), drawTriangle);
 
 		// Spriteの描画
-		sprite->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), directionalLightResource.Get(), drawSprite);
+		sprite->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), drawSprite);
 
 		// Sphereの描画
-		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), directionalLightResource.Get(), drawSphere);
+		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), dirLight->GetGPUVirtualAddress(), drawSphere);
 
 		// Modelの描画
-		teapot->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("teapot"), directionalLightResource.Get(), drawModel);
+		teapot->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("teapot"), dirLight->GetGPUVirtualAddress(), drawModel);
 
 		// Model2の描画
-		multiMaterial->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("multiMaterial"), directionalLightResource.Get(), drawModel2);
+		multiMaterial->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("multiMaterial"), dirLight->GetGPUVirtualAddress(), drawModel2);
 
 		// Model3の描画
-		suzanne->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("suzanne"), directionalLightResource.Get(), drawModel3);
+		suzanne->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("suzanne"), dirLight->GetGPUVirtualAddress(), drawModel3);
 
 		// Model4の描画
-		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), directionalLightResource.Get(), drawModel4);
+		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), drawModel4);
 
 		// ImGui表示
 		dxCommon.DrawImGui();

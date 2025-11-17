@@ -28,7 +28,7 @@ public:
     // モデル描画用関数
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-        ID3D12Resource* directionalLightResource,
+        D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
         bool draw = true);
 
 private:
