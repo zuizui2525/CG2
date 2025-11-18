@@ -2,7 +2,6 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <fstream>
-#include "../Struct.h"
 #include "../Matrix/Matrix.h"
 #include "../Log/Log.h"
 
@@ -12,6 +11,16 @@ struct IDxcIncludeHandler;
 
 class PSO {
 public:
+    enum BlendMode {
+        kBlendModeNone,       // ブレンドなし
+        kBlendModeNormal,     // 通常αブレンド
+        kBlendModeAdd,        // 加算
+        kBlendModeSubtract,   // 減算
+        kBlendModeMultiply,   // 乗算
+        kBlendModeScreen,     // スクリーン
+        kCountOfBlendMode,    // カウント用:使うためのものではない
+    };
+
     // ComPtrで管理
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
     Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_[kCountOfBlendMode];

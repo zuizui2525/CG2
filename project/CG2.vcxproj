@@ -148,6 +148,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.cpp" />
     <ClCompile Include="ZuizuiEngine\Audio\Audio.cpp" />
     <ClCompile Include="ZuizuiEngine\Camera\Camera.cpp" />
@@ -197,6 +201,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.h" />
     <ClInclude Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.h" />
     <ClInclude Include="ZuizuiEngine\Audio\Audio.h" />
     <ClInclude Include="ZuizuiEngine\Camera\Camera.h" />

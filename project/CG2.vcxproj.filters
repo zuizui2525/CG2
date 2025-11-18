@@ -231,6 +231,18 @@
     <ClCompile Include="ZuizuiEngine\Zuizui.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d.VS.hlsl" />
@@ -325,6 +337,18 @@
       <Filter>ヘッダー ファイル\Engine\Light\DirectionalLight</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Zuizui.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

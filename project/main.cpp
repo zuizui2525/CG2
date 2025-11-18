@@ -203,7 +203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("BlendMode");
 		int blendIndex = static_cast<int>(pso->blendMode_);
 		ImGui::Combo("BlendMode", &blendIndex, "None\0Normal\0Add\0Subtract\0Multiply\0Screen\0");
-		pso->blendMode_ = static_cast<BlendMode>(blendIndex);
+		pso->blendMode_ = static_cast<PSO::BlendMode>(blendIndex);
 		ImGui::End();
 		
 		// 終了
