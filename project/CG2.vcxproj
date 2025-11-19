@@ -148,6 +148,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ZuizuiEngine\PSO\PSOManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp" />
@@ -176,6 +179,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ZuizuiEngine\3d\Sphere\SphereObject.cpp" />
     <ClCompile Include="ZuizuiEngine\2d\Sprite\SpriteObject.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Triangle\TriangleObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.cpp" />
     <ClCompile Include="ZuizuiEngine\WindowApp\WindowApp.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Model\ModelManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Texture\Texture.cpp" />
@@ -201,6 +205,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZuizuiEngine\PSO\PSOManager.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h" />
     <ClInclude Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h" />
     <ClInclude Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.h" />
     <ClInclude Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.h" />
@@ -226,6 +233,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="ZuizuiEngine\PSO\PSO.h" />
     <ClInclude Include="ZuizuiEngine\3d\Sphere\SphereObject.h" />
     <ClInclude Include="ZuizuiEngine\2d\Sprite\SpriteObject.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.h" />
     <ClInclude Include="ZuizuiEngine\Struct.h" />
     <ClInclude Include="ZuizuiEngine\3d\Triangle\TriangleObject.h" />
     <ClInclude Include="ZuizuiEngine\WindowApp\WindowApp.h" />

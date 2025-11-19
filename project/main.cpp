@@ -5,7 +5,7 @@
 #include "Imgui/ImguiManager.h"
 #include "Input/Input.h"
 #include "Audio/Audio.h"
-#include "PSO/PSO.h"
+#include "PSO/PSOManager.h"
 #include "Light/DirectionalLight/DirectionalLight.h"
 #include "3d/Triangle/TriangleObject.h"
 #include "2d/Sprite/SpriteObject.h"
@@ -35,7 +35,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("DxCommon Initialize");
 
 	//PSO
-	std::unique_ptr<PSO> pso = std::make_unique<PSO>(dxCommon.GetDevice(), dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler(), logger.GetLogStream());
+	std::unique_ptr<PSOManager> psoManager = std::make_unique<PSOManager>(dxCommon.GetDevice());
+	psoManager->Initialize(
+		dxCommon.GetDxcUtils(),
+		dxCommon.GetDxcCompiler(),
+		dxCommon.GetIncludeHandler()
+	);
 	logger.Write("PSO Initialize");
 
 	// Input
@@ -137,6 +142,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	suzanne->GetTransform().rotate.y = 3.0f;
 	bunny->GetTransform().rotate.y = 3.0f;
 
+	static BlendMode currentBlendMode = kBlendModeNormal;
+	const char* items = "None\0Normal\0Add\0Subtract\0Multiply\0Screen\0";
+
 	// ゲームループ
 	while (window.ProcessMessage()) {
 		// ゲームの処理
@@ -201,9 +209,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::End();
 
 		ImGui::Begin("BlendMode");
-		int blendIndex = static_cast<int>(pso->blendMode_);
-		ImGui::Combo("BlendMode", &blendIndex, "None\0Normal\0Add\0Subtract\0Multiply\0Screen\0");
-		pso->blendMode_ = static_cast<PSO::BlendMode>(blendIndex);
+		int blendIndex = static_cast<int>(currentBlendMode);
+
+		if (ImGui::Combo("BlendMode", &blendIndex, items)) {
+			// ユーザーが変更した場合
+			BlendMode newMode = static_cast<BlendMode>(blendIndex);
+
+			// PSOManagerの専用関数を呼び出す
+			HRESULT hr = psoManager->UpdateBlendMode("Object3D", newMode);
+
+			if (SUCCEEDED(hr)) {
+				// 成功した場合のみ状態を更新
+				currentBlendMode = newMode;
+			} else {
+				// エラー処理 (例: ログ出力)
+			}
+		}
 		ImGui::End();
 		
 		// 終了
@@ -246,8 +267,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 描画前処理
 		dxCommon.BeginFrame();
 		dxCommon.PreDraw(
-			pso->GetPipelineState(),
-			pso->GetRootSignature()
+			psoManager->GetPSO("Object3D"),
+			psoManager->GetRootSignature("Object3D")
 		);
 
 		// 三角形の描画
