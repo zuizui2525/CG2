@@ -175,7 +175,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ZuizuiEngine\Matrix\Matrix.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Model\ModelObject.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Object3D.cpp" />
-    <ClCompile Include="ZuizuiEngine\PSO\PSO.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Sphere\SphereObject.cpp" />
     <ClCompile Include="ZuizuiEngine\2d\Sprite\SpriteObject.cpp" />
     <ClCompile Include="ZuizuiEngine\3d\Triangle\TriangleObject.cpp" />
@@ -230,7 +229,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="ZuizuiEngine\Matrix\Matrix.h" />
     <ClInclude Include="ZuizuiEngine\3d\Model\ModelObject.h" />
     <ClInclude Include="ZuizuiEngine\3d\Object3D.h" />
-    <ClInclude Include="ZuizuiEngine\PSO\PSO.h" />
     <ClInclude Include="ZuizuiEngine\3d\Sphere\SphereObject.h" />
     <ClInclude Include="ZuizuiEngine\2d\Sprite\SpriteObject.h" />
     <ClInclude Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.h" />

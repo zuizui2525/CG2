@@ -201,9 +201,6 @@
     <ClCompile Include="ZuizuiEngine\Matrix\Matrix.cpp">
       <Filter>ソース ファイル\Engine\Matrix</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\PSO.cpp">
-      <Filter>ソース ファイル\Engine\PSO</Filter>
-    </ClCompile>
     <ClCompile Include="ZuizuiEngine\3d\Model\ModelManager.cpp">
       <Filter>ソース ファイル\Engine\3d\Model</Filter>
     </ClCompile>
@@ -314,9 +311,6 @@
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Matrix\Matrix.h">
       <Filter>ヘッダー ファイル\Engine\Matrix</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\PSO.h">
-      <Filter>ヘッダー ファイル\Engine\PSO</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Struct.h">
       <Filter>ヘッダー ファイル\Engine</Filter>

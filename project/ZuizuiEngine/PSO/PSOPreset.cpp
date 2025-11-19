@@ -14,11 +14,15 @@ PSOPreset PSOPreset::CreateObject3DPreset(
     // 1. RootSignature
     // ---------------------------
     RootSignatureBuilder rs;
-    // b0: マトリクス
+    // 行列 (b0, VS)
     rs.AddCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
-    // t0: テクスチャ
+    // マテリアル(b0, PS)
+    rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+    // ライティング (b1, PS)
+    rs.AddCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
+    // テクスチャ (t0, PS)
     rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
-    // s0: サンプラー
+    // サンプラー (s0)
     D3D12_SAMPLER_DESC sampler{};
     sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
     sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;

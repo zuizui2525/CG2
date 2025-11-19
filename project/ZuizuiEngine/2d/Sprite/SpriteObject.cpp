@@ -59,10 +59,10 @@ void SpriteObject::Draw(ID3D12GraphicsCommandList* commandList,
 
     commandList->IASetVertexBuffers(0, 1, &vbView_);
     commandList->IASetIndexBuffer(&ibView_);
-    commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(3, lightAddress);
-    commandList->SetGraphicsRootDescriptorTable(2, textureHandle);
+    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
+    commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
 
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

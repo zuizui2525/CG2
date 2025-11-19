@@ -20,5 +20,5 @@ public:
     const D3D12_BLEND_DESC& Build();
 
 private:
-    D3D12_BLEND_DESC blendDesc_;
+    D3D12_BLEND_DESC blendDesc_{};
 };
