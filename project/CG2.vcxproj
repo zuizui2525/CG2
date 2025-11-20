@@ -148,6 +148,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
@@ -171,7 +172,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ZuizuiEngine\Input\Input.cpp" />
     <ClCompile Include="ZuizuiEngine\Base\Log\Log.cpp" />
     <ClCompile Include="externals\imgui\ImguiManager\ImguiManager.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="ZuizuiEngine\Math\Matrix\Matrix.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.cpp" />

@@ -1,152 +1,116 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{4c0bfc0a-ee81-46dc-864f-dd30cc12b875}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine">
-      <UniqueIdentifier>{8907dc1b-ad16-43d7-8a63-44fcc1892742}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine">
+      <UniqueIdentifier>{22038478-f607-4631-b7af-e387425c5ef8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\2d">
-      <UniqueIdentifier>{443133e6-b5c4-40d8-bd9f-5034f3b8dd54}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Audio">
+      <UniqueIdentifier>{424c89a8-e40a-4b14-a3e5-c825d10f8218}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\3d">
-      <UniqueIdentifier>{175429c3-dd04-482b-bc55-a8aa63577951}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Base">
+      <UniqueIdentifier>{be79bf87-b573-4589-9356-e48da47de0ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\2d\Sprite">
-      <UniqueIdentifier>{d7136c12-cab6-4670-8bf8-e236ee75fca8}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Input">
+      <UniqueIdentifier>{daadc930-c78d-4f15-be34-435bfcd4db02}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\3d\Model">
-      <UniqueIdentifier>{90ba0313-5777-4c42-86e7-c26ebdf8635e}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics">
+      <UniqueIdentifier>{292b6c72-68a2-4c12-8b1a-5f7aee395c88}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\3d\Sphere">
-      <UniqueIdentifier>{ab86ef6e-0dd1-4cab-8030-41e2842510e7}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Math">
+      <UniqueIdentifier>{0e74dcb7-9a98-4558-895e-bedadcb2a2a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\3d\Triangle">
-      <UniqueIdentifier>{0916df0b-4229-4968-9a8f-8724d861b443}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Math\Matrix">
+      <UniqueIdentifier>{5c144e09-5db2-4cdf-97f3-e437ac7712f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\DxCommon">
-      <UniqueIdentifier>{cf70c79b-60c3-4fcd-b89c-1b69c719ed33}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Math\Function">
+      <UniqueIdentifier>{4959273c-86a5-4753-87b0-d98cfa2e7c5d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Function">
-      <UniqueIdentifier>{edf406d4-2357-4189-beb4-3650195c92c9}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Base\Log">
+      <UniqueIdentifier>{871d54cb-9a43-4c3c-bed5-973143158172}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Input">
-      <UniqueIdentifier>{96fe3271-bd57-4ea5-aece-a4e5a70ddcca}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Base\DxCommon">
+      <UniqueIdentifier>{9c71b97b-87eb-41d2-b717-b2ddbb247c75}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\WindowApp">
-      <UniqueIdentifier>{ff7b5d76-ac8d-4aaf-a694-b786239ff48a}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Base\WindowApp">
+      <UniqueIdentifier>{e99f0c3a-14bb-4e56-893c-e7c754873fdb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Matrix">
-      <UniqueIdentifier>{3a19006a-00d0-45e4-bc57-8c5b9c31e51e}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects">
+      <UniqueIdentifier>{4390b32a-132e-4941-b779-51f95afb5a41}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\PSO">
-      <UniqueIdentifier>{5c94eec4-3423-41ee-90ef-ddae9aae446e}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Actor">
+      <UniqueIdentifier>{013305d4-b115-42f9-bce9-91a01fe7a255}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine">
-      <UniqueIdentifier>{09f132a1-8250-4760-bb5d-c0c7c23adddc}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO">
+      <UniqueIdentifier>{f672404e-5df9-40ae-a36b-4f17c246ebd2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\2d">
-      <UniqueIdentifier>{b3c5ea77-1930-4ffd-8408-b7a2990b1c96}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Texture">
+      <UniqueIdentifier>{6b47e75e-ccc2-4feb-9396-3df3ccb11362}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\2d\Sprite">
-      <UniqueIdentifier>{ec5df459-5965-43cc-a5de-ed62c53ad06b}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Actor\Camera">
+      <UniqueIdentifier>{b441ddad-4a3f-4efb-9235-3bebca56b012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\3d">
-      <UniqueIdentifier>{541dc078-bc77-4853-a186-b4036be65344}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Actor\Light">
+      <UniqueIdentifier>{b542530a-ee71-49f2-a593-2559d71d7591}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\3d\Model">
-      <UniqueIdentifier>{2adebea1-1f38-4a51-acff-55e1ca200f66}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight">
+      <UniqueIdentifier>{88b6af37-f98e-4561-bed0-5dfb432e62c3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\3d\Triangle">
-      <UniqueIdentifier>{1ec972ba-cff6-4de4-8791-b03a995a3b6d}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera">
+      <UniqueIdentifier>{9f1d541f-a88a-4c36-87e3-4af3f4d73575}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\3d\Sphere">
-      <UniqueIdentifier>{9212f0ac-637f-47b2-b76c-61e1492a0315}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\2d">
+      <UniqueIdentifier>{e4bd57b6-78f4-4e30-839f-09a0b73e34c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\DxCommon">
-      <UniqueIdentifier>{56ff62cc-b40d-493a-8e5f-ec46b6768065}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\3d">
+      <UniqueIdentifier>{7777c0df-6a27-4ec2-b28a-b51b60263b06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Input">
-      <UniqueIdentifier>{1078fb93-9512-4844-9089-74b901078c30}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\2d\Sprite">
+      <UniqueIdentifier>{82b55cbd-df32-46b3-b789-066f3e021cd0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Function">
-      <UniqueIdentifier>{a1a5fc04-c6bb-4a46-b209-b4574c4f748e}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\3d\Model">
+      <UniqueIdentifier>{053f022e-697e-4aa1-b0b0-628759287c7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Matrix">
-      <UniqueIdentifier>{af30cf84-bf33-4041-a399-5eccbec6bd91}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\3d\Triangle">
+      <UniqueIdentifier>{6bb0e9a5-01f7-467f-9cd4-9ea9e953c7e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\PSO">
-      <UniqueIdentifier>{7d357dd7-b36b-44a8-9e91-39155997c0d5}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\3d\Sphere">
+      <UniqueIdentifier>{fc8f1be8-8fe8-421b-8057-40742177ff3a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\WindowApp">
-      <UniqueIdentifier>{738a8b18-8f14-4575-b072-d2fde2b31eed}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\BlendStateBuilder">
+      <UniqueIdentifier>{67340324-8d21-4620-b804-89d0e06af82c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Texture">
-      <UniqueIdentifier>{64e9b7cd-531f-404a-a37a-e3a9608f79da}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder">
+      <UniqueIdentifier>{af494813-8ca3-4809-bc4b-03151da6164f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Texture">
-      <UniqueIdentifier>{8f0bcfe2-2374-4ac3-a562-79c4602200f9}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder">
+      <UniqueIdentifier>{a524df2c-a7f9-4f4d-b1e4-2b6950bb2a48}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Log">
-      <UniqueIdentifier>{1d5a5be6-6dee-4cfd-ad7b-84424851b8b6}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\PSOManager">
+      <UniqueIdentifier>{9a7e4cd3-573d-4c21-a9f7-f040342d0940}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Log">
-      <UniqueIdentifier>{58b4361d-eab6-4041-9743-9a77cfbecfe4}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder">
+      <UniqueIdentifier>{7a7f6e63-81de-452e-84bc-6139890f1908}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\ImGui">
-      <UniqueIdentifier>{cb2410f4-1ca5-4adc-bf19-4f2f02da68e1}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\PSOPreset">
+      <UniqueIdentifier>{b0d3b745-e0a8-4d33-b817-16e9efa5d5b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\ImGui">
-      <UniqueIdentifier>{055ae4a7-893a-4eca-ab2f-91285abb783f}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder">
+      <UniqueIdentifier>{940620de-79a0-4391-b378-50ba4afc963b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Camera">
-      <UniqueIdentifier>{22e6714d-2200-4237-a42e-a398a5ae5a22}</UniqueIdentifier>
+    <Filter Include="ZuizuiEngine\Graphics\PSO\ShaderProgram">
+      <UniqueIdentifier>{87c05715-6039-4384-9398-8b1f2db2c51b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Camera\DebugCamera">
-      <UniqueIdentifier>{85b900e5-3f55-428f-979d-cc98825847e4}</UniqueIdentifier>
+    <Filter Include="imgui\ImguiManager">
+      <UniqueIdentifier>{0515ed2f-4455-42ec-9ce9-8306fc374599}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Camera">
-      <UniqueIdentifier>{a4cedd2c-d37b-4540-a54a-3196e32a410f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Camera\DebugCamera">
-      <UniqueIdentifier>{5787715a-f7d4-4c24-9ee8-478865bd6d6e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Audio">
-      <UniqueIdentifier>{a07873cd-17b7-4baf-a3c1-e7ac6e01127c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Audio">
-      <UniqueIdentifier>{463e3776-6ea8-4516-b56c-493dd08ac996}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Light">
-      <UniqueIdentifier>{cfea3fa3-76d7-4dbf-a711-8e2986b57ec8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Light\DirectionalLight">
-      <UniqueIdentifier>{456c2cdb-874a-40c5-9076-57208801c58e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Light">
-      <UniqueIdentifier>{e79faa9d-de84-43e3-a672-ae0799426ecc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Light\DirectionalLight">
-      <UniqueIdentifier>{cd660541-a823-4b43-b8a5-7b34fef83bf7}</UniqueIdentifier>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{d68df63b-3203-4840-9a86-b3920d4b468d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -168,94 +132,99 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.cpp">
-      <Filter>ソース ファイル\Engine\2d\Sprite</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.cpp">
-      <Filter>ソース ファイル\Engine\3d\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.cpp">
-      <Filter>ソース ファイル\Engine\3d\Sphere</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.cpp">
-      <Filter>ソース ファイル\Engine\3d\Triangle</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.cpp">
-      <Filter>ソース ファイル\Engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp">
-      <Filter>ソース ファイル\Engine\Camera\DebugCamera</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Base\DxCommon\DxCommon.cpp">
-      <Filter>ソース ファイル\Engine\DxCommon</Filter>
+    <ClCompile Include="ZuizuiEngine\Zuizui.cpp">
+      <Filter>ZuizuiEngine</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Math\Function\Function.cpp">
-      <Filter>ソース ファイル\Engine\Function</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Input\Input.cpp">
-      <Filter>ソース ファイル\Engine\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Base\WindowApp\WindowApp.cpp">
-      <Filter>ソース ファイル\Engine\WindowApp</Filter>
+      <Filter>ZuizuiEngine\Math\Function</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Math\Matrix\Matrix.cpp">
-      <Filter>ソース ファイル\Engine\Matrix</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.cpp">
-      <Filter>ソース ファイル\Engine\3d\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Texture\Texture.cpp">
-      <Filter>ソース ファイル\Engine\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Texture\TextureManager.cpp">
-      <Filter>ソース ファイル\Engine\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Base\Log\Log.cpp">
-      <Filter>ソース ファイル\Engine\Log</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\ImguiManager\ImguiManager.cpp">
-      <Filter>ソース ファイル\Engine\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.cpp">
-      <Filter>ソース ファイル\Engine\Camera</Filter>
+      <Filter>ZuizuiEngine\Math\Matrix</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Audio\Audio.cpp">
-      <Filter>ソース ファイル\Engine\Audio</Filter>
+      <Filter>ZuizuiEngine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Input\Input.cpp">
+      <Filter>ZuizuiEngine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Base\DxCommon\DxCommon.cpp">
+      <Filter>ZuizuiEngine\Base\DxCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Base\Log\Log.cpp">
+      <Filter>ZuizuiEngine\Base\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Base\WindowApp\WindowApp.cpp">
+      <Filter>ZuizuiEngine\Base\WindowApp</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.cpp">
-      <Filter>ソース ファイル\Engine\Light\DirectionalLight</Filter>
+      <Filter>ZuizuiEngine\Graphics\Actor\Light\DirectionalLight</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Zuizui.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp">
+      <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.cpp">
+      <Filter>ZuizuiEngine\Graphics\Actor\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ZuizuiEngine\Graphics\Texture\Texture.cpp">
+      <Filter>ZuizuiEngine\Graphics\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Texture\TextureManager.cpp">
+      <Filter>ZuizuiEngine\Graphics\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\2d\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Sphere</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Triangle</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\BlendStateBuilder</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
+      <Filter>ZuizuiEngine\Graphics\PSO\InputLayoutBuilder</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\PSOManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp">
+      <Filter>ZuizuiEngine\Graphics\PSO\PSOPreset</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
+      <Filter>ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
+      <Filter>ZuizuiEngine\Graphics\PSO\RootSignatureBuilder</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\ShaderProgram\ShaderProgram.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\ShaderProgram</Filter>
     </ClCompile>
+    <ClCompile Include="externals\imgui\ImguiManager\ImguiManager.cpp">
+      <Filter>imgui\ImguiManager</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\Shader\Object3d.VS.hlsl" />
-    <FxCompile Include="resources\Shader\Object3d.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Object3d.PS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -282,92 +251,92 @@
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.h">
-      <Filter>ヘッダー ファイル\Engine\2d\Sprite</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.h">
-      <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.h">
-      <Filter>ヘッダー ファイル\Engine\3d\Triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.h">
-      <Filter>ヘッダー ファイル\Engine\3d\Sphere</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.h">
-      <Filter>ヘッダー ファイル\Engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h">
-      <Filter>ヘッダー ファイル\Engine\Camera\DebugCamera</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Base\DxCommon\DxCommon.h">
-      <Filter>ヘッダー ファイル\Engine\DxCommon</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Input\Input.h">
-      <Filter>ヘッダー ファイル\Engine\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Math\Function\Function.h">
-      <Filter>ヘッダー ファイル\Engine\Function</Filter>
+    <ClInclude Include="ZuizuiEngine\Zuizui.h">
+      <Filter>ZuizuiEngine</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Math\Matrix\Matrix.h">
-      <Filter>ヘッダー ファイル\Engine\Matrix</Filter>
+      <Filter>ZuizuiEngine\Math\Matrix</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Math\Struct.h">
-      <Filter>ヘッダー ファイル\Engine</Filter>
+      <Filter>ZuizuiEngine\Math</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Base\WindowApp\WindowApp.h">
-      <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.h">
-      <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Texture\Texture.h">
-      <Filter>ヘッダー ファイル\Engine\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Texture\TextureManager.h">
-      <Filter>ヘッダー ファイル\Engine\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Base\Log\Log.h">
-      <Filter>ヘッダー ファイル\Engine\Log</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
-      <Filter>ヘッダー ファイル\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.h">
-      <Filter>ヘッダー ファイル\Engine\Camera</Filter>
+    <ClInclude Include="ZuizuiEngine\Math\Function\Function.h">
+      <Filter>ZuizuiEngine\Math\Function</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Audio\Audio.h">
-      <Filter>ヘッダー ファイル\Engine\Audio</Filter>
+      <Filter>ZuizuiEngine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Input\Input.h">
+      <Filter>ZuizuiEngine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Base\DxCommon\DxCommon.h">
+      <Filter>ZuizuiEngine\Base\DxCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Base\Log\Log.h">
+      <Filter>ZuizuiEngine\Base\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Base\WindowApp\WindowApp.h">
+      <Filter>ZuizuiEngine\Base\WindowApp</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.h">
-      <Filter>ヘッダー ファイル\Engine\Light\DirectionalLight</Filter>
+      <Filter>ZuizuiEngine\Graphics\Actor\Light\DirectionalLight</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Zuizui.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.h">
+      <Filter>ZuizuiEngine\Graphics\Actor\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h">
+      <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="ZuizuiEngine\Graphics\Texture\Texture.h">
+      <Filter>ZuizuiEngine\Graphics\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Texture\TextureManager.h">
+      <Filter>ZuizuiEngine\Graphics\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\2d\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Sphere</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\BlendStateBuilder</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
+      <Filter>ZuizuiEngine\Graphics\PSO\InputLayoutBuilder</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\PSOManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.h">
+      <Filter>ZuizuiEngine\Graphics\PSO\PSOPreset</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
+      <Filter>ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
+      <Filter>ZuizuiEngine\Graphics\PSO\RootSignatureBuilder</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\ShaderProgram\ShaderProgram.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ZuizuiEngine\Graphics\PSO\ShaderProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
+      <Filter>imgui\ImguiManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -376,6 +345,8 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\Shader\Object3d.hlsli" />
+    <None Include="resources\Shader\Object3d.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
