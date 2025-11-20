@@ -148,8 +148,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ZuizuiEngine\PSO\PSOManager.cpp" />
-    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\PSOManager\PSOManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp" />
     <ClCompile Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.cpp" />
@@ -204,8 +204,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ZuizuiEngine\PSO\PSOManager.h" />
-    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\PSOManager\PSOManager.h" />
+    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.h" />
     <ClInclude Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h" />
     <ClInclude Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h" />
     <ClInclude Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.h" />

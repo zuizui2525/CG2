@@ -5,7 +5,7 @@
 #include <string>
 #include <dxcapi.h>
 
-#include "PSOPreset.h"
+#include "../PSOPreset/PSOPreset.h"
 
 class PSOManager {
 public:

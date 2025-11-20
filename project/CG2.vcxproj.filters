@@ -243,10 +243,10 @@
     <ClCompile Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset.cpp">
+    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\PSOManager.cpp">
+    <ClCompile Include="ZuizuiEngine\PSO\PSOManager\PSOManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.cpp">
@@ -360,10 +360,10 @@
     <ClInclude Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset.h">
+    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\PSOManager.h">
+    <ClInclude Include="ZuizuiEngine\PSO\PSOManager\PSOManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.h">
