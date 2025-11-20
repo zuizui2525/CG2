@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
-#include "../Struct.h"
+#include "Struct.h"
 
 class Audio {
 public:

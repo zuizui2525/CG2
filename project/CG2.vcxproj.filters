@@ -168,88 +168,88 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\2d\Sprite\SpriteObject.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.cpp">
       <Filter>ソース ファイル\Engine\2d\Sprite</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\3d\Model\ModelObject.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.cpp">
       <Filter>ソース ファイル\Engine\3d\Model</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\3d\Sphere\SphereObject.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.cpp">
       <Filter>ソース ファイル\Engine\3d\Sphere</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\3d\Triangle\TriangleObject.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.cpp">
       <Filter>ソース ファイル\Engine\3d\Triangle</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\3d\Object3D.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.cpp">
       <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Camera\DebugCamera\DebugCamera.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp">
       <Filter>ソース ファイル\Engine\Camera\DebugCamera</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\DxCommon\DxCommon.cpp">
+    <ClCompile Include="ZuizuiEngine\Base\DxCommon\DxCommon.cpp">
       <Filter>ソース ファイル\Engine\DxCommon</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Function\Function.cpp">
+    <ClCompile Include="ZuizuiEngine\Math\Function\Function.cpp">
       <Filter>ソース ファイル\Engine\Function</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Input\Input.cpp">
       <Filter>ソース ファイル\Engine\Input</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\WindowApp\WindowApp.cpp">
+    <ClCompile Include="ZuizuiEngine\Base\WindowApp\WindowApp.cpp">
       <Filter>ソース ファイル\Engine\WindowApp</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Matrix\Matrix.cpp">
+    <ClCompile Include="ZuizuiEngine\Math\Matrix\Matrix.cpp">
       <Filter>ソース ファイル\Engine\Matrix</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\3d\Model\ModelManager.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.cpp">
       <Filter>ソース ファイル\Engine\3d\Model</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Texture\Texture.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Texture\Texture.cpp">
       <Filter>ソース ファイル\Engine\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Texture\TextureManager.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Texture\TextureManager.cpp">
       <Filter>ソース ファイル\Engine\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Log\Log.cpp">
+    <ClCompile Include="ZuizuiEngine\Base\Log\Log.cpp">
       <Filter>ソース ファイル\Engine\Log</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Imgui\ImguiManager.cpp">
+    <ClCompile Include="externals\imgui\ImguiManager\ImguiManager.cpp">
       <Filter>ソース ファイル\Engine\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Camera\Camera.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.cpp">
       <Filter>ソース ファイル\Engine\Camera</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Audio\Audio.cpp">
       <Filter>ソース ファイル\Engine\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.cpp">
       <Filter>ソース ファイル\Engine\Light\DirectionalLight</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Zuizui.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\PSOManager\PSOManager.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.cpp">
+    <ClCompile Include="ZuizuiEngine\Graphics\PSO\ShaderProgram\ShaderProgram.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -282,91 +282,91 @@
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\2d\Sprite\SpriteObject.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\2d\Sprite\SpriteObject.h">
       <Filter>ヘッダー ファイル\Engine\2d\Sprite</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\3d\Model\ModelObject.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelObject.h">
       <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\3d\Triangle\TriangleObject.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Triangle\TriangleObject.h">
       <Filter>ヘッダー ファイル\Engine\3d\Triangle</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\3d\Sphere\SphereObject.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Sphere\SphereObject.h">
       <Filter>ヘッダー ファイル\Engine\3d\Sphere</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\3d\Object3D.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Object3D.h">
       <Filter>ヘッダー ファイル\Engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Camera\DebugCamera\DebugCamera.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h">
       <Filter>ヘッダー ファイル\Engine\Camera\DebugCamera</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\DxCommon\DxCommon.h">
+    <ClInclude Include="ZuizuiEngine\Base\DxCommon\DxCommon.h">
       <Filter>ヘッダー ファイル\Engine\DxCommon</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Input\Input.h">
       <Filter>ヘッダー ファイル\Engine\Input</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Function\Function.h">
+    <ClInclude Include="ZuizuiEngine\Math\Function\Function.h">
       <Filter>ヘッダー ファイル\Engine\Function</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Matrix\Matrix.h">
+    <ClInclude Include="ZuizuiEngine\Math\Matrix\Matrix.h">
       <Filter>ヘッダー ファイル\Engine\Matrix</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Struct.h">
+    <ClInclude Include="ZuizuiEngine\Math\Struct.h">
       <Filter>ヘッダー ファイル\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\WindowApp\WindowApp.h">
+    <ClInclude Include="ZuizuiEngine\Base\WindowApp\WindowApp.h">
       <Filter>ヘッダー ファイル\Engine\WindowApp</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\3d\Model\ModelManager.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Model\ModelManager.h">
       <Filter>ヘッダー ファイル\Engine\3d\Model</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Texture\Texture.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Texture\Texture.h">
       <Filter>ヘッダー ファイル\Engine\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Texture\TextureManager.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Texture\TextureManager.h">
       <Filter>ヘッダー ファイル\Engine\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Log\Log.h">
+    <ClInclude Include="ZuizuiEngine\Base\Log\Log.h">
       <Filter>ヘッダー ファイル\Engine\Log</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Imgui\ImguiManager.h">
+    <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
       <Filter>ヘッダー ファイル\Engine\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Camera\Camera.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.h">
       <Filter>ヘッダー ファイル\Engine\Camera</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Audio\Audio.h">
       <Filter>ヘッダー ファイル\Engine\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Light\DirectionalLight\DirectionalLight.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.h">
       <Filter>ヘッダー ファイル\Engine\Light\DirectionalLight</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Zuizui.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\BlendStateBuilder\BlendStateBuilder.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\PSOPreset\PSOPreset.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\PSOManager\PSOManager.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\PSO\ShaderProgram\ShaderProgram.h">
+    <ClInclude Include="ZuizuiEngine\Graphics\PSO\ShaderProgram\ShaderProgram.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

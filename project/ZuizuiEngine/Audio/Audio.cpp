@@ -1,5 +1,5 @@
 #include "Audio.h"
-#include "Function/Function.h"
+#include "Function.h"
 #include <iostream>
 
 Audio::Audio() {}
