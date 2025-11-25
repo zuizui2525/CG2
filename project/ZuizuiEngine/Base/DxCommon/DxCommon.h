@@ -6,7 +6,7 @@ public:
 	void Initialize(HWND hwnd, int32_t width, int32_t height);
 	void BeginFrame();
 	void EndFrame();
-	void PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature);
+	void PreDraw();
 	void DrawImGui();
 	void FrameStart();
 	void FrameEnd(int targetFps);

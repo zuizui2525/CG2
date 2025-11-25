@@ -40,8 +40,14 @@ void TriangleObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projec
 void TriangleObject::Draw(ID3D12GraphicsCommandList* commandList,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
     D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+    ID3D12PipelineState* pipelineState,
+    ID3D12RootSignature* rootSignature,
     bool enableDraw) {
     if (!enableDraw) return;
+
+    // パイプラインの選択
+    commandList->SetGraphicsRootSignature(rootSignature);
+    commandList->SetPipelineState(pipelineState);
 
     commandList->IASetVertexBuffers(0, 1, &vbView_);
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());

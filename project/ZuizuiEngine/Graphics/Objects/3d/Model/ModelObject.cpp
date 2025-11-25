@@ -45,7 +45,14 @@ void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectio
 void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
     D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+    ID3D12PipelineState* pipelineState,
+    ID3D12RootSignature* rootSignature,
     bool draw) {
+    
+    // パイプラインの選択
+    commandList->SetGraphicsRootSignature(rootSignature);
+    commandList->SetPipelineState(pipelineState);
+    
     // VBV設定
     commandList->IASetVertexBuffers(0, 1, &vbv_);
 

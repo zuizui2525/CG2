@@ -72,12 +72,11 @@ void DxCommon::EndFrame() {
 }
 
 
-void DxCommon::PreDraw(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature) {
+void DxCommon::PreDraw() {
 	ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
 	commandList_->SetDescriptorHeaps(1, heaps);
 	commandList_->RSSetViewports(1, &viewport_);
-	commandList_->RSSetScissorRects(1, &scissorRect_); commandList_->SetGraphicsRootSignature(rootSignature);
-	commandList_->SetPipelineState(pipelineState);
+	commandList_->RSSetScissorRects(1, &scissorRect_);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
