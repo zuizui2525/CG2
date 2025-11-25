@@ -13,6 +13,7 @@
 #include "ModelObject.h"
 #include "Camera.h"
 #include "TextureManager.h"
+#include "ParticleManager.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -91,6 +92,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/bunny/bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
 
+	// パーティクル
+	std::unique_ptr<ParticleManager> particleManager = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
+	logger.Write("Particle Initialize");
+
 #ifdef _DEBUG
 	// Imgui
 	std::unique_ptr<ImguiManager> imgui = std::make_unique<ImguiManager>();
@@ -131,7 +136,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawTriangle = false;
 	bool drawSprite = false;
 	bool drawSphere = false;
-	bool drawModel = true;
+	bool drawModel = false;
 	bool drawModel2 = false;
 	bool drawModel3 = false;
 	bool drawModel4 = false;
@@ -264,6 +269,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// モデル4
 		bunny->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
+		// パーティクル
+		particleManager->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+
 		// 描画前処理
 		dxCommon.BeginFrame();
 		dxCommon.PreDraw();
@@ -288,6 +296,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// Model4の描画
 		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel4);
+
+		// パーティクルの描画
+		particleManager->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
 
 		// ImGui表示
 		dxCommon.DrawImGui();
