@@ -66,7 +66,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
     // ------------------------------------
     for (UINT index = 0; index < kNumInstance; ++index) {
         transforms_[index].translate = initialPosition;
-        float offset = (float)index * 0.1f;
+        float offset = (float)index * 0.05f;
         transforms_[index].translate.x += offset;
         transforms_[index].translate.y += offset;
         transforms_[index].scale = { 1.0f, 1.0f, 1.0f };
