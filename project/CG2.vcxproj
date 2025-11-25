@@ -81,7 +81,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Particle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Particle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,7 +133,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)ZuizuiEngine\Graphics\Texture;$(SolutionDir)ZuizuiEngine\Graphics\PSO\ShaderProgram;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOPreset;$(SolutionDir)ZuizuiEngine\Graphics\PSO\PSOManager;$(SolutionDir)ZuizuiEngine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Particle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Model;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Triangle;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d\Sphere;$(SolutionDir)ZuizuiEngine\Graphics\Objects\3d;$(SolutionDir)ZuizuiEngine\Graphics\Objects\2d\Sprite;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)ZuizuiEngine\Graphics\Actor\Camera;$(SolutionDir)ZuizuiEngine\Math\Function;$(SolutionDir)ZuizuiEngine\Math\Matrix;$(SolutionDir)ZuizuiEngine\Math;$(SolutionDir)ZuizuiEngine\Base\WindowApp;$(SolutionDir)ZuizuiEngine\Base\Log;$(SolutionDir)ZuizuiEngine\Base\DxCommon;$(SolutionDir)ZuizuiEngine\Input;$(SolutionDir)ZuizuiEngine\Audio;$(SolutionDir)ZuizuiEngine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,6 +149,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
@@ -202,8 +203,19 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="resources\Shader\Particle.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Particle.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h" />
@@ -252,6 +264,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d.hlsli" />
+    <None Include="resources\Shader\Particle.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -20,6 +20,13 @@ public:
         IDxcCompiler3* dxcCompiler,
         IDxcIncludeHandler* includeHandler);
 
+    // Particle用のプリセット作成関数
+    static PSOPreset CreateParticlePreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
     // メンバ変数
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 

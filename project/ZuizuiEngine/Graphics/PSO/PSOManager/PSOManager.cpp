@@ -17,6 +17,12 @@ HRESULT PSOManager::Initialize(
     // 登録処理
     RegisterPreset("Object3D", object3DPreset);
 
+    // Particle用プリセット作成
+    PSOPreset particlePreset = PSOPreset::CreateParticlePreset(
+        device_, dxcUtils, dxcCompiler, includeHandler);
+
+    // 登録処理
+    RegisterPreset("Particle", particlePreset);
     return S_OK;
 }
 
