@@ -449,3 +449,61 @@ namespace Math {
 		return identity;
 	}
 }
+
+// 二公演算子
+Vector3 operator+(const Vector3& v1, const Vector3& v2) {
+	return Math::Add(v1, v2);
+}
+Vector3 operator-(const Vector3& v1, const Vector3& v2) {
+	return Math::Subtract(v1, v2);
+}
+Vector3 operator*(float s, const Vector3& v) {
+	return Math::Multiply(s, v);
+}
+Vector3 operator*(const Vector3& v, float s) {
+	return s * v;
+}
+Vector3 operator/(const Vector3& v, float s) {
+	return Math::Multiply(1.0f / s, v);
+}
+Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2) {
+	return Math::Add(m1, m2);
+}
+Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2) {
+	return Math::Subtract(m1, m2);
+}
+Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) {
+	return Math::Multiply(m1, m2);
+}
+// 単項演算子
+Vector3 operator-(const Vector3& v) {
+	return { -v.x,-v.y,-v.z };
+}
+Vector3 operator+(const Vector3& v) {
+	return v;
+}
+// 複合代入演算子
+Vector3& operator*=(Vector3& v, float s) {
+	v.x *= s;
+	v.y *= s;
+	v.z *= s;
+	return v;
+}
+Vector3& operator-=(Vector3& v1, const Vector3& v2) {
+	v1.x -= v2.x;
+	v1.y -= v2.y;
+	v1.z -= v2.z;
+	return v1;
+}
+Vector3& operator+=(Vector3& v1, const Vector3& v2) {
+	v1.x += v2.x;
+	v1.y += v2.y;
+	v1.z += v2.z;
+	return v1;
+}
+Vector3& operator/=(Vector3& v, float s) {
+	v.x /= s;
+	v.y /= s;
+	v.z /= s;
+	return v;
+}

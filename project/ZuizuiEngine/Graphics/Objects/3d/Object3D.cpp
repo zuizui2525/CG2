@@ -27,7 +27,7 @@ Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     uvTransform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
 }
 
-void Object3D::ImGuiControl() {
+void Object3D::ImGuiSRTControl() {
     if (ImGui::CollapsingHeader("SRT")) {
         ImGui::DragFloat3("scale", &transform_.scale.x, 0.01f); // Triangleの拡縮を変更するUI
         ImGui::DragFloat3("rotate", &transform_.rotate.x, 0.01f); // Triangleの回転を変更するUI
@@ -36,6 +36,10 @@ void Object3D::ImGuiControl() {
     if (ImGui::CollapsingHeader("Color")) {
         ImGui::ColorEdit4("Color", &materialData_->color.x, true); // 色の値を変更するUI
     }
+    ImGui::Separator();
+}
+
+void Object3D::ImGuiLightingControl() {
     if (ImGui::CollapsingHeader("lighting")) {
         ImGui::RadioButton("None", &materialData_->enableLighting, 0);
         ImGui::RadioButton("Lambert", &materialData_->enableLighting, 1);

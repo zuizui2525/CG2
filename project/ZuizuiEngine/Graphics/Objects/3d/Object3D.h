@@ -10,7 +10,8 @@ public:
     virtual ~Object3D() = default;
 
     // ImGui
-    void ImGuiControl();
+    void ImGuiSRTControl();
+    void ImGuiLightingControl();
 
     // 共通アクセサ
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }

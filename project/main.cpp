@@ -140,6 +140,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel2 = false;
 	bool drawModel3 = false;
 	bool drawModel4 = false;
+	bool drawParticle = true;
 
 	sphere->GetTransform().rotate.y = 4.7f;
 	teapot->GetTransform().rotate.y = 3.0f;
@@ -168,14 +169,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Triangle")) {
 				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
 				if (drawTriangle) {
-					triangle->ImGuiControl();
+					triangle->ImGuiSRTControl();
+					triangle->ImGuiLightingControl();
 				}
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Sphere")) {
 				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
 				if (drawSphere) {
-					sphere->ImGuiControl();
+					sphere->ImGuiSRTControl();
+					sphere->ImGuiLightingControl();
 				}
 				ImGui::EndTabItem();
 			}
@@ -189,19 +192,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Model")) {
 				ImGui::Checkbox("Draw(teapot)", &drawModel);
 				if (drawModel) {
-					teapot->ImGuiControl();
+					teapot->ImGuiSRTControl();
+					teapot->ImGuiLightingControl();
 				}
 				ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
 				if (drawModel2) {
-					multiMaterial->ImGuiControl();
+					multiMaterial->ImGuiSRTControl();
+					multiMaterial->ImGuiLightingControl();
 				}
 				ImGui::Checkbox("Draw(suzanne)", &drawModel3);
 				if (drawModel3) {
-					suzanne->ImGuiControl();
+					suzanne->ImGuiSRTControl();
+					suzanne->ImGuiLightingControl();
 				}
 				ImGui::Checkbox("Draw(bunny)", &drawModel4);
 				if (drawModel4) {
-					bunny->ImGuiControl();
+					bunny->ImGuiSRTControl();
+					bunny->ImGuiLightingControl();
+				}
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("Particles")) {
+				ImGui::Checkbox("Draw(particle)", &drawParticle);
+				if (drawParticle) {
+					particleManager->ImGuiSRTControl();
+					particleManager->ImGuiLightingControl();
+					particleManager->ImGuiParticleControl();
 				}
 				ImGui::EndTabItem();
 			}
@@ -298,7 +314,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel4);
 
 		// パーティクルの描画
-		particleManager->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
+		particleManager->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle);
 
 		// ImGui表示
 		dxCommon.DrawImGui();
