@@ -126,7 +126,7 @@ void ParticleManager::Update(const Camera* camera) {
 		}
 
 		// 【修正】パーティクル個別のローカルワールド行列を計算
-		Matrix4x4 particleLocalWorldMatrix = Math::MakeAffineMatrix(
+		Matrix4x4 particleLocalMatrix = Math::MakeAffineMatrix(
 			particles_[index].transform.scale,
 			particles_[index].transform.rotate,
 			particles_[index].transform.translate
@@ -141,9 +141,9 @@ void ParticleManager::Update(const Camera* camera) {
 		// ビルボードするかしないか
 		Matrix4x4 worldMatrix{};
 		if (billboardActive_) {
-			worldMatrix = Math::Multiply(Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix), billboardMatrix);
+			worldMatrix = Math::Multiply(Math::Multiply(particleLocalMatrix, managerWorldMatrix), billboardMatrix);
 		} else {
-			worldMatrix = Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix);
+			worldMatrix = Math::Multiply(particleLocalMatrix, managerWorldMatrix);
 		}
 
 		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
