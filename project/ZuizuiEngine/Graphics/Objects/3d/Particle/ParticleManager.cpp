@@ -13,7 +13,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// DxCommonから必要な情報を取得
 	ID3D12Device* device = dxCommon->GetDevice();
 	ID3D12DescriptorHeap* srvHeap = dxCommon->GetSrvHeap();
-	startPosition_ = initialPosition;
+	transform_.translate = initialPosition;
 
 	// CBV/SRV/UAV ヒープのディスクリプタサイズを取得
 	UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -68,7 +68,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	randomEngine_ = std::mt19937(seedGenerator_());
 
 	for (UINT index = 0; index < kNumMaxInstance; ++index) {
-		particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
+		particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
 	}
 
 	// ------------------------------------
@@ -99,6 +99,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 		&instancingSrvDesc,
 		instanceSrvHandleCPU_ // 保持したCPUハンドルを使用
 	);
+	kDescriptorIndex++;
 }
 
 // ------------------------------------
@@ -119,7 +120,7 @@ void ParticleManager::Update(const Matrix4x4& viewMatrix, const Matrix4x4& proje
 	// 全てのインスタンスのWVP行列を計算し、GPUバッファに書き込む
 	for (UINT index = 0; index < kNumMaxInstance; ++index) {
 		if (particles_[index].lifeTime <= particles_[index].currentTime) {
-			particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
+			particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
 			continue;
 		}
 
@@ -188,13 +189,15 @@ void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 	}
 }
 
-void ParticleManager::ImGuiParticleControl() {  
-    if (ImGui::Button("[Reset]")) {  
+void ParticleManager::ImGuiParticleControl(const std::string& name) {
+	std::string label = "##" + name;
+	
+	if (ImGui::Button(("Reset" + label).c_str())) {
 		for (UINT index = 0; index < kNumMaxInstance; ++index) {
-			particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
+			particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
 		}
-		ImGui::Separator();
     }  
+	ImGui::Separator();
 	ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
 }
 

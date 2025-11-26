@@ -24,9 +24,6 @@ public:
     // 描画すべきインスタンスの数
     uint32_t numInstance_ = 0;
 
-    // 内部で管理するSRVヒープの固定インデックス
-    static const UINT kDescriptorIndex = 50;
-
     // コンストラクタ: DxCommon* と初期位置のみを受け取る
     ParticleManager(DxCommon* dxCommon, const Vector3& initialPosition);
     ~ParticleManager() = default;
@@ -43,13 +40,17 @@ public:
         bool draw = true);
 
     // ImGui
-    void ImGuiParticleControl();
+    void ImGuiParticleControl(const std::string& name);
 
     // アクセサ（VBVはDrawでも使用するため公開しても良いが、ここではUpdate/Drawで完結）
     ID3D12Resource* GetInstanceResource() const { return instanceResource_.Get(); }
+    
 
 private:
     Particle MakeNewParticle(std::mt19937& randomEngine, Vector3 initialPosition);
+
+    // 内部で管理するSRVヒープの固定インデックス
+    static inline UINT kDescriptorIndex = 50;
 
     // --- 頂点バッファ関連 (クアッド) ---
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -71,7 +72,6 @@ private:
     // ランダム
     std::random_device seedGenerator_;
     std::mt19937 randomEngine_;
-    Vector3 startPosition_{};                                           // 初期値
     std::uniform_real_distribution<float> distribution_{ -0.5f, 0.5f }; // 飛んでいく速度の下限上限
     std::uniform_real_distribution<float> distColor_{ 0.0f,1.0f };      // 色の下限上限
     float alpha_ = 0.0f;                                                // 透明度

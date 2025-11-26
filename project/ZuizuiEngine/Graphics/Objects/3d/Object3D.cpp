@@ -27,23 +27,29 @@ Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     uvTransform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
 }
 
-void Object3D::ImGuiSRTControl() {
-    if (ImGui::CollapsingHeader("SRT")) {
-        ImGui::DragFloat3("scale", &transform_.scale.x, 0.01f); // Triangleの拡縮を変更するUI
-        ImGui::DragFloat3("rotate", &transform_.rotate.x, 0.01f); // Triangleの回転を変更するUI
-        ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f); // Triangleの位置を変更するUI
+// Object3D.cpp (正しい修正案)
+
+void Object3D::ImGuiSRTControl(const std::string& name) {
+    std::string label = "##" + name;
+    
+    if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
+        ImGui::DragFloat3(("scale" + label).c_str(), &transform_.scale.x, 0.01f);
+        ImGui::DragFloat3(("rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
+        ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f);
     }
-    if (ImGui::CollapsingHeader("Color")) {
-        ImGui::ColorEdit4("Color", &materialData_->color.x, true); // 色の値を変更するUI
+    if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
+       ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
     }
     ImGui::Separator();
 }
 
-void Object3D::ImGuiLightingControl() {
-    if (ImGui::CollapsingHeader("lighting")) {
-        ImGui::RadioButton("None", &materialData_->enableLighting, 0);
-        ImGui::RadioButton("Lambert", &materialData_->enableLighting, 1);
-        ImGui::RadioButton("HalfLambert", &materialData_->enableLighting, 2);
+void Object3D::ImGuiLightingControl(const std::string& name) {
+    std::string label = "##" + name;
+
+    if (ImGui::CollapsingHeader(("lighting" + label).c_str())) {
+        ImGui::RadioButton(("None" + label).c_str(), &materialData_->enableLighting, 0);
+        ImGui::RadioButton(("Lambert" + label).c_str(), &materialData_->enableLighting, 1);
+        ImGui::RadioButton(("HalfLambert" + label).c_str(), &materialData_->enableLighting, 2);
     }
     ImGui::Separator();
 }

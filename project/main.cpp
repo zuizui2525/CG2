@@ -92,13 +92,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/bunny/bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
 
+	// パーティクル2
+	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 1.0f, 0.0f, 0.0f });
+	logger.Write("Particle2 Initialize");
+
 	// パーティクル
 	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
 	logger.Write("Particle Initialize");
 
-	// パーティクル2
-	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 3.0f, 0.0f, 0.0f });
-	logger.Write("Particle2 Initialize");
+	
 
 #ifdef _DEBUG
 	// Imgui
@@ -175,16 +177,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Triangle")) {
 				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
 				if (drawTriangle) {
-					triangle->ImGuiSRTControl();
-					triangle->ImGuiLightingControl();
+					triangle->ImGuiSRTControl("Triangle");
+					triangle->ImGuiLightingControl("Triangle");
 				}
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Sphere")) {
 				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
 				if (drawSphere) {
-					sphere->ImGuiSRTControl();
-					sphere->ImGuiLightingControl();
+					sphere->ImGuiSRTControl("Sphere");
+					sphere->ImGuiLightingControl("Sphere");
 				}
 				ImGui::EndTabItem();
 			}
@@ -198,38 +200,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Model")) {
 				ImGui::Checkbox("Draw(teapot)", &drawModel);
 				if (drawModel) {
-					teapot->ImGuiSRTControl();
-					teapot->ImGuiLightingControl();
+					teapot->ImGuiSRTControl("teapot");
+					teapot->ImGuiLightingControl("teapot");
 				}
 				ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
 				if (drawModel2) {
-					multiMaterial->ImGuiSRTControl();
-					multiMaterial->ImGuiLightingControl();
+					multiMaterial->ImGuiSRTControl("multiMaterial");
+					multiMaterial->ImGuiLightingControl("multiMaterial");
 				}
 				ImGui::Checkbox("Draw(suzanne)", &drawModel3);
 				if (drawModel3) {
-					suzanne->ImGuiSRTControl();
-					suzanne->ImGuiLightingControl();
+					suzanne->ImGuiSRTControl("suzanne");
+					suzanne->ImGuiLightingControl("suzanne");
 				}
 				ImGui::Checkbox("Draw(bunny)", &drawModel4);
 				if (drawModel4) {
-					bunny->ImGuiSRTControl();
-					bunny->ImGuiLightingControl();
+					bunny->ImGuiSRTControl("bunny");
+					bunny->ImGuiLightingControl("bunny");
 				}
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Particles")) {
 				ImGui::Checkbox("Draw(particle)", &drawParticle);
 				if (drawParticle) {
-					particle->ImGuiSRTControl();
-					particle->ImGuiLightingControl();
-					particle->ImGuiParticleControl();
+					particle->ImGuiSRTControl("particle");
+					particle->ImGuiLightingControl("particle");
+					particle->ImGuiParticleControl("particle");
 				}
 				ImGui::Checkbox("Draw(particle2)", &drawParticle2);
 				if (drawParticle2) {
-					particle2->ImGuiSRTControl();
-					particle2->ImGuiLightingControl();
-					particle2->ImGuiParticleControl();
+					particle2->ImGuiSRTControl("particle2");
+					particle2->ImGuiLightingControl("particle2");
+					particle2->ImGuiParticleControl("particle2");
 				}
 				ImGui::EndTabItem();
 			}
