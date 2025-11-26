@@ -1,4 +1,5 @@
 #include "SpriteObject.h"
+#include "Camera.h"
 
 SpriteObject::SpriteObject(ID3D12Device* device, int width, int height) {
     // Material
@@ -39,9 +40,9 @@ SpriteObject::SpriteObject(ID3D12Device* device, int width, int height) {
 
 SpriteObject::~SpriteObject() {}
 
-void SpriteObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
+void SpriteObject::Update(const Camera* camera) {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, viewMatrix), projectionMatrix);
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera->GetViewMatrix2D()), camera->GetProjectionMatrix2D());
     wvpData_->WVP = wvp;
     wvpData_->world = world;
 

@@ -277,31 +277,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		triangle->GetTransform().rotate.y += 0.03f;
 
 		// 三角形
-		triangle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		triangle->Update(camera.get());
 
 		// スプライト
-		sprite->Update(camera->GetViewMatrix2D(), camera->GetProjectionMatrix2D());
+		sprite->Update(camera.get());
 
 		// 球
-		sphere->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		sphere->Update(camera.get());
 
 		// モデル
-		teapot->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		teapot->Update(camera.get());
 
 		// モデル2
-		multiMaterial->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		multiMaterial->Update(camera.get());
 
 		// モデル3
-		suzanne->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		suzanne->Update(camera.get());
 
 		// モデル4
-		bunny->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		bunny->Update(camera.get());
 
 		// パーティクル
-		particle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		particle->Update(camera.get());
 
 		// パーティクル2
-		particle2->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		particle2->Update(camera.get());
 
 		// 描画前処理
 		dxCommon.BeginFrame();

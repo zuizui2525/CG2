@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+class Camera;
+
 // objモデル用クラス
 class ModelObject : public Object3D {
 public:
@@ -19,7 +21,7 @@ public:
     const std::shared_ptr<ModelData>& GetModelData() const { return modelData_; }
 
     // 毎フレーム更新（Transform から行列計算して WVP 反映）
-    void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
+    void Update(const Camera* camera);
 
     // モデル描画用関数
     void Draw(ID3D12GraphicsCommandList* commandList,

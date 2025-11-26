@@ -8,13 +8,15 @@
 #include "Struct.h"
 #include "Function.h"
 
+class Camera;
+
 class SpriteObject {
 public:
     SpriteObject(ID3D12Device* device, int width, int height);
     ~SpriteObject();
 
     // 更新（ModelObjectと揃える）
-    void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
+    void Update(const Camera* camera);
 
     // 描画
     void Draw(ID3D12GraphicsCommandList* commandList,

@@ -7,13 +7,15 @@
 #include "Struct.h"
 #include "Object3D.h"
 
+class Camera;
+
 class TriangleObject: public Object3D {
 public:
     TriangleObject(ID3D12Device* device);
     ~TriangleObject();
 
     // 更新処理（view, projectionを渡す）
-    void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
+    void Update(const Camera* camera);
 
     // 描画処理
     void Draw(ID3D12GraphicsCommandList* commandList,

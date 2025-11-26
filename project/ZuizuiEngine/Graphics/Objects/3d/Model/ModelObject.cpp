@@ -1,6 +1,7 @@
 #include "ModelObject.h"
 #include "ModelManager.h"
 #include "Function.h"
+#include "Camera.h"
 
 ModelObject::ModelObject(ID3D12Device* device,
     const std::string& filename,
@@ -25,7 +26,7 @@ ModelObject::ModelObject(ID3D12Device* device,
     memcpy(vertexData, modelData_->vertices.data(), sizeof(VertexData) * modelData_->vertices.size());
 }
 
-void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
+void ModelObject::Update(const Camera* camera) {
     // ワールド行列
     Matrix4x4 worldMatrix = Math::MakeAffineMatrix(
         transform_.scale,
@@ -34,7 +35,7 @@ void ModelObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectio
     );
 
     // WVP行列
-    Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
+    Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
 
     // 定数バッファに書き込み
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));

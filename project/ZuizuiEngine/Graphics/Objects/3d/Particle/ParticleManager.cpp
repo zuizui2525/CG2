@@ -2,6 +2,7 @@
 #include "Function.h"
 #include "Matrix.h" 
 #include "DxCommon.h"
+#include "Camera.h"
 #include <stdexcept>
 #include <array>
 #include <cassert>
@@ -105,7 +106,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 // ------------------------------------
 // Update
 // ------------------------------------
-void ParticleManager::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
+void ParticleManager::Update(const Camera* camera) {
 
 	// 【★追加】ParticleManager自身のワールド行列を計算
 	// Object3Dから継承した transform_ メンバを使用
@@ -135,14 +136,14 @@ void ParticleManager::Update(const Matrix4x4& viewMatrix, const Matrix4x4& proje
 		// マネージャの位置・回転・スケールが反映される
 		Matrix4x4 worldMatrix = Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix);
 
-		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
+		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
 
 		// インスタンスデータに書き込み
 		particles_[index].transform.translate += particles_[index].velocity * kDeltaTime_;
 		particles_[index].currentTime += kDeltaTime_;
 		alpha_ = 1.0f - (particles_[index].currentTime / particles_[index].lifeTime);
 		instanceData_[numInstance_].WVP = worldViewProjection;
-		instanceData_[numInstance_].world = worldMatrix; // 【修正】最終的な worldMatrix を使用
+		instanceData_[numInstance_].world = worldMatrix;
 		instanceData_[numInstance_].color = particles_[index].color;
 		instanceData_[numInstance_].color.w = alpha_;
 		++numInstance_;

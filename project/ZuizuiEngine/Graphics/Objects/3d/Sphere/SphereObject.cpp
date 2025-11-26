@@ -1,5 +1,6 @@
 #include "SphereObject.h"
 #include "Function.h"
+#include "Camera.h"
 
 SphereObject::SphereObject(ID3D12Device* device, uint32_t subdivision, float radius)
     : Object3D(device, 2), subdivision_(subdivision), radius_(radius) {
@@ -66,9 +67,9 @@ SphereObject::~SphereObject() {
     // ComPtrなので明示解放は不要
 }
 
-void SphereObject::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
+void SphereObject::Update(const Camera* camera) {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, viewMatrix), projectionMatrix);
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
     wvpData_->WVP = wvp;
     wvpData_->world = world;
 

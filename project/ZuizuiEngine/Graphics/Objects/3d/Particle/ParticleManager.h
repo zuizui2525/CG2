@@ -16,6 +16,7 @@ struct Particle {
 };
 
 class DxCommon;
+class Camera;
 
 class ParticleManager : public Object3D {
 public:
@@ -29,7 +30,7 @@ public:
     ~ParticleManager() = default;
 
     // 毎フレーム更新
-    void Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix);
+    void Update(const Camera* camera);
 
     // モデル描画用関数
     void Draw(ID3D12GraphicsCommandList* commandList,
