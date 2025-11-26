@@ -13,6 +13,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// DxCommonから必要な情報を取得
 	ID3D12Device* device = dxCommon->GetDevice();
 	ID3D12DescriptorHeap* srvHeap = dxCommon->GetSrvHeap();
+	startPosition_ = initialPosition;
 
 	// CBV/SRV/UAV ヒープのディスクリプタサイズを取得
 	UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -52,7 +53,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// ------------------------------------
 	// 2. インスタンスデータ用 StructuredBuffer 作成
 	// ------------------------------------
-	size_t bufferSize = sizeof(TransformationMatrix) * kNumInstance;
+	size_t bufferSize = sizeof(ParticleForGPU) * kNumMaxInstance;
 	instanceResource_ = CreateBufferResource(device, bufferSize);
 	if (!instanceResource_) throw std::runtime_error("Failed to create instanceResource_");
 
@@ -66,8 +67,8 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// ランダム
 	randomEngine_ = std::mt19937(seedGenerator_());
 
-	for (UINT index = 0; index < kNumInstance; ++index) {
-		particles_[index] = MakeNewParticle(randomEngine_);
+	for (UINT index = 0; index < kNumMaxInstance; ++index) {
+		particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
 	}
 
 	// ------------------------------------
@@ -89,8 +90,8 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumInstance;
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	// SRVを作成
 	device->CreateShaderResourceView(
@@ -104,22 +105,46 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 // Update
 // ------------------------------------
 void ParticleManager::Update(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix) {
-	// 全てのインスタンスのWVP行列を計算し、GPUバッファに書き込む
-	for (UINT index = 0; index < kNumInstance; ++index) {
-		// 上方向に移動
-		particles_[index].transform.translate += particles_[index].velocity;
 
-		Matrix4x4 worldMatrix = Math::MakeAffineMatrix(
+	// 【★追加】ParticleManager自身のワールド行列を計算
+	// Object3Dから継承した transform_ メンバを使用
+	Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(
+		transform_.scale,
+		transform_.rotate,
+		transform_.translate
+	);
+
+	// numInstance_のリセット
+	numInstance_ = 0;
+	// 全てのインスタンスのWVP行列を計算し、GPUバッファに書き込む
+	for (UINT index = 0; index < kNumMaxInstance; ++index) {
+		if (particles_[index].lifeTime <= particles_[index].currentTime) {
+			particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
+			continue;
+		}
+
+		// 【修正】パーティクル個別のローカルワールド行列を計算
+		Matrix4x4 particleLocalWorldMatrix = Math::MakeAffineMatrix(
 			particles_[index].transform.scale,
 			particles_[index].transform.rotate,
 			particles_[index].transform.translate
 		);
 
+		// 【修正】マネージャのワールド行列を乗算して、最終的なワールド行列を得る
+		// マネージャの位置・回転・スケールが反映される
+		Matrix4x4 worldMatrix = Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix);
+
 		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrix);
 
 		// インスタンスデータに書き込み
-		instanceData_[index].WVP = worldViewProjection;
-		instanceData_[index].world = worldMatrix;
+		particles_[index].transform.translate += particles_[index].velocity * kDeltaTime_;
+		particles_[index].currentTime += kDeltaTime_;
+		alpha_ = 1.0f - (particles_[index].currentTime / particles_[index].lifeTime);
+		instanceData_[numInstance_].WVP = worldViewProjection;
+		instanceData_[numInstance_].world = worldMatrix; // 【修正】最終的な worldMatrix を使用
+		instanceData_[numInstance_].color = particles_[index].color;
+		instanceData_[numInstance_].color.w = alpha_;
+		++numInstance_;
 	}
 }
 
@@ -158,25 +183,29 @@ void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 	if (draw) {
 		UINT vertexCount = (UINT)vertices_.size();
 		assert(vertexCount > 0 && "Vertex count must be greater than 0");
-		// 1つのメッシュ(クアッド)を kNumInstance 回描画する
-		commandList->DrawInstanced(vertexCount, kNumInstance, 0, 0);
+		// 1つのメッシュ(クアッド)を numInstance 回描画する
+		commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
 	}
 }
 
 void ParticleManager::ImGuiParticleControl() {  
     if (ImGui::Button("[Reset]")) {  
-		for (UINT index = 0; index < kNumInstance; ++index) {
-			particles_[index] = MakeNewParticle(randomEngine_);
+		for (UINT index = 0; index < kNumMaxInstance; ++index) {
+			particles_[index] = MakeNewParticle(randomEngine_, startPosition_);
 		}
 		ImGui::Separator();
     }  
+	ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
 }
 
-Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine) {
+Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {
 	Particle particle{};
-	particle.transform.translate = { distribution_(randomEngine), distribution_(randomEngine), distribution_(randomEngine) };
+	particle.transform.translate = startPosition;
 	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
 	particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 	particle.velocity = { distribution_(randomEngine), distribution_(randomEngine), distribution_(randomEngine) };
+	particle.color = { distColor_(randomEngine),distColor_(randomEngine), distColor_(randomEngine), 1.0f };
+	particle.lifeTime = distTime_(randomEngine);
+	particle.currentTime = 0.0f;
 	return particle;
 }

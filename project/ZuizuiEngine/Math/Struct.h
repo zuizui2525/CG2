@@ -78,6 +78,12 @@ struct TransformationMatrix {
     Matrix4x4 world;
 };
 
+struct ParticleForGPU {
+    Matrix4x4 WVP;
+    Matrix4x4 world;
+    Vector4 color;
+};
+
 struct DirectionalLight {
     Vector4 color;     //!< ライトの色
     Vector3 direction; //!< ライトの方向

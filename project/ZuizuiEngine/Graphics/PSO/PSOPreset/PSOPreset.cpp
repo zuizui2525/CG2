@@ -141,7 +141,7 @@ PSOPreset PSOPreset::CreateParticlePreset(
     BlendStateBuilder blendBuilder;
     // パーティクルなので「加算合成(kBlendModeAdd)」がよく使われますが、
     // まずは動作確認のため「通常(Normal)」にしておきます。
-    blendBuilder.SetBlendMode(kBlendModeNormal);
+    blendBuilder.SetBlendMode(kBlendModeAdd);
     preset.blendDesc = blendBuilder.Build();
 
 
@@ -158,9 +158,8 @@ PSOPreset PSOPreset::CreateParticlePreset(
     // --------------------------------------------------------
     DepthStencilStateBuilder dsb;
     dsb.SetDepthEnable(true);
-    // 半透明パーティクルの場合、本来は深度書き込み(DepthWrite)をOFFにしますが、
-    // まずはONのままで進めます。
-    // dsb.SetDepthWriteMask(D3D12_DEPTH_WRITE_MASK_ZERO); 
+    // 半透明パーティクルの場合、深度書き込み(DepthWrite)をOFF
+    dsb.SetDepthWriteMask(D3D12_DEPTH_WRITE_MASK_ZERO); 
     preset.depthStencilDesc = dsb.GetDesc();
 
 

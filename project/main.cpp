@@ -93,8 +93,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("Bunny Initialize");
 
 	// パーティクル
-	std::unique_ptr<ParticleManager> particleManager = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
+	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
 	logger.Write("Particle Initialize");
+
+	// パーティクル2
+	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 3.0f, 0.0f, 0.0f });
+	logger.Write("Particle2 Initialize");
 
 #ifdef _DEBUG
 	// Imgui
@@ -123,6 +127,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("uvChecker", "resources/uvChecker.png");
 	textureManager->LoadTexture("monsterball", "resources/monsterball.png");
 	textureManager->LoadTexture("white", "resources/white.png");
+	textureManager->LoadTexture("circle", "resources/circle.png");
 
 	textureManager->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
 	textureManager->LoadTexture("multiMaterial", multiMaterial->GetModelData()->material.textureFilePath);
@@ -141,6 +146,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel3 = false;
 	bool drawModel4 = false;
 	bool drawParticle = true;
+	bool drawParticle2 = true;
 
 	sphere->GetTransform().rotate.y = 4.7f;
 	teapot->GetTransform().rotate.y = 3.0f;
@@ -215,9 +221,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Particles")) {
 				ImGui::Checkbox("Draw(particle)", &drawParticle);
 				if (drawParticle) {
-					particleManager->ImGuiSRTControl();
-					particleManager->ImGuiLightingControl();
-					particleManager->ImGuiParticleControl();
+					particle->ImGuiSRTControl();
+					particle->ImGuiLightingControl();
+					particle->ImGuiParticleControl();
+				}
+				ImGui::Checkbox("Draw(particle2)", &drawParticle2);
+				if (drawParticle2) {
+					particle2->ImGuiSRTControl();
+					particle2->ImGuiLightingControl();
+					particle2->ImGuiParticleControl();
 				}
 				ImGui::EndTabItem();
 			}
@@ -286,7 +298,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		bunny->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// パーティクル
-		particleManager->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+		particle->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
+
+		// パーティクル2
+		particle2->Update(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D());
 
 		// 描画前処理
 		dxCommon.BeginFrame();
@@ -314,7 +329,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel4);
 
 		// パーティクルの描画
-		particleManager->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle);
+		particle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle);
+
+		// パーティクル2の描画
+		particle2->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle2);
 
 		// ImGui表示
 		dxCommon.DrawImGui();

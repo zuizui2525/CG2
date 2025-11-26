@@ -10,6 +10,9 @@
 struct Particle {
     Transform transform;
     Vector3 velocity;
+    Vector4 color;
+    float lifeTime;
+    float currentTime;
 };
 
 class DxCommon;
@@ -17,7 +20,9 @@ class DxCommon;
 class ParticleManager : public Object3D {
 public:
     // パーティクルの個数
-    static const UINT kNumInstance = 50;
+    static const UINT kNumMaxInstance = 50;
+    // 描画すべきインスタンスの数
+    uint32_t numInstance_ = 0;
 
     // 内部で管理するSRVヒープの固定インデックス
     static const UINT kDescriptorIndex = 50;
@@ -44,7 +49,7 @@ public:
     ID3D12Resource* GetInstanceResource() const { return instanceResource_.Get(); }
 
 private:
-    Particle MakeNewParticle(std::mt19937& randomEngine);
+    Particle MakeNewParticle(std::mt19937& randomEngine, Vector3 initialPosition);
 
     // --- 頂点バッファ関連 (クアッド) ---
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -53,10 +58,10 @@ private:
 
     // --- インスタンスデータ関連 ---
     Microsoft::WRL::ComPtr<ID3D12Resource> instanceResource_;
-    TransformationMatrix* instanceData_ = nullptr; // Mapされたインスタンスデータへのポインタ
+    ParticleForGPU* instanceData_ = nullptr; // Mapされたインスタンスデータへのポインタ
 
     // CPU側で管理するインスタンスごとのParticle情報
-    Particle particles_[kNumInstance];
+    Particle particles_[kNumMaxInstance];
 
     // --- SRVハンドル ---
     // SRVヒープ上のCPU/GPUハンドルを保持 (TextureManager方式)
@@ -66,5 +71,10 @@ private:
     // ランダム
     std::random_device seedGenerator_;
     std::mt19937 randomEngine_;
-    std::uniform_real_distribution<float> distribution_{ -0.01f, 0.01f };
+    Vector3 startPosition_{};                                           // 初期値
+    std::uniform_real_distribution<float> distribution_{ -0.5f, 0.5f }; // 飛んでいく速度の下限上限
+    std::uniform_real_distribution<float> distColor_{ 0.0f,1.0f };      // 色の下限上限
+    float alpha_ = 0.0f;                                                // 透明度
+    std::uniform_real_distribution<float> distTime_{ 2.0f,4.0f };       // 生存時間の下限上限
+    const float kDeltaTime_ = 1.0f / 60.0f;                             // デルタタイム
 };
