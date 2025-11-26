@@ -92,15 +92,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<ModelObject> bunny = std::make_unique<ModelObject>(dxCommon.GetDevice(), "resources/obj/bunny/bunny.obj", Vector3{ 0.0f, 0.0f, 0.0f });
 	logger.Write("Bunny Initialize");
 
-	// パーティクル2
-	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 1.0f, 0.0f, 0.0f });
-	logger.Write("Particle2 Initialize");
-
 	// パーティクル
 	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
 	logger.Write("Particle Initialize");
 
-	
+	// パーティクル2
+	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 1.0f, 0.0f, 0.0f });
+	logger.Write("Particle2 Initialize");
 
 #ifdef _DEBUG
 	// Imgui
