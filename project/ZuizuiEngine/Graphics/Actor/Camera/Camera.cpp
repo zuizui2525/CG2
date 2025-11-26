@@ -12,10 +12,10 @@ void Camera::Initialize() {
         0.0f, 100.0f
     );
 
-    Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(
+    cameraMatrix_ = Math::MakeAffineMatrix(
         transform_.scale, transform_.rotate, transform_.translate
     );
-    viewMatrix3D_ = Math::Inverse(cameraMatrix);
+    viewMatrix3D_ = Math::Inverse(cameraMatrix_);
     projectionMatrix3D_ = Math::MakePerspectiveFovMatrix(
         0.45f,
         static_cast<float>(WindowApp::kClientWidth) / static_cast<float>(WindowApp::kClientHeight),

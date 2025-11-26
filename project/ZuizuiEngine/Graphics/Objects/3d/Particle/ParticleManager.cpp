@@ -132,9 +132,19 @@ void ParticleManager::Update(const Camera* camera) {
 			particles_[index].transform.translate
 		);
 
-		// 【修正】マネージャのワールド行列を乗算して、最終的なワールド行列を得る
-		// マネージャの位置・回転・スケールが反映される
-		Matrix4x4 worldMatrix = Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix);
+		Matrix4x4 billboardMatrix = camera->GetCameraMatrix();
+		billboardMatrix.m[3][0] = 0.0f;
+		billboardMatrix.m[3][1] = 0.0f;
+		billboardMatrix.m[3][2] = 0.0f;
+		billboardMatrix.m[3][3] = 1.0f;
+
+		// ビルボードするかしないか
+		Matrix4x4 worldMatrix{};
+		if (billboardActive_) {
+			worldMatrix = Math::Multiply(Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix), billboardMatrix);
+		} else {
+			worldMatrix = Math::Multiply(particleLocalWorldMatrix, managerWorldMatrix);
+		}
 
 		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
 
@@ -198,6 +208,7 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 			particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
 		}
     }  
+	ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
 	ImGui::Separator();
 	ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
 }
