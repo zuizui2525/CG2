@@ -16,7 +16,8 @@ class DxCommon;
 
 class ParticleManager : public Object3D {
 public:
-    static const UINT kNumInstance = 10;
+    // パーティクルの個数
+    static const UINT kNumInstance = 50;
 
     // 内部で管理するSRVヒープの固定インデックス
     static const UINT kDescriptorIndex = 50;
