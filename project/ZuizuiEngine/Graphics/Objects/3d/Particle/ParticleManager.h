@@ -6,6 +6,7 @@
 #include <d3d12.h> 
 #include <wrl.h>
 #include <random>
+#include <list>
 
 struct Particle {
     Transform transform;
@@ -45,7 +46,6 @@ public:
 
     // アクセサ（VBVはDrawでも使用するため公開しても良いが、ここではUpdate/Drawで完結）
     ID3D12Resource* GetInstanceResource() const { return instanceResource_.Get(); }
-    
 
 private:
     Particle MakeNewParticle(std::mt19937& randomEngine, Vector3 initialPosition);
@@ -63,7 +63,7 @@ private:
     ParticleForGPU* instanceData_ = nullptr; // Mapされたインスタンスデータへのポインタ
 
     // CPU側で管理するインスタンスごとのParticle情報
-    Particle particles_[kNumMaxInstance];
+    std::list<Particle> particles_;
 
     // --- SRVハンドル ---
     // SRVヒープ上のCPU/GPUハンドルを保持 (TextureManager方式)
@@ -79,4 +79,5 @@ private:
     std::uniform_real_distribution<float> distTime_{ 2.0f,4.0f };       // 生存時間の下限上限
     const float kDeltaTime_ = 1.0f / 60.0f;                             // デルタタイム
     bool billboardActive_ = true;
+    bool loopActive_ = false;
 };

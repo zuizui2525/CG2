@@ -68,8 +68,8 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// ランダム
 	randomEngine_ = std::mt19937(seedGenerator_());
 
-	for (UINT index = 0; index < kNumMaxInstance; ++index) {
-		particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
+	for (UINT i = 0; i < kNumMaxInstance; ++i) {
+		particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
 	}
 
 	// ------------------------------------
@@ -107,40 +107,37 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 // Update
 // ------------------------------------
 void ParticleManager::Update(const Camera* camera) {
+	// numInstance_のリセット
+	numInstance_ = 0;
 
-	// 【★追加】ParticleManager自身のワールド行列を計算
-	// Object3Dから継承した transform_ メンバを使用
 	Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(
 		transform_.scale,
 		transform_.rotate,
 		transform_.translate
 	);
 
-	// numInstance_のリセット
-	numInstance_ = 0;
 	// 全てのインスタンスのWVP行列を計算し、GPUバッファに書き込む
-	for (UINT index = 0; index < kNumMaxInstance; ++index) {
-		if (particles_[index].lifeTime <= particles_[index].currentTime) {
-			particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
+	for (auto particleIterator = particles_.begin();
+		particleIterator != particles_.end();) {
+		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			particleIterator = particles_.erase(particleIterator);
 			continue;
 		}
 
-		// 【修正】パーティクル個別のローカルワールド行列を計算
 		Matrix4x4 particleLocalMatrix = Math::MakeAffineMatrix(
-			particles_[index].transform.scale,
-			particles_[index].transform.rotate,
-			particles_[index].transform.translate
+			(*particleIterator).transform.scale,
+			(*particleIterator).transform.rotate,
+			(*particleIterator).transform.translate
 		);
 
-		Matrix4x4 billboardMatrix = camera->GetCameraMatrix();
-		billboardMatrix.m[3][0] = 0.0f;
-		billboardMatrix.m[3][1] = 0.0f;
-		billboardMatrix.m[3][2] = 0.0f;
-		billboardMatrix.m[3][3] = 1.0f;
-
-		// ビルボードするかしないか
 		Matrix4x4 worldMatrix{};
 		if (billboardActive_) {
+			Matrix4x4 billboardMatrix = camera->GetCameraMatrix();
+			billboardMatrix.m[3][0] = 0.0f;
+			billboardMatrix.m[3][1] = 0.0f;
+			billboardMatrix.m[3][2] = 0.0f;
+			billboardMatrix.m[3][3] = 1.0f;
+
 			worldMatrix = Math::Multiply(Math::Multiply(particleLocalMatrix, managerWorldMatrix), billboardMatrix);
 		} else {
 			worldMatrix = Math::Multiply(particleLocalMatrix, managerWorldMatrix);
@@ -149,14 +146,29 @@ void ParticleManager::Update(const Camera* camera) {
 		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
 
 		// インスタンスデータに書き込み
-		particles_[index].transform.translate += particles_[index].velocity * kDeltaTime_;
-		particles_[index].currentTime += kDeltaTime_;
-		alpha_ = 1.0f - (particles_[index].currentTime / particles_[index].lifeTime);
-		instanceData_[numInstance_].WVP = worldViewProjection;
-		instanceData_[numInstance_].world = worldMatrix;
-		instanceData_[numInstance_].color = particles_[index].color;
-		instanceData_[numInstance_].color.w = alpha_;
-		++numInstance_;
+		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime_;
+		(*particleIterator).currentTime += kDeltaTime_;
+		alpha_ = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+		if (numInstance_ < kNumMaxInstance) {
+			instanceData_[numInstance_].WVP = worldViewProjection;
+			instanceData_[numInstance_].world = worldMatrix;
+			instanceData_[numInstance_].color = (*particleIterator).color;
+			instanceData_[numInstance_].color.w = alpha_;
+			++numInstance_;
+		}
+		++particleIterator;
+	}
+
+	if (loopActive_) {
+		// 現在のパーティクル数
+		size_t currentParticleCount = particles_.size();
+		// 最大数との差分を計算
+		size_t neededCount = kNumMaxInstance - currentParticleCount;
+
+		// 不足分を生成して追加
+		for (size_t i = 0; i < neededCount; ++i) {
+			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+		}
 	}
 }
 
@@ -204,15 +216,23 @@ void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 
 void ParticleManager::ImGuiParticleControl(const std::string& name) {
 	std::string label = "##" + name;
-	
-	if (ImGui::Button(("Reset" + label).c_str())) {
-		for (UINT index = 0; index < kNumMaxInstance; ++index) {
-			particles_[index] = MakeNewParticle(randomEngine_, transform_.translate);
-		}
-    }  
-	ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
-	ImGui::Separator();
+
 	ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
+	if (ImGui::Button(("+1Particle" + label).c_str())) {
+		if (numInstance_ < kNumMaxInstance) {
+			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+		}
+	}
+	if (ImGui::Button(("+3Particle" + label).c_str())) {
+		if (numInstance_ <= (kNumMaxInstance - 3)) {
+			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+		}
+	}
+	ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
+	ImGui::Checkbox(("loop" + label).c_str(), &loopActive_);
+	ImGui::Separator();
 }
 
 Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {
