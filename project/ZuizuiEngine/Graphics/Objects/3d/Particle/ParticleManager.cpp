@@ -196,7 +196,9 @@ void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 		UINT vertexCount = (UINT)vertices_.size();
 		assert(vertexCount > 0 && "Vertex count must be greater than 0");
 		// 1つのメッシュ(クアッド)を numInstance 回描画する
-		commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
+		if (numInstance_ > 0) {
+			commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
+		}
 	}
 }
 

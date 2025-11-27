@@ -21,7 +21,7 @@ class Camera;
 class ParticleManager : public Object3D {
 public:
     // パーティクルの個数
-    static const UINT kNumMaxInstance = 50;
+    static const UINT kNumMaxInstance = 10;
     // 描画すべきインスタンスの数
     uint32_t numInstance_ = 0;
 
