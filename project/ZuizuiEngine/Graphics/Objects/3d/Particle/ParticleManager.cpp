@@ -238,10 +238,10 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 		float max_time = distTime_.b();     // 上限
 
 		// ImGuiでローカル変数 (min_dist, max_dist, min_time, max_time) を編集
-		ImGui::DragFloat("distribution.min", &min_dist, 0.001f);
-		ImGui::DragFloat("distribution.max", &max_dist, 0.001f);
-		ImGui::DragFloat("distTime.min", &min_time, 0.001f);
-		ImGui::DragFloat("distTime.max", &max_time, 0.001f);
+		ImGui::DragFloat("distribution.min", &min_dist, 0.1f);
+		ImGui::DragFloat("distribution.max", &max_dist, 0.1f);
+		ImGui::DragFloat("distTime.min", &min_time, 0.1f);
+		ImGui::DragFloat("distTime.max", &max_time, 0.1f);
 
 		// 変更された値を新しいパラメータオブジェクトとして設定し直す
 		if (min_dist != distribution_.a() || max_dist != distribution_.b()) {
