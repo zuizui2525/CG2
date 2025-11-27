@@ -2,6 +2,7 @@
 #include <dinput.h>
 #include <wrl.h>
 #include <Windows.h>
+#include "Struct.h" // Vector2を参照するため追加
 
 class Input {
 public:
@@ -25,10 +26,20 @@ public:
     bool MousePress(int button) const;
     bool MouseRelease(int button) const;
 
-    // マウス座標取得
-    LONG GetMouseX() const { return mouseState_.lX; }
-    LONG GetMouseY() const { return mouseState_.lY; }
-    LONG GetMouseZ() const { return mouseState_.lZ; } // ホイール
+    // マウス座標取得 (float型)
+    float GetMouseX() const { return mousePos_.x; }
+    float GetMouseY() const { return mousePos_.y; }
+
+    // マウスホイール取得 (float型)
+    float GetMouseWheel() const { return static_cast<float>(mouseState_.lZ); }
+
+    // マウス座標をVector2で取得
+    Vector2 GetMousePos() const { return mousePos_; }
+
+    // マウス座標設定 (Set関数)
+    void SetMouseX(float x) { mousePos_.x = x; }
+    void SetMouseY(float y) { mousePos_.y = y; }
+    void SetMousePos(const Vector2& pos);
 
 private:
     Microsoft::WRL::ComPtr<IDirectInput8> directInput_;
@@ -40,4 +51,7 @@ private:
 
     DIMOUSESTATE2 mouseState_{};     // 現在のマウス状態
     DIMOUSESTATE2 preMouseState_{};  // 1フレーム前のマウス状態
+
+    // アプリケーション側で管理するマウス座標
+    Vector2 mousePos_{};
 };

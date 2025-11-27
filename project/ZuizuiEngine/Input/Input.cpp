@@ -55,7 +55,12 @@ void Input::Update() {
     preMouseState_ = mouseState_;
     if (mouse_) {
         mouse_->Acquire();
+        // マウスの状態を取得
         mouse_->GetDeviceState(sizeof(mouseState_), &mouseState_);
+
+        // 取得した相対移動量（lX, lY）をアプリケーション座標（mousePos_）に加算
+        mousePos_.x += static_cast<float>(mouseState_.lX);
+        mousePos_.y += static_cast<float>(mouseState_.lY);
     }
 }
 
@@ -83,4 +88,9 @@ bool Input::MousePress(int button) const {
 
 bool Input::MouseRelease(int button) const {
     return !(mouseState_.rgbButtons[button] & 0x80) && (preMouseState_.rgbButtons[button] & 0x80);
+}
+
+// マウス座標をVector2で設定
+void Input::SetMousePos(const Vector2& pos) {
+    mousePos_ = pos;
 }
