@@ -78,5 +78,5 @@ private:
     float alpha_ = 0.0f;                                                // 透明度
     std::uniform_real_distribution<float> distTime_{ 2.0f,4.0f };       // 生存時間の下限上限
     const float kDeltaTime_ = 1.0f / 60.0f;                             // デルタタイム
-    bool billboardActive_ = false;
+    bool billboardActive_ = true;
 };

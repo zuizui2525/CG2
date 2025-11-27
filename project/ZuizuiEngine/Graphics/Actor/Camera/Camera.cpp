@@ -29,7 +29,7 @@ void Camera::Update(Input* input) {
         useDebugCamera_ = !useDebugCamera_;
     }
 
-    Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(
+    cameraMatrix_ = Math::MakeAffineMatrix(
         transform_.scale, transform_.rotate, transform_.translate
     );
 
@@ -43,7 +43,7 @@ void Camera::Update(Input* input) {
         projectionMatrix3D_ = debugCamera_.GetProjectionMatrix();
     } else {
         debugCamera_.ShowCursorBack();
-        viewMatrix3D_ = Math::Inverse(cameraMatrix);
+        viewMatrix3D_ = Math::Inverse(cameraMatrix_);
         projectionMatrix3D_ = Math::MakePerspectiveFovMatrix(
             0.45f,
             static_cast<float>(WindowApp::kClientWidth) / static_cast<float>(WindowApp::kClientHeight),
