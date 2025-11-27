@@ -48,6 +48,7 @@ private:
 
     // マネージャ全体のTransform
     Transform transform_{};
+
     // マテリアルリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
     Material* materialData_ = nullptr;
@@ -63,6 +64,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> instanceResource_;
     ParticleForGPU* instanceData_ = nullptr;
 
+    // 個々のパーティクル
     std::list<Particle> particles_;
 
     // SRVハンドル
