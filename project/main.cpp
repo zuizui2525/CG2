@@ -175,16 +175,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Triangle")) {
 				ImGui::Checkbox("Draw(Triangle)", &drawTriangle);
 				if (drawTriangle) {
-					triangle->ImGuiSRTControl("Triangle");
-					triangle->ImGuiLightingControl("Triangle");
+					triangle->ImGuiControl("Triangle");
 				}
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Sphere")) {
 				ImGui::Checkbox("Draw(Sphere)", &drawSphere);
 				if (drawSphere) {
-					sphere->ImGuiSRTControl("Sphere");
-					sphere->ImGuiLightingControl("Sphere");
+					sphere->ImGuiControl("Sphere");
 				}
 				ImGui::EndTabItem();
 			}
@@ -198,39 +196,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::BeginTabItem("Model")) {
 				ImGui::Checkbox("Draw(teapot)", &drawModel);
 				if (drawModel) {
-					teapot->ImGuiSRTControl("teapot");
-					teapot->ImGuiLightingControl("teapot");
+					teapot->ImGuiControl("teapot");
 				}
 				ImGui::Checkbox("Draw(multiMaterial)", &drawModel2);
 				if (drawModel2) {
-					multiMaterial->ImGuiSRTControl("multiMaterial");
-					multiMaterial->ImGuiLightingControl("multiMaterial");
+					multiMaterial->ImGuiControl("multiMaterial");
 				}
 				ImGui::Checkbox("Draw(suzanne)", &drawModel3);
 				if (drawModel3) {
-					suzanne->ImGuiSRTControl("suzanne");
-					suzanne->ImGuiLightingControl("suzanne");
+					suzanne->ImGuiControl("suzanne");
 				}
 				ImGui::Checkbox("Draw(bunny)", &drawModel4);
 				if (drawModel4) {
-					bunny->ImGuiSRTControl("bunny");
-					bunny->ImGuiLightingControl("bunny");
+					bunny->ImGuiControl("bunny");
 				}
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Particles")) {
 				ImGui::Checkbox("Draw(particle)", &drawParticle);
 				if (drawParticle) {
-					particle->ImGuiSRTControl("particle");
-					particle->ImGuiLightingControl("particle");
-					particle->ImGuiParticleControl("particle");
-				}
+					particle->ImGuiControl("particle");
+					}
 				ImGui::Checkbox("Draw(particle2)", &drawParticle2);
 				if (drawParticle2) {
-					particle2->ImGuiSRTControl("particle2");
-					particle2->ImGuiLightingControl("particle2");
-					particle2->ImGuiParticleControl("particle2");
-				}
+					particle2->ImGuiControl("particle2");
+					}
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();

@@ -27,7 +27,11 @@ Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     uvTransform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
 }
 
-// Object3D.cpp (正しい修正案)
+void Object3D::ImGuiControl(const std::string& name) {
+    ImGuiSRTControl(name);
+    ImGuiLightingControl(name);
+    ImGui::Separator();
+}
 
 void Object3D::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
@@ -40,7 +44,6 @@ void Object3D::ImGuiSRTControl(const std::string& name) {
     if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
        ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
     }
-    ImGui::Separator();
 }
 
 void Object3D::ImGuiLightingControl(const std::string& name) {
@@ -51,5 +54,4 @@ void Object3D::ImGuiLightingControl(const std::string& name) {
         ImGui::RadioButton(("Lambert" + label).c_str(), &materialData_->enableLighting, 1);
         ImGui::RadioButton(("HalfLambert" + label).c_str(), &materialData_->enableLighting, 2);
     }
-    ImGui::Separator();
 }

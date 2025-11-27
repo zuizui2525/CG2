@@ -6,50 +6,65 @@
 #include <stdexcept>
 #include <array>
 #include <cassert>
+#include "imgui.h" 
+
+namespace {
+	void InitializeTransform(Transform& transform) {
+		transform.scale = { 1, 1, 1 };
+		transform.rotate = { 0, 0, 0 };
+		transform.translate = { 0, 0, 0 };
+	}
+} // namespace
+
 
 ParticleManager::ParticleManager(DxCommon* dxCommon,
-	const Vector3& initialPosition)
-	// Object3Dの初期化: ライティングモード0 (無効) を仮定
-	: Object3D(dxCommon->GetDevice(), 0) {
-	// DxCommonから必要な情報を取得
+	const Vector3& initialPosition) {
 	ID3D12Device* device = dxCommon->GetDevice();
 	ID3D12DescriptorHeap* srvHeap = dxCommon->GetSrvHeap();
+
+	// Transform初期化
+	InitializeTransform(transform_);
 	transform_.translate = initialPosition;
 
-	// CBV/SRV/UAV ヒープのディスクリプタサイズを取得
+	// Materialリソース作成
+	materialResource_ = CreateBufferResource(device, sizeof(Material));
+	if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
+	HRESULT hr_mat = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+	if (FAILED(hr_mat) || !materialData_) throw std::runtime_error("Failed to map materialResource_");
+	materialData_->color = { 1,1,1,1 };
+	materialData_->enableLighting = 0;
+	materialData_->uvtransform = Math::MakeIdentity();
+
 	UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// ------------------------------------
 	// 1. 板ポリゴン（クアッド）の頂点データ作成
 	// ------------------------------------
-	// クアッドの頂点データ (6頂点)
 	vertices_ = {
 		// Triangle 1
-		 {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}}, // 左下
-		 {{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},  // 左上
-		 {{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},  // 右下
+		 {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+		 {{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+		 {{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
 
 		 // Triangle 2
-		 {{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},  // 右下
-		 {{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},  // 左上
-		 {{1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}   // 右上
+		 {{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+		 {{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+		 {{1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}
 	};
 
-	// 頂点リソース作成
 	size_t vertexBufferSize = sizeof(VertexData) * vertices_.size();
 	vertexResource_ = CreateBufferResource(device, vertexBufferSize);
 	if (!vertexResource_) throw std::runtime_error("Failed to create vertexResource_");
 
-	// 頂点データ転送
 	VertexData* vertexData = nullptr;
 	HRESULT map_hr = vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	if (FAILED(map_hr)) throw std::runtime_error("Failed to map vertexResource_");
 	memcpy(vertexData, vertices_.data(), vertexBufferSize);
 
-	// VBV (Vertex Buffer View) の設定
 	vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	vbv_.SizeInBytes = (UINT)vertexBufferSize;
 	vbv_.StrideInBytes = sizeof(VertexData);
+
 
 	// ------------------------------------
 	// 2. インスタンスデータ用 StructuredBuffer 作成
@@ -58,14 +73,12 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	instanceResource_ = CreateBufferResource(device, bufferSize);
 	if (!instanceResource_) throw std::runtime_error("Failed to create instanceResource_");
 
-	// マッピング
 	HRESULT hr = instanceResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceData_));
 	if (FAILED(hr) || !instanceData_) throw std::runtime_error("Failed to map instanceResource_");
 
 	// ------------------------------------
-	// 3. インスタンスごとのTransformを初期化 
+	// 3. インスタンスごとのTransformを初期化
 	// ------------------------------------
-	// ランダム
 	randomEngine_ = std::mt19937(seedGenerator_());
 
 	for (UINT i = 0; i < kNumMaxInstance; ++i) {
@@ -73,20 +86,17 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	}
 
 	// ------------------------------------
-	// 4. インスタンスデータ用 SRVの作成 (Function.hのヘルパー関数を使用)
+	// 4. インスタンスデータ用 SRVの作成
 	// ------------------------------------
 
-	// ★ CPUハンドルを計算し、メンバ変数に保持
 	instanceSrvHandleCPU_ =
 		GetCPUDescriptorHandle(srvHeap, descriptorSize, kDescriptorIndex);
 
-	// ★ GPUハンドルを計算し、メンバ変数に保持
 	instanceSrvHandleGPU_ =
 		GetGPUDescriptorHandle(srvHeap, descriptorSize, kDescriptorIndex);
 
-	// SRVディスクリプタの設定 (Structured Bufferとして設定)
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured BufferはUNKNOWN
+	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	instancingSrvDesc.Buffer.FirstElement = 0;
@@ -94,20 +104,15 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
-	// SRVを作成
 	device->CreateShaderResourceView(
 		instanceResource_.Get(),
 		&instancingSrvDesc,
-		instanceSrvHandleCPU_ // 保持したCPUハンドルを使用
+		instanceSrvHandleCPU_
 	);
 	kDescriptorIndex++;
 }
 
-// ------------------------------------
-// Update
-// ------------------------------------
 void ParticleManager::Update(const Camera* camera) {
-	// numInstance_のリセット
 	numInstance_ = 0;
 
 	Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(
@@ -116,36 +121,35 @@ void ParticleManager::Update(const Camera* camera) {
 		transform_.translate
 	);
 
-	// 全てのインスタンスのWVP行列を計算し、GPUバッファに書き込む
+	Matrix4x4 billBoardMatrix = Math::MakeIdentity();
+	if (billboardActive_) {
+		billBoardMatrix = Math::Inverse(camera->GetViewMatrix3D());
+		billBoardMatrix.m[3][0] = 0.0f;
+		billBoardMatrix.m[3][1] = 0.0f;
+		billBoardMatrix.m[3][2] = 0.0f;
+	}
+
 	for (auto particleIterator = particles_.begin();
 		particleIterator != particles_.end();) {
-		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+
+		if ((*particleIterator).currentTime >= (*particleIterator).lifeTime) {
 			particleIterator = particles_.erase(particleIterator);
 			continue;
 		}
 
-		Matrix4x4 particleLocalMatrix = Math::MakeAffineMatrix(
+		Matrix4x4 particleWorldMatrix = Math::MakeAffineMatrix(
 			(*particleIterator).transform.scale,
 			(*particleIterator).transform.rotate,
 			(*particleIterator).transform.translate
 		);
 
-		Matrix4x4 worldMatrix{};
-		if (billboardActive_) {
-			Matrix4x4 billboardMatrix = camera->GetCameraMatrix();
-			billboardMatrix.m[3][0] = 0.0f;
-			billboardMatrix.m[3][1] = 0.0f;
-			billboardMatrix.m[3][2] = 0.0f;
-			billboardMatrix.m[3][3] = 1.0f;
+		particleWorldMatrix = Math::Multiply(billBoardMatrix, particleWorldMatrix);
 
-			worldMatrix = Math::Multiply(Math::Multiply(particleLocalMatrix, managerWorldMatrix), billboardMatrix);
-		} else {
-			worldMatrix = Math::Multiply(particleLocalMatrix, managerWorldMatrix);
-		}
+		particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
 
-		Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
+		Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D()));
+		Matrix4x4 worldMatrix = particleWorldMatrix;
 
-		// インスタンスデータに書き込み
 		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime_;
 		(*particleIterator).currentTime += kDeltaTime_;
 		alpha_ = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
@@ -160,12 +164,9 @@ void ParticleManager::Update(const Camera* camera) {
 	}
 
 	if (loopActive_) {
-		// 現在のパーティクル数
 		size_t currentParticleCount = particles_.size();
-		// 最大数との差分を計算
 		size_t neededCount = kNumMaxInstance - currentParticleCount;
 
-		// 不足分を生成して追加
 		for (size_t i = 0; i < neededCount; ++i) {
 			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
 		}
@@ -173,9 +174,6 @@ void ParticleManager::Update(const Camera* camera) {
 }
 
 
-// ------------------------------------
-// Draw (RootSignatureの定義に完全に対応)
-// ------------------------------------
 void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
 	D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
@@ -186,53 +184,88 @@ void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
 	commandList->SetGraphicsRootSignature(rootSignature);
 	commandList->SetPipelineState(pipelineState);
 
-	// VBV設定（板ポリの頂点データ）
 	commandList->IASetVertexBuffers(0, 1, &vbv_);
 
-	// 【Root Parameter 0: インスタンスデータ (SRV, t0, VS)】
-	// インスタンシング用の行列データ。内部で保持しているGPUハンドルを使用
+	// Root Parameter 0: インスタンスデータ
 	commandList->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
 
-	// 【Root Parameter 1: マテリアル (CBV, b0, PS)】
+	// Root Parameter 1: マテリアル
 	commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
 
-	// 【Root Parameter 2: DirectionalLight (CBV, b1, PS)】
+	// Root Parameter 2: DirectionalLight
 	commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
 
-	// 【Root Parameter 3: テクスチャ (SRV, t0, PS)】
-	// 外部から渡されたテクスチャのGPUハンドルを使用
+	// Root Parameter 3: テクスチャ
 	commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
 
-	// 描画: インスタンシング描画
 	if (draw) {
 		UINT vertexCount = (UINT)vertices_.size();
 		assert(vertexCount > 0 && "Vertex count must be greater than 0");
-		// 1つのメッシュ(クアッド)を numInstance 回描画する
 		if (numInstance_ > 0) {
 			commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
 		}
 	}
 }
 
+void ParticleManager::ImGuiControl(const std::string& name) {
+	ImGuiSRTControl(name);
+	ImGuiParticleControl(name);
+	ImGui::Separator();
+}
+
+void ParticleManager::ImGuiSRTControl(const std::string& name) {
+	std::string label = "##" + name;
+
+	if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
+		ImGui::DragFloat3(("scale" + label).c_str(), &transform_.scale.x, 0.01f);
+		ImGui::DragFloat3(("rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
+		ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f);
+	}
+	if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
+		ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
+	}
+}
+
 void ParticleManager::ImGuiParticleControl(const std::string& name) {
 	std::string label = "##" + name;
 
-	ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
-	if (ImGui::Button(("+1Particle" + label).c_str())) {
-		if (numInstance_ < kNumMaxInstance) {
-			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+	if (ImGui::CollapsingHeader(("Particles" + label).c_str())) {
+		ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
+		// 現在のパラメータを取得
+		float min_dist = distribution_.a(); // 下限
+		float max_dist = distribution_.b(); // 上限
+		float min_time = distTime_.a();     // 下限
+		float max_time = distTime_.b();     // 上限
+
+		// ImGuiでローカル変数 (min_dist, max_dist, min_time, max_time) を編集
+		ImGui::DragFloat("distribution.min", &min_dist, 0.001f);
+		ImGui::DragFloat("distribution.max", &max_dist, 0.001f);
+		ImGui::DragFloat("distTime.min", &min_time, 0.001f);
+		ImGui::DragFloat("distTime.max", &max_time, 0.001f);
+
+		// 変更された値を新しいパラメータオブジェクトとして設定し直す
+		if (min_dist != distribution_.a() || max_dist != distribution_.b()) {
+			distribution_ = std::uniform_real_distribution<float>(min_dist, max_dist);
 		}
-	}
-	if (ImGui::Button(("+3Particle" + label).c_str())) {
-		if (numInstance_ <= (kNumMaxInstance - 3)) {
-			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
-			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
-			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+		if (min_time != distTime_.a() || max_time != distTime_.b()) {
+			distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
 		}
+
+		if (ImGui::Button(("+1Particle" + label).c_str())) {
+			if (numInstance_ < kNumMaxInstance) {
+				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			}
+		}
+		if (ImGui::Button(("+3Particle" + label).c_str())) {
+			if (numInstance_ <= (kNumMaxInstance - 3)) {
+				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			}
+		}
+		ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
+		ImGui::Checkbox(("loop" + label).c_str(), &loopActive_);
 	}
-	ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
-	ImGui::Checkbox(("loop" + label).c_str(), &loopActive_);
-	ImGui::Separator();
 }
 
 Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {

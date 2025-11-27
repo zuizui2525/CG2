@@ -10,8 +10,7 @@ public:
     virtual ~Object3D() = default;
 
     // ImGui
-    void ImGuiSRTControl(const std::string& name);
-    void ImGuiLightingControl(const std::string& name);
+    void ImGuiControl(const std::string& name);
 
     // 共通アクセサ
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
@@ -22,6 +21,10 @@ public:
     TransformationMatrix* GetWvpData() { return wvpData_; }
 
 protected:
+    // ImGui
+    void ImGuiSRTControl(const std::string& name);
+    void ImGuiLightingControl(const std::string& name);
+
     // GPUリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
