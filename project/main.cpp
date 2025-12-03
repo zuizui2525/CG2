@@ -23,7 +23,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Window
 	WindowApp window;
-	if (!window.Initialize(L"CreateEngine!!")) return -1;
+	if (!window.Initialize(L"LE2B_02_イトウカズイ")) return -1;
 	window.Show();
 
 	// Log
@@ -93,12 +93,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	logger.Write("Bunny Initialize");
 
 	// パーティクル
-	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>(&dxCommon, Vector3{0.0f, 0.0f, 0.0f});
+	std::unique_ptr<ParticleManager> particle = std::make_unique<ParticleManager>(&dxCommon, Vector3{ -10.0f, 0.0f, 20.0f}, 10);
 	logger.Write("Particle Initialize");
 
 	// パーティクル2
-	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 1.0f, 0.0f, 0.0f });
+	std::unique_ptr<ParticleManager> particle2 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ -5.0f, 0.0f, 20.0f });
 	logger.Write("Particle2 Initialize");
+
+	// パーティクル3
+	std::unique_ptr<ParticleManager> particle3 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 0.0f, 0.0f, 20.0f }, 1000);
+	logger.Write("Particle3 Initialize");
+
+	// パーティクル4
+	std::unique_ptr<ParticleManager> particle4 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 5.0f, 0.0f, 20.0f }, 10000);
+	logger.Write("Particle4 Initialize");
+
+	// パーティクル5
+	std::unique_ptr<ParticleManager> particle5 = std::make_unique<ParticleManager>(&dxCommon, Vector3{ 10.0f, 0.0f, 20.0f }, 100000);
+	logger.Write("Particle5 Initialize");
 
 #ifdef _DEBUG
 	// Imgui
@@ -136,7 +148,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 音声出力
 	SoundData soundData1 = audio.LoadSound("resources/fanfare.wav");
-	audio.PlaySound(soundData1, true);
+	//audio.PlaySound(soundData1, true);
 
 	bool drawTriangle = false;
 	bool drawSprite = false;
@@ -145,8 +157,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool drawModel2 = false;
 	bool drawModel3 = false;
 	bool drawModel4 = false;
-	bool drawParticle = true;
-	bool drawParticle2 = true;
+	bool drawParticle = false;
+	bool drawParticle2 = false;
+	bool drawParticle3 = true;
+	bool drawParticle4 = false;
+	bool drawParticle5 = false;
 
 	sphere->GetTransform().rotate.y = 4.7f;
 	teapot->GetTransform().rotate.y = 3.0f;
@@ -216,11 +231,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::Checkbox("Draw(particle)", &drawParticle);
 				if (drawParticle) {
 					particle->ImGuiControl("particle");
-					}
+				}
 				ImGui::Checkbox("Draw(particle2)", &drawParticle2);
 				if (drawParticle2) {
 					particle2->ImGuiControl("particle2");
-					}
+				}
+				ImGui::Checkbox("Draw(particle3)", &drawParticle3);
+				if (drawParticle3) {
+					particle3->ImGuiControl("particle3");
+				}
+				ImGui::Checkbox("Draw(particle4)", &drawParticle4);
+				if (drawParticle4) {
+					particle4->ImGuiControl("particle4");
+				}
+				ImGui::Checkbox("Draw(particle5)", &drawParticle5);
+				if (drawParticle5) {
+					particle5->ImGuiControl("particle5");
+				}
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
@@ -293,6 +320,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// パーティクル2
 		particle2->Update(camera.get());
 
+		// パーティクル3
+		particle3->Update(camera.get());
+
+		// パーティクル4
+		particle4->Update(camera.get());
+
+		// パーティクル5
+		particle5->Update(camera.get());
+
 		// 描画前処理
 		dxCommon.BeginFrame();
 		dxCommon.PreDraw();
@@ -323,6 +359,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// パーティクル2の描画
 		particle2->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle2);
+
+		// パーティクル3の描画
+		particle3->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle3);
+
+		// パーティクル4の描画
+		particle4->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle4);
+		
+		// パーティクル5の描画
+		particle5->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle5);
 
 		// ImGui表示
 		dxCommon.DrawImGui();

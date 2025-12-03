@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 void Camera::Initialize() {
-    transform_ = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-15.0f} };
+    transform_ = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-20.0f} };
     debugCamera_.Initialize();
 
     viewMatrix2D_ = Math::MakeIdentity();

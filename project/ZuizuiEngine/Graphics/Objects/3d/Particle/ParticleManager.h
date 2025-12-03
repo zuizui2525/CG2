@@ -9,11 +9,23 @@
 #include <string>
 
 struct Particle {
-    Transform transform;
-    Vector3 velocity;
-    Vector4 color;
-    float lifeTime;
-    float currentTime;
+    Transform transform;  // パーティクルのtransform
+    Vector3 velocity;     // 速度
+    Vector4 color;        // 色
+    float lifeTime;       // 存在時間
+    float currentTime;    // 発生してからの経過時間
+};
+
+struct Emitter {
+    Transform transform;  // エミッタのtransform
+    uint32_t count;       // 発生数
+    float frequency;      // 発生頻度
+    float frequencyTime;  // 頻度用時刻
+};
+
+struct AcclerationField {
+    Vector3 acceleration; // 加速度
+    AABB area;            // 範囲
 };
 
 class DxCommon;
@@ -21,10 +33,7 @@ class Camera;
 
 class ParticleManager {
 public:
-    static const UINT kNumMaxInstance = 10;
-    uint32_t numInstance_ = 0;
-
-    ParticleManager(DxCommon* dxCommon, const Vector3& initialPosition);
+    ParticleManager(DxCommon* dxCommon, const Vector3& initialPosition = { 0.0f,0.0f,0.0f }, const int maxInstance = 100, const int count = 10, const float frequency = 0.5);
     ~ParticleManager() = default;
 
     void Update(const Camera* camera);
@@ -39,15 +48,26 @@ public:
     void ImGuiControl(const std::string& name);
 
     ID3D12Resource* GetInstanceResource() const { return instanceResource_.Get(); }
+    Vector3& GetPosition() { return emitter_.transform.translate; }
+    void SetPosition(const Vector3& position) { emitter_.transform.translate = position; }
 
 private:
     Particle MakeNewParticle(std::mt19937& randomEngine, Vector3 initialPosition);
-
+    std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine);
+    
     void ImGuiSRTControl(const std::string& name);
     void ImGuiParticleControl(const std::string& name);
 
-    // マネージャ全体のTransform
-    Transform transform_{};
+    // Emitter
+    Emitter emitter_{};
+
+    // 風
+    AcclerationField accelerationFeild_;
+
+    // パーティクルの最大発生数
+    static const UINT kNumMaxInstance = 10000;
+    UINT numMaxInstance_ = 0;
+    uint32_t numInstance_ = 0;
 
     // マテリアルリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
@@ -74,11 +94,15 @@ private:
     // ランダム
     std::random_device seedGenerator_;
     std::mt19937 randomEngine_;
-    std::uniform_real_distribution<float> distribution_{ -0.5f, 0.5f };
+    std::uniform_real_distribution<float> distribution_{ -20.0f, 20.0f };
     std::uniform_real_distribution<float> distColor_{ 0.0f,1.0f };
     float alpha_ = 0.0f;
-    std::uniform_real_distribution<float> distTime_{ 2.0f,4.0f };
+    std::uniform_real_distribution<float> distTime_{ 1.0f,10.0f };
     const float kDeltaTime_ = 1.0f / 60.0f;
-    bool billboardActive_ = true;
-    bool loopActive_ = true;
+   
+    // フラグ
+    bool billboardActive_ = true;  // ビルボード
+
+    bool loopActive_ = false;      // ループするのか
+    bool emitterActive_ = true;    // エミッタをつかうのか
 };

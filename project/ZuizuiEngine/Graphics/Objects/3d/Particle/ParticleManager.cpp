@@ -3,6 +3,7 @@
 #include "Matrix.h" 
 #include "DxCommon.h"
 #include "Camera.h"
+#include "Collision.h"
 #include <stdexcept>
 #include <array>
 #include <cassert>
@@ -18,13 +19,25 @@ namespace {
 
 
 ParticleManager::ParticleManager(DxCommon* dxCommon,
-	const Vector3& initialPosition) {
+	const Vector3& initialPosition, const int maxInstance, const int count, const float frequency) {
 	ID3D12Device* device = dxCommon->GetDevice();
 	ID3D12DescriptorHeap* srvHeap = dxCommon->GetSrvHeap();
 
 	// Transform初期化
-	InitializeTransform(transform_);
-	transform_.translate = initialPosition;
+	InitializeTransform(emitter_.transform);
+	emitter_.transform.translate = initialPosition;
+	emitter_.count = count;
+	emitter_.frequency = frequency;
+	emitter_.frequencyTime = 0.0f;
+
+	// パーティクルの数の初期化
+	numMaxInstance_ = maxInstance;
+	if (numMaxInstance_ > kNumMaxInstance) { numMaxInstance_ = kNumMaxInstance; };
+
+	// 風の初期化
+	accelerationFeild_.acceleration = { 50.0f,0.0f,0.0f };
+	accelerationFeild_.area.min = { -10.0f,-10.0f,10.0f };
+	accelerationFeild_.area.max = { 10.0f,10.0f,30.0f };
 
 	// Materialリソース作成
 	materialResource_ = CreateBufferResource(device, sizeof(Material));
@@ -69,7 +82,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// ------------------------------------
 	// 2. インスタンスデータ用 StructuredBuffer 作成
 	// ------------------------------------
-	size_t bufferSize = sizeof(ParticleForGPU) * kNumMaxInstance;
+	size_t bufferSize = sizeof(ParticleForGPU) * numMaxInstance_;
 	instanceResource_ = CreateBufferResource(device, bufferSize);
 	if (!instanceResource_) throw std::runtime_error("Failed to create instanceResource_");
 
@@ -80,10 +93,6 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	// 3. インスタンスごとのTransformを初期化
 	// ------------------------------------
 	randomEngine_ = std::mt19937(seedGenerator_());
-
-	for (UINT i = 0; i < kNumMaxInstance; ++i) {
-		particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
-	}
 
 	// ------------------------------------
 	// 4. インスタンスデータ用 SRVの作成
@@ -101,7 +110,7 @@ ParticleManager::ParticleManager(DxCommon* dxCommon,
 	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+	instancingSrvDesc.Buffer.NumElements = numMaxInstance_;
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	device->CreateShaderResourceView(
@@ -116,9 +125,9 @@ void ParticleManager::Update(const Camera* camera) {
 	numInstance_ = 0;
 
 	Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(
-		transform_.scale,
-		transform_.rotate,
-		transform_.translate
+		emitter_.transform.scale,
+		emitter_.transform.rotate,
+		emitter_.transform.translate
 	);
 
 	Matrix4x4 billBoardMatrix = Math::MakeIdentity();
@@ -150,10 +159,15 @@ void ParticleManager::Update(const Camera* camera) {
 		Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D()));
 		Matrix4x4 worldMatrix = particleWorldMatrix;
 
+		// Feildの範囲内のParticleには加速度を適応する
+		if (IsCollision(accelerationFeild_.area, (*particleIterator).transform.translate)) {
+			(*particleIterator).velocity += accelerationFeild_.acceleration * kDeltaTime_;
+		}
+
 		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime_;
 		(*particleIterator).currentTime += kDeltaTime_;
 		alpha_ = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-		if (numInstance_ < kNumMaxInstance) {
+		if (numInstance_ < numMaxInstance_) {
 			instanceData_[numInstance_].WVP = worldViewProjection;
 			instanceData_[numInstance_].world = worldMatrix;
 			instanceData_[numInstance_].color = (*particleIterator).color;
@@ -163,12 +177,33 @@ void ParticleManager::Update(const Camera* camera) {
 		++particleIterator;
 	}
 
-	if (loopActive_) {
+	if (loopActive_ && !emitterActive_) {
+		// [ループモード]:
 		size_t currentParticleCount = particles_.size();
-		size_t neededCount = kNumMaxInstance - currentParticleCount;
+		size_t neededCount = numMaxInstance_ - currentParticleCount;
 
 		for (size_t i = 0; i < neededCount; ++i) {
-			particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			particles_.push_back(MakeNewParticle(randomEngine_, emitter_.transform.translate));
+		}
+	}
+
+	if (emitterActive_ && !loopActive_) {
+		// [エミッタモード]:
+		emitter_.frequencyTime += kDeltaTime_;
+		if (emitter_.frequency <= emitter_.frequencyTime) {
+
+			size_t currentParticleCount = particles_.size();
+			size_t maxEmitCount = numMaxInstance_ - currentParticleCount;
+
+			uint32_t emitCount = (std::min)(emitter_.count, (uint32_t)maxEmitCount);
+
+			if (emitCount > 0) {
+				Emitter actualEmitter = emitter_;
+				actualEmitter.count = emitCount;
+
+				particles_.splice(particles_.end(), Emit(actualEmitter, randomEngine_));
+			}
+			emitter_.frequencyTime -= emitter_.frequency;
 		}
 	}
 }
@@ -217,9 +252,9 @@ void ParticleManager::ImGuiSRTControl(const std::string& name) {
 	std::string label = "##" + name;
 
 	if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
-		ImGui::DragFloat3(("scale" + label).c_str(), &transform_.scale.x, 0.01f);
-		ImGui::DragFloat3(("rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
-		ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f);
+		ImGui::DragFloat3(("scale" + label).c_str(), &emitter_.transform.scale.x, 0.01f);
+		ImGui::DragFloat3(("rotate" + label).c_str(), &emitter_.transform.rotate.x, 0.01f);
+		ImGui::DragFloat3(("Translate" + label).c_str(), &emitter_.transform.translate.x, 0.01f);
 	}
 	if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
 		ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
@@ -230,7 +265,7 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 	std::string label = "##" + name;
 
 	if (ImGui::CollapsingHeader(("Particles" + label).c_str())) {
-		ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, kNumMaxInstance);
+		ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, numMaxInstance_);
 		// 現在のパラメータを取得
 		float min_dist = distribution_.a(); // 下限
 		float max_dist = distribution_.b(); // 上限
@@ -238,10 +273,10 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 		float max_time = distTime_.b();     // 上限
 
 		// ImGuiでローカル変数 (min_dist, max_dist, min_time, max_time) を編集
-		ImGui::DragFloat("distribution.min", &min_dist, 0.1f);
-		ImGui::DragFloat("distribution.max", &max_dist, 0.1f);
-		ImGui::DragFloat("distTime.min", &min_time, 0.1f);
-		ImGui::DragFloat("distTime.max", &max_time, 0.1f);
+		ImGui::DragFloat(("distribution.min" + label).c_str(), &min_dist, 0.1f, -100.0f, (max_dist - 0.01f));
+		ImGui::DragFloat(("distribution.max" + label).c_str(), &max_dist, 0.1f, (min_dist + 0.01f), 100.0f);
+		ImGui::DragFloat(("distTime.min" + label).c_str(), &min_time, 0.1f, 0.0f, (max_time - 0.01f));
+		ImGui::DragFloat(("distTime.max" + label).c_str(), &max_time, 0.1f, (min_time + 0.01f), 100.0f);
 
 		// 変更された値を新しいパラメータオブジェクトとして設定し直す
 		if (min_dist != distribution_.a() || max_dist != distribution_.b()) {
@@ -251,20 +286,28 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 			distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
 		}
 
+		// count
+		int count = static_cast<int>(emitter_.count);
+		if (ImGui::DragInt(("count" + label).c_str(), &count, 1, 1, numMaxInstance_)) {
+			emitter_.count = static_cast<uint32_t>(count);
+		}
+		// frequency
+		ImGui::DragFloat(("frequency" + label).c_str(), &emitter_.frequency, 0.1f, 0.01f, 50.0f);
+
 		if (ImGui::Button(("+1Particle" + label).c_str())) {
-			if (numInstance_ < kNumMaxInstance) {
-				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+			if (numInstance_ < numMaxInstance_) {
+				particles_.push_back(MakeNewParticle(randomEngine_, emitter_.transform.translate));
 			}
 		}
-		if (ImGui::Button(("+3Particle" + label).c_str())) {
-			if (numInstance_ <= (kNumMaxInstance - 3)) {
-				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
-				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
-				particles_.push_back(MakeNewParticle(randomEngine_, transform_.translate));
+		if (ImGui::Button(("+Emitter.count" + label).c_str())) {
+			if (numInstance_ <= (numMaxInstance_ - emitter_.count)) {
+				particles_.splice(particles_.end(), Emit(emitter_, randomEngine_));
 			}
 		}
 		ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
-		ImGui::Checkbox(("loop" + label).c_str(), &loopActive_);
+		ImGui::Separator();
+		if (ImGui::Checkbox(("loop" + label).c_str(), &loopActive_)) { emitterActive_ = false; }
+		if (ImGui::Checkbox(("emit" + label).c_str(), &emitterActive_)) { loopActive_ = false; }
 	}
 }
 
@@ -278,4 +321,12 @@ Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 st
 	particle.lifeTime = distTime_(randomEngine);
 	particle.currentTime = 0.0f;
 	return particle;
+}
+
+std::list<Particle> ParticleManager::Emit(const Emitter& emitter, std::mt19937& randomEngine) {
+	std::list<Particle> particles;
+	for (uint32_t count = 0; count < emitter.count; ++count) {
+		particles.push_back(MakeNewParticle(randomEngine, emitter.transform.translate));
+	}
+	return particles;
 }
