@@ -102,6 +102,7 @@ private:
    
     // フラグ
     bool billboardActive_ = true;  // ビルボード
+    bool windActive_ = false;      // 風
 
     bool loopActive_ = false;      // ループするのか
     bool emitterActive_ = true;    // エミッタをつかうのか

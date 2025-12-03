@@ -160,7 +160,7 @@ void ParticleManager::Update(const Camera* camera) {
 		Matrix4x4 worldMatrix = particleWorldMatrix;
 
 		// Feildの範囲内のParticleには加速度を適応する
-		if (IsCollision(accelerationFeild_.area, (*particleIterator).transform.translate)) {
+		if (IsCollision(accelerationFeild_.area, (*particleIterator).transform.translate) && windActive_) {
 			(*particleIterator).velocity += accelerationFeild_.acceleration * kDeltaTime_;
 		}
 
@@ -305,6 +305,12 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
 			}
 		}
 		ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
+		ImGui::Checkbox(("wind" + label).c_str(), &windActive_);
+		if (windActive_) {
+			ImGui::DragFloat3(("min" + label).c_str(), &accelerationFeild_.area.min.x, 0.01f);
+			ImGui::DragFloat3(("max" + label).c_str(), &accelerationFeild_.area.max.x, 0.01f);
+			ImGui::DragFloat3(("acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.01f);
+		}
 		ImGui::Separator();
 		if (ImGui::Checkbox(("loop" + label).c_str(), &loopActive_)) { emitterActive_ = false; }
 		if (ImGui::Checkbox(("emit" + label).c_str(), &emitterActive_)) { loopActive_ = false; }
