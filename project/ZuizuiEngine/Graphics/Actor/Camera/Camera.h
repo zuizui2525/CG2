@@ -17,6 +17,10 @@ public:
     const Matrix4x4& GetProjectionMatrix2D() const { return projectionMatrix2D_; }
     const Transform& GetTransform() const { return transform_; }
 
+    void SetTransform(const Transform& transform) { transform_ = transform; }
+    void SetRotation(const Vector3& rotate) { transform_.rotate = rotate; }
+    void SetPosition(const Vector3& position) { transform_.translate = position; }
+
 private:
     Transform transform_;       // 通常カメラの位置・回転・スケール
     DebugCamera debugCamera_;   // デバッグカメラ
