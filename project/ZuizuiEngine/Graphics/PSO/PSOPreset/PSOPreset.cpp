@@ -69,7 +69,7 @@ PSOPreset PSOPreset::CreateObject3DPreset(
     // パスはプロジェクトの構成に合わせて正確に記述してください
     // VS
     bool vsResult = preset.shaderProgram.CompileVS(
-        L"resources/Shader/Object3D.VS.hlsl",
+        L"resources/Shader/Object3d/Object3d.VS.hlsl",
         dxcUtils, dxcCompiler, includeHandler
     );
     // ★失敗したらここで止める
@@ -77,7 +77,7 @@ PSOPreset PSOPreset::CreateObject3DPreset(
 
     // PS
     bool psResult = preset.shaderProgram.CompilePS(
-        L"resources/Shader/Object3D.PS.hlsl",
+        L"resources/Shader/Object3d/Object3d.PS.hlsl",
         dxcUtils, dxcCompiler, includeHandler
     );
     // ★失敗したらここで止める
@@ -167,14 +167,14 @@ PSOPreset PSOPreset::CreateParticlePreset(
     // 6. Shader Compile (★ファイル名をParticle用に)
     // --------------------------------------------------------
     bool vsResult = preset.shaderProgram.CompileVS(
-        L"resources/Shader/Particle.VS.hlsl", // ★Particle用のVS
+        L"resources/Shader/Particle/Particle.VS.hlsl", // ★Particle用のVS
         dxcUtils, dxcCompiler, includeHandler
     );
     // コンパイルエラーチェック
     assert(vsResult && "Particle VS Compile Failed!");
 
     bool psResult = preset.shaderProgram.CompilePS(
-        L"resources/Shader/Particle.PS.hlsl", // ★Particle用のPS
+        L"resources/Shader/Particle/Particle.PS.hlsl", // ★Particle用のPS
         dxcUtils, dxcCompiler, includeHandler
     );
     assert(psResult && "Particle PS Compile Failed!");

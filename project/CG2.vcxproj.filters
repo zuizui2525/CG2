@@ -221,14 +221,14 @@
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\Shader\Object3d.VS.hlsl">
+    <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Shader\Object3d.PS.hlsl">
+    <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle\Particle.VS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle\Particle.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -351,9 +351,9 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\Shader\Object3d.hlsli">
+    <None Include="resources\Shader\Object3d\Object3d.hlsli">
       <Filter>Shader</Filter>
     </None>
-    <None Include="resources\Shader\Particle.hlsli" />
+    <None Include="resources\Shader\Particle\Particle.hlsli" />
   </ItemGroup>
 </Project>
