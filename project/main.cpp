@@ -147,8 +147,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureManager->LoadTexture("bunny", bunny->GetModelData()->material.textureFilePath);
 
 	// 音声出力
-	SoundData soundData1 = audio.LoadSound("resources/fanfare.wav");
-	//audio.PlaySound(soundData1, true);
+	SoundData soundData1 = audio.LoadSound("resources/bgm.mp3");
+	audio.PlaySound(soundData1, true);
 
 	bool drawTriangle = false;
 	bool drawSprite = false;
@@ -280,7 +280,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 終了
 		imgui->End();
 #endif
-
 		// Inputの更新処理
 		input->Update();
 

@@ -1,6 +1,10 @@
 #include "Audio.h"
 #include "Function.h"
 #include <iostream>
+#pragma comment(lib, "Mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
+#pragma comment(lib, "XAudio2.lib")
 
 Audio::Audio() {}
 Audio::~Audio() { Finalize(); }

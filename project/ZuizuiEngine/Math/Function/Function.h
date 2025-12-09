@@ -15,10 +15,8 @@
 #include <dxgi1_6.h>
 #include <dbghelp.h>
 #include <strsafe.h>
-#include <dxgidebug.h>
 #include <wrl.h>
 #include <dxcapi.h>
-#include <xaudio2.h>
 
 #include "DirectXTex.h"
 #include "d3dx12.h"
@@ -33,7 +31,6 @@
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxcompiler.lib")
-#pragma comment(lib, "xaudio2.lib")
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
