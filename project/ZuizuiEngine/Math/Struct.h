@@ -159,10 +159,3 @@ struct FormatChunk {
     ChunkHeader chunk; // "fmt"
     WAVEFORMATEX fmt;  // 波形フォーマット
 };
-
-// 音声データ
-struct SoundData {
-    std::vector<BYTE> audioData;     //!< 音声データ本体
-    WAVEFORMATEX* wfex = nullptr;    //!< フォーマット情報
-    IXAudio2SourceVoice* sourceVoice = nullptr; //!< ソースボイス
-};

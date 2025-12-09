@@ -7,7 +7,12 @@
 #include <string>
 #include <vector>
 #include <cassert>
-#include "Struct.h"
+
+struct SoundData {
+    std::vector<BYTE> audioData;     //!< 音声データ本体
+    WAVEFORMATEX* wfex = nullptr;    //!< フォーマット情報
+    IXAudio2SourceVoice* sourceVoice = nullptr; //!< ソースボイス
+};
 
 class Audio {
 public:
