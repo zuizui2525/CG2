@@ -148,7 +148,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 音声出力
 	SoundData soundData1 = audio.LoadSound("resources/bgm.mp3");
-	audio.PlaySound(soundData1, true);
+	audio.PlaySound(soundData1, 1.0f, true);
 
 	bool drawTriangle = false;
 	bool drawSprite = false;

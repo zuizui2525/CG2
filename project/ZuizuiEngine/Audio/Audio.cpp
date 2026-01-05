@@ -98,10 +98,13 @@ SoundData Audio::LoadSound(const std::string& filePath) {
     return soundData;
 }
 
-void Audio::PlaySound(SoundData& soundData, bool loop) {
+void Audio::PlaySoundW(SoundData& soundData, float volume, bool loop) {
     if (!xAudio2_ || !soundData.wfex) return;
 
     HRESULT hr = xAudio2_->CreateSourceVoice(&soundData.sourceVoice, soundData.wfex);
+    assert(SUCCEEDED(hr));
+
+    hr = soundData.sourceVoice->SetVolume(volume);
     assert(SUCCEEDED(hr));
 
     XAUDIO2_BUFFER buffer{};

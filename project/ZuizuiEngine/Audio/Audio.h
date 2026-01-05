@@ -27,7 +27,7 @@ public:
     SoundData LoadSound(const std::string& filePath);
 
     // 再生・停止・解放
-    void PlaySound(SoundData& soundData, bool loop = false);
+    void PlaySoundW(SoundData& soundData, float volume = 1.0f, bool loop = false);
     void StopSound(SoundData& soundData);
     void Unload(SoundData& soundData);
 
