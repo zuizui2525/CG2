@@ -17,7 +17,7 @@ private:
         bool ceilingCollisionFlag = false;
         bool landingFlag = false;
         bool wallContactFlag = false;
-        Vector3 velocity;
+        Vector3 velocity = {};
     };
 
     enum class LRDirection { kRight, kLeft };
@@ -36,6 +36,13 @@ public:
     void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
     void SetPosition(const Vector3& pos) { position_ = pos; }
     const Vector3& GetPosition() const { return position_; }
+    
+    bool IsAttacking() const {
+        return behavior_ == Behavior::kAttack && attackPhase_ == AttackPhase::rush;
+    }
+
+    bool IsDead() const { return isDead_; }
+    void OnCollisionWithEnemy() { isDead_ = true; }
 
 private:
     void BehaviorRootUpdate();
@@ -88,4 +95,6 @@ private:
     bool canDoubleJump_ = false;
     bool isWallJumping_ = false;
     float wallJumpTimer_ = 0.0f;
+
+    bool isDead_ = false;
 };

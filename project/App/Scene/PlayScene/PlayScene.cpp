@@ -177,10 +177,17 @@ void PlayScene::Update() {
 		if (pPos.x > eAABB.min.x && pPos.x < eAABB.max.x &&
 			pPos.y > eAABB.min.y && pPos.y < eAABB.max.y) {
 
-			// もしプレイヤーが攻撃中なら敵を倒す
-			// if (player_->IsAttacking()) { 
-			(*it)->OnCollisionWithPlayer();
-			// }
+			if (player_->IsAttacking()) {
+				// 突進中なら敵を倒す
+				(*it)->OnCollisionWithPlayer();
+			} else {
+				// 通常時ならプレイヤーが死ぬ
+				player_->OnCollisionWithEnemy();
+
+				// シーンをタイトルに戻す（またはリトライ）
+				nextScene_ = SceneLabel::Title;
+				isFinish_ = true;
+			}
 		}
 
 		// 死亡フラグが立ったらリストから削除

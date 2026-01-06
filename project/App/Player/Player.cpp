@@ -18,6 +18,11 @@ void Player::Initialize(DxCommon* dxCommon, TextureManager* textureManager, Inpu
 }
 
 void Player::Update(Camera* camera) {
+    if (isDead_) {
+        // 死亡時の演出や動きを止める処理
+        return;
+    }
+
     if (behaviorRequest_ != Behavior::kUnknown) {
         behavior_ = behaviorRequest_;
         if (behavior_ == Behavior::kRoot) BehaviorRootInitialize();
@@ -75,7 +80,7 @@ void Player::BehaviorAttackUpdate() {
         if (++attackParameter_ > 10) {
             attackPhase_ = AttackPhase::rush;
             attackParameter_ = 0;
-            velocity_.x = (lrDirection_ == LRDirection::kRight) ? 0.3f : -0.3f;
+            velocity_.x = (lrDirection_ == LRDirection::kRight) ? 0.1f : -0.1f;
         }
         break;
     case AttackPhase::rush:
@@ -125,6 +130,7 @@ void Player::HandleMoveInput() {
             velocity_.y = kJumpAcceleration;
             onGround_ = false;
         }
+
     } else {
         // --- 空中処理 ---
         if (wallJumpTimer_ <= 0.0f) {
