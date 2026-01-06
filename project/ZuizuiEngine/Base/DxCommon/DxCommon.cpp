@@ -73,11 +73,23 @@ void DxCommon::EndFrame() {
 
 
 void DxCommon::PreDraw() {
-	ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
-	commandList_->SetDescriptorHeaps(1, heaps);
-	commandList_->RSSetViewports(1, &viewport_);
-	commandList_->RSSetScissorRects(1, &scissorRect_);
-	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    // 1. バックバッファのインデックス取得とRenderTargetのセット（もしBeginFrameでやっていれば省略可だが、ここにあると確実）
+    D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+    commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex_], false, &dsvHandle);
+
+    // 2. 画面の色をクリア（これを忘れると前のフレームが残る）
+    FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 背景色（お好みで）
+    commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex_], clearColor, 0, nullptr);
+
+    // 3. 奥行きをクリア（重要：これをしないと白黒の線やモデルの欠けが出る）
+    commandList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+    // 4. 各種描画設定
+    ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
+    commandList_->SetDescriptorHeaps(1, heaps);
+    commandList_->RSSetViewports(1, &viewport_);
+    commandList_->RSSetScissorRects(1, &scissorRect_);
+    commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void DxCommon::DrawImGui() {

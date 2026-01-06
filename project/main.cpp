@@ -8,7 +8,6 @@
 #include "PSOManager.h"
 #include "DirectionalLight.h"
 #include "App/Scene/SceneManager.h"
-#include "Camera.h"
 #include "TextureManager.h"
 #include "ParticleManager.h"
 
@@ -46,11 +45,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input->Initialize(window.GetInstance(), window.GetHWND());
 	logger.Write("Input Initialize");
 
-	// Camera
-	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-	camera->Initialize();
-	logger.Write("Camera Initialize");
-
 #ifdef _DEBUG
 	// Imgui
 	std::unique_ptr<ImguiManager> imgui = std::make_unique<ImguiManager>();
@@ -77,16 +71,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// SceneManager
 	SceneManager sceneManager;
-	sceneManager.Initialize(SceneLabel::Play, &dxCommon, psoManager.get(), textureManager.get());
+	sceneManager.Initialize(SceneLabel::Title, &dxCommon, psoManager.get(), textureManager.get(), input.get());
 
 	// ゲームループ
 	while (window.ProcessMessage()) {
 		// ゲームの処理
 		// フレームの開始時刻を記録
 		dxCommon.FrameStart();
-		// 開始
 #ifdef _DEBUG
+		// 開始
 		imgui->Begin();
+
+		// ImGui
+		sceneManager.ImGuiControl();
+
 		// 終了
 		imgui->End();
 #endif
@@ -95,9 +93,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// SceneManager
 		sceneManager.Update();
-
-		// Camera
-		camera->Update(input.get());
 
 		// 描画前処理
 		dxCommon.BeginFrame();

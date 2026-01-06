@@ -219,8 +219,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
-    <ClCompile Include="App\Scene\PlayScene.cpp" />
+    <ClCompile Include="App\Scene\PlayScene\PlayScene.cpp" />
     <ClCompile Include="App\Scene\SceneManager.cpp" />
+    <ClCompile Include="App\Scene\TitleScene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -347,8 +348,9 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.h" />
     <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h" />
     <ClInclude Include="App\Scene\Scene.h" />
-    <ClInclude Include="App\Scene\PlayScene.h" />
+    <ClInclude Include="App\Scene\PlayScene\PlayScene.h" />
     <ClInclude Include="App\Scene\SceneManager.h" />
+    <ClInclude Include="App\Scene\TitleScene\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

@@ -1,28 +1,34 @@
 #include "SceneManager.h"
+#include <imGui.h>
 
 SceneManager::SceneManager() {
-    scene_ = SceneLabel::Play;
+    scene_ = SceneLabel::Title;
+    titleScene_ = std::make_unique<TitleScene>();
     playScene_ = std::make_unique<PlayScene>();
     currentScene_ = playScene_.get();
 }
 
 SceneManager::~SceneManager() {}
 
-void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager) {
+void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
     // 基盤システムのポインタを保存しておく
     dxCommon_ = dxCommon;
     psoManager_ = psoManager;
     textureManager_ = textureManager;
+    input_ = input;
 
     // 引数で初期化のシーンを選択
     switch (scene) {
+    case SceneLabel::Title:
+        currentScene_ = titleScene_.get();
+        break;
     case SceneLabel::Play:
         currentScene_ = playScene_.get();
         break;
     }
 
     // 現在のシーンに基盤を渡して初期化
-    currentScene_->Initialize(dxCommon_, psoManager_, textureManager_);
+    currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
 }
 
 void SceneManager::Update() {
@@ -31,17 +37,34 @@ void SceneManager::Update() {
     // シーン切り替えフラグが立っていた場合
     if (currentScene_->GetIsFinish()) {
         switch (currentScene_->GetNextScene()) {
+        case SceneLabel::Title:
+            currentScene_ = titleScene_.get();
+            break;
         case SceneLabel::Play:
             currentScene_ = playScene_.get();
             break;
-            // 他のシーンへの切り替え処理...
         }
 
         // 次のシーンも同じ基盤システムで初期化する
-        currentScene_->Initialize(dxCommon_, psoManager_, textureManager_);
+        currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
+        currentScene_->Update();
     }
 }
 
 void SceneManager::Draw() {
     currentScene_->Draw();
+}
+
+void SceneManager::ImGuiControl() {
+    ImGui::Begin("Scene");
+    switch (currentScene_->GetNowScene()) {
+    case SceneLabel::Title:
+        ImGui::Text("Scene = Title");
+        break;
+    case SceneLabel::Play:
+        ImGui::Text("Scene = Play");
+        break;
+    }
+    ImGui::End();
+    currentScene_->ImGuiControl();
 }

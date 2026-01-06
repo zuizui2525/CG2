@@ -2,6 +2,7 @@
 #include "DxCommon.h"
 #include "PSOManager.h"
 #include "TextureManager.h"
+#include "Input.h"
 
 enum class SceneLabel {
 	Title,
@@ -15,9 +16,10 @@ public:
 	virtual ~Scene() = default;
 
 	// 初期化時に基盤システムを渡すように変更
-	virtual void Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager) = 0;
+	virtual void Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) = 0;
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
+	virtual void ImGuiControl() = 0;
 
 	bool GetIsFinish() const { return isFinish_; }
 	SceneLabel GetNowScene() const { return nowScene_; }
@@ -34,4 +36,5 @@ protected:
 	DxCommon* dxCommon_ = nullptr;
 	PSOManager* psoManager_ = nullptr;
 	TextureManager* textureManager_ = nullptr;
+	Input* input_ = nullptr;
 };

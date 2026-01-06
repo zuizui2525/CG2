@@ -7,25 +7,29 @@
 #include "Camera.h"
 #include <memory>
 
-class PlayScene : public Scene {
+class TitleScene : public Scene {
 public:
-	PlayScene();
-	~PlayScene() override;
+	TitleScene();
+	~TitleScene() override;
 
-	void Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager) override;
+	void Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) override;
 	void Update() override;
 	void Draw() override;
+	void ImGuiControl() override;
 
 private:
 	// main.cppから移行した描画オブジェクト
 	std::unique_ptr<Camera> camera_;
 	std::unique_ptr<DirectionalLightObject> dirLight_;
+
 	std::unique_ptr<ModelObject> teapot_;
+	Vector3 position_{};
+	float speed_ = 0.1f;
 	std::unique_ptr<SpriteObject> sprite_;
 	std::unique_ptr<SphereObject> sphere_;
 
-	// 描画フラグ（ImGuiで制御していたもの）
+	// 描画フラグ
 	bool drawModel_ = true;
-	bool drawSprite_ = false;
-	bool drawSphere_ = false;
+	bool drawSprite_ = true;
+	bool drawSphere_ = true;
 };
