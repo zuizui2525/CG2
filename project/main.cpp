@@ -20,7 +20,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Window
 	WindowApp window;
-	if (!window.Initialize(L"LE2B_02_イトウカズイ")) return -1;
+	if (!window.Initialize(L"LE2B_02_イトウカズイ_岩集")) return -1;
 	window.Show();
 
 	// Log
