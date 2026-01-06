@@ -57,6 +57,10 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	player_->Initialize(dxCommon_, textureManager_, input_);
 	player_->SetMapChipField(mapChipField_.get());
 
+	// CameraControlの生成と初期化
+	cameraControl_ = std::make_unique<CameraControl>();
+	cameraControl_->Initialize(camera_.get(), player_.get());
+
 	// スプライト生成
 	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 640, 360);
 	textureManager_->LoadTexture("uvChecker", "resources/uvChecker.png");
@@ -90,6 +94,7 @@ void PlayScene::Update() {
 	// 各オブジェクトの更新
 	skydome_->Update(camera_.get());
 	player_->Update(camera_.get());
+	cameraControl_->Update();
 	sprite_->Update(camera_.get());
 	sphere_->Update(camera_.get());
 	for (auto& block : blocks_) {

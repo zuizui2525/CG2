@@ -65,9 +65,9 @@ private:
     Vector3 scale_ = { 0.1f, 0.1f, 0.1f };
     Vector3 velocity_ = { 0.0f, 0.0f, 0.0f };
 
-    static inline const float kAcceleration = 0.01f;
-    static inline const float kAttenuation = 0.05f;
-    static inline const float kLimitRunSpeed = 0.05f;
+    static inline const float kAcceleration = 0.005f;
+    static inline const float kAttenuation = 0.1f;
+    static inline const float kLimitRunSpeed = 0.03f;
     static inline const float kGravityAccleration = 0.005f;
     static inline const float kLimitFallSpeed = 0.15f;
     static inline const float kJumpAcceleration = 0.09f;

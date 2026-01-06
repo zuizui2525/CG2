@@ -8,6 +8,7 @@
 #include "MapChipField.h"
 #include "Skydome.h"
 #include "player.h"
+#include "CameraControl.h"
 #include <memory>
 
 class PlayScene : public Scene {
@@ -23,6 +24,7 @@ public:
 private:
 	// main.cppから移行した描画オブジェクト
 	std::unique_ptr<Camera> camera_;
+	std::unique_ptr<CameraControl> cameraControl_;
 	std::unique_ptr<DirectionalLightObject> dirLight_;
 
 	std::unique_ptr<SpriteObject> sprite_;
