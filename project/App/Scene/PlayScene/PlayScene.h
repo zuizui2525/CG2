@@ -9,6 +9,7 @@
 #include "Skydome.h"
 #include "player.h"
 #include "CameraControl.h"
+#include "Clear.h"
 #include <memory>
 
 class PlayScene : public Scene {
@@ -36,6 +37,10 @@ private:
 	// player
 	std::unique_ptr<Player> player_;
 	
+	// Clear
+	std::unique_ptr<Clear> clear_;
+	Vector3 goalPos_ = { 19.6f, 1.0f, 0.0f };
+
 	// mapChipField
 	std::unique_ptr<MapChipField> mapChipField_;
 	std::vector<std::unique_ptr<ModelObject>> blocks_;

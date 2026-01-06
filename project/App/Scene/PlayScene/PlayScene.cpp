@@ -1,4 +1,5 @@
 #include "PlayScene.h"
+#include "Collision.h"
 
 PlayScene::PlayScene() {
 }
@@ -59,6 +60,10 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	player_->Initialize(dxCommon_, textureManager_, input_);
 	player_->SetMapChipField(mapChipField_.get());
 
+	// Clearクラスの生成と初期化
+	clear_ = std::make_unique<Clear>();
+	clear_->Initialize(dxCommon_, textureManager_, goalPos_);
+
 	// CameraControlの生成と初期化
 	cameraControl_ = std::make_unique<CameraControl>();
 	cameraControl_->Initialize(camera_.get(), player_.get());
@@ -97,10 +102,24 @@ void PlayScene::Update() {
 	skydome_->Update(camera_.get());
 	player_->Update(camera_.get());
 	cameraControl_->Update();
+	clear_->Update(camera_.get());
 	sprite_->Update(camera_.get());
 	sphere_->Update(camera_.get());
 	for (auto& block : blocks_) {
 		block->Update(camera_.get());
+	}
+
+	// 3. ゴールとの当たり判定（追加）
+	Vector3 pPos = player_->GetPosition();
+	AABB goalAABB = clear_->GetAABB();
+
+	// プレイヤーがゴールのAABB範囲内に入ったか判定
+	if (pPos.x >= goalAABB.min.x && pPos.x <= goalAABB.max.x &&
+		pPos.y >= goalAABB.min.y && pPos.y <= goalAABB.max.y) {
+
+		// クリアフラグを立てる
+		nextScene_ = SceneLabel::Title;
+		isFinish_ = true;
 	}
 }
 
@@ -110,6 +129,9 @@ void PlayScene::Draw() {
 
 	// playerの描画
 	player_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
+
+	// clear(ゴール)の描画
+	clear_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
 
 	// マップチップの描画ループ
 	for (auto& block : blocks_) {
