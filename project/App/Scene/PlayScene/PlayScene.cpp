@@ -81,6 +81,13 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 }
 
 void PlayScene::Update() {
+	// 1. プレイヤーの死亡演出が終わったかチェック
+	if (player_->IsDeadFinished()) {
+		nextScene_ = SceneLabel::Title;
+		isFinish_ = true;
+		return;
+	}
+
 	camera_->Update(input_);
 	dirLight_->Update();
 
@@ -178,16 +185,11 @@ void PlayScene::Update() {
 			pPos.y > eAABB.min.y && pPos.y < eAABB.max.y) {
 
 			if (player_->IsAttacking()) {
-				// 突進中なら敵を倒す
-				(*it)->OnCollisionWithPlayer();
-			} else {
-				// 通常時ならプレイヤーが死ぬ
-				player_->OnCollisionWithEnemy();
-
-				// シーンをタイトルに戻す（またはリトライ）
-				nextScene_ = SceneLabel::Title;
-				isFinish_ = true;
-			}
+                (*it)->OnCollisionWithPlayer();
+            } else {
+                // 即終了ではなく、死亡演出を開始させる
+                player_->StartDead();
+            }
 		}
 
 		// 死亡フラグが立ったらリストから削除

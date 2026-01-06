@@ -22,7 +22,7 @@ private:
 
     enum class LRDirection { kRight, kLeft };
     enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorner };
-    enum class Behavior { kUnknown, kRoot, kAttack };
+    enum class Behavior { kUnknown, kRoot, kAttack, kDead };
     enum class AttackPhase { reservoir, rush, lingeringSound };
 
 public:
@@ -43,6 +43,8 @@ public:
 
     bool IsDead() const { return isDead_; }
     void OnCollisionWithEnemy() { isDead_ = true; }
+    void StartDead();
+    bool IsDeadFinished() const { return behavior_ == Behavior::kDead && deadTimer_ >= kMaxDeadTime; }
 
 private:
     void BehaviorRootUpdate();
@@ -97,4 +99,6 @@ private:
     float wallJumpTimer_ = 0.0f;
 
     bool isDead_ = false;
+    float deadTimer_ = 0.0f;
+    static inline const float kMaxDeadTime = 1.0f;
 };

@@ -18,9 +18,20 @@ void Player::Initialize(DxCommon* dxCommon, TextureManager* textureManager, Inpu
 }
 
 void Player::Update(Camera* camera) {
-    if (isDead_) {
-        // 死亡時の演出や動きを止める処理
-        return;
+    if (behavior_ == Behavior::kDead) {
+        deadTimer_ += 1.0f / 60.0f;
+
+        // 死亡演出：回転しながら重力で落ちる
+        rotation_.x += 0.1f; // くるくる回る
+        velocity_.y -= 0.005f; // 重力
+        position_.x += velocity_.x;
+        position_.y += velocity_.y;
+
+        // 行列更新
+        model_->SetPosition(position_);
+        model_->SetRotate(rotation_);
+        model_->Update(camera);
+        return; // 死亡中は他の入力処理を飛ばす
     }
 
     if (behaviorRequest_ != Behavior::kUnknown) {
@@ -310,4 +321,12 @@ void Player::contactWithAWall(const CollisionMapInfo& info) {
 
 void Player::Draw(DxCommon* dxCommon, TextureManager* textureManager, PSOManager* psoManager, DirectionalLightObject* dirLight) {
     model_->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle("player"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
+}
+
+void Player::StartDead() {
+    if (behavior_ == Behavior::kDead) return;
+    behavior_ = Behavior::kDead;
+    deadTimer_ = 0.0f;
+    // 死亡時の初期速度（上に少し跳ねる）
+    velocity_ = { 0.0f, 0.1f, 0.0f };
 }
