@@ -222,6 +222,7 @@
     <ClCompile Include="App\Scene\PlayScene\PlayScene.cpp" />
     <ClCompile Include="App\Scene\SceneManager.cpp" />
     <ClCompile Include="App\Scene\TitleScene\TitleScene.cpp" />
+    <ClCompile Include="App\Skydome\Skydome.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -351,6 +352,7 @@
     <ClInclude Include="App\Scene\PlayScene\PlayScene.h" />
     <ClInclude Include="App\Scene\SceneManager.h" />
     <ClInclude Include="App\Scene\TitleScene\TitleScene.h" />
+    <ClInclude Include="App\Skydome\Skydome.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

@@ -5,6 +5,7 @@
 #include "SpriteObject.h"
 #include "SphereObject.h"
 #include "Camera.h"
+#include "Skydome.h"
 #include <memory>
 
 class PlayScene : public Scene {
@@ -29,11 +30,10 @@ private:
 	std::unique_ptr<SpriteObject> sprite_;
 	std::unique_ptr<SphereObject> sphere_;
 
-	std::unique_ptr<ModelObject> skydome_;
+	std::unique_ptr<Skydome> skydome_;
 	
 	// 描画フラグ
 	bool drawModel_ = true;
 	bool drawSprite_ = false;
 	bool drawSphere_ = false;
-	bool drawSkydome_ = true;
 };

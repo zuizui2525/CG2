@@ -25,6 +25,10 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	dirLight_ = std::make_unique<DirectionalLightObject>();
 	dirLight_->Initialize(dxCommon_->GetDevice());
 
+	// Skydomeの生成と初期化
+	skydome_ = std::make_unique<Skydome>();
+	skydome_->Initialize(dxCommon_, textureManager_);
+
 	// モデル生成
 	teapot_ = std::make_unique<ModelObject>(dxCommon_->GetDevice(), "resources/obj/teapot/teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
 	textureManager_->LoadTexture("teapot", teapot_->GetModelData()->material.textureFilePath);
@@ -36,10 +40,6 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	// 球生成
 	sphere_ = std::make_unique<SphereObject>(dxCommon_->GetDevice(), 16, 1.0f);
 	textureManager_->LoadTexture("monsterball", "resources/monsterball.png");
-
-	// skydome
-	skydome_ = std::make_unique<ModelObject>(dxCommon_->GetDevice(), "resources/AL/skydome/skydome.obj", Vector3{ 0.0f, 0.0f, 0.0f });
-	textureManager_->LoadTexture("skydome", skydome_->GetModelData()->material.textureFilePath);
 }
 
 void PlayScene::Update() {
@@ -75,22 +75,15 @@ void PlayScene::Update() {
 	teapot_->SetPosition(position_);
 
 	// 各オブジェクトの更新
+	skydome_->Update(camera_.get());
 	teapot_->Update(camera_.get());
 	sprite_->Update(camera_.get());
 	sphere_->Update(camera_.get());
-	skydome_->Update(camera_.get());
 }
 
 void PlayScene::Draw() {
 	// skydomeの描画
-	skydome_->Draw(
-		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("skydome"),
-		dirLight_->GetGPUVirtualAddress(),
-		psoManager_->GetPSO("Object3D"),
-		psoManager_->GetRootSignature("Object3D"),
-		drawSkydome_
-	);
+	skydome_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
 
 	// Modelの描画
 	teapot_->Draw(

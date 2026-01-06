@@ -151,6 +151,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="App\Scene\PlayScene\PlayScene.cpp" />
     <ClCompile Include="App\Scene\SceneManager.cpp" />
     <ClCompile Include="App\Scene\TitleScene\TitleScene.cpp" />
+    <ClCompile Include="App\Skydome\Skydome.cpp" />
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.cpp" />
@@ -223,6 +224,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="App\Scene\PlayScene\PlayScene.h" />
     <ClInclude Include="App\Scene\SceneManager.h" />
     <ClInclude Include="App\Scene\TitleScene\TitleScene.h" />
+    <ClInclude Include="App\Skydome\Skydome.h" />
     <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.h" />
