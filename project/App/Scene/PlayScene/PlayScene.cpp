@@ -19,7 +19,7 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	// Camera
 	camera_ = std::make_unique<Camera>();
 	camera_->Initialize();
-	camera_->SetTransform({ {1.0f, 1.0f, 1.0f}, {0.2f,0.0f,0.0f}, {0.0f,4.0f,-20.0f} });
+	camera_->SetTransform({ {1.0f, 1.0f, 1.0f}, {0.2f,0.0f,0.0f}, {0.0f,4.0f,-10.0f} });
 
 	// DirectionalLight
 	dirLight_ = std::make_unique<DirectionalLightObject>();
@@ -29,9 +29,32 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	skydome_ = std::make_unique<Skydome>();
 	skydome_->Initialize(dxCommon_, textureManager_);
 
-	// モデル生成
-	teapot_ = std::make_unique<ModelObject>(dxCommon_->GetDevice(), "resources/obj/teapot/teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
-	textureManager_->LoadTexture("teapot", teapot_->GetModelData()->material.textureFilePath);
+	// mapChipFieldの生成と初期化
+	mapChipField_ = std::make_unique<MapChipField>();
+	mapChipField_->LoadMapChipCsv("resources/AL/map/map.csv");
+	for (uint32_t y = 0; y < mapChipField_->GetNumBlockVertical(); ++y) {
+		for (uint32_t x = 0; x < mapChipField_->GetNumBlockHorizontal(); ++x) {
+			if (mapChipField_->GetMapChipTypeByIndex(x, y) == MapChipField::MapChipType::kBlock) {
+				Vector3 pos = mapChipField_->GetMapChipPositionByIndex(x, y);
+
+				// ここで個別に実体を作る
+				auto newBlock = std::make_unique<ModelObject>(
+					dxCommon_->GetDevice(),
+					"resources/AL/cube/cube.obj",
+					pos
+				);
+				newBlock->SetScale({ 0.1f, 0.1f, 0.1f });
+				blocks_.push_back(std::move(newBlock));
+			}
+		}
+	}
+	if (!blocks_.empty()) {
+		textureManager_->LoadTexture("cube", blocks_[0]->GetModelData()->material.textureFilePath);
+	}
+
+	// Playerの生成と初期化
+	player_ = std::make_unique<Player>();
+	player_->Initialize(dxCommon_, textureManager_, input_);
 
 	// スプライト生成
 	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 640, 360);
@@ -63,37 +86,34 @@ void PlayScene::Update() {
 		drawSphere_ = false;
 	}
 
-	if (input_->Press(DIK_W)) {
-		position_.z += speed_;
-	}else if (input_->Press(DIK_S)) {
-		position_.z -= speed_;
-	}else if (input_->Press(DIK_A)) {
-		position_.x -= speed_;
-	}else if (input_->Press(DIK_D)) {
-		position_.x += speed_;
-	}
-	teapot_->SetPosition(position_);
-
 	// 各オブジェクトの更新
 	skydome_->Update(camera_.get());
-	teapot_->Update(camera_.get());
+	player_->Update(camera_.get());
 	sprite_->Update(camera_.get());
 	sphere_->Update(camera_.get());
+	for (auto& block : blocks_) {
+		block->Update(camera_.get());
+	}
 }
 
 void PlayScene::Draw() {
 	// skydomeの描画
 	skydome_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
 
-	// Modelの描画
-	teapot_->Draw(
-		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("teapot"),
-		dirLight_->GetGPUVirtualAddress(),
-		psoManager_->GetPSO("Object3D"),
-		psoManager_->GetRootSignature("Object3D"),
-		drawModel_
-	);
+	// playerの描画
+	player_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
+
+	// マップチップの描画ループ
+	for (auto& block : blocks_) {
+		block->Draw(
+			dxCommon_->GetCommandList(),
+			textureManager_->GetGpuHandle("cube"),
+			dirLight_->GetGPUVirtualAddress(),
+			psoManager_->GetPSO("Object3D"),
+			psoManager_->GetRootSignature("Object3D"),
+			drawModel_
+		);
+	}
 
 	// Spriteの描画
 	sprite_->Draw(

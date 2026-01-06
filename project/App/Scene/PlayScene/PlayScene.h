@@ -5,7 +5,9 @@
 #include "SpriteObject.h"
 #include "SphereObject.h"
 #include "Camera.h"
+#include "MapChipField.h"
 #include "Skydome.h"
+#include "player.h"
 #include <memory>
 
 class PlayScene : public Scene {
@@ -23,15 +25,19 @@ private:
 	std::unique_ptr<Camera> camera_;
 	std::unique_ptr<DirectionalLightObject> dirLight_;
 
-	std::unique_ptr<ModelObject> teapot_;
-	Vector3 position_{};
-	float speed_ = 0.1f;
-
 	std::unique_ptr<SpriteObject> sprite_;
 	std::unique_ptr<SphereObject> sphere_;
 
+	// skydome
 	std::unique_ptr<Skydome> skydome_;
+
+	// player
+	std::unique_ptr<Player> player_;
 	
+	// mapChipField
+	std::unique_ptr<MapChipField> mapChipField_;
+	std::vector<std::unique_ptr<ModelObject>> blocks_;
+
 	// 描画フラグ
 	bool drawModel_ = true;
 	bool drawSprite_ = false;

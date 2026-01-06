@@ -223,6 +223,8 @@
     <ClCompile Include="App\Scene\SceneManager.cpp" />
     <ClCompile Include="App\Scene\TitleScene\TitleScene.cpp" />
     <ClCompile Include="App\Skydome\Skydome.cpp" />
+    <ClCompile Include="App\MapChipField\MapChipField.cpp" />
+    <ClCompile Include="App\Player\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -353,6 +355,8 @@
     <ClInclude Include="App\Scene\SceneManager.h" />
     <ClInclude Include="App\Scene\TitleScene\TitleScene.h" />
     <ClInclude Include="App\Skydome\Skydome.h" />
+    <ClInclude Include="App\MapChipField\MapChipField.h" />
+    <ClInclude Include="App\Player\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
