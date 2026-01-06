@@ -55,6 +55,7 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	// Playerの生成と初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize(dxCommon_, textureManager_, input_);
+	player_->SetMapChipField(mapChipField_.get());
 
 	// スプライト生成
 	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 640, 360);
