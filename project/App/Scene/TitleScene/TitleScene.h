@@ -5,6 +5,7 @@
 #include "SpriteObject.h"
 #include "SphereObject.h"
 #include "Camera.h"
+#include "Skydome.h"
 #include <memory>
 
 class TitleScene : public Scene {
@@ -22,11 +23,10 @@ private:
 	std::unique_ptr<Camera> camera_;
 	std::unique_ptr<DirectionalLightObject> dirLight_;
 
-	std::unique_ptr<ModelObject> teapot_;
-	Vector3 position_{};
-	float speed_ = 0.1f;
-	std::unique_ptr<SpriteObject> sprite_;
-	std::unique_ptr<SphereObject> sphere_;
+	// UI
+	std::unique_ptr<SpriteObject> title_;
+	// skydome
+	std::unique_ptr<Skydome> skydome_;
 
 	// 描画フラグ
 	bool drawModel_ = true;

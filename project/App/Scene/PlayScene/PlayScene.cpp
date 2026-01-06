@@ -72,12 +72,8 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	cameraControl_->Initialize(camera_.get(), player_.get());
 
 	// スプライト生成
-	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 640, 360);
-	textureManager_->LoadTexture("uvChecker", "resources/uvChecker.png");
-
-	// 球生成
-	sphere_ = std::make_unique<SphereObject>(dxCommon_->GetDevice(), 16, 1.0f);
-	textureManager_->LoadTexture("monsterball", "resources/monsterball.png");
+	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 1280, 720);
+	textureManager_->LoadTexture("gameHUD", "resources/AL/gameHUD.png");
 }
 
 void PlayScene::Update() {
@@ -96,25 +92,12 @@ void PlayScene::Update() {
 		isFinish_ = true;
 	}
 
-	if (input_->Trigger(DIK_1)) { 
-		drawModel_ = true; 
-	} else if (input_->Trigger(DIK_2)) {
-		drawSprite_ = true;
-	} else if (input_->Trigger(DIK_3)) {
-		drawSphere_ = true;
-	} else if (input_->Trigger(DIK_4)) {
-		drawModel_ = false;
-		drawSprite_ = false;
-		drawSphere_ = false;
-	}
-
 	// 各オブジェクトの更新
 	skydome_->Update(camera_.get());
 	player_->Update(camera_.get());
 	cameraControl_->Update();
 	clear_->Update(camera_.get());
 	sprite_->Update(camera_.get());
-	sphere_->Update(camera_.get());
 	for (auto& block : blocks_) {
 		block->Update(camera_.get());
 	}
@@ -231,21 +214,11 @@ void PlayScene::Draw() {
 	// Spriteの描画
 	sprite_->Draw(
 		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("uvChecker"),
+		textureManager_->GetGpuHandle("gameHUD"),
 		dirLight_->GetGPUVirtualAddress(),
 		psoManager_->GetPSO("Object3D"),
 		psoManager_->GetRootSignature("Object3D"),
-		drawSprite_
-	);
-
-	// Sphereの描画
-	sphere_->Draw(
-		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("monsterball"),
-		dirLight_->GetGPUVirtualAddress(),
-		psoManager_->GetPSO("Object3D"),
-		psoManager_->GetRootSignature("Object3D"),
-		drawSphere_
+		true
 	);
 }
 

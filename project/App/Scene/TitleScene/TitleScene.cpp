@@ -25,17 +25,13 @@ void TitleScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureM
 	dirLight_ = std::make_unique<DirectionalLightObject>();
 	dirLight_->Initialize(dxCommon_->GetDevice());
 
-	// モデル生成
-	teapot_ = std::make_unique<ModelObject>(dxCommon_->GetDevice(), "resources/obj/teapot/teapot.obj", Vector3{ 1.0f, 0.0f, 0.0f });
-	textureManager_->LoadTexture("teapot", teapot_->GetModelData()->material.textureFilePath);
-
 	// スプライト生成
-	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 640, 360);
-	textureManager_->LoadTexture("uvChecker", "resources/uvChecker.png");
+	title_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 1280, 720);
+	textureManager_->LoadTexture("title", "resources/AL/title.png");
 
-	// 球生成
-	sphere_ = std::make_unique<SphereObject>(dxCommon_->GetDevice(), 16, 1.0f);
-	textureManager_->LoadTexture("monsterball", "resources/monsterball.png");
+	// Skydomeの生成と初期化
+	skydome_ = std::make_unique<Skydome>();
+	skydome_->Initialize(dxCommon_, textureManager_);
 }
 
 void TitleScene::Update() {
@@ -48,40 +44,21 @@ void TitleScene::Update() {
 	}
 
 	// 各オブジェクトの更新
-	teapot_->Update(camera_.get());
-	sprite_->Update(camera_.get());
-	sphere_->Update(camera_.get());
+	title_->Update(camera_.get());
+	skydome_->Update(camera_.get());
 }
 
 void TitleScene::Draw() {
-	// Modelの描画
-	teapot_->Draw(
+	// skydomeの描画
+	skydome_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
+	// titleの描画
+	title_->Draw(
 		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("teapot"),
-		dirLight_->GetGPUVirtualAddress(),
-		psoManager_->GetPSO("Object3D"),
-		psoManager_->GetRootSignature("Object3D"),
-		drawModel_
-	);
-
-	// Spriteの描画
-	sprite_->Draw(
-		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("uvChecker"),
+		textureManager_->GetGpuHandle("title"),
 		dirLight_->GetGPUVirtualAddress(),
 		psoManager_->GetPSO("Object3D"),
 		psoManager_->GetRootSignature("Object3D"),
 		drawSprite_
-	);
-
-	// Sphereの描画
-	sphere_->Draw(
-		dxCommon_->GetCommandList(),
-		textureManager_->GetGpuHandle("monsterball"),
-		dirLight_->GetGPUVirtualAddress(),
-		psoManager_->GetPSO("Object3D"),
-		psoManager_->GetRootSignature("Object3D"),
-		drawSphere_
 	);
 }
 

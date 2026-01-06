@@ -31,8 +31,7 @@ private:
 	std::unique_ptr<DirectionalLightObject> dirLight_;
 
 	std::unique_ptr<SpriteObject> sprite_;
-	std::unique_ptr<SphereObject> sphere_;
-
+	
 	// skydome
 	std::unique_ptr<Skydome> skydome_;
 
@@ -60,6 +59,4 @@ private:
 
 	// 描画フラグ
 	bool drawModel_ = true;
-	bool drawSprite_ = false;
-	bool drawSphere_ = false;
 };
