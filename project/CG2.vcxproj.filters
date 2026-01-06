@@ -227,6 +227,7 @@
     <ClCompile Include="App\Player\Player.cpp" />
     <ClCompile Include="App\CameraControl\CameraControl.cpp" />
     <ClCompile Include="App\Clear\Clear.cpp" />
+    <ClCompile Include="App\Enemy\Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -361,6 +362,7 @@
     <ClInclude Include="App\Player\Player.h" />
     <ClInclude Include="App\CameraControl\CameraControl.h" />
     <ClInclude Include="App\Clear\Clear.h" />
+    <ClInclude Include="App\Enemy\Enemy.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

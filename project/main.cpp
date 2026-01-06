@@ -10,6 +10,7 @@
 #include "App/Scene/SceneManager.h"
 #include "TextureManager.h"
 #include "ParticleManager.h"
+#include <ctime>
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -72,6 +73,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// SceneManager
 	SceneManager sceneManager;
 	sceneManager.Initialize(SceneLabel::Title, &dxCommon, psoManager.get(), textureManager.get(), input.get());
+
+	// ランダム
+	srand(static_cast<unsigned int>(time(nullptr)));
 
 	// ゲームループ
 	while (window.ProcessMessage()) {

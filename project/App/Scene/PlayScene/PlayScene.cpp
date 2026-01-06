@@ -8,6 +8,9 @@ PlayScene::~PlayScene() {
 }
 
 void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
+	// 敵のリストをクリアしておく
+	enemies_.clear();
+	enemySpawnTimer_ = 0.0f;
 	// 明示的な開放
 	blocks_.clear();
 	// 基盤ポインタの保存
@@ -109,6 +112,48 @@ void PlayScene::Update() {
 		block->Update(camera_.get());
 	}
 
+	// --- 1. 敵の出現処理 (2秒ごと) ---
+	enemySpawnTimer_ += 1.0f / 60.0f;
+	if (enemySpawnTimer_ >= kEnemySpawnInterval) {
+		enemySpawnTimer_ = 0.0f;
+
+		auto newEnemy = std::make_unique<Enemy>();
+
+		// --- ここからランダム高さの計算 ---
+		float minHeight = 0.2f; // 出現する最小の高さ
+		float maxHeight = 2.0f; // 出現する最大の高さ
+
+		// 0.0f ～ 1.0f の間のランダムな小数を生成
+		float randomT = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+		// 最小値と最大値の間で補間する (例: 0.2 + (2.0 - 0.2) * randomT)
+		float randomY = minHeight + (maxHeight - minHeight) * randomT;
+		// ----------------------------------
+
+		newEnemy->Initialize(dxCommon_, textureManager_, { 20.0f, randomY, 0.01f });
+		enemies_.push_back(std::move(newEnemy));
+	}
+
+	// --- 2. 敵の更新と削除処理 ---
+	for (auto it = enemies_.begin(); it != enemies_.end(); ) {
+		// 敵の移動更新
+		(*it)->Update(camera_.get());
+
+		// プレイヤーとの当たり判定 (必要であれば)
+		// CheckCollision(player_.get(), it->get());
+
+		// --- マップの端（画面外）に出たかどうかの判定 ---
+		Vector3 ePos = (*it)->GetPosition();
+		bool isOut = (ePos.x < kMapLeftEnd || ePos.x > kMapRightEnd);
+
+		// 死亡フラグが立っている、または画面外に出たら削除
+		if ((*it)->IsDead() || isOut) {
+			it = enemies_.erase(it); // リストから削除して次の要素へ
+		} else {
+			++it;
+		}
+	}
+
 	// 3. ゴールとの当たり判定（追加）
 	Vector3 pPos = player_->GetPosition();
 	AABB goalAABB = clear_->GetAABB();
@@ -121,6 +166,30 @@ void PlayScene::Update() {
 		nextScene_ = SceneLabel::Title;
 		isFinish_ = true;
 	}
+
+	// 敵の更新と当たり判定
+	for (auto it = enemies_.begin(); it != enemies_.end(); ) {
+		(*it)->Update(camera_.get());
+
+		Enemy::AABB eAABB = (*it)->GetAABB();
+
+		// 簡易AABB判定 (Playerが攻撃中かどうかの判定をPlayerクラスに追加する必要があります)
+		if (pPos.x > eAABB.min.x && pPos.x < eAABB.max.x &&
+			pPos.y > eAABB.min.y && pPos.y < eAABB.max.y) {
+
+			// もしプレイヤーが攻撃中なら敵を倒す
+			// if (player_->IsAttacking()) { 
+			(*it)->OnCollisionWithPlayer();
+			// }
+		}
+
+		// 死亡フラグが立ったらリストから削除
+		if ((*it)->IsDead()) {
+			it = enemies_.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 void PlayScene::Draw() {
@@ -132,6 +201,11 @@ void PlayScene::Draw() {
 
 	// clear(ゴール)の描画
 	clear_->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
+
+	// enemyの描画
+	for (auto& enemy : enemies_) {
+		enemy->Draw(dxCommon_, textureManager_, psoManager_, dirLight_.get());
+	}
 
 	// マップチップの描画ループ
 	for (auto& block : blocks_) {
