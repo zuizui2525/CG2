@@ -7,6 +7,8 @@ PlayScene::~PlayScene() {
 }
 
 void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
+	// 明示的な開放
+	blocks_.clear();
 	// 基盤ポインタの保存
 	dxCommon_ = dxCommon;
 	psoManager_ = psoManager;
