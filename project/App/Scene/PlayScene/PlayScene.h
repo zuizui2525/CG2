@@ -25,11 +25,15 @@ private:
 	std::unique_ptr<ModelObject> teapot_;
 	Vector3 position_{};
 	float speed_ = 0.1f;
+
 	std::unique_ptr<SpriteObject> sprite_;
 	std::unique_ptr<SphereObject> sphere_;
+
+	std::unique_ptr<ModelObject> skydome_;
 	
 	// 描画フラグ
 	bool drawModel_ = true;
 	bool drawSprite_ = false;
-	bool drawSphere_ = true;
+	bool drawSphere_ = false;
+	bool drawSkydome_ = true;
 };

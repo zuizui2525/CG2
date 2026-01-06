@@ -16,6 +16,9 @@ public:
     const Matrix4x4& GetViewMatrix2D() const { return viewMatrix2D_; }
     const Matrix4x4& GetProjectionMatrix2D() const { return projectionMatrix2D_; }
     const Transform& GetTransform() const { return transform_; }
+    const Vector3& GetScale() const { return transform_.scale; }
+    const Vector3& GetRotate() const { return transform_.rotate; }
+    const Vector3& GetPosition() const { return transform_.translate; }
 
     void SetTransform(const Transform& transform) { transform_ = transform; }
     void SetRotation(const Vector3& rotate) { transform_.rotate = rotate; }
