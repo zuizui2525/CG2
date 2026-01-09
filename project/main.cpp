@@ -336,7 +336,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		triangle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("white"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawTriangle);
 
 		// Spriteの描画
-		sprite->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSprite);
+		sprite->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSprite);
 
 		// Sphereの描画
 		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSphere);

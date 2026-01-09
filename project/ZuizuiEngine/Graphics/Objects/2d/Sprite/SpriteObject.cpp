@@ -8,6 +8,7 @@ SpriteObject::SpriteObject(ID3D12Device* device, int width, int height) {
     materialData_->color = { 1,1,1,1 };
     materialData_->enableLighting = 0;
     materialData_->uvtransform = Math::MakeIdentity();
+    materialData_->shininess = 30.0f;
 
     // WVP
     wvpResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
@@ -55,6 +56,7 @@ void SpriteObject::Update(const Camera* camera) {
 void SpriteObject::Draw(ID3D12GraphicsCommandList* commandList,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
     D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
     ID3D12PipelineState* pipelineState,
     ID3D12RootSignature* rootSignature,
     bool enableDraw) {
@@ -69,7 +71,8 @@ void SpriteObject::Draw(ID3D12GraphicsCommandList* commandList,
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
+    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
+    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
 
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

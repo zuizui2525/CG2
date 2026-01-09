@@ -37,10 +37,18 @@ void ModelObject::Update(const Camera* camera) {
     // WVP行列
     Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
 
+    // 逆転置行列
+    Matrix4x4 worldForNormal = worldViewProjection;
+    worldForNormal.m[3][0] = 0.0f;
+    worldForNormal.m[3][1] = 0.0f;
+    worldForNormal.m[3][2] = 0.0f;
+    worldForNormal.m[3][3] = 1.0f;
+
     // 定数バッファに書き込み
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
     wvpData_->WVP = worldViewProjection;
     wvpData_->world = worldMatrix;
+    wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
 void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,

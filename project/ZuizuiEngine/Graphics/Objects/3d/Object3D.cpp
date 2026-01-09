@@ -20,6 +20,7 @@ Object3D::Object3D(ID3D12Device* device, int lightingMode) {
     materialData_->color = { 1,1,1,1 };
     materialData_->enableLighting = lightingMode;
     materialData_->uvtransform = Math::MakeIdentity();
+    materialData_->shininess = 30.0f;
 
     // Transform初期化
     transform_.scale = { 1,1,1 };

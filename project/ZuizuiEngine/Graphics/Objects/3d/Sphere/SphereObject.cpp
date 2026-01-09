@@ -70,8 +70,15 @@ SphereObject::~SphereObject() {
 void SphereObject::Update(const Camera* camera) {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
     Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
+    // 逆転置行列
+    Matrix4x4 worldForNormal = world;
+    worldForNormal.m[3][0] = 0.0f;
+    worldForNormal.m[3][1] = 0.0f;
+    worldForNormal.m[3][2] = 0.0f;
+    worldForNormal.m[3][3] = 1.0f;
     wvpData_->WVP = wvp;
     wvpData_->world = world;
+    wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 
     Matrix4x4 uv = Math::MakeScaleMatrix(uvTransform_.scale);
     uv = Math::Multiply(uv, Math::MakeRotateZMatrix(uvTransform_.rotate.z));

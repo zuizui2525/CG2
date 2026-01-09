@@ -96,11 +96,13 @@ struct Material {
     int32_t enableLighting;
     float padding[3];
     Matrix4x4 uvtransform;
+    float shininess;
 };
 
 struct TransformationMatrix {
     Matrix4x4 WVP;
     Matrix4x4 world;
+    Matrix4x4 WorldInverseTranspose;
 };
 
 struct ParticleForGPU {
