@@ -3,6 +3,16 @@
 #include "Input.h"
 
 class DebugCamera {
+public:
+	bool skipNextMouseUpdate_ = false; // 初回回転スキップ用
+	void Initialize();
+	void Update(Input* input);
+	const Matrix4x4& GetViewMatrix() { return viewMatrix_; }
+	const Matrix4x4& GetProjectionMatrix() { return projectionMatrix_; }
+	const Vector3& GetPosition() { return translation_; }
+	// ウィンドウハンドル設定
+	void HideCursor();
+	void ShowCursorBack();
 private:
 	Vector3 rotation_ = {};
 	Vector3 translation_ = { 0.0f, 0.0f, -10.0f };
@@ -19,13 +29,4 @@ private:
 	HWND hwnd_ = nullptr; // 追加：ウィンドウハンドル
 	bool isCursorHidden_ = false;
 	void ResetPosition();
-public:
-	bool skipNextMouseUpdate_ = false; // 初回回転スキップ用
-	void Initialize();
-	void Update(Input* input);
-	const Matrix4x4& GetViewMatrix() { return viewMatrix_; }
-	const Matrix4x4& GetProjectionMatrix() { return projectionMatrix_; }
-	// ウィンドウハンドル設定
-	void HideCursor();
-	void ShowCursorBack();
 };

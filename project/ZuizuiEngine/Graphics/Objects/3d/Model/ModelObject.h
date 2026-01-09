@@ -27,6 +27,7 @@ public:
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+        D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
         ID3D12PipelineState* pipelineState,
         ID3D12RootSignature* rootSignature,
         bool draw = true);

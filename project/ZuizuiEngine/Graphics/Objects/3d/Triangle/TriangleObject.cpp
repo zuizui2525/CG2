@@ -41,6 +41,7 @@ void TriangleObject::Update(const Camera* camera) {
 void TriangleObject::Draw(ID3D12GraphicsCommandList* commandList,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
     D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
     ID3D12PipelineState* pipelineState,
     ID3D12RootSignature* rootSignature,
     bool enableDraw) {
@@ -54,7 +55,8 @@ void TriangleObject::Draw(ID3D12GraphicsCommandList* commandList,
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
+    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
+    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
 
     commandList->DrawInstanced(3, 1, 0, 0);
 }

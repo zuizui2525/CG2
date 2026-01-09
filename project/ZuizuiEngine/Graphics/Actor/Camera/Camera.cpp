@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-void Camera::Initialize() {
+void Camera::Initialize(ID3D12Device* device) {
     transform_ = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-20.0f} };
     debugCamera_.Initialize();
 
@@ -21,6 +21,9 @@ void Camera::Initialize() {
         static_cast<float>(WindowApp::kClientWidth) / static_cast<float>(WindowApp::kClientHeight),
         0.1f, 100.0f
     );
+
+    resource_ = CreateBufferResource(device, (sizeof(CameraForGPU)));
+    resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 }
 
 void Camera::Update(Input* input) {
@@ -52,6 +55,14 @@ void Camera::Update(Input* input) {
     }
 
     wasDebugCameraLastFrame_ = useDebugCamera_;
+
+    if (data_) {
+        if (useDebugCamera_) {
+           data_->worldPosition = debugCamera_.GetPosition();
+        } else {
+            data_->worldPosition = transform_.translate;
+        }
+    }
 }
 
 void Camera::ImGuiControl() {

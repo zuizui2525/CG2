@@ -3,13 +3,16 @@
 #include "Input.h"
 #include "DebugCamera.h"
 #include "WindowApp.h"
+#include <d3d12.h>
+#include <wrl.h>
 
 class Camera {
 public:
-    void Initialize();
+    void Initialize(ID3D12Device* device);
     void Update(Input* input);
     void ImGuiControl();
 
+    D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return resource_->GetGPUVirtualAddress(); }
     const Matrix4x4& GetCameraMatrix() const { return cameraMatrix_; }
     const Matrix4x4& GetViewMatrix3D() const { return viewMatrix3D_; }
     const Matrix4x4& GetProjectionMatrix3D() const { return projectionMatrix3D_; }
@@ -32,4 +35,7 @@ private:
     Matrix4x4 projectionMatrix3D_;
     Matrix4x4 viewMatrix2D_;
     Matrix4x4 projectionMatrix2D_;
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
+    CameraForGPU* data_ = nullptr;
 };

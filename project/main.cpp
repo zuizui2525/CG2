@@ -56,7 +56,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Camera
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-	camera->Initialize();
+	camera->Initialize(dxCommon.GetDevice());
 	logger.Write("Camera Initialize");
 
 	// DirectionalLight
@@ -333,25 +333,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		dxCommon.PreDraw();
 
 		// 三角形の描画
-		triangle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("white"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawTriangle);
+		triangle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("white"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawTriangle);
 
 		// Spriteの描画
 		sprite->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("uvChecker"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSprite);
 
 		// Sphereの描画
-		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSphere);
+		sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("monsterball"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawSphere);
 
 		// Modelの描画
-		teapot->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("teapot"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel);
+		teapot->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("teapot"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel);
 
 		// Model2の描画
-		multiMaterial->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("multiMaterial"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel2);
+		multiMaterial->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("multiMaterial"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel2);
 
 		// Model3の描画
-		suzanne->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("suzanne"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel3);
+		suzanne->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("suzanne"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel3);
 
 		// Model4の描画
-		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel4);
+		bunny->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("bunny"), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), drawModel4);
 
 		// パーティクルの描画
 		particle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle("circle"), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), drawParticle);

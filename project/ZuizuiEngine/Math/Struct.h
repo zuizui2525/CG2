@@ -109,6 +109,11 @@ struct ParticleForGPU {
     Vector4 color;
 };
 
+struct CameraForGPU {
+    Vector3 worldPosition;
+    float padding;
+};
+
 struct DirectionalLight {
     Vector4 color;     //!< ライトの色
     Vector3 direction; //!< ライトの方向

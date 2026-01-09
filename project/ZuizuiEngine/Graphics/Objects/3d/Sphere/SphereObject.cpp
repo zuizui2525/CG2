@@ -82,6 +82,7 @@ void SphereObject::Update(const Camera* camera) {
 void SphereObject::Draw(ID3D12GraphicsCommandList* commandList,
     D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
     D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
+    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
     ID3D12PipelineState* pipelineState,
     ID3D12RootSignature* rootSignature,
     bool enableDraw) {
@@ -96,7 +97,8 @@ void SphereObject::Draw(ID3D12GraphicsCommandList* commandList,
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
+    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
+    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
 
     // インデックス数 = subdivision * subdivision * 6
     uint32_t indexCount = subdivision_ * subdivision_ * 6;
