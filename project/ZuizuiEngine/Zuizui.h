@@ -50,7 +50,7 @@ private:
     Zuizui() = default;
     static Zuizui* instance;
 
-    WindowApp window;
+    std::unique_ptr<WindowApp> window;
     std::unique_ptr<Log> logger;
     std::unique_ptr<DxCommon> dxCommon;
     std::unique_ptr<Audio> audio;

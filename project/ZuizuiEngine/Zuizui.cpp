@@ -14,8 +14,11 @@ Zuizui* Zuizui::GetInstance() {
 }
 
 void Zuizui::Initialize() {
+    window = std::make_unique<WindowApp>();
     window->Initialize(L"LE2B_02_イトウカズイ");
     window->Show();
+
+    dxCommon = std::make_unique<DxCommon>();
     dxCommon->Initialize(window->GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
 
     psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
@@ -33,6 +36,7 @@ void Zuizui::Initialize() {
     dirLight = std::make_unique<DirectionalLightObject>();
     dirLight->Initialize(dxCommon->GetDevice());
 
+    audio = std::make_unique<Audio>();
     audio->Initialize();
 
 #ifdef _DEBUG
