@@ -14,73 +14,68 @@ Zuizui* Zuizui::GetInstance() {
 }
 
 void Zuizui::Initialize() {
-    window.Initialize(L"LE2B_02_イトウカズイ");
-    window.Show();
-    dxCommon.Initialize(window.GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
+    window->Initialize(L"LE2B_02_イトウカズイ");
+    window->Show();
+    dxCommon->Initialize(window->GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
 
-    psoManager = std::make_unique<PSOManager>(dxCommon.GetDevice());
-    psoManager->Initialize(dxCommon.GetDxcUtils(), dxCommon.GetDxcCompiler(), dxCommon.GetIncludeHandler());
+    psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
+    psoManager->Initialize(dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler());
 
     textureManager = std::make_unique<TextureManager>();
-    textureManager->Initialize(dxCommon.GetDevice(), dxCommon.GetCommandList(), dxCommon.GetSrvHeap());
+    textureManager->Initialize(dxCommon->GetDevice(), dxCommon->GetCommandList(), dxCommon->GetSrvHeap());
 
     input = std::make_unique<Input>();
-    input->Initialize(window.GetInstance(), window.GetHWND());
+    input->Initialize(window->GetInstance(), window->GetHWND());
 
     camera = std::make_unique<Camera>();
-    camera->Initialize(dxCommon.GetDevice(), input.get());
+    camera->Initialize(dxCommon->GetDevice(), input.get());
 
     dirLight = std::make_unique<DirectionalLightObject>();
-    dirLight->Initialize(dxCommon.GetDevice());
+    dirLight->Initialize(dxCommon->GetDevice());
 
-    audio.Initialize();
+    audio->Initialize();
 
 #ifdef _DEBUG
     imgui = std::make_unique<ImguiManager>();
-    imgui->Initialize(window.GetHWND(), dxCommon.GetDevice(), dxCommon.GetBackBufferCount(), dxCommon.GetRtvFormat(), dxCommon.GetRtvHeap(), dxCommon.GetSrvHeap());
+    imgui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());
 #endif
 }
 
 void Zuizui::BeginFrame() {
-    dxCommon.FrameStart();
+    dxCommon->FrameStart();
 #ifdef _DEBUG
     imgui->Begin();
 #endif
-    dxCommon.BeginFrame();
-    dxCommon.PreDraw();
+    dxCommon->BeginFrame();
+    dxCommon->PreDraw();
 }
 
 void Zuizui::EndFrame() {
 #ifdef _DEBUG
     imgui->End();
-    dxCommon.DrawImGui();
+    dxCommon->DrawImGui();
 #endif
-    dxCommon.EndFrame();
-    dxCommon.FrameEnd(60);
+    dxCommon->EndFrame();
+    dxCommon->FrameEnd(60);
 }
 
 // 描画ラップ関数群
 void Zuizui::DrawModel(ModelObject* model, const std::string& textureKey, bool drawFlag) {
     if (!drawFlag || !model) return;
-    model->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
+    model->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
 void Zuizui::DrawSphere(SphereObject* sphere, const std::string& textureKey, bool drawFlag) {
     if (!drawFlag || !sphere) return;
-    sphere->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
+    sphere->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
 void Zuizui::DrawParticle(ParticleManager* particle, const std::string& textureKey, bool drawFlag) {
     if (!drawFlag || !particle) return;
-    particle->Draw(dxCommon.GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
+    particle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
 }
 
 void Zuizui::Finalize() {
-    psoManager.reset();
-    textureManager.reset();
-    camera.reset();
-    dirLight.reset();
-    input.reset();
 #ifdef _DEBUG
     imgui->Shutdown();
 #endif
