@@ -85,4 +85,8 @@ void Zuizui::Finalize() {
 #endif
     // COMの終了処理
     CoUninitialize();
+
+    // 明示的に開放
+    delete instance;
+    instance = nullptr;
 }
