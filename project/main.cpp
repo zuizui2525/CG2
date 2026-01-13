@@ -56,7 +56,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Camera
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-	camera->Initialize(dxCommon.GetDevice());
+	camera->Initialize(dxCommon.GetDevice(), input.get());
 	logger.Write("Camera Initialize");
 
 	// DirectionalLight
@@ -284,7 +284,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		input->Update();
 
 		// Camera
-		camera->Update(input.get());
+		camera->Update();
 
 		//directionalLight
 		dirLight->Update();

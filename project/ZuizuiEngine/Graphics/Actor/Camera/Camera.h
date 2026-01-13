@@ -8,8 +8,8 @@
 
 class Camera {
 public:
-    void Initialize(ID3D12Device* device);
-    void Update(Input* input);
+    void Initialize(ID3D12Device* device, Input* input);
+    void Update();
     void ImGuiControl();
 
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return resource_->GetGPUVirtualAddress(); }
@@ -29,6 +29,8 @@ private:
     DebugCamera debugCamera_;   // デバッグカメラ
     bool useDebugCamera_ = false;
     bool wasDebugCameraLastFrame_ = false;
+
+    Input* input_ = nullptr;
 
     Matrix4x4 cameraMatrix_;
     Matrix4x4 viewMatrix3D_;

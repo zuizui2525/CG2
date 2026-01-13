@@ -1,6 +1,7 @@
 #include "Camera.h"
 
-void Camera::Initialize(ID3D12Device* device) {
+void Camera::Initialize(ID3D12Device* device, Input* input) {
+    input_ = input;
     transform_ = { {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-20.0f} };
     debugCamera_.Initialize();
 
@@ -26,9 +27,10 @@ void Camera::Initialize(ID3D12Device* device) {
     resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 }
 
-void Camera::Update(Input* input) {
+void Camera::Update() {
+    if (!input_) return;
     // TABで切り替え
-    if (input->Trigger(DIK_TAB)) {
+    if (input_->Trigger(DIK_TAB)) {
         useDebugCamera_ = !useDebugCamera_;
     }
 
@@ -41,7 +43,7 @@ void Camera::Update(Input* input) {
             debugCamera_.skipNextMouseUpdate_ = true;
         }
         debugCamera_.HideCursor();
-        debugCamera_.Update(input);
+        debugCamera_.Update(input_);
         viewMatrix3D_ = debugCamera_.GetViewMatrix();
         projectionMatrix3D_ = debugCamera_.GetProjectionMatrix();
     } else {
