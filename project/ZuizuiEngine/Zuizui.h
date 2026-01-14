@@ -11,13 +11,11 @@
 #include "Log.h"
 #include "Input.h"
 #include "Audio.h"
-
-// 前方宣言
-class ModelObject;
-class SpriteObject;
-class SphereObject;
-class TriangleObject;
-class ParticleManager;
+#include "ModelObject.h"
+#include "SphereObject.h"
+#include "SpriteObject.h"
+#include "TriangleObject.h"
+#include "ParticleManager.h"
 
 class Zuizui {
 public:

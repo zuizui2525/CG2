@@ -1,9 +1,4 @@
 #include "Zuizui.h"
-#include "ModelObject.h"
-#include "SphereObject.h"
-#include "SpriteObject.h"
-#include "TriangleObject.h"
-#include "ParticleManager.h"
 #include "ImguiManager.h"
 
 Zuizui* Zuizui::instance = nullptr;
