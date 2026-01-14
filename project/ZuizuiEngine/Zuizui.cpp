@@ -106,8 +106,11 @@ void Zuizui::DrawTriangle(TriangleObject* triangle, const std::string& textureKe
     triangle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
-void Zuizui::DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position, bool drawFlag) {
+void Zuizui::DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position, const int maxInstance, const int count, const float frequency, bool drawFlag) {
     if (!drawFlag || !particle) return;
+    particle->SetMaxInstance(maxInstance);
+    particle->SetCount(count);
+    particle->SetFrequency(frequency);
     particle->SetPosition(position);
     particle->Update(camera.get());
     particle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);

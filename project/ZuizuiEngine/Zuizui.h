@@ -36,7 +36,7 @@ public:
     void DrawSphere(SphereObject* sphere, const std::string& textureKey, Vector3 position = {}, float radius = 1.0f, bool drawFlag = true);
     void DrawSprite(SpriteObject* sprite, const std::string& textureKey, Vector2 position = {}, float width = 100.0f, float height = 100.0f, bool drawFlag = true);
     void DrawTriangle(TriangleObject* triangle, const std::string& textureKey, Vector3 position = {}, bool drawFlag = true);
-    void DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position = {}, bool drawFlag = true);
+    void DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position = {}, const int maxInstance = 100, const int count = 10, const float frequency = 0.5, bool drawFlag = true);
     
     // キーボード入力
     bool TriggerKey(BYTE key) const;

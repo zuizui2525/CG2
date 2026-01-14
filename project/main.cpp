@@ -19,6 +19,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     auto triangle = std::make_unique<TriangleObject>(engine->GetDevice());
     engine->GetTextureManager()->LoadTexture("white", "resources/white.png");
 
+    auto particle = std::make_unique<ParticleManager>(engine->GetDxCommon());
+    engine->GetTextureManager()->LoadTexture("circle", "resources/circle.png");
+
     while (engine->ProcessMessage()) {
         engine->Update();
         
@@ -27,6 +30,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         engine->DrawSphere(sphere.get(), "monsterBall", Vector3{ 2.0f, 0.0f, 0.0f }, 0.5f);
         engine->DrawSprite(sprite.get(), "uvChecker", Vector2{}, 300.0f, 300.0f);
         engine->DrawTriangle(triangle.get(), "white", Vector3{ -2.0f, 0.0f, 0.0f });
+        engine->DrawParticle(particle.get(), "circle", Vector3{ 4.0f, 2.0f, 0.0f }, 1000, 50, 1.0f);
         engine->EndFrame();
     }
 
