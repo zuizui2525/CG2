@@ -11,17 +11,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     auto teapot = std::make_unique<ModelObject>(engine->GetDevice(), "resources/obj/teapot/teapot.obj");
     engine->GetTextureManager()->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
 
+    auto sphere = std::make_unique<SphereObject>(engine->GetDevice(), 16, 1.0f);
+    engine->GetTextureManager()->LoadTexture("monsterBall", teapot->GetModelData()->material.textureFilePath);
+
+
     while (engine->ProcessMessage()) {
-        engine->GetCamera()->Update();
-        Vector3 position{};
-        if (engine->PressKey(DIK_SPACE)) {
-            position.y += 1.0f;
-        }
-        teapot->SetPosition(position);
+        engine->Update();
         teapot->Update(engine->GetCamera());
 
         engine->BeginFrame();
-        engine->DrawModel(teapot.get(), "teapot");
+        engine->DrawModel(Vector3{}, teapot.get(), "teapot");
         engine->EndFrame();
     }
 

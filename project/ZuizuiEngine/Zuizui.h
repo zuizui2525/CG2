@@ -25,6 +25,7 @@ public:
 
     // 基盤の初期化と終了
     void Initialize();
+    void Update();
     void Finalize();
 
     // フレーム制御
@@ -32,13 +33,14 @@ public:
     void BeginFrame();
     void EndFrame();
 
-    // --- 簡略化された描画関数 ---
-    void DrawModel(ModelObject* model, const std::string& textureKey, bool drawFlag = true);
-    void DrawSphere(SphereObject* sphere, const std::string& textureKey, bool drawFlag = true);
-    void DrawSprite(SpriteObject* sprite, const std::string& textureKey, bool drawFlag = true);
-    void DrawTriangle(TriangleObject* triangle, const std::string& textureKey, bool drawFlag = true);
-    void DrawParticle(ParticleManager* particle, const std::string& textureKey, bool drawFlag = true);
+    // 描画関数
+    void DrawModel(Vector3 position, ModelObject* model, const std::string& textureKey, bool drawFlag = true);
+    void DrawSphere(Vector3 position, SphereObject* sphere, const std::string& textureKey, bool drawFlag = true);
+    void DrawSprite(Vector3 position, SpriteObject* sprite, const std::string& textureKey, bool drawFlag = true);
+    void DrawTriangle(Vector3 position, TriangleObject* triangle, const std::string& textureKey, bool drawFlag = true);
+    void DrawParticle(Vector3 position, ParticleManager* particle, const std::string& textureKey, bool drawFlag = true);
     
+    // キーボード入力
     bool TriggerKey(BYTE key) const;
     bool PressKey(BYTE key) const;
     bool ReleaseKey(BYTE key) const;
