@@ -12,8 +12,10 @@ WindowApp::~WindowApp() {
     }
 }
 
-bool WindowApp::Initialize(const wchar_t* title) {
+bool WindowApp::Initialize(const wchar_t* title, int32_t width, int32_t height) {
     timeBeginPeriod(1);
+    wrc_ = { 0, 0, width, height };
+
     wc_.lpfnWndProc = WindowProc;
     wc_.lpszClassName = L"MyWindowClass";
     wc_.hInstance = GetModuleHandle(nullptr);
@@ -21,12 +23,14 @@ bool WindowApp::Initialize(const wchar_t* title) {
 
     RegisterClass(&wc_);
 
-    AdjustWindowRect(&wrc_, WS_OVERLAPPEDWINDOW, false);
+    UINT windowStyle = WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX;
+
+    AdjustWindowRect(&wrc_, windowStyle, false);
 
     hwnd_ = CreateWindow(
         wc_.lpszClassName,
         title,
-        WS_OVERLAPPEDWINDOW,
+        windowStyle,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
         wrc_.right - wrc_.left,

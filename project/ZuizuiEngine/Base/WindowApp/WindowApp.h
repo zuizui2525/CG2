@@ -13,7 +13,7 @@ public:
     ~WindowApp();
 
     // 初期化・表示
-    bool Initialize(const wchar_t* title);
+    bool Initialize(const wchar_t* title, const int32_t width = kClientWidth, const int32_t height = kClientHeight);
     void Show();
 
     // メッセージループ

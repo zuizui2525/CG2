@@ -8,13 +8,13 @@ Zuizui* Zuizui::GetInstance() {
     return instance;
 }
 
-void Zuizui::Initialize() {
+void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t height) {
     window = std::make_unique<WindowApp>();
-    window->Initialize(L"LE2B_02_イトウカズイ");
+    window->Initialize(title, width, height);
     window->Show();
 
     dxCommon = std::make_unique<DxCommon>();
-    dxCommon->Initialize(window->GetHWND(), WindowApp::kClientWidth, WindowApp::kClientHeight);
+    dxCommon->Initialize(window->GetHWND(), width, height);
 
     psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
     psoManager->Initialize(dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler());

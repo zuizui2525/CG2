@@ -5,7 +5,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     SetUnhandledExceptionFilter(ExportDump);
 
     Zuizui* engine = Zuizui::GetInstance();
-    engine->Initialize();
+    engine->Initialize(L"LE2B_02_イトウカズイ");
 
     auto teapot = std::make_unique<ModelObject>(engine->GetDevice(), "resources/obj/teapot/teapot.obj");
     engine->GetTextureManager()->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
