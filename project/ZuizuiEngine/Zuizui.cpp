@@ -46,6 +46,18 @@ void Zuizui::Update() {
     dirLight->Update();
 }
 
+void Zuizui::Finalize() {
+#ifdef _DEBUG
+    imgui->Shutdown();
+#endif
+    // COMの終了処理
+    CoUninitialize();
+
+    // 明示的に開放
+    delete instance;
+    instance = nullptr;
+}
+
 void Zuizui::BeginFrame() {
     dxCommon->FrameStart();
 #ifdef _DEBUG
@@ -64,16 +76,16 @@ void Zuizui::EndFrame() {
     dxCommon->FrameEnd(60);
 }
 
-// 描画ラップ関数群
-void Zuizui::DrawModel(Vector3 position, ModelObject* model, const std::string& textureKey, bool drawFlag) {
+void Zuizui::DrawModel(ModelObject* model, const std::string& textureKey, Vector3 position, bool drawFlag) {
     if (!drawFlag || !model) return;
     model->SetPosition(position);
     model->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
-void Zuizui::DrawSphere(Vector3 position, SphereObject* sphere, const std::string& textureKey, bool drawFlag) {
+void Zuizui::DrawSphere(SphereObject* sphere, const std::string& textureKey, Vector3 position, float radius, bool drawFlag) {
     if (!drawFlag || !sphere) return;
     sphere->SetPosition(position);
+    sphere->SetRadius(radius);
     sphere->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
@@ -107,14 +119,3 @@ bool Zuizui::ReleaseKey(BYTE key) const {
     return input->Release(key);
 }
 
-void Zuizui::Finalize() {
-#ifdef _DEBUG
-    imgui->Shutdown();
-#endif
-    // COMの終了処理
-    CoUninitialize();
-
-    // 明示的に開放
-    delete instance;
-    instance = nullptr;
-}

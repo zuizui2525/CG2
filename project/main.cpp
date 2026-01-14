@@ -16,10 +16,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     while (engine->ProcessMessage()) {
         engine->Update();
         teapot->Update(engine->GetCamera());
+        sphere->Update(engine->GetCamera());
 
         engine->BeginFrame();
-        engine->DrawModel(Vector3{}, teapot.get(), "teapot", false);
-        engine->DrawSphere(Vector3{}, sphere.get(), "monsterBall");
+        engine->DrawModel(teapot.get(), "teapot", Vector3{});
+        engine->DrawSphere(sphere.get(), "monsterBall", Vector3{ 2.0f, 0.0f, 0.0f }, 1.0f);
         engine->EndFrame();
     }
 
