@@ -38,6 +38,10 @@ public:
     void DrawSprite(SpriteObject* sprite, const std::string& textureKey, bool drawFlag = true);
     void DrawTriangle(TriangleObject* triangle, const std::string& textureKey, bool drawFlag = true);
     void DrawParticle(ParticleManager* particle, const std::string& textureKey, bool drawFlag = true);
+    
+    bool TriggerKey(BYTE key) const;
+    bool PressKey(BYTE key) const;
+    bool ReleaseKey(BYTE key) const;
 
     // ゲッター
     ID3D12Device* GetDevice() { return dxCommon->GetDevice(); }

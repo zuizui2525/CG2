@@ -74,9 +74,31 @@ void Zuizui::DrawSphere(SphereObject* sphere, const std::string& textureKey, boo
     sphere->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
+void Zuizui::DrawSprite(SpriteObject* sprite, const std::string& textureKey, bool drawFlag) {
+    if (!drawFlag || !sprite) return;
+    sprite->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
+}
+
+void Zuizui::DrawTriangle(TriangleObject* triangle, const std::string& textureKey, bool drawFlag) {
+    if (!drawFlag || !triangle) return;
+    triangle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
+}
+
 void Zuizui::DrawParticle(ParticleManager* particle, const std::string& textureKey, bool drawFlag) {
     if (!drawFlag || !particle) return;
     particle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
+}
+
+bool Zuizui::TriggerKey(BYTE key) const {
+    return input->Trigger(key);
+}
+
+bool Zuizui::PressKey(BYTE key) const {
+    return input->Press(key);
+}
+
+bool Zuizui::ReleaseKey(BYTE key) const {
+    return input->Release(key);
 }
 
 void Zuizui::Finalize() {

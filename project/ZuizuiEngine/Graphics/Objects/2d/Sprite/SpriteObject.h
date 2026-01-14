@@ -30,10 +30,19 @@ public:
     // ImGui
     void ImGuiControl();
 
-    // getter
+    // Getter
     Transform& GetTransform() { return transform_; }
+    Vector3& GetScale() { return transform_.scale; }
+    Vector3& GetRotate() { return transform_.rotate; }
+    Vector3& GetPosition() { return transform_.translate; }
     Transform& GetUVTransform() { return uvTransform_; }
     Material* GetMaterialData() { return materialData_; }
+
+    // Setter
+    void SetTransform(Transform& transform) { transform_ = transform; }
+    void SetScale(Vector3& scale) { transform_.scale = scale; }
+    void SetRotate(Vector3& rotate) { transform_.rotate = rotate; }
+    void SetPosition(Vector3& position) { transform_.translate = position; }
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;

@@ -4,14 +4,10 @@
 #include "Camera.h"
 
 ModelObject::ModelObject(ID3D12Device* device,
-    const std::string& filename,
-    const Vector3& initialPosition)
+    const std::string& filename)
     : Object3D(device, 2) // 2 = ライティング有効
 {
-    // 初期位置をセット
-    transform_.translate = initialPosition;
-
-    // モデルデータ読み込み
+   // モデルデータ読み込み
     modelData_ = ModelManager::GetInstance().LoadModel(device, filename);
 
     // 頂点リソース作成
