@@ -79,6 +79,7 @@ void Zuizui::EndFrame() {
 void Zuizui::DrawModel(ModelObject* model, const std::string& textureKey, Vector3 position, bool drawFlag) {
     if (!drawFlag || !model) return;
     model->SetPosition(position);
+    model->Update(camera.get());
     model->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
@@ -86,24 +87,29 @@ void Zuizui::DrawSphere(SphereObject* sphere, const std::string& textureKey, Vec
     if (!drawFlag || !sphere) return;
     sphere->SetPosition(position);
     sphere->SetRadius(radius);
+    sphere->Update(camera.get());
     sphere->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
-void Zuizui::DrawSprite(Vector3 position, SpriteObject* sprite, const std::string& textureKey, bool drawFlag) {
+void Zuizui::DrawSprite(SpriteObject* sprite, const std::string& textureKey, Vector2 position, float width, float height, bool drawFlag) {
     if (!drawFlag || !sprite) return;
-    sprite->SetPosition(position);
+    sprite->SetSize(width, height);
+    sprite->SetPosition(Vector3{position.x, position.y, 0.0f});
+    sprite->Update(camera.get());
     sprite->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
-void Zuizui::DrawTriangle(Vector3 position, TriangleObject* triangle, const std::string& textureKey, bool drawFlag) {
+void Zuizui::DrawTriangle(TriangleObject* triangle, const std::string& textureKey, Vector3 position, bool drawFlag) {
     if (!drawFlag || !triangle) return;
     triangle->SetPosition(position);
+    triangle->Update(camera.get());
     triangle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), camera->GetGPUVirtualAddress(), psoManager->GetPSO("Object3D"), psoManager->GetRootSignature("Object3D"), true);
 }
 
-void Zuizui::DrawParticle(Vector3 position, ParticleManager* particle, const std::string& textureKey, bool drawFlag) {
+void Zuizui::DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position, bool drawFlag) {
     if (!drawFlag || !particle) return;
     particle->SetPosition(position);
+    particle->Update(camera.get());
     particle->Draw(dxCommon->GetCommandList(), textureManager->GetGpuHandle(textureKey), dirLight->GetGPUVirtualAddress(), psoManager->GetPSO("Particle"), psoManager->GetRootSignature("Particle"), true);
 }
 

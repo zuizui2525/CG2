@@ -32,11 +32,11 @@ public:
     void EndFrame();
 
     // 描画関数
-    void DrawModel(ModelObject* model, const std::string& textureKey, Vector3 position, bool drawFlag = true);
-    void DrawSphere(SphereObject* sphere, const std::string& textureKey, Vector3 position, float radius, bool drawFlag = true);
-    void DrawSprite(Vector3 position, SpriteObject* sprite, const std::string& textureKey, bool drawFlag = true);
-    void DrawTriangle(Vector3 position, TriangleObject* triangle, const std::string& textureKey, bool drawFlag = true);
-    void DrawParticle(Vector3 position, ParticleManager* particle, const std::string& textureKey, bool drawFlag = true);
+    void DrawModel(ModelObject* model, const std::string& textureKey, Vector3 position = {}, bool drawFlag = true);
+    void DrawSphere(SphereObject* sphere, const std::string& textureKey, Vector3 position = {}, float radius = 1.0f, bool drawFlag = true);
+    void DrawSprite(SpriteObject* sprite, const std::string& textureKey, Vector2 position = {}, float width = 100.0f, float height = 100.0f, bool drawFlag = true);
+    void DrawTriangle(TriangleObject* triangle, const std::string& textureKey, Vector3 position = {}, bool drawFlag = true);
+    void DrawParticle(ParticleManager* particle, const std::string& textureKey, Vector3 position = {}, bool drawFlag = true);
     
     // キーボード入力
     bool TriggerKey(BYTE key) const;

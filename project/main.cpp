@@ -13,14 +13,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     auto sphere = std::make_unique<SphereObject>(engine->GetDevice());
     engine->GetTextureManager()->LoadTexture("monsterBall", "resources/monsterball.png");
 
+    auto sprite = std::make_unique<SpriteObject>(engine->GetDevice());
+    engine->GetTextureManager()->LoadTexture("uvChecker", "resources/uvChecker.png");
+
+    auto triangle = std::make_unique<TriangleObject>(engine->GetDevice());
+    engine->GetTextureManager()->LoadTexture("white", "resources/white.png");
+
     while (engine->ProcessMessage()) {
         engine->Update();
-        teapot->Update(engine->GetCamera());
-        sphere->Update(engine->GetCamera());
-
+        
         engine->BeginFrame();
         engine->DrawModel(teapot.get(), "teapot", Vector3{});
-        engine->DrawSphere(sphere.get(), "monsterBall", Vector3{ 2.0f, 0.0f, 0.0f }, 1.0f);
+        engine->DrawSphere(sphere.get(), "monsterBall", Vector3{ 2.0f, 0.0f, 0.0f }, 0.5f);
+        engine->DrawSprite(sprite.get(), "uvChecker", Vector2{}, 300.0f, 300.0f);
+        engine->DrawTriangle(triangle.get(), "white", Vector3{ -2.0f, 0.0f, 0.0f });
         engine->EndFrame();
     }
 

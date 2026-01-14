@@ -12,13 +12,12 @@ class Camera;
 
 class SpriteObject {
 public:
-    SpriteObject(ID3D12Device* device, int width, int height);
+    // コンストラクタから引数を削除
+    SpriteObject(ID3D12Device* device);
     ~SpriteObject();
 
-    // 更新（ModelObjectと揃える）
     void Update(const Camera* camera);
 
-    // 描画
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
@@ -27,7 +26,6 @@ public:
         ID3D12RootSignature* rootSignature,
         bool enableDraw);
 
-    // ImGui
     void ImGuiControl();
 
     // Getter
@@ -37,12 +35,21 @@ public:
     Vector3& GetPosition() { return transform_.translate; }
     Transform& GetUVTransform() { return uvTransform_; }
     Material* GetMaterialData() { return materialData_; }
+    float GetWidth() const { return width_; }
+    float GetHeight() const { return height_; }
 
     // Setter
-    void SetTransform(Transform& transform) { transform_ = transform; }
-    void SetScale(Vector3& scale) { transform_.scale = scale; }
-    void SetRotate(Vector3& rotate) { transform_.rotate = rotate; }
-    void SetPosition(Vector3& position) { transform_.translate = position; }
+    void SetTransform(const Transform& transform) { transform_ = transform; }
+    void SetScale(const Vector3& scale) { transform_.scale = scale; }
+    void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
+    void SetPosition(const Vector3& position) { transform_.translate = position; }
+
+    // サイズ設定用のSetter
+    void SetSize(float width, float height);
+
+private:
+    // 頂点座標を更新する内部関数
+    void UpdateVertexData();
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
@@ -52,10 +59,14 @@ private:
 
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
+    VertexData* vertexData_ = nullptr; // 頂点データへのポインタを保持
 
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
     D3D12_INDEX_BUFFER_VIEW ibView_{};
 
     Transform transform_{ {1,1,1}, {0,0,0}, {0,0,0} };
     Transform uvTransform_{ {1,1,1}, {0,0,0}, {0,0,0} };
+
+    float width_ = 100.0f;  // デフォルト幅
+    float height_ = 100.0f; // デフォルト高さ
 };
