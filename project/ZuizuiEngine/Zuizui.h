@@ -43,12 +43,20 @@ public:
     bool PressKey(BYTE key) const;
     bool ReleaseKey(BYTE key) const;
 
-    // ゲッター
+    // getter
     ID3D12Device* GetDevice() { return dxCommon->GetDevice(); }
     DxCommon* GetDxCommon() { return dxCommon.get(); }
     Camera* GetCamera() { return camera.get(); }
     PSOManager* GetPSOManager() { return psoManager.get(); }
     TextureManager* GetTextureManager() { return textureManager.get(); }
+    Vector3 GetCameraScale() { return camera->GetScale(); }
+    Vector3 GetCameraRotate() { return camera->GetRotate(); }
+    Vector3 GetCameraPos() { return camera->GetPosition(); }
+
+    // setter
+    void SetCameraScale(Vector3 scale) { camera->SetScale(scale); }
+    void SetCameraRotate(Vector3 rotate) { camera->SetRotate(rotate); }
+    void SetCameraPos(Vector3 position) { camera->SetPosition(position); }    
 
 private:
     Zuizui() = default;
