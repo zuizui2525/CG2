@@ -75,10 +75,20 @@ ParticleManager::ParticleManager(DxCommon* dxCommon) : dxCommon_(dxCommon) {
 }
 
 void ParticleManager::SetMaxInstance(uint32_t maxInstance) {
-    // 物理限界を超えないように設定
+    // 値が変わっていない、かつ初期化済みなら何もしない
+    if (numMaxInstance_ == maxInstance && isInitialized_) {
+        return;
+    }
+
     numMaxInstance_ = (std::min)(maxInstance, (uint32_t)kNumMaxInstance);
 
-    // リソースの（再）生成を実行
+    // 最初の1回だけインデックスを決定する（例: staticで管理している場合）
+    if (!isInitialized_) {
+        static UINT nextIndex = 50;
+        mySrvIndex_ = nextIndex++;
+        isInitialized_ = true;
+    }
+
     CreateInstanceResource();
 }
 
@@ -87,35 +97,36 @@ void ParticleManager::CreateInstanceResource() {
     ID3D12DescriptorHeap* srvHeap = dxCommon_->GetSrvHeap();
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-    // インスタンスデータ用 StructuredBuffer 作成
+    // 1. インスタンスデータ用リソースの作成
+    // numMaxInstance_ が変化したときだけここに来る
     size_t bufferSize = sizeof(ParticleForGPU) * numMaxInstance_;
     instanceResource_ = CreateBufferResource(device, bufferSize);
     if (!instanceResource_) throw std::runtime_error("Failed to create instanceResource_");
 
     HRESULT hr = instanceResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceData_));
-    if (FAILED(hr) || !instanceData_) throw std::runtime_error("Failed to map instanceResource_");
+    if (FAILED(hr)) throw std::runtime_error("Failed to map instanceResource_");
 
-    // SRVの作成
-    instanceSrvHandleCPU_ = GetCPUDescriptorHandle(srvHeap, descriptorSize, kDescriptorIndex);
-    instanceSrvHandleGPU_ = GetGPUDescriptorHandle(srvHeap, descriptorSize, kDescriptorIndex);
+    // 2. 固定された mySrvIndex_ を使用してハンドルを取得
+    // これにより、kDescriptorIndex が無限に増えるのを防ぎます
+    instanceSrvHandleCPU_ = GetCPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
+    instanceSrvHandleGPU_ = GetGPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
 
+    // 3. SRVの設定
     D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
     instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
     instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
     instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     instancingSrvDesc.Buffer.FirstElement = 0;
     instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-    instancingSrvDesc.Buffer.NumElements = numMaxInstance_;
+    instancingSrvDesc.Buffer.NumElements = numMaxInstance_; // 新しい最大数で作成
     instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
+    // 指定した固定位置（mySrvIndex_）にSRVを書き込む
     device->CreateShaderResourceView(
         instanceResource_.Get(),
         &instancingSrvDesc,
         instanceSrvHandleCPU_
     );
-
-    // 次のインスタンスのためにインデックスを進める
-    kDescriptorIndex++;
 }
 
 void ParticleManager::Update(const Camera* camera) {

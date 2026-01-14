@@ -89,7 +89,8 @@ private:
     ParticleForGPU* instanceData_ = nullptr;
 
     // SRV
-    static inline UINT kDescriptorIndex = 50;
+    UINT mySrvIndex_ = 0; // 個別のインデックスを保持
+    bool isInitialized_ = false; // 初期化済みフラグ
     D3D12_CPU_DESCRIPTOR_HANDLE instanceSrvHandleCPU_{};
     D3D12_GPU_DESCRIPTOR_HANDLE instanceSrvHandleGPU_{};
 
