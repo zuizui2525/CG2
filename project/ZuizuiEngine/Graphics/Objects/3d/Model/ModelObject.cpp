@@ -2,16 +2,19 @@
 #include "ModelManager.h"
 #include "Function.h"
 #include "Camera.h"
+#include "DirectionalLight.h"
 
-void ModelObject::Initialize(ID3D12Device* device, const std::string& filename, int lightingMode) {
+void ModelObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, const std::string& filename, int lightingMode) {
     // 基底クラスの初期化
-    Object3D::Initialize(device, lightingMode);
+    Object3D::Initialize(engine, lightingMode);
+    camera_ = camera;
+    DirectionalLight_ = light;
 
     // モデルデータ読み込み
-    modelData_ = ModelManager::GetInstance().LoadModel(device, filename);
+    modelData_ = ModelManager::GetInstance().LoadModel(engine_->GetDevice(), filename);
 
     // 頂点リソース作成
-    vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_->vertices.size());
+    vertexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(VertexData) * modelData_->vertices.size());
     vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbv_.SizeInBytes = sizeof(VertexData) * (UINT)modelData_->vertices.size();
     vbv_.StrideInBytes = sizeof(VertexData);
@@ -22,7 +25,7 @@ void ModelObject::Initialize(ID3D12Device* device, const std::string& filename, 
     memcpy(vertexData, modelData_->vertices.data(), sizeof(VertexData) * modelData_->vertices.size());
 }
 
-void ModelObject::Update(const Camera* camera) {
+void ModelObject::Update() {
     // ワールド行列
     Matrix4x4 worldMatrix = Math::MakeAffineMatrix(
         transform_.scale,
@@ -31,7 +34,7 @@ void ModelObject::Update(const Camera* camera) {
     );
 
     // WVP行列
-    Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
+    Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera_->GetViewMatrix3D()), camera_->GetProjectionMatrix3D());
 
     // 逆転置行列
     Matrix4x4 worldForNormal = worldViewProjection;
@@ -47,30 +50,26 @@ void ModelObject::Update(const Camera* camera) {
     wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
-void ModelObject::Draw(ID3D12GraphicsCommandList* commandList,
-    D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-    D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-    ID3D12PipelineState* pipelineState,
-    ID3D12RootSignature* rootSignature,
-    bool draw) {
-    
+void ModelObject::Draw(const std::string& textureKey, Vector3 position, bool draw) {
+    // 座標を設定
+    SetPosition(position);
+
     // パイプラインの選択
-    commandList->SetGraphicsRootSignature(rootSignature);
-    commandList->SetPipelineState(pipelineState);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
+    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
     
     // VBV設定
-    commandList->IASetVertexBuffers(0, 1, &vbv_);
+    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
 
     // 定数バッファ設定
-    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
-    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, DirectionalLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, engine_->GetTextureManager()->GetGpuHandle(textureKey));
 
     // 描画
     if (draw) {
-        commandList->DrawInstanced(UINT(modelData_->vertices.size()), 1, 0, 0);
+        engine_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData_->vertices.size()), 1, 0, 0);
     }
 }

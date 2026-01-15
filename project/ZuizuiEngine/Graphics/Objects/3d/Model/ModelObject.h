@@ -1,11 +1,14 @@
 #pragma once
 #include "Object3D.h"
+#include "Zuizui.h"
 #include "Struct.h"
 #include <memory>
 #include <string>
 #include <vector>
 
+class Zuizui;
 class Camera;
+class DirectionalLightObject;
 
 // objモデル用クラス
 class ModelObject : public Object3D {
@@ -19,22 +22,19 @@ public:
     // モデルデータ取得（テクスチャパスなどを参照する用）
     const std::shared_ptr<ModelData>& GetModelData() const { return modelData_; }
 
-    void Initialize(ID3D12Device* device, const std::string& filename, int lightingMode = 2);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, const std::string& filename, int lightingMode = 2);
 
     // 毎フレーム更新（Transform から行列計算して WVP 反映）
-    void Update(const Camera* camera);
+    void Update();
 
     // モデル描画用関数
-    void Draw(ID3D12GraphicsCommandList* commandList,
-        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-        D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-        D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-        ID3D12PipelineState* pipelineState,
-        ID3D12RootSignature* rootSignature,
-        bool draw = true);
+    void Draw(const std::string& textureKey, Vector3 position, bool draw);
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
     D3D12_VERTEX_BUFFER_VIEW vbv_{};
     std::shared_ptr<ModelData> modelData_;
+
+    Camera* camera_ = nullptr;
+    DirectionalLightObject* DirectionalLight_ = nullptr;
 };

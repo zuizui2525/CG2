@@ -3,13 +3,14 @@
 #include <d3d12.h>
 #include "Struct.h"
 
-// 3Dオブジェクトの基底クラス
+class Zuizui;
+
 class Object3D {
 public:
     Object3D() = default;
     virtual ~Object3D() = default;
 
-    void Initialize(ID3D12Device* device, int lightingMode);
+    void Initialize(Zuizui* engine, int lightingMode);
 
     // ImGui
     void ImGuiControl(const std::string& name);
@@ -46,4 +47,7 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
+
+    // engine
+    Zuizui* engine_ = nullptr;
 };
