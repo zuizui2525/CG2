@@ -8,11 +8,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Zuizui* engine = Zuizui::GetInstance();
     engine->Initialize(L"LE2B_02_イトウカズイ");
+    
+    std::unique_ptr<Camera> camera = std::make_unique<Camera>();
+    camera->Initialize(engine->GetDevice(), input.get());
 
-
+   std::unique_ptr<DirectionalLightObject> dirLight = std::make_unique<DirectionalLightObject>();
+    dirLight->Initialize(engine->GetDevice());
 
     auto teapot = std::make_unique<ModelObject>();
-    teapot->Initialize(engine, "resources/obj/teapot/teapot.obj");
+    teapot->Initialize(engine, camera.get(), dirLight.get(), "resources/obj/teapot/teapot.obj");
     engine->GetTextureManager()->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
 
     auto sphere = std::make_unique<SphereObject>();
