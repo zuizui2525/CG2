@@ -8,26 +8,22 @@
 #include "Struct.h"
 #include "Object3D.h"
 
+class Zuizui;
 class Camera;
+class DirectionalLightObject;
 
 class SphereObject : public Object3D {
 public:
     SphereObject() = default;
     ~SphereObject() = default;
 
-    void Initialize(ID3D12Device* device, int lightingMode = 2);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode = 2);
 
-    // 更新処理 (パラメータ変更があればメッシュを再生成する)
-    void Update(const Camera* camera);
+    // 更新処理
+    void Update();
 
     // 描画処理
-    void Draw(ID3D12GraphicsCommandList* commandList,
-        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-        D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-        D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-        ID3D12PipelineState* pipelineState,
-        ID3D12RootSignature* rootSignature,
-        bool enableDraw);
+    void Draw(const std::string& textureKey, bool draw = true);
 
     // Getter
     float GetRadius() const { return radius_; }
@@ -50,10 +46,11 @@ private:
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
     D3D12_INDEX_BUFFER_VIEW ibView_{};
 
-    ID3D12Device* device_ = nullptr;
-
     // パラメータ
     uint32_t subdivision_ = 16;
     float radius_ = 1.0f;
     bool needsUpdate_ = false; // 再生成フラグ
+
+    Camera* camera_ = nullptr;
+    DirectionalLightObject* DirectionalLight_ = nullptr;
 };

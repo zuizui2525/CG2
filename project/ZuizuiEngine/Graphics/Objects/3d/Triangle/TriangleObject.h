@@ -7,26 +7,22 @@
 #include "Struct.h"
 #include "Object3D.h"
 
+class Zuizui;
 class Camera;
+class DirectionalLightObject;
 
 class TriangleObject: public Object3D {
 public:
     TriangleObject() = default;
     ~TriangleObject() = default;
 
-    void Initialize(ID3D12Device* device, int lightingMode = 0);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode = 0);
 
-    // 更新処理（view, projectionを渡す）
-    void Update(const Camera* camera);
+    // 更新処理
+    void Update();
 
     // 描画処理
-    void Draw(ID3D12GraphicsCommandList* commandList,
-        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-        D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-        D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-        ID3D12PipelineState* pipelineState,
-        ID3D12RootSignature* rootSignature,
-        bool enableDraw);
+    void Draw(const std::string& textureKey, bool draw = true);
   
 private:
     // GPUリソース
@@ -34,4 +30,7 @@ private:
 
     // バッファビュー
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
+
+    Camera* camera_ = nullptr;
+    DirectionalLightObject* DirectionalLight_ = nullptr;
 };

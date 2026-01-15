@@ -15,6 +15,9 @@ public:
     // ImGui
     void ImGuiControl(const std::string& name);
 
+    // LoadTexture
+    void LoadTexture(const std::string& name, const std::string& filePath);
+
     // 共通アクセサ
     // Getter
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
@@ -28,10 +31,10 @@ public:
     TransformationMatrix* GetWvpData() { return wvpData_; }
 
     // Setter
-    void SetTransform(Transform& transform) { transform_ = transform; }
-    void SetScale(Vector3& scale) { transform_.scale = scale; }
-    void SetRotate(Vector3& rotate) { transform_.rotate = rotate; }
-    void SetPosition(Vector3& position) { transform_.translate = position; }
+    void SetTransform(Transform transform) { transform_ = transform; }
+    void SetScale(Vector3 scale) { transform_.scale = scale; }
+    void SetRotate(Vector3 rotate) { transform_.rotate = rotate; }
+    void SetPosition(Vector3 position) { transform_.translate = position; }
 
 protected:
     // ImGui

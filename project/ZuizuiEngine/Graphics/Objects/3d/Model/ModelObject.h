@@ -28,7 +28,7 @@ public:
     void Update();
 
     // モデル描画用関数
-    void Draw(const std::string& textureKey, Vector3 position, bool draw);
+    void Draw(const std::string& textureKey, bool draw = true);
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;

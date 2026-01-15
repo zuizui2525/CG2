@@ -37,6 +37,10 @@ void Object3D::ImGuiControl(const std::string& name) {
     ImGui::Separator();
 }
 
+void Object3D::LoadTexture(const std::string& name, const std::string& filePath) {
+    engine_->GetTextureManager()->LoadTexture(name, filePath);
+}
+
 void Object3D::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
     

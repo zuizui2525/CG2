@@ -50,10 +50,8 @@ void ModelObject::Update() {
     wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
-void ModelObject::Draw(const std::string& textureKey, Vector3 position, bool draw) {
-    // 座標を設定
-    SetPosition(position);
-
+void ModelObject::Draw(const std::string& textureKey, bool draw) {
+    if (!draw) return;
     // パイプラインの選択
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
     engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));

@@ -36,6 +36,7 @@ public:
     DxCommon* GetDxCommon() { return dxCommon.get(); }
     PSOManager* GetPSOManager() { return psoManager.get(); }
     TextureManager* GetTextureManager() { return textureManager.get(); }
+    WindowApp* GetWindow() { return window.get(); }
 
 private:
     Zuizui() = default;

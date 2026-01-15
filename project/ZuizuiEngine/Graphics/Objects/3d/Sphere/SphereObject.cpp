@@ -1,7 +1,68 @@
 #include "SphereObject.h"
 #include "Function.h"
+#include "Zuizui.h"
 #include "Camera.h"
+#include "DirectionalLight.h"
 #include "Matrix.h"
+
+void SphereObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode) {
+    // 基底クラスの初期化
+    Object3D::Initialize(engine, lightingMode);
+    camera_ = camera;
+    DirectionalLight_ = light;
+
+    // 初回のメッシュ生成
+    CreateMesh();
+}
+
+void SphereObject::Update() {
+    // パラメータに変更があればメッシュを再生成
+    if (needsUpdate_) {
+        CreateMesh();
+        needsUpdate_ = false;
+    }
+
+    // 行列更新
+    Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera_->GetViewMatrix3D()), camera_->GetProjectionMatrix3D());
+
+    Matrix4x4 worldForNormal = world;
+    worldForNormal.m[3][0] = 0.0f;
+    worldForNormal.m[3][1] = 0.0f;
+    worldForNormal.m[3][2] = 0.0f;
+    worldForNormal.m[3][3] = 1.0f;
+
+    wvpData_->WVP = wvp;
+    wvpData_->world = world;
+    wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
+
+    Matrix4x4 uv = Math::MakeScaleMatrix(uvTransform_.scale);
+    uv = Math::Multiply(uv, Math::MakeRotateZMatrix(uvTransform_.rotate.z));
+    uv = Math::Multiply(uv, Math::MakeTranslateMatrix(uvTransform_.translate));
+    materialData_->uvtransform = uv;
+}
+
+void SphereObject::Draw(const std::string& textureKey, bool draw) {
+    if (!draw) return;
+
+    // パイプラインの選択
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
+    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
+
+    // VBV設定
+    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
+    engine_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
+
+    // 定数バッファ設定
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, DirectionalLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, engine_->GetTextureManager()->GetGpuHandle(textureKey));
+
+    uint32_t indexCount = subdivision_ * subdivision_ * 6;
+    engine_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+}
 
 void SphereObject::CreateMesh() {
     // 頂点数とインデックス数を計算
@@ -11,7 +72,7 @@ void SphereObject::CreateMesh() {
     float kLatEvery = static_cast<float>(M_PI / subdivision_);
 
     // Vertex Resource 作成 (以前のリソースはComPtrの代入により自動解放される)
-    vertexResource_ = CreateBufferResource(device_, sizeof(VertexData) * kVertexCount);
+    vertexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(VertexData) * kVertexCount);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * kVertexCount;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -37,7 +98,7 @@ void SphereObject::CreateMesh() {
     vertexResource_->Unmap(0, nullptr);
 
     // Index Resource 作成
-    indexResource_ = CreateBufferResource(device_, sizeof(uint32_t) * kIndexCount);
+    indexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(uint32_t) * kIndexCount);
     ibView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     ibView_.SizeInBytes = sizeof(uint32_t) * kIndexCount;
     ibView_.Format = DXGI_FORMAT_R32_UINT;
@@ -61,66 +122,4 @@ void SphereObject::CreateMesh() {
         }
     }
     indexResource_->Unmap(0, nullptr);
-}
-
-void SphereObject::Initialize(ID3D12Device* device, int lightingMode) {
-    // 基底クラスの初期化
-    Object3D::Initialize(device, lightingMode);
-    
-    // deviceの初期化
-    device_ = device;
-
-    // 初回のメッシュ生成
-    CreateMesh();
-}
-
-void SphereObject::Update(const Camera* camera) {
-    // パラメータに変更があればメッシュを再生成
-    if (needsUpdate_) {
-        CreateMesh();
-        needsUpdate_ = false;
-    }
-
-    // 行列更新
-    Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera->GetViewMatrix3D()), camera->GetProjectionMatrix3D());
-
-    Matrix4x4 worldForNormal = world;
-    worldForNormal.m[3][0] = 0.0f;
-    worldForNormal.m[3][1] = 0.0f;
-    worldForNormal.m[3][2] = 0.0f;
-    worldForNormal.m[3][3] = 1.0f;
-
-    wvpData_->WVP = wvp;
-    wvpData_->world = world;
-    wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
-
-    Matrix4x4 uv = Math::MakeScaleMatrix(uvTransform_.scale);
-    uv = Math::Multiply(uv, Math::MakeRotateZMatrix(uvTransform_.rotate.z));
-    uv = Math::Multiply(uv, Math::MakeTranslateMatrix(uvTransform_.translate));
-    materialData_->uvtransform = uv;
-}
-
-void SphereObject::Draw(ID3D12GraphicsCommandList* commandList,
-    D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-    D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-    ID3D12PipelineState* pipelineState,
-    ID3D12RootSignature* rootSignature,
-    bool enableDraw) {
-    if (!enableDraw) return;
-
-    commandList->SetGraphicsRootSignature(rootSignature);
-    commandList->SetPipelineState(pipelineState);
-
-    commandList->IASetVertexBuffers(0, 1, &vbView_);
-    commandList->IASetIndexBuffer(&ibView_);
-    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
-    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
-
-    uint32_t indexCount = subdivision_ * subdivision_ * 6;
-    commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 }
