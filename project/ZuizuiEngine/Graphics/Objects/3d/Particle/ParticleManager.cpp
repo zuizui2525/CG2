@@ -15,63 +15,6 @@ namespace {
         transform.rotate = { 0.0f, 0.0f, 0.0f };
         transform.translate = { 0.0f, 0.0f, 0.0f };
     }
-} // namespace
-
-ParticleManager::ParticleManager(DxCommon* dxCommon) : dxCommon_(dxCommon) {
-    ID3D12Device* device = dxCommon_->GetDevice();
-
-    // --- Emitterの初期化 ---
-    InitializeTransform(emitter_.transform);
-    emitter_.count = 10;
-    emitter_.frequency = 0.5f;
-    emitter_.frequencyTime = 0.0f;
-
-    // --- 風（Acceleration Field）の初期化 ---
-    accelerationFeild_.acceleration = { 50.0f, 0.0f, 0.0f };
-    accelerationFeild_.area.min = { -10.0f, -10.0f, 10.0f };
-    accelerationFeild_.area.max = { 10.0f, 10.0f, 30.0f };
-
-    // --- Materialリソースの作成 ---
-    materialResource_ = CreateBufferResource(device, sizeof(Material));
-    if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
-
-    HRESULT hr_mat = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-    if (FAILED(hr_mat) || !materialData_) throw std::runtime_error("Failed to map materialResource_");
-
-    materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    materialData_->enableLighting = 0;
-    materialData_->uvtransform = Math::MakeIdentity();
-
-    // --- 頂点バッファ（板ポリゴン）の作成 ---
-    vertices_ = {
-        // Triangle 1
-        {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-        {{ 1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        // Triangle 2
-        {{ 1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-        {{ 1.0f,  1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}
-    };
-
-    size_t vertexBufferSize = sizeof(VertexData) * vertices_.size();
-    vertexResource_ = CreateBufferResource(device, vertexBufferSize);
-    if (!vertexResource_) throw std::runtime_error("Failed to create vertexResource_");
-
-    VertexData* vertexData = nullptr;
-    HRESULT map_hr = vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-    if (FAILED(map_hr)) throw std::runtime_error("Failed to map vertexResource_");
-    memcpy(vertexData, vertices_.data(), vertexBufferSize);
-
-    vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-    vbv_.SizeInBytes = (UINT)vertexBufferSize;
-    vbv_.StrideInBytes = sizeof(VertexData);
-
-    // --- 乱数エンジンの初期化 ---
-    randomEngine_ = std::mt19937(seedGenerator_());
-
-    // --- インスタンスリソースの初期確保 (デフォルト100) ---
-    SetMaxInstance(100);
 }
 
 void ParticleManager::SetMaxInstance(uint32_t maxInstance) {
@@ -127,6 +70,64 @@ void ParticleManager::CreateInstanceResource() {
         &instancingSrvDesc,
         instanceSrvHandleCPU_
     );
+}
+
+void ParticleManager::Initialize(DxCommon* dxCommon) {
+    dxCommon_ = dxCommon;
+    ID3D12Device* device = dxCommon_->GetDevice();
+
+    // --- Emitterの初期化 ---
+    InitializeTransform(emitter_.transform);
+    emitter_.count = 10;
+    emitter_.frequency = 0.5f;
+    emitter_.frequencyTime = 0.0f;
+
+    // --- 風（Acceleration Field）の初期化 ---
+    accelerationFeild_.acceleration = { 50.0f, 0.0f, 0.0f };
+    accelerationFeild_.area.min = { -10.0f, -10.0f, 10.0f };
+    accelerationFeild_.area.max = { 10.0f, 10.0f, 30.0f };
+
+    // --- Materialリソースの作成 ---
+    materialResource_ = CreateBufferResource(device, sizeof(Material));
+    if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
+
+    HRESULT hr_mat = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+    if (FAILED(hr_mat) || !materialData_) throw std::runtime_error("Failed to map materialResource_");
+
+    materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    materialData_->enableLighting = 0;
+    materialData_->uvtransform = Math::MakeIdentity();
+
+    // --- 頂点バッファ（板ポリゴン）の作成 ---
+    vertices_ = {
+        // Triangle 1
+        {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+        {{ 1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        // Triangle 2
+        {{ 1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+        {{ 1.0f,  1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}
+    };
+
+    size_t vertexBufferSize = sizeof(VertexData) * vertices_.size();
+    vertexResource_ = CreateBufferResource(device, vertexBufferSize);
+    if (!vertexResource_) throw std::runtime_error("Failed to create vertexResource_");
+
+    VertexData* vertexData = nullptr;
+    HRESULT map_hr = vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+    if (FAILED(map_hr)) throw std::runtime_error("Failed to map vertexResource_");
+    memcpy(vertexData, vertices_.data(), vertexBufferSize);
+
+    vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
+    vbv_.SizeInBytes = (UINT)vertexBufferSize;
+    vbv_.StrideInBytes = sizeof(VertexData);
+
+    // --- 乱数エンジンの初期化 ---
+    randomEngine_ = std::mt19937(seedGenerator_());
+
+    // --- インスタンスリソースの初期確保 (デフォルト100) ---
+    SetMaxInstance(100);
 }
 
 void ParticleManager::Update(const Camera* camera) {

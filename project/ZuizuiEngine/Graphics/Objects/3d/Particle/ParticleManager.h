@@ -35,9 +35,10 @@ struct AcclerationField {
 
 class ParticleManager {
 public:
-    ParticleManager(DxCommon* dxCommon);
+    ParticleManager() = default;
     ~ParticleManager() = default;
 
+    void Initialize(DxCommon* dxCommon);
     void Update(const Camera* camera);
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,

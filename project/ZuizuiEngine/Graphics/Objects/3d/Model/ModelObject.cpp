@@ -3,11 +3,11 @@
 #include "Function.h"
 #include "Camera.h"
 
-ModelObject::ModelObject(ID3D12Device* device,
-    const std::string& filename)
-    : Object3D(device, 2) // 2 = ライティング有効
-{
-   // モデルデータ読み込み
+void ModelObject::Initialize(ID3D12Device* device, const std::string& filename, int lightingMode) {
+    // 基底クラスの初期化
+    Object3D::Initialize(device, lightingMode);
+
+    // モデルデータ読み込み
     modelData_ = ModelManager::GetInstance().LoadModel(device, filename);
 
     // 頂点リソース作成

@@ -2,7 +2,23 @@
 #include "Camera.h"
 #include <imgui.h>
 
-SpriteObject::SpriteObject(ID3D12Device* device) {
+void SpriteObject::SetSize(float width, float height) {
+    width_ = width;
+    height_ = height;
+    UpdateVertexData(); // サイズが変わったら頂点を再計算
+}
+
+void SpriteObject::UpdateVertexData() {
+    if (vertexData_ == nullptr) return;
+
+    // 座標の設定 (左上原点の場合)
+    vertexData_[0] = { {0.0f, height_, 0.0f, 1.0f}, {0,1}, {0,0,-1} }; // 左下
+    vertexData_[1] = { {0.0f, 0.0f, 0.0f, 1.0f}, {0,0}, {0,0,-1} };    // 左上
+    vertexData_[2] = { {width_, height_, 0.0f, 1.0f}, {1,1}, {0,0,-1} }; // 右下
+    vertexData_[3] = { {width_, 0.0f, 0.0f, 1.0f}, {1,0}, {0,0,-1} };    // 右上
+}
+
+void SpriteObject::Initialize(ID3D12Device* device) {
     // Material
     materialResource_ = CreateBufferResource(device, sizeof(Material));
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
@@ -37,26 +53,6 @@ SpriteObject::SpriteObject(ID3D12Device* device) {
     uint32_t* idx;
     indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&idx));
     idx[0] = 0; idx[1] = 1; idx[2] = 2; idx[3] = 1; idx[4] = 3; idx[5] = 2;
-}
-
-SpriteObject::~SpriteObject() {
-    // MapしたリソースはUnmapせずともRelease時に自動で解除されます
-}
-
-void SpriteObject::SetSize(float width, float height) {
-    width_ = width;
-    height_ = height;
-    UpdateVertexData(); // サイズが変わったら頂点を再計算
-}
-
-void SpriteObject::UpdateVertexData() {
-    if (vertexData_ == nullptr) return;
-
-    // 座標の設定 (左上原点の場合)
-    vertexData_[0] = { {0.0f, height_, 0.0f, 1.0f}, {0,1}, {0,0,-1} }; // 左下
-    vertexData_[1] = { {0.0f, 0.0f, 0.0f, 1.0f}, {0,0}, {0,0,-1} };    // 左上
-    vertexData_[2] = { {width_, height_, 0.0f, 1.0f}, {1,1}, {0,0,-1} }; // 右下
-    vertexData_[3] = { {width_, 0.0f, 0.0f, 1.0f}, {1,0}, {0,0,-1} };    // 右上
 }
 
 void SpriteObject::Update(const Camera* camera) {

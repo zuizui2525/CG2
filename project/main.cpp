@@ -7,19 +7,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Zuizui* engine = Zuizui::GetInstance();
     engine->Initialize(L"LE2B_02_イトウカズイ");
 
-    auto teapot = std::make_unique<ModelObject>(engine->GetDevice(), "resources/obj/teapot/teapot.obj");
+    auto teapot = std::make_unique<ModelObject>();
+    teapot->Initialize(engine->GetDevice(), "resources/obj/teapot/teapot.obj");
     engine->GetTextureManager()->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
 
-    auto sphere = std::make_unique<SphereObject>(engine->GetDevice());
+    auto sphere = std::make_unique<SphereObject>();
+    sphere->Initialize(engine->GetDevice());
     engine->GetTextureManager()->LoadTexture("monsterBall", "resources/monsterball.png");
 
-    auto sprite = std::make_unique<SpriteObject>(engine->GetDevice());
+    auto sprite = std::make_unique<SpriteObject>();
+    sprite->Initialize(engine->GetDevice());
     engine->GetTextureManager()->LoadTexture("uvChecker", "resources/uvChecker.png");
 
-    auto triangle = std::make_unique<TriangleObject>(engine->GetDevice());
+    auto triangle = std::make_unique<TriangleObject>();
+    triangle->Initialize(engine->GetDevice());
     engine->GetTextureManager()->LoadTexture("white", "resources/white.png");
 
-    auto particle = std::make_unique<ParticleManager>(engine->GetDxCommon());
+    auto particle = std::make_unique<ParticleManager>();
+    particle->Initialize(engine->GetDxCommon());
     engine->GetTextureManager()->LoadTexture("circle", "resources/circle.png");
 
     while (engine->ProcessMessage()) {

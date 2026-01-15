@@ -13,11 +13,11 @@ class Camera;
 class SpriteObject {
 public:
     // コンストラクタから引数を削除
-    SpriteObject(ID3D12Device* device);
-    ~SpriteObject();
+    SpriteObject() = default;
+    ~SpriteObject() = default;
 
+    void Initialize(ID3D12Device* device);
     void Update(const Camera* camera);
-
     void Draw(ID3D12GraphicsCommandList* commandList,
         D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
         D3D12_GPU_VIRTUAL_ADDRESS lightAddress,

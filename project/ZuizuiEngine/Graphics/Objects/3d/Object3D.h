@@ -6,8 +6,10 @@
 // 3Dオブジェクトの基底クラス
 class Object3D {
 public:
-    Object3D(ID3D12Device* device, int lightingMode);
+    Object3D() = default;
     virtual ~Object3D() = default;
+
+    void Initialize(ID3D12Device* device, int lightingMode);
 
     // ImGui
     void ImGuiControl(const std::string& name);

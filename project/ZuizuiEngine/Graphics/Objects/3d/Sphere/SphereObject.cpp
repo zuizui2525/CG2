@@ -3,16 +3,6 @@
 #include "Camera.h"
 #include "Matrix.h"
 
-SphereObject::SphereObject(ID3D12Device* device)
-    : Object3D(device, 2) {
-    device_ = device;
-    // 初回のメッシュ生成
-    CreateMesh();
-}
-
-SphereObject::~SphereObject() {
-}
-
 void SphereObject::CreateMesh() {
     // 頂点数とインデックス数を計算
     uint32_t kVertexCount = (subdivision_ + 1) * (subdivision_ + 1);
@@ -71,6 +61,17 @@ void SphereObject::CreateMesh() {
         }
     }
     indexResource_->Unmap(0, nullptr);
+}
+
+void SphereObject::Initialize(ID3D12Device* device, int lightingMode) {
+    // 基底クラスの初期化
+    Object3D::Initialize(device, lightingMode);
+    
+    // deviceの初期化
+    device_ = device;
+
+    // 初回のメッシュ生成
+    CreateMesh();
 }
 
 void SphereObject::Update(const Camera* camera) {

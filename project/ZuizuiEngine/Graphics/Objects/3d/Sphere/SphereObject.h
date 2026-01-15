@@ -12,9 +12,10 @@ class Camera;
 
 class SphereObject : public Object3D {
 public:
-    // 初期値を 16, 1.0f に設定
-    SphereObject(ID3D12Device* device);
-    ~SphereObject();
+    SphereObject() = default;
+    ~SphereObject() = default;
+
+    void Initialize(ID3D12Device* device, int lightingMode = 2);
 
     // 更新処理 (パラメータ変更があればメッシュを再生成する)
     void Update(const Camera* camera);

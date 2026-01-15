@@ -3,7 +3,7 @@
 #include "Matrix.h"
 #include <stdexcept>
 
-Object3D::Object3D(ID3D12Device* device, int lightingMode) {
+void Object3D::Initialize(ID3D12Device* device, int lightingMode) {
     // WVPリソース作成
     wvpResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
     if (!wvpResource_) throw std::runtime_error("Failed to create wvpResource_");

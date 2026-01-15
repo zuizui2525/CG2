@@ -2,7 +2,10 @@
 #include "Function.h"
 #include "Camera.h"
 
-TriangleObject::TriangleObject(ID3D12Device* device) : Object3D(device, 0) {
+void TriangleObject::Initialize(ID3D12Device* device, int lightingMode) {
+    // 基底クラスの初期化
+    Object3D::Initialize(device, lightingMode);
+
     // Vertex (三角形3頂点)
     vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * 3);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -23,8 +26,6 @@ TriangleObject::TriangleObject(ID3D12Device* device) : Object3D(device, 0) {
     vtx[2].texcoord = { 1.0f, 1.0f };
     vtx[2].normal = { 0.0f, 0.0f, -1.0f };
 }
-
-TriangleObject::~TriangleObject() {}
 
 void TriangleObject::Update(const Camera* camera) {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);

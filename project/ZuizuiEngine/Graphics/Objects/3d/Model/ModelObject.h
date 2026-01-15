@@ -10,13 +10,16 @@ class Camera;
 // objモデル用クラス
 class ModelObject : public Object3D {
 public:
-    ModelObject(ID3D12Device* device, const std::string& filename);
+    ModelObject() = default;
+    ~ModelObject() = default;
 
     // 頂点バッファビュー取得
     D3D12_VERTEX_BUFFER_VIEW GetVBV() const { return vbv_; }
 
     // モデルデータ取得（テクスチャパスなどを参照する用）
     const std::shared_ptr<ModelData>& GetModelData() const { return modelData_; }
+
+    void Initialize(ID3D12Device* device, const std::string& filename, int lightingMode = 2);
 
     // 毎フレーム更新（Transform から行列計算して WVP 反映）
     void Update(const Camera* camera);

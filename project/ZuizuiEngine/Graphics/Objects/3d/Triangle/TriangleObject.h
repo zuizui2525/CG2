@@ -11,8 +11,10 @@ class Camera;
 
 class TriangleObject: public Object3D {
 public:
-    TriangleObject(ID3D12Device* device);
-    ~TriangleObject();
+    TriangleObject() = default;
+    ~TriangleObject() = default;
+
+    void Initialize(ID3D12Device* device, int lightingMode = 0);
 
     // 更新処理（view, projectionを渡す）
     void Update(const Camera* camera);
