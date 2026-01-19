@@ -18,10 +18,6 @@ void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t
 
     psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
     psoManager->Initialize(dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler());
-
-    textureManager = std::make_unique<TextureManager>();
-    textureManager->Initialize(dxCommon->GetDevice(), dxCommon->GetCommandList(), dxCommon->GetSrvHeap());
-
 #ifdef _DEBUG
     imgui = std::make_unique<ImguiManager>();
     imgui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());

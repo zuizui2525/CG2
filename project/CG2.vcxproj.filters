@@ -217,7 +217,7 @@
       <Filter>imgui\ImguiManager</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp" />
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -342,7 +342,7 @@
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
       <Filter>imgui\ImguiManager</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.h" />
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h" />
     <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h" />
   </ItemGroup>
   <ItemGroup>

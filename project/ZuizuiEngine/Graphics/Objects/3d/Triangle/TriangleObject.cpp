@@ -3,12 +3,14 @@
 #include "Zuizui.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
+#include "TextureManager.h"
 
-void TriangleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode) {
+void TriangleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
     // 基底クラスの初期化
     Object3D::Initialize(engine, lightingMode);
     camera_ = camera;
-    DirectionalLight_ = light;
+    dirLight_ = light;
+    texture_ = texture;
 
     // Vertex (三角形3頂点)
     vertexResource_ = CreateBufferResource(engine->GetDevice(), sizeof(VertexData) * 3);
@@ -62,9 +64,9 @@ void TriangleObject::Draw(const std::string& textureKey, bool draw) {
     // 定数バッファ設定
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, DirectionalLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, engine_->GetTextureManager()->GetGpuHandle(textureKey));
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
 
     engine_->GetDxCommon()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

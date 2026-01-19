@@ -11,13 +11,14 @@
 class Zuizui;
 class Camera;
 class DirectionalLightObject;
+class TextureManager;
 
 class SphereObject : public Object3D {
 public:
     SphereObject() = default;
     ~SphereObject() = default;
 
-    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode = 2);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 2);
 
     // 更新処理
     void Update();
@@ -52,5 +53,6 @@ private:
     bool needsUpdate_ = false; // 再生成フラグ
 
     Camera* camera_ = nullptr;
-    DirectionalLightObject* DirectionalLight_ = nullptr;
+    DirectionalLightObject* dirLight_ = nullptr;
+    TextureManager* texture_ = nullptr;
 };

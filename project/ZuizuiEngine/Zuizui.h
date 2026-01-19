@@ -5,17 +5,7 @@
 #include "DxCommon.h"
 #include "WindowApp.h"
 #include "PSOManager.h"
-#include "TextureManager.h"
-#include "Camera.h"
-#include "DirectionalLight.h"
 #include "Log.h"
-#include "Input.h"
-#include "Audio.h"
-#include "ModelObject.h"
-#include "SphereObject.h"
-#include "SpriteObject.h"
-#include "TriangleObject.h"
-#include "ParticleManager.h"
 
 class Zuizui {
 public:
@@ -33,9 +23,9 @@ public:
 
     // getter
     ID3D12Device* GetDevice() { return dxCommon->GetDevice(); }
+
     DxCommon* GetDxCommon() { return dxCommon.get(); }
     PSOManager* GetPSOManager() { return psoManager.get(); }
-    TextureManager* GetTextureManager() { return textureManager.get(); }
     WindowApp* GetWindow() { return window.get(); }
 
 private:
@@ -46,7 +36,6 @@ private:
     std::unique_ptr<Log> logger;
     std::unique_ptr<DxCommon> dxCommon;
     std::unique_ptr<PSOManager> psoManager;
-    std::unique_ptr<TextureManager> textureManager;
 
 #ifdef _DEBUG
     std::unique_ptr<class ImguiManager> imgui;

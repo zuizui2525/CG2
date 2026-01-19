@@ -150,7 +150,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
@@ -217,7 +217,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h" />
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleManager.h" />
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOManager\PSOManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\PSOPreset\PSOPreset.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h" />

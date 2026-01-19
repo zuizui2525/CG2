@@ -1,8 +1,10 @@
-#include "ParticleManager.h"
+#include "ParticleObject.h"
 #include "Function.h"
 #include "Matrix.h" 
-#include "DxCommon.h"
+#include "Zuizui.h"
 #include "Camera.h"
+#include "DirectionalLight.h"
+#include "TextureManager.h"
 #include "Collision.h"
 #include <stdexcept>
 #include <array>
@@ -17,7 +19,7 @@ namespace {
     }
 }
 
-void ParticleManager::SetMaxInstance(uint32_t maxInstance) {
+void ParticleObject::SetMaxInstance(uint32_t maxInstance) {
     // 値が変わっていない、かつ初期化済みなら何もしない
     if (numMaxInstance_ == maxInstance && isInitialized_) {
         return;
@@ -35,9 +37,9 @@ void ParticleManager::SetMaxInstance(uint32_t maxInstance) {
     CreateInstanceResource();
 }
 
-void ParticleManager::CreateInstanceResource() {
-    ID3D12Device* device = dxCommon_->GetDevice();
-    ID3D12DescriptorHeap* srvHeap = dxCommon_->GetSrvHeap();
+void ParticleObject::CreateInstanceResource() {
+    ID3D12Device* device = engine_->GetDevice();
+    ID3D12DescriptorHeap* srvHeap = engine_->GetDxCommon()->GetSrvHeap();
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     // 1. インスタンスデータ用リソースの作成
@@ -72,9 +74,12 @@ void ParticleManager::CreateInstanceResource() {
     );
 }
 
-void ParticleManager::Initialize(DxCommon* dxCommon) {
-    dxCommon_ = dxCommon;
-    ID3D12Device* device = dxCommon_->GetDevice();
+void ParticleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
+    engine_ = engine;
+    camera_ = camera;
+    dirLight_ = light;
+    texture_ = texture;
+    ID3D12Device* device = engine_->GetDevice();
 
     // --- Emitterの初期化 ---
     InitializeTransform(emitter_.transform);
@@ -95,7 +100,7 @@ void ParticleManager::Initialize(DxCommon* dxCommon) {
     if (FAILED(hr_mat) || !materialData_) throw std::runtime_error("Failed to map materialResource_");
 
     materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    materialData_->enableLighting = 0;
+    materialData_->enableLighting = lightingMode;
     materialData_->uvtransform = Math::MakeIdentity();
 
     // --- 頂点バッファ（板ポリゴン）の作成 ---
@@ -130,7 +135,7 @@ void ParticleManager::Initialize(DxCommon* dxCommon) {
     SetMaxInstance(100);
 }
 
-void ParticleManager::Update(const Camera* camera) {
+void ParticleObject::Update() {
     numInstance_ = 0;
 
     Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(
@@ -141,7 +146,7 @@ void ParticleManager::Update(const Camera* camera) {
 
     Matrix4x4 billBoardMatrix = Math::MakeIdentity();
     if (billboardActive_) {
-        billBoardMatrix = Math::Inverse(camera->GetViewMatrix3D());
+        billBoardMatrix = Math::Inverse(camera_->GetViewMatrix3D());
         billBoardMatrix.m[3][0] = 0.0f;
         billBoardMatrix.m[3][1] = 0.0f;
         billBoardMatrix.m[3][2] = 0.0f;
@@ -162,7 +167,7 @@ void ParticleManager::Update(const Camera* camera) {
         particleWorldMatrix = Math::Multiply(billBoardMatrix, particleWorldMatrix);
         particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
 
-        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(camera->GetViewMatrix3D(), camera->GetProjectionMatrix3D()));
+        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(camera_->GetViewMatrix3D(), camera_->GetProjectionMatrix3D()));
         Matrix4x4 worldMatrix = particleWorldMatrix;
 
         // Fieldの範囲内のParticleには加速度を適応する
@@ -211,35 +216,30 @@ void ParticleManager::Update(const Camera* camera) {
     }
 }
 
-void ParticleManager::Draw(ID3D12GraphicsCommandList* commandList,
-    D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-    D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-    ID3D12PipelineState* pipelineState,
-    ID3D12RootSignature* rootSignature,
-    bool draw) {
+void ParticleObject::Draw(const std::string& textureKey, bool draw) {
+    if (!draw) return;
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Particle"));
+    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Particle"));
+    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
 
-    commandList->SetGraphicsRootSignature(rootSignature);
-    commandList->SetPipelineState(pipelineState);
-    commandList->IASetVertexBuffers(0, 1, &vbv_);
-
-    commandList->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
-    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootDescriptorTable(3, textureHandle);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(3, texture_->GetGpuHandle(textureKey));
 
     if (draw && numInstance_ > 0) {
         UINT vertexCount = (UINT)vertices_.size();
-        commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
+        engine_->GetDxCommon()->GetCommandList()->DrawInstanced(vertexCount, numInstance_, 0, 0);
     }
 }
 
-void ParticleManager::ImGuiControl(const std::string& name) {
+void ParticleObject::ImGuiControl(const std::string& name) {
     ImGuiSRTControl(name);
     ImGuiParticleControl(name);
     ImGui::Separator();
 }
 
-void ParticleManager::ImGuiSRTControl(const std::string& name) {
+void ParticleObject::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
     if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
         ImGui::DragFloat3(("scale" + label).c_str(), &emitter_.transform.scale.x, 0.01f);
@@ -251,7 +251,7 @@ void ParticleManager::ImGuiSRTControl(const std::string& name) {
     }
 }
 
-void ParticleManager::ImGuiParticleControl(const std::string& name) {
+void ParticleObject::ImGuiParticleControl(const std::string& name) {
     std::string label = "##" + name;
     if (ImGui::CollapsingHeader(("Particles" + label).c_str())) {
         ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, numMaxInstance_);
@@ -303,7 +303,7 @@ void ParticleManager::ImGuiParticleControl(const std::string& name) {
     }
 }
 
-Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {
+Particle ParticleObject::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {
     Particle particle{};
     particle.transform.translate = startPosition;
     particle.transform.scale = { 1.0f, 1.0f, 1.0f };
@@ -315,7 +315,7 @@ Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, Vector3 st
     return particle;
 }
 
-std::list<Particle> ParticleManager::Emit(const Emitter& emitter, std::mt19937& randomEngine) {
+std::list<Particle> ParticleObject::Emit(const Emitter& emitter, std::mt19937& randomEngine) {
     std::list<Particle> particles;
     for (uint32_t i = 0; i < emitter.count; ++i) {
         particles.push_back(MakeNewParticle(randomEngine, emitter.transform.translate));

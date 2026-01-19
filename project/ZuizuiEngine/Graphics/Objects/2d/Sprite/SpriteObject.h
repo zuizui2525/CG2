@@ -8,7 +8,10 @@
 #include "Struct.h"
 #include "Function.h"
 
+class Zuizui;
 class Camera;
+class DirectionalLightObject;
+class TextureManager;
 
 class SpriteObject {
 public:
@@ -16,15 +19,13 @@ public:
     SpriteObject() = default;
     ~SpriteObject() = default;
 
-    void Initialize(ID3D12Device* device);
-    void Update(const Camera* camera);
-    void Draw(ID3D12GraphicsCommandList* commandList,
-        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-        D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-        D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-        ID3D12PipelineState* pipelineState,
-        ID3D12RootSignature* rootSignature,
-        bool enableDraw);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 0);
+
+    // 更新処理
+    void Update();
+
+    // 描画処理
+    void Draw(const std::string& textureKey, bool draw = true);
 
     void ImGuiControl();
 
@@ -69,4 +70,9 @@ private:
 
     float width_ = 100.0f;  // デフォルト幅
     float height_ = 100.0f; // デフォルト高さ
+
+    Zuizui* engine_ = nullptr;
+    Camera* camera_ = nullptr;
+    DirectionalLightObject* dirLight_ = nullptr;
+    TextureManager* texture_ = nullptr;
 };

@@ -1,5 +1,8 @@
 #include "SpriteObject.h"
+#include "Zuizui.h"
 #include "Camera.h"
+#include "DirectionalLight.h"
+#include "TextureManager.h"
 #include <imgui.h>
 
 void SpriteObject::SetSize(float width, float height) {
@@ -18,9 +21,14 @@ void SpriteObject::UpdateVertexData() {
     vertexData_[3] = { {width_, 0.0f, 0.0f, 1.0f}, {1,0}, {0,0,-1} };    // 右上
 }
 
-void SpriteObject::Initialize(ID3D12Device* device) {
+void SpriteObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
+    engine_ = engine;
+    camera_ = camera;
+    dirLight_ = light;
+    texture_ = texture;
+    
     // Material
-    materialResource_ = CreateBufferResource(device, sizeof(Material));
+    materialResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(Material));
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
     materialData_->color = { 1,1,1,1 };
     materialData_->enableLighting = 0;
@@ -28,13 +36,13 @@ void SpriteObject::Initialize(ID3D12Device* device) {
     materialData_->shininess = 30.0f;
 
     // WVP
-    wvpResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
+    wvpResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(TransformationMatrix));
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
     wvpData_->WVP = Math::MakeIdentity();
     wvpData_->world = Math::MakeIdentity();
 
     // Vertex
-    vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * 4);
+    vertexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(VertexData) * 4);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * 4;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -46,7 +54,7 @@ void SpriteObject::Initialize(ID3D12Device* device) {
     UpdateVertexData();
 
     // Index
-    indexResource_ = CreateBufferResource(device, sizeof(uint32_t) * 6);
+    indexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(uint32_t) * 6);
     ibView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     ibView_.SizeInBytes = sizeof(uint32_t) * 6;
     ibView_.Format = DXGI_FORMAT_R32_UINT;
@@ -55,9 +63,9 @@ void SpriteObject::Initialize(ID3D12Device* device) {
     idx[0] = 0; idx[1] = 1; idx[2] = 2; idx[3] = 1; idx[4] = 3; idx[5] = 2;
 }
 
-void SpriteObject::Update(const Camera* camera) {
+void SpriteObject::Update() {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera->GetViewMatrix2D()), camera->GetProjectionMatrix2D());
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera_->GetViewMatrix2D()), camera_->GetProjectionMatrix2D());
     wvpData_->WVP = wvp;
     wvpData_->world = world;
 
@@ -67,27 +75,21 @@ void SpriteObject::Update(const Camera* camera) {
     materialData_->uvtransform = uv;
 }
 
-void SpriteObject::Draw(ID3D12GraphicsCommandList* commandList,
-    D3D12_GPU_DESCRIPTOR_HANDLE textureHandle,
-    D3D12_GPU_VIRTUAL_ADDRESS lightAddress,
-    D3D12_GPU_VIRTUAL_ADDRESS cameraAddress,
-    ID3D12PipelineState* pipelineState,
-    ID3D12RootSignature* rootSignature,
-    bool enableDraw) {
-    if (!enableDraw) return;
+void SpriteObject::Draw(const std::string& textureKey, bool draw) {
+    if (!draw) return;
 
-    commandList->SetGraphicsRootSignature(rootSignature);
-    commandList->SetPipelineState(pipelineState);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
+    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
 
-    commandList->IASetVertexBuffers(0, 1, &vbView_);
-    commandList->IASetIndexBuffer(&ibView_);
-    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, lightAddress);
-    commandList->SetGraphicsRootConstantBufferView(3, cameraAddress);
-    commandList->SetGraphicsRootDescriptorTable(4, textureHandle);
+    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
+    engine_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
 
-    commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+    engine_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void SpriteObject::ImGuiControl() {

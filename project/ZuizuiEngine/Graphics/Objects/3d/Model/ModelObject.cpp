@@ -3,12 +3,14 @@
 #include "Function.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
+#include "TextureManager.h"
 
-void ModelObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, const std::string& filename, int lightingMode) {
+void ModelObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, const std::string& filename, int lightingMode) {
     // 基底クラスの初期化
     Object3D::Initialize(engine, lightingMode);
     camera_ = camera;
-    DirectionalLight_ = light;
+    dirLight_ = light;
+    texture_ = texture;
 
     // モデルデータ読み込み
     modelData_ = ModelManager::GetInstance().LoadModel(engine_->GetDevice(), filename);
@@ -62,9 +64,9 @@ void ModelObject::Draw(const std::string& textureKey, bool draw) {
     // 定数バッファ設定
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, DirectionalLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, engine_->GetTextureManager()->GetGpuHandle(textureKey));
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
 
     // 描画
     if (draw) {

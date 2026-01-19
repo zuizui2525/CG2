@@ -15,9 +15,6 @@ public:
     // ImGui
     void ImGuiControl(const std::string& name);
 
-    // LoadTexture
-    void LoadTexture(const std::string& name, const std::string& filePath);
-
     // 共通アクセサ
     // Getter
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }

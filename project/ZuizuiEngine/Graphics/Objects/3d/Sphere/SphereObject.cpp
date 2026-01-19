@@ -3,13 +3,15 @@
 #include "Zuizui.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
+#include "TextureManager.h"
 #include "Matrix.h"
 
-void SphereObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode) {
+void SphereObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
     // 基底クラスの初期化
     Object3D::Initialize(engine, lightingMode);
     camera_ = camera;
-    DirectionalLight_ = light;
+    dirLight_ = light;
+    texture_ = texture;
 
     // 初回のメッシュ生成
     CreateMesh();
@@ -56,9 +58,9 @@ void SphereObject::Draw(const std::string& textureKey, bool draw) {
     // 定数バッファ設定
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, DirectionalLight_->GetGPUVirtualAddress());
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
     engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, engine_->GetTextureManager()->GetGpuHandle(textureKey));
+    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
 
     uint32_t indexCount = subdivision_ * subdivision_ * 6;
     engine_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);

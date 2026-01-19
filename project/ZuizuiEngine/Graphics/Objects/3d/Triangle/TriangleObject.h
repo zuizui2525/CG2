@@ -10,13 +10,14 @@
 class Zuizui;
 class Camera;
 class DirectionalLightObject;
+class TextureManager;
 
 class TriangleObject: public Object3D {
 public:
     TriangleObject() = default;
     ~TriangleObject() = default;
 
-    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, int lightingMode = 0);
+    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 0);
 
     // 更新処理
     void Update();
@@ -32,5 +33,6 @@ private:
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
 
     Camera* camera_ = nullptr;
-    DirectionalLightObject* DirectionalLight_ = nullptr;
+    DirectionalLightObject* dirLight_ = nullptr;
+    TextureManager* texture_ = nullptr;
 };
