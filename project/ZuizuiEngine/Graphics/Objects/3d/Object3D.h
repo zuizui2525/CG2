@@ -2,15 +2,16 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Struct.h"
+#include "BaseObject.h"
 
 class Zuizui;
 
-class Object3D {
+class Object3D : public Base3D {
 public:
     Object3D() = default;
     virtual ~Object3D() = default;
 
-    void Initialize(Zuizui* engine, int lightingMode);
+    void Initialize(int lightingMode);
 
     // ImGui
     void ImGuiControl(const std::string& name);
@@ -47,7 +48,4 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
-
-    // engine
-    Zuizui* engine_ = nullptr;
 };

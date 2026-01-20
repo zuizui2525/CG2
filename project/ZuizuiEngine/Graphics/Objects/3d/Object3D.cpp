@@ -4,11 +4,9 @@
 #include "Zuizui.h"
 #include <stdexcept>
 
-void Object3D::Initialize(Zuizui* engine, int lightingMode) {
-    // ポインタに代入
-    engine_ = engine;
+void Object3D::Initialize(int lightingMode) {
     // WVPリソース作成
-    wvpResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(TransformationMatrix));
+    wvpResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(TransformationMatrix));
     if (!wvpResource_) throw std::runtime_error("Failed to create wvpResource_");
     HRESULT hr = wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
     if (FAILED(hr) || !wvpData_) throw std::runtime_error("Failed to map wvpResource_");
@@ -16,7 +14,7 @@ void Object3D::Initialize(Zuizui* engine, int lightingMode) {
     wvpData_->world = Math::MakeIdentity();
 
     // Materialリソース作成
-    materialResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(Material));
+    materialResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(Material));
     if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
     hr = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
     if (FAILED(hr) || !materialData_) throw std::runtime_error("Failed to map materialResource_");

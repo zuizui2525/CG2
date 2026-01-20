@@ -38,8 +38,8 @@ void ParticleObject::SetMaxInstance(uint32_t maxInstance) {
 }
 
 void ParticleObject::CreateInstanceResource() {
-    ID3D12Device* device = engine_->GetDevice();
-    ID3D12DescriptorHeap* srvHeap = engine_->GetDxCommon()->GetSrvHeap();
+    ID3D12Device* device = sEngine->GetDevice();
+    ID3D12DescriptorHeap* srvHeap = sEngine->GetDxCommon()->GetSrvHeap();
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     // 1. インスタンスデータ用リソースの作成
@@ -74,12 +74,8 @@ void ParticleObject::CreateInstanceResource() {
     );
 }
 
-void ParticleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
-    engine_ = engine;
-    camera_ = camera;
-    dirLight_ = light;
-    texture_ = texture;
-    ID3D12Device* device = engine_->GetDevice();
+void ParticleObject::Initialize(int lightingMode) {
+    ID3D12Device* device = sEngine->GetDevice();
 
     // --- Emitterの初期化 ---
     InitializeTransform(emitter_.transform);
@@ -146,7 +142,7 @@ void ParticleObject::Update() {
 
     Matrix4x4 billBoardMatrix = Math::MakeIdentity();
     if (billboardActive_) {
-        billBoardMatrix = Math::Inverse(camera_->GetViewMatrix3D());
+        billBoardMatrix = Math::Inverse(sCamera->GetViewMatrix3D());
         billBoardMatrix.m[3][0] = 0.0f;
         billBoardMatrix.m[3][1] = 0.0f;
         billBoardMatrix.m[3][2] = 0.0f;
@@ -167,7 +163,7 @@ void ParticleObject::Update() {
         particleWorldMatrix = Math::Multiply(billBoardMatrix, particleWorldMatrix);
         particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
 
-        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(camera_->GetViewMatrix3D(), camera_->GetProjectionMatrix3D()));
+        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(sCamera->GetViewMatrix3D(), sCamera->GetProjectionMatrix3D()));
         Matrix4x4 worldMatrix = particleWorldMatrix;
 
         // Fieldの範囲内のParticleには加速度を適応する
@@ -218,18 +214,18 @@ void ParticleObject::Update() {
 
 void ParticleObject::Draw(const std::string& textureKey, bool draw) {
     if (!draw) return;
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Particle"));
-    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Particle"));
-    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Particle"));
+    sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Particle"));
+    sEngine->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
 
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(3, texture_->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sDirLight->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(3, sTexMgr->GetGpuHandle(textureKey));
 
     if (draw && numInstance_ > 0) {
         UINT vertexCount = (UINT)vertices_.size();
-        engine_->GetDxCommon()->GetCommandList()->DrawInstanced(vertexCount, numInstance_, 0, 0);
+        sEngine->GetDxCommon()->GetCommandList()->DrawInstanced(vertexCount, numInstance_, 0, 0);
     }
 }
 

@@ -7,19 +7,15 @@
 #include "Matrix.h"
 #include "Struct.h"
 #include "Function.h"
+#include "BaseObject.h"
 
-class Zuizui;
-class Camera;
-class DirectionalLightObject;
-class TextureManager;
-
-class SpriteObject {
+class SpriteObject : Base2D{
 public:
     // コンストラクタから引数を削除
     SpriteObject() = default;
     ~SpriteObject() = default;
 
-    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 0);
+    void Initialize(int lightingMode = 0);
 
     // 更新処理
     void Update();
@@ -70,9 +66,4 @@ private:
 
     float width_ = 100.0f;  // デフォルト幅
     float height_ = 100.0f; // デフォルト高さ
-
-    Zuizui* engine_ = nullptr;
-    Camera* camera_ = nullptr;
-    DirectionalLightObject* dirLight_ = nullptr;
-    TextureManager* texture_ = nullptr;
 };

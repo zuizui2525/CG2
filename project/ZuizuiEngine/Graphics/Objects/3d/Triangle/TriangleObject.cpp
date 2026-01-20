@@ -5,15 +5,12 @@
 #include "DirectionalLight.h"
 #include "TextureManager.h"
 
-void TriangleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
+void TriangleObject::Initialize(int lightingMode) {
     // 基底クラスの初期化
-    Object3D::Initialize(engine, lightingMode);
-    camera_ = camera;
-    dirLight_ = light;
-    texture_ = texture;
-
+    Object3D::Initialize(lightingMode);
+    
     // Vertex (三角形3頂点)
-    vertexResource_ = CreateBufferResource(engine->GetDevice(), sizeof(VertexData) * 3);
+    vertexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * 3);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * 3;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -35,7 +32,7 @@ void TriangleObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLight
 
 void TriangleObject::Update() {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera_->GetViewMatrix3D()), camera_->GetProjectionMatrix3D());
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, sCamera->GetViewMatrix3D()), sCamera->GetProjectionMatrix3D());
     Matrix4x4 worldForNormal = world;
     worldForNormal.m[3][0] = 0.0f;
     worldForNormal.m[3][1] = 0.0f;
@@ -55,18 +52,18 @@ void TriangleObject::Draw(const std::string& textureKey, bool draw) {
     if (!draw) return;
 
     // パイプラインの選択
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
-    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
+    sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Object3D"));
 
     // VBV設定
-    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
+    sEngine->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
 
     // 定数バッファ設定
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sDirLight->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sCamera->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, sTexMgr->GetGpuHandle(textureKey));
 
-    engine_->GetDxCommon()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+    sEngine->GetDxCommon()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

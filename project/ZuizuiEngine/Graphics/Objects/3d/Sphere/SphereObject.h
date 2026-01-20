@@ -8,17 +8,12 @@
 #include "Struct.h"
 #include "Object3D.h"
 
-class Zuizui;
-class Camera;
-class DirectionalLightObject;
-class TextureManager;
-
 class SphereObject : public Object3D {
 public:
     SphereObject() = default;
     ~SphereObject() = default;
 
-    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 2);
+    void Initialize(int lightingMode = 2);
 
     // 更新処理
     void Update();
@@ -51,8 +46,4 @@ private:
     uint32_t subdivision_ = 16;
     float radius_ = 1.0f;
     bool needsUpdate_ = false; // 再生成フラグ
-
-    Camera* camera_ = nullptr;
-    DirectionalLightObject* dirLight_ = nullptr;
-    TextureManager* texture_ = nullptr;
 };

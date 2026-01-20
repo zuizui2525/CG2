@@ -1,0 +1,7 @@
+#include "BaseObject.h"
+
+Zuizui* EngineResource::sEngine = nullptr;
+TextureManager* TextureResource::sTexMgr = nullptr;
+Camera* CameraResource::sCamera = nullptr;
+DirectionalLightObject* LightResource::sDirLight = nullptr;
+ModelManager* ModelResource::sModelMgr = nullptr;

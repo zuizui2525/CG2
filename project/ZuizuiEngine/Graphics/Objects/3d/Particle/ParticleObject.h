@@ -1,5 +1,6 @@
 #pragma once
 #include "Struct.h"
+#include "BaseObject.h"
 #include <memory>
 #include <vector>
 #include <d3d12.h> 
@@ -8,11 +9,6 @@
 #include <list>
 #include <string>
 #include <algorithm>
-
-class Zuizui;
-class Camera;
-class DirectionalLightObject;
-class TextureManager;
 
 struct Particle {
 	Transform transform;
@@ -34,11 +30,11 @@ struct AcclerationField {
 	AABB area;
 };
 
-class ParticleObject {
+class ParticleObject : Base3D{
 public:
 	~ParticleObject() = default;
 
-	void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 0);
+	void Initialize(int lightingMode = 0);
 
 	// 更新処理
 	void Update();
@@ -114,9 +110,4 @@ private:
 	bool windActive_ = false;
 	bool loopActive_ = false;
 	bool emitterActive_ = true;
-
-	Zuizui* engine_ = nullptr;
-	Camera* camera_ = nullptr;
-	DirectionalLightObject* dirLight_ = nullptr;
-	TextureManager* texture_ = nullptr;
 };

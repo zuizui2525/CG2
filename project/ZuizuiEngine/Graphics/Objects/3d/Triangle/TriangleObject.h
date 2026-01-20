@@ -7,17 +7,12 @@
 #include "Struct.h"
 #include "Object3D.h"
 
-class Zuizui;
-class Camera;
-class DirectionalLightObject;
-class TextureManager;
-
 class TriangleObject: public Object3D {
 public:
     TriangleObject() = default;
     ~TriangleObject() = default;
 
-    void Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode = 0);
+    void Initialize(int lightingMode = 0);
 
     // 更新処理
     void Update();
@@ -31,8 +26,4 @@ private:
 
     // バッファビュー
     D3D12_VERTEX_BUFFER_VIEW vbView_{};
-
-    Camera* camera_ = nullptr;
-    DirectionalLightObject* dirLight_ = nullptr;
-    TextureManager* texture_ = nullptr;
 };

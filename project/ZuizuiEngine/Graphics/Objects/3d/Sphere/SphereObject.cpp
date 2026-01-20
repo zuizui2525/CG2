@@ -6,13 +6,10 @@
 #include "TextureManager.h"
 #include "Matrix.h"
 
-void SphereObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, int lightingMode) {
+void SphereObject::Initialize(int lightingMode) {
     // 基底クラスの初期化
-    Object3D::Initialize(engine, lightingMode);
-    camera_ = camera;
-    dirLight_ = light;
-    texture_ = texture;
-
+    Object3D::Initialize(lightingMode);
+    
     // 初回のメッシュ生成
     CreateMesh();
 }
@@ -26,7 +23,7 @@ void SphereObject::Update() {
 
     // 行列更新
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, camera_->GetViewMatrix3D()), camera_->GetProjectionMatrix3D());
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, sCamera->GetViewMatrix3D()), sCamera->GetProjectionMatrix3D());
 
     Matrix4x4 worldForNormal = world;
     worldForNormal.m[3][0] = 0.0f;
@@ -48,22 +45,22 @@ void SphereObject::Draw(const std::string& textureKey, bool draw) {
     if (!draw) return;
 
     // パイプラインの選択
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
-    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
+    sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Object3D"));
 
     // VBV設定
-    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
-    engine_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
+    sEngine->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
+    sEngine->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
 
     // 定数バッファ設定
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sDirLight->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sCamera->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, sTexMgr->GetGpuHandle(textureKey));
 
     uint32_t indexCount = subdivision_ * subdivision_ * 6;
-    engine_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+    sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 }
 
 void SphereObject::CreateMesh() {
@@ -74,7 +71,7 @@ void SphereObject::CreateMesh() {
     float kLatEvery = static_cast<float>(M_PI / subdivision_);
 
     // Vertex Resource 作成 (以前のリソースはComPtrの代入により自動解放される)
-    vertexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(VertexData) * kVertexCount);
+    vertexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * kVertexCount);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * kVertexCount;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -100,7 +97,7 @@ void SphereObject::CreateMesh() {
     vertexResource_->Unmap(0, nullptr);
 
     // Index Resource 作成
-    indexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(uint32_t) * kIndexCount);
+    indexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(uint32_t) * kIndexCount);
     ibView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     ibView_.SizeInBytes = sizeof(uint32_t) * kIndexCount;
     ibView_.Format = DXGI_FORMAT_R32_UINT;
