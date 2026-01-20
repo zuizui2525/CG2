@@ -109,6 +109,18 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{d68df63b-3203-4840-9a86-b3920d4b468d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ZuizuiEngine\Math\Collision">
+      <UniqueIdentifier>{84e55c25-71cc-46b6-a9a1-b07d40f6b0d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Object3D">
+      <UniqueIdentifier>{fa0467d3-8405-4c97-8b1d-6d22c90d3568}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Particle">
+      <UniqueIdentifier>{57ff79c5-a266-482f-8b53-409b028fd520}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ZuizuiEngine\Graphics\Objects\3d\Particle">
+      <UniqueIdentifier>{e1618b90-2e9a-4268-87c0-b1b3cf194159}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui.cpp">
@@ -217,19 +229,29 @@
       <Filter>imgui\ImguiManager</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp" />
-    <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp" />
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\BaseObject.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\BaseObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp">
+      <Filter>ZuizuiEngine\Math\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>Shader\Object3D</Filter>
     </FxCompile>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>Shader\Object3D</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Shader\Particle\Particle.VS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle\Particle.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle\Particle.VS.hlsl">
+      <Filter>Shader\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Particle\Particle.PS.hlsl">
+      <Filter>Shader\Particle</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -343,9 +365,15 @@
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
       <Filter>imgui\ImguiManager</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h" />
-    <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h" />
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\BaseObject.h" />
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\BaseObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h">
+      <Filter>ZuizuiEngine\Math\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -354,8 +382,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli">
-      <Filter>Shader</Filter>
+      <Filter>Shader\Object3D</Filter>
     </None>
-    <None Include="resources\Shader\Particle\Particle.hlsli" />
+    <None Include="resources\Shader\Particle\Particle.hlsli">
+      <Filter>Shader\Particle</Filter>
+    </None>
   </ItemGroup>
 </Project>
