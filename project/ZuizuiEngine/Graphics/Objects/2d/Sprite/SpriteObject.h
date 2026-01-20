@@ -7,7 +7,7 @@
 #include "Matrix.h"
 #include "Struct.h"
 #include "Function.h"
-#include "BaseObject.h"
+#include "BaseResource.h"
 
 class SpriteObject : Base2D{
 public:

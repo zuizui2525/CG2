@@ -1,6 +1,6 @@
 #pragma once
 #include "Struct.h"
-#include "BaseObject.h"
+#include "BaseResource.h"
 #include <memory>
 #include <vector>
 #include <d3d12.h> 

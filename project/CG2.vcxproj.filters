@@ -229,7 +229,7 @@
       <Filter>imgui\ImguiManager</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ZuizuiEngine\Graphics\Objects\BaseObject.cpp">
+    <ClCompile Include="ZuizuiEngine\BaseResource.cpp">
       <Filter>ZuizuiEngine\Graphics\Objects</Filter>
     </ClCompile>
     <ClCompile Include="ZuizuiEngine\Math\Collision\Collision.cpp">
@@ -366,7 +366,7 @@
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
       <Filter>imgui\ImguiManager</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Objects\BaseObject.h">
+    <ClInclude Include="ZuizuiEngine\BaseResource.h">
       <Filter>ZuizuiEngine\Graphics\Objects</Filter>
     </ClInclude>
     <ClInclude Include="ZuizuiEngine\Math\Collision\Collision.h">

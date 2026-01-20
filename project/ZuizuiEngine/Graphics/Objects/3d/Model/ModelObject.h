@@ -1,6 +1,6 @@
 #pragma once
 #include "Object3D.h"
-#include "BaseObject.h"
+#include "BaseResource.h"
 #include <string>
 
 class ModelObject : public Object3D, public BaseModel {

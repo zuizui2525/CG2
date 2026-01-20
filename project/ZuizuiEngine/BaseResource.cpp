@@ -1,4 +1,4 @@
-#include "BaseObject.h"
+#include "BaseResource.h"
 
 Zuizui* EngineResource::sEngine = nullptr;
 TextureManager* TextureResource::sTexMgr = nullptr;

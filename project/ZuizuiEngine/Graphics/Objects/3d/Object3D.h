@@ -2,7 +2,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Struct.h"
-#include "BaseObject.h"
+#include "BaseResource.h"
 
 class Zuizui;
 

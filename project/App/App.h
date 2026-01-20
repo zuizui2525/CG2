@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
+#include "BaseResource.h"
 #include "ModelObject.h"
 #include "SphereObject.h"
 #include "SpriteObject.h"
