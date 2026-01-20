@@ -238,6 +238,7 @@
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp">
       <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
     </ClCompile>
+    <ClCompile Include="App\App.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -374,6 +375,7 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h">
       <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
     </ClInclude>
+    <ClInclude Include="App\App.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
