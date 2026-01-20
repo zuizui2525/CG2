@@ -30,13 +30,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     textureMgr->Initialize(engine->GetDevice(), engine->GetDxCommon()->GetCommandList(), engine->GetDxCommon()->GetSrvHeap());
     
     std::unique_ptr<ModelManager> modelMgr = std::make_unique<ModelManager>();
-    modelMgr->Initialize(engine->GetDevice());
+    modelMgr->Initialize(engine->GetDevice(), textureMgr.get());
 
     auto teapot = std::make_unique<ModelObject>();
     teapot->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get(), modelMgr.get());
     modelMgr->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
-    textureMgr->LoadTexture("teapot", modelMgr->GetModelData("teapot")->material.textureFilePath);
     teapot->SetPosition(Vector3{ 0.0f, 0.0f, 0.0f });
+
+    auto bunny = std::make_unique<ModelObject>();
+    bunny->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get(), modelMgr.get());
+    modelMgr->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
+    bunny->SetPosition(Vector3{ 0.0f, 2.0f, 0.0f });
 
     auto sphere = std::make_unique<SphereObject>();
     sphere->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get());
@@ -64,6 +68,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         dirLight->Update();
 
         teapot->Update();
+        bunny->Update();
         sphere->Update();
         triangle->Update();
         particle->Update();
@@ -72,6 +77,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         engine->BeginFrame();
        
         teapot->Draw("teapot", "teapot");
+        bunny->Draw("bunny", "bunny");
         sphere->Draw("monsterBall");
         triangle->Draw("white");
         particle->Draw("circle");

@@ -1,8 +1,10 @@
 #include "ModelManager.h"
+#include "TextureManager.h"
 #include "Function.h"
 
-void ModelManager::Initialize(ID3D12Device* device) {
+void ModelManager::Initialize(ID3D12Device* device, TextureManager* texMgr) {
     device_ = device;
+    texMgr_ = texMgr;
 }
 
 void ModelManager::LoadModel(const std::string& name, const std::string& filename) {
@@ -23,6 +25,7 @@ void ModelManager::LoadModel(const std::string& name, const std::string& filenam
     data->vertexResource->Unmap(0, nullptr);
 
     models_[name] = std::move(data);
+    texMgr_->LoadTexture(name, models_[name]->material.textureFilePath);
 }
 
 std::shared_ptr<ModelData> ModelManager::GetModelData(const std::string& name) const {
