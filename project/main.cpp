@@ -5,6 +5,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     D3DResourceLeakChecker leakCheck;
     SetUnhandledExceptionFilter(ExportDump);
 
+    // App生成
     std::unique_ptr<App> app = std::make_unique<App>();
 
     // 初期化
