@@ -29,11 +29,11 @@ void ModelObject::Update() {
 void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, bool draw) {
     if (!draw) return;
 
-    assert(!modelKey.empty() && "ModelObject::Draw: modelKeyが空です！");
-    assert(!textureKey.empty() && "ModelObject::Draw: textureKeyが空です！");
+    assert(!modelKey.empty());
+    assert(!textureKey.empty());
    
     auto modelData = sModelMgr->GetModelData(modelKey);
-    assert(modelData && "ModelObject::Draw: 指定されたmodelKeyがModelManagerに登録されていません！");
+    assert(modelData);
 
     auto commandList = sEngine->GetDxCommon()->GetCommandList();
     commandList->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
