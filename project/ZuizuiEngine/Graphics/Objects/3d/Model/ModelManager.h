@@ -7,16 +7,15 @@
 
 class ModelManager {
 public:
-    static ModelManager& GetInstance();
-    std::shared_ptr<ModelData> LoadModel(ID3D12Device* device, const std::string& filename);
+    ModelManager() = default;
+    ~ModelManager() = default;
+
+    void Initialize(ID3D12Device* device);
+    void LoadModel(const std::string& name, const std::string& filename);
+    std::shared_ptr<ModelData> GetModelData(const std::string& name) const;
     void Clear();
 
 private:
-    ModelManager() = default;
-    ~ModelManager() = default;
-    ModelManager(const ModelManager&) = delete;
-    ModelManager& operator=(const ModelManager&) = delete;
-
-private:
-    std::unordered_map<std::string, std::shared_ptr<ModelData>> modelCache_;
+    ID3D12Device* device_ = nullptr;
+    std::unordered_map<std::string, std::shared_ptr<ModelData>> models_;
 };

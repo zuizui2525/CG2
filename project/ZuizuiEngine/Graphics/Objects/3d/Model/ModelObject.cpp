@@ -1,75 +1,58 @@
 #include "ModelObject.h"
-#include "ModelManager.h"
-#include "Function.h"
+#include "Zuizui.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
 #include "TextureManager.h"
+#include "ModelManager.h"
+#include "Matrix.h"
+#include <cassert>
 
-void ModelObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texture, const std::string& filename, int lightingMode) {
-    // 基底クラスの初期化
+void ModelObject::Initialize(Zuizui* engine, Camera* camera, DirectionalLightObject* light, TextureManager* texMgr, ModelManager* modelMgr, int lightingMode) {
     Object3D::Initialize(engine, lightingMode);
     camera_ = camera;
     dirLight_ = light;
-    texture_ = texture;
-
-    // モデルデータ読み込み
-    modelData_ = ModelManager::GetInstance().LoadModel(engine_->GetDevice(), filename);
-
-    // 頂点リソース作成
-    vertexResource_ = CreateBufferResource(engine_->GetDevice(), sizeof(VertexData) * modelData_->vertices.size());
-    vbv_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-    vbv_.SizeInBytes = sizeof(VertexData) * (UINT)modelData_->vertices.size();
-    vbv_.StrideInBytes = sizeof(VertexData);
-
-    // 頂点データ転送
-    VertexData* vertexData = nullptr;
-    vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-    memcpy(vertexData, modelData_->vertices.data(), sizeof(VertexData) * modelData_->vertices.size());
+    texMgr_ = texMgr;
+    modelMgr_ = modelMgr;
 }
 
 void ModelObject::Update() {
-    // ワールド行列
-    Matrix4x4 worldMatrix = Math::MakeAffineMatrix(
-        transform_.scale,
-        transform_.rotate,
-        transform_.translate
-    );
+    Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    Matrix4x4 viewMatrix = camera_->GetViewMatrix3D();
+    Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix3D();
+    Matrix4x4 wvpMatrix = Math::Multiply(worldMatrix, Math::Multiply(viewMatrix, projectionMatrix));
 
-    // WVP行列
-    Matrix4x4 worldViewProjection = Math::Multiply(Math::Multiply(worldMatrix, camera_->GetViewMatrix3D()), camera_->GetProjectionMatrix3D());
+    // 法線用行列（逆転置）
+    Matrix4x4 worldForNormal = worldMatrix;
+    worldForNormal.m[3][0] = 0.0f; worldForNormal.m[3][1] = 0.0f; worldForNormal.m[3][2] = 0.0f;
 
-    // 逆転置行列
-    Matrix4x4 worldForNormal = worldViewProjection;
-    worldForNormal.m[3][0] = 0.0f;
-    worldForNormal.m[3][1] = 0.0f;
-    worldForNormal.m[3][2] = 0.0f;
-    worldForNormal.m[3][3] = 1.0f;
-
-    // 定数バッファに書き込み
-    wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-    wvpData_->WVP = worldViewProjection;
+    wvpData_->WVP = wvpMatrix;
     wvpData_->world = worldMatrix;
     wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
-void ModelObject::Draw(const std::string& textureKey, bool draw) {
+void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, bool draw) {
     if (!draw) return;
-    // パイプラインの選択
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
-    engine_->GetDxCommon()->GetCommandList()->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
-    
-    // VBV設定
-    engine_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
 
-    // 定数バッファ設定
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
-    engine_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, texture_->GetGpuHandle(textureKey));
+    assert(!modelKey.empty() && "ModelObject::Draw: modelKeyが空です！");
+    assert(!textureKey.empty() && "ModelObject::Draw: textureKeyが空です！");
+   
+    auto modelData = modelMgr_->GetModelData(modelKey);
+    assert(modelData && "ModelObject::Draw: 指定されたmodelKeyがModelManagerに登録されていません！");
 
-    // 描画
-    if (draw) {
-        engine_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData_->vertices.size()), 1, 0, 0);
-    }
+    auto commandList = engine_->GetDxCommon()->GetCommandList();
+    commandList->SetGraphicsRootSignature(engine_->GetPSOManager()->GetRootSignature("Object3D"));
+    commandList->SetPipelineState(engine_->GetPSOManager()->GetPSO("Object3D"));
+
+    // マネージャが持っているVBVを使用
+    commandList->IASetVertexBuffers(0, 1, &modelData->vbv);
+
+    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(2, dirLight_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(3, camera_->GetGPUVirtualAddress());
+
+    // 指定されたキーでテクスチャ取得
+    commandList->SetGraphicsRootDescriptorTable(4, texMgr_->GetGpuHandle(textureKey));
+
+    commandList->DrawInstanced((UINT)modelData->vertices.size(), 1, 0, 0);
 }

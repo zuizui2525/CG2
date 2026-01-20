@@ -3,6 +3,7 @@
 #include "DirectionalLight.h"
 #include "Input.h"
 #include "TextureManager.h"
+#include "ModelManager.h"
 #include "ModelObject.h"
 #include "SphereObject.h"
 #include "SpriteObject.h"
@@ -25,32 +26,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     std::unique_ptr<DirectionalLightObject> dirLight = std::make_unique<DirectionalLightObject>();
     dirLight->Initialize(engine->GetDevice());
 
-    std::unique_ptr<TextureManager> texture = std::make_unique<TextureManager>();
-    texture->Initialize(engine->GetDevice(), engine->GetDxCommon()->GetCommandList(), engine->GetDxCommon()->GetSrvHeap());
+    std::unique_ptr<TextureManager> textureMgr = std::make_unique<TextureManager>();
+    textureMgr->Initialize(engine->GetDevice(), engine->GetDxCommon()->GetCommandList(), engine->GetDxCommon()->GetSrvHeap());
     
+    std::unique_ptr<ModelManager> modelMgr = std::make_unique<ModelManager>();
+    modelMgr->Initialize(engine->GetDevice());
+
     auto teapot = std::make_unique<ModelObject>();
-    teapot->Initialize(engine, camera.get(), dirLight.get(), texture.get(), "resources/obj/teapot/teapot.obj");
-    texture->LoadTexture("teapot", teapot->GetModelData()->material.textureFilePath);
+    teapot->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get(), modelMgr.get());
+    modelMgr->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
+    textureMgr->LoadTexture("teapot", modelMgr->GetModelData("teapot")->material.textureFilePath);
     teapot->SetPosition(Vector3{ 0.0f, 0.0f, 0.0f });
 
     auto sphere = std::make_unique<SphereObject>();
-    sphere->Initialize(engine, camera.get(), dirLight.get(), texture.get());
-    texture->LoadTexture("monsterBall", "resources/monsterball.png");
+    sphere->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get());
+    textureMgr->LoadTexture("monsterBall", "resources/monsterball.png");
     sphere->SetPosition(Vector3{ 2.0f, 0.0f, 0.0f });
 
     auto triangle = std::make_unique<TriangleObject>();
-    triangle->Initialize(engine, camera.get(), dirLight.get(), texture.get());
-    texture->LoadTexture("white", "resources/white.png");
+    triangle->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get());
+    textureMgr->LoadTexture("white", "resources/white.png");
     triangle->SetPosition(Vector3{ -2.0f, 0.0f, 0.0f });
 
     auto particle = std::make_unique<ParticleObject>();
-    particle->Initialize(engine, camera.get(), dirLight.get(), texture.get());
-    texture->LoadTexture("circle", "resources/circle.png");
+    particle->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get());
+    textureMgr->LoadTexture("circle", "resources/circle.png");
     particle->SetPosition(Vector3{ 4.0f, 2.0f, 20.0f });
 
     auto sprite = std::make_unique<SpriteObject>();
-    sprite->Initialize(engine, camera.get(), dirLight.get(), texture.get());
-    texture->LoadTexture("uvChecker", "resources/uvChecker.png");
+    sprite->Initialize(engine, camera.get(), dirLight.get(), textureMgr.get());
+    textureMgr->LoadTexture("uvChecker", "resources/uvChecker.png");
     sprite->SetSize(300.0f, 300.0f);
 
     while (engine->ProcessMessage()) {
@@ -66,7 +71,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         engine->BeginFrame();
        
-        teapot->Draw("teapot");
+        teapot->Draw("teapot", "teapot");
         sphere->Draw("monsterBall");
         triangle->Draw("white");
         particle->Draw("circle");

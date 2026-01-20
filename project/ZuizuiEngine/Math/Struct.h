@@ -135,6 +135,8 @@ struct MaterialData {
 struct ModelData {
     std::vector<VertexData> vertices;
     MaterialData material;
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+    D3D12_VERTEX_BUFFER_VIEW vbv;
 };
 
 // D3D12 リソースリークチェッカー
