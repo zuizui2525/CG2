@@ -121,6 +121,9 @@
     <Filter Include="ZuizuiEngine\Graphics\Objects\3d\Particle">
       <UniqueIdentifier>{e1618b90-2e9a-4268-87c0-b1b3cf194159}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{7ddb4f41-4008-4075-920c-987f24d201f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui.cpp">
@@ -238,7 +241,9 @@
     <ClCompile Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.cpp">
       <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
     </ClCompile>
-    <ClCompile Include="App\App.cpp" />
+    <ClCompile Include="App\App.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -375,7 +380,9 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Objects\3d\Particle\ParticleObject.h">
       <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
     </ClInclude>
-    <ClInclude Include="App\App.h" />
+    <ClInclude Include="App\App.h">
+      <Filter>App</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
