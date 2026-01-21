@@ -70,10 +70,11 @@ void App::Initialize() {
 }
 
 void App::Run() {
+#ifdef _DEBUG
     imGui_->Begin();
     pointLight_->ImGuiControl();
     imGui_->End();
-
+#endif
     // --- 更新 ---
     input_->Update();
     camera_->Update();
@@ -98,8 +99,10 @@ void App::Run() {
 }
 
 void App::Finalize() {
-	engine_->Finalize();
+#ifdef _DEBUG
     imGui_->Shutdown();
+#endif
+	engine_->Finalize();
 }
 
 bool App::IsEnd() const {
