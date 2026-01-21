@@ -244,6 +244,7 @@
     <ClCompile Include="App\App.cpp">
       <Filter>App</Filter>
     </ClCompile>
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\PointLight\PointLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -383,6 +384,7 @@
     <ClInclude Include="App\App.h">
       <Filter>App</Filter>
     </ClInclude>
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\PointLight\PointLight.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
