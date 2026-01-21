@@ -26,7 +26,7 @@ void App::Initialize() {
 
     // テクスチャ
     texMgr_->LoadTexture("white", "resources/white.png");
-    texMgr_->LoadTexture("monsterBall", "resources/monsterball.png");
+    texMgr_->LoadTexture("monsterBall", "resources/monsterBall.png");
     texMgr_->LoadTexture("circle", "resources/circle.png");
     texMgr_->LoadTexture("uvChecker", "resources/uvChecker.png");
 
