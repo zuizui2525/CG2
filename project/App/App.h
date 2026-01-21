@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "Zuizui.h"
+#include "ImGuiManager.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
@@ -28,6 +29,7 @@ private:
     Zuizui* engine_ = nullptr;
 
     // マネージャ・リソース
+    std::unique_ptr<ImguiManager> imGui_;
     std::unique_ptr<Input> input_;
     std::unique_ptr<Camera> camera_;
     std::unique_ptr<DirectionalLightObject> dirLight_;

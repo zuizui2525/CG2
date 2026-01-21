@@ -5,6 +5,9 @@ void App::Initialize() {
     engine_ = Zuizui::GetInstance();
     engine_->Initialize(L"LE2B_02_イトウカズイ");
 
+#ifdef _DEBUG
+    imGui_ = std::make_unique<ImguiManager>();
+#endif
     input_ = std::make_unique<Input>();
     camera_ = std::make_unique<Camera>();
     dirLight_ = std::make_unique<DirectionalLightObject>();
@@ -18,6 +21,10 @@ void App::Initialize() {
     pointLight_->Initialize(engine_->GetDevice());
     texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
     modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
+
+#ifdef _DEBUG
+    imGui_->Initialize(engine_->GetWindow()->GetHWND(), engine_->GetDxCommon()->GetDevice(), engine_->GetDxCommon()->GetBackBufferCount(), engine_->GetDxCommon()->GetRtvFormat(), engine_->GetDxCommon()->GetRtvHeap(), engine_->GetDxCommon()->GetSrvHeap());
+#endif
 
     // 静的リソース（シングルトン的な役割）への登録
     EngineResource::SetEngine(engine_);
@@ -63,7 +70,9 @@ void App::Initialize() {
 }
 
 void App::Run() {
+    imGui_->Begin();
     pointLight_->ImGuiControl();
+    imGui_->End();
 
     // --- 更新 ---
     input_->Update();
@@ -90,6 +99,7 @@ void App::Run() {
 
 void App::Finalize() {
 	engine_->Finalize();
+    imGui_->Shutdown();
 }
 
 bool App::IsEnd() const {
