@@ -18,6 +18,8 @@ public:
 
     // フレーム制御
     bool ProcessMessage() { return window->ProcessMessage(); }
+    void ImGuiBegin();
+    void ImGuiEnd();
     void BeginFrame();
     void EndFrame();
 
@@ -38,6 +40,6 @@ private:
     std::unique_ptr<PSOManager> psoManager;
 
 #ifdef _DEBUG
-    std::unique_ptr<class ImguiManager> imgui;
+    std::unique_ptr<class ImguiManager> imGui;
 #endif
 };

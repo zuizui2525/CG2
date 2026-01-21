@@ -3,6 +3,7 @@
 class Zuizui;
 class Camera;
 class DirectionalLightObject;
+class PointLightObject;
 class TextureManager;
 class ModelManager;
 
@@ -30,8 +31,10 @@ protected:
 class LightResource {
 public:
     static void SetLight(DirectionalLightObject* light) { sDirLight = light; }
+    static void SetPointLight(PointLightObject* light) { sPointLight = light; }
 protected:
     static DirectionalLightObject* sDirLight;
+    static PointLightObject* sPointLight;
 };
 
 class ModelResource {

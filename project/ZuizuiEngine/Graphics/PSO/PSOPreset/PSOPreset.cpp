@@ -18,10 +18,12 @@ PSOPreset PSOPreset::CreateObject3DPreset(
     rs.AddCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
     // マテリアル(b0, PS)
     rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
-    // ライティング (b1, PS)
+    // カメラ (b1, PS)
     rs.AddCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
-    // カメラ (b2, PS)
+    // ライティング (b2, PS) directionalLight
     rs.AddCBV(2, D3D12_SHADER_VISIBILITY_PIXEL);
+    // ライティング (b3, PS) pointLight
+    rs.AddCBV(3, D3D12_SHADER_VISIBILITY_PIXEL);
     // テクスチャ (t0, PS)
     rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
     // サンプラー (s0)

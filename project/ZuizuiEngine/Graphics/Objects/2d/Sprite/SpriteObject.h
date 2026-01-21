@@ -23,7 +23,7 @@ public:
     // 描画処理
     void Draw(const std::string& textureKey, bool draw = true);
 
-    void ImGuiControl();
+    void ImGuiControl(const char* name);
 
     // Getter
     Transform& GetTransform() { return transform_; }

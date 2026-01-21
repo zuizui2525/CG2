@@ -232,7 +232,6 @@ void ParticleObject::Draw(const std::string& textureKey, bool draw) {
 void ParticleObject::ImGuiControl(const std::string& name) {
     ImGuiSRTControl(name);
     ImGuiParticleControl(name);
-    ImGui::Separator();
 }
 
 void ParticleObject::ImGuiSRTControl(const std::string& name) {

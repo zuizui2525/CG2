@@ -79,13 +79,14 @@ void SpriteObject::Draw(const std::string& textureKey, bool draw) {
     sEngine->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sCamera->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, sTexMgr->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(5, sTexMgr->GetGpuHandle(textureKey));
 
     sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void SpriteObject::ImGuiControl() {
+void SpriteObject::ImGuiControl(const char* name) {
+    ImGui::Begin(name);
     if (ImGui::CollapsingHeader("Sprite Settings")) {
         float size[2] = { width_, height_ };
         if (ImGui::DragFloat2("Size", size, 1.0f)) {
@@ -112,5 +113,5 @@ void SpriteObject::ImGuiControl() {
         ImGui::DragFloat("uvRotate", &uvTransform_.rotate.z, 0.01f);
         ImGui::DragFloat2("uvTranslate", &uvTransform_.translate.x, 0.01f);
     }
-    ImGui::Separator();
+    ImGui::End();
 }

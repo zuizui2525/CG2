@@ -19,14 +19,14 @@ void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t
     psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
     psoManager->Initialize(dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler());
 #ifdef _DEBUG
-    imgui = std::make_unique<ImguiManager>();
-    imgui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());
+    imGui = std::make_unique<ImguiManager>();
+    imGui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());
 #endif
 }
 
 void Zuizui::Finalize() {
 #ifdef _DEBUG
-    imgui->Shutdown();
+    imGui->Shutdown();
 #endif
     // COMの終了処理
     CoUninitialize();
@@ -36,18 +36,26 @@ void Zuizui::Finalize() {
     instance = nullptr;
 }
 
+void Zuizui::ImGuiBegin() {
+#ifdef _DEBUG
+    imGui->Begin();
+#endif
+}
+
+void Zuizui::ImGuiEnd() {
+#ifdef _DEBUG
+    imGui->End();
+#endif
+}
+
 void Zuizui::BeginFrame() {
     dxCommon->FrameStart();
-#ifdef _DEBUG
-    imgui->Begin();
-#endif
     dxCommon->BeginFrame();
     dxCommon->PreDraw();
 }
 
 void Zuizui::EndFrame() {
 #ifdef _DEBUG
-    imgui->End();
     dxCommon->DrawImGui();
 #endif
     dxCommon->EndFrame();

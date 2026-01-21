@@ -3,6 +3,8 @@
 
 void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCount,
     DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* srvHeap) {
+    if (initialized_) return;
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();

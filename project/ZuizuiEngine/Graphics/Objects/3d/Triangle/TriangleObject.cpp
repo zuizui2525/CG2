@@ -61,9 +61,9 @@ void TriangleObject::Draw(const std::string& textureKey, bool draw) {
     // 定数バッファ設定
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sDirLight->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sCamera->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, sTexMgr->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sDirLight->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(5, sTexMgr->GetGpuHandle(textureKey));
 
     sEngine->GetDxCommon()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

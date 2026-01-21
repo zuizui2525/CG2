@@ -5,9 +5,6 @@ void App::Initialize() {
     engine_ = Zuizui::GetInstance();
     engine_->Initialize(L"LE2B_02_イトウカズイ");
 
-#ifdef _DEBUG
-    imGui_ = std::make_unique<ImguiManager>();
-#endif
     input_ = std::make_unique<Input>();
     camera_ = std::make_unique<Camera>();
     dirLight_ = std::make_unique<DirectionalLightObject>();
@@ -22,15 +19,12 @@ void App::Initialize() {
     texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
     modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
 
-#ifdef _DEBUG
-    imGui_->Initialize(engine_->GetWindow()->GetHWND(), engine_->GetDxCommon()->GetDevice(), engine_->GetDxCommon()->GetBackBufferCount(), engine_->GetDxCommon()->GetRtvFormat(), engine_->GetDxCommon()->GetRtvHeap(), engine_->GetDxCommon()->GetSrvHeap());
-#endif
-
     // 静的リソース（シングルトン的な役割）への登録
     EngineResource::SetEngine(engine_);
     TextureResource::SetTextureManager(texMgr_.get());
     CameraResource::SetCamera(camera_.get());
     LightResource::SetLight(dirLight_.get());
+    LightResource::SetPointLight(pointLight_.get());
     ModelResource::SetModelManager(modelMgr_.get());
 
     // テクスチャ
@@ -42,6 +36,7 @@ void App::Initialize() {
     // モデル
     modelMgr_->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
     modelMgr_->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
+    modelMgr_->LoadModel("terrain", "resources/obj/terrain/terrain.obj");
 
     // ゲームオブジェクト
     teapot_ = std::make_unique<ModelObject>();
@@ -51,6 +46,11 @@ void App::Initialize() {
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
     bunny_->SetPosition({ 0.0f, 2.0f, 0.0f });
+
+    terrain_ = std::make_unique<ModelObject>();
+    terrain_->Initialize();
+    terrain_->SetScale(Vector3{ 2.0f, 2.0f, 2.0f });
+    terrain_->SetPosition({ 0.0f, -1.0f, 0.0f });
 
     sphere_ = std::make_unique<SphereObject>();
     sphere_->Initialize();
@@ -70,11 +70,17 @@ void App::Initialize() {
 }
 
 void App::Run() {
-#ifdef _DEBUG
-    imGui_->Begin();
+    // --- ImGui ---
+    engine_->ImGuiBegin();
+    camera_->ImGuiControl();
+    dirLight_->ImGuiControl();
     pointLight_->ImGuiControl();
-    imGui_->End();
-#endif
+    sphere_->ImGuiControl("sphere");
+    triangle_->ImGuiControl("triangle");
+    particle_->ImGuiControl("particle");
+    sprite_->ImGuiControl("sprite");
+    engine_->ImGuiEnd();
+
     // --- 更新 ---
     input_->Update();
     camera_->Update();
@@ -82,6 +88,7 @@ void App::Run() {
     pointLight_->Update();
     teapot_->Update();
     bunny_->Update();
+    terrain_->Update();
     sphere_->Update();
     triangle_->Update();
     particle_->Update();
@@ -89,6 +96,7 @@ void App::Run() {
 
     // --- 描画 ---
     engine_->BeginFrame();
+    terrain_->Draw("terrain", "terrain");
     teapot_->Draw("teapot", "teapot");
     bunny_->Draw("bunny", "bunny");
     sphere_->Draw("monsterBall");
@@ -99,9 +107,6 @@ void App::Run() {
 }
 
 void App::Finalize() {
-#ifdef _DEBUG
-    imGui_->Shutdown();
-#endif
 	engine_->Finalize();
 }
 

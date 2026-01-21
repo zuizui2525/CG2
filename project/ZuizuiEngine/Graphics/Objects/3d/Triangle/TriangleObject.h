@@ -12,7 +12,7 @@ public:
     TriangleObject() = default;
     ~TriangleObject() = default;
 
-    void Initialize(int lightingMode = 0);
+    void Initialize(int lightingMode = 2);
 
     // 更新処理
     void Update();
