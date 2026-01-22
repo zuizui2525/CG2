@@ -110,4 +110,8 @@ private:
 	bool windActive_ = false;
 	bool loopActive_ = false;
 	bool emitterActive_ = true;
+
+	// ImGuiウィンドウの開閉状態
+	bool isOpen_ = false;
+	bool isWindowOpen_ = false;
 };

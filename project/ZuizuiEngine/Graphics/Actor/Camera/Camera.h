@@ -10,7 +10,7 @@ class Camera {
 public:
     void Initialize(ID3D12Device* device, Input* input);
     void Update();
-    void ImGuiControl();
+    void ImGuiControl(const std::string& name);
 
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return resource_->GetGPUVirtualAddress(); }
     const Matrix4x4& GetCameraMatrix() const { return cameraMatrix_; }
@@ -44,4 +44,7 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
     CameraForGPU* data_ = nullptr;
+
+    // ImGuiウィンドウの開閉状態
+    bool isWindowOpen_ = false;
 };

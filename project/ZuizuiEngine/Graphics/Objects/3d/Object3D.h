@@ -48,4 +48,7 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
+
+    // ImGuiウィンドウの開閉状態
+    bool isWindowOpen_ = false;
 };

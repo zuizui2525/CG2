@@ -9,6 +9,7 @@ void App::Initialize() {
     camera_ = std::make_unique<Camera>();
     dirLight_ = std::make_unique<DirectionalLightObject>();
     pointLight_ = std::make_unique<PointLightObject>();
+    spotLight_ = std::make_unique<SpotLightObject>();
     texMgr_ = std::make_unique<TextureManager>();
     modelMgr_ = std::make_unique<ModelManager>();
 
@@ -16,6 +17,7 @@ void App::Initialize() {
     camera_->Initialize(engine_->GetDevice(), input_.get());
     dirLight_->Initialize(engine_->GetDevice());
     pointLight_->Initialize(engine_->GetDevice());
+    spotLight_->Initialize(engine_->GetDevice());
     texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
     modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
 
@@ -25,6 +27,7 @@ void App::Initialize() {
     CameraResource::SetCamera(camera_.get());
     LightResource::SetLight(dirLight_.get());
     LightResource::SetPointLight(pointLight_.get());
+    LightResource::SetSpotLight(spotLight_.get());
     ModelResource::SetModelManager(modelMgr_.get());
 
     // テクスチャ
@@ -72,9 +75,13 @@ void App::Initialize() {
 void App::Run() {
     // --- ImGui ---
     engine_->ImGuiBegin();
-    camera_->ImGuiControl();
-    dirLight_->ImGuiControl();
-    pointLight_->ImGuiControl();
+    camera_->ImGuiControl("camera");
+    dirLight_->ImGuiControl("dirLight");
+    pointLight_->ImGuiControl("pointLight");
+    spotLight_->ImGuiControl("spotLight");
+    teapot_->ImGuiControl("teapot");
+    bunny_->ImGuiControl("bunny");
+    terrain_->ImGuiControl("terrain");
     sphere_->ImGuiControl("sphere");
     triangle_->ImGuiControl("triangle");
     particle_->ImGuiControl("particle");
@@ -86,6 +93,7 @@ void App::Run() {
     camera_->Update();
     dirLight_->Update();
     pointLight_->Update();
+    spotLight_->Update();
     teapot_->Update();
     bunny_->Update();
     terrain_->Update();

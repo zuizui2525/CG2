@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "Input.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
@@ -32,6 +33,7 @@ private:
     std::unique_ptr<Camera> camera_;
     std::unique_ptr<DirectionalLightObject> dirLight_;
     std::unique_ptr<PointLightObject> pointLight_;
+    std::unique_ptr<SpotLightObject> spotLight_;
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
 

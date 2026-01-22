@@ -21,10 +21,21 @@ void DirectionalLightObject::Update() {
     lightData_->direction = Math::Normalize(lightData_->direction);
 }
 
-void DirectionalLightObject::ImGuiControl() {
-    ImGui::Text("DirectionalLight");
-    ImGui::ColorEdit4("Color", &lightData_->color.x);
-    ImGui::DragFloat3("Direction", &lightData_->direction.x, 0.01f);
-    ImGui::DragFloat("Intensity", &lightData_->intensity, 0.01f);
-    ImGui::Separator();
+void DirectionalLightObject::ImGuiControl(const std::string& name) {
+    ImGui::Begin("Light List");
+    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
+    ImGui::End();
+
+    if (isWindowOpen_) {
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+            std::string label = "##" + name;
+
+            if (ImGui::CollapsingHeader(("Directional Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::ColorEdit4(("Color" + label).c_str(), &lightData_->color.x);
+                ImGui::DragFloat3(("Direction" + label).c_str(), &lightData_->direction.x, 0.01f);
+                ImGui::DragFloat(("Intensity" + label).c_str(), &lightData_->intensity, 0.01f);
+            }
+        }
+        ImGui::End();
+    }
 }

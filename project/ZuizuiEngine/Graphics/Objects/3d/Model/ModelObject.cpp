@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "Matrix.h"
@@ -50,9 +51,11 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     if (sPointLight) {
         commandList->SetGraphicsRootConstantBufferView(4, sPointLight->GetGPUVirtualAddress());
     }
-
+    if (sSpotLight) {
+        commandList->SetGraphicsRootConstantBufferView(5, sSpotLight->GetGPUVirtualAddress());
+    }
     // 指定されたキーでテクスチャ取得
-    commandList->SetGraphicsRootDescriptorTable(5, sTexMgr->GetGpuHandle(textureKey));
+    commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
 
     commandList->DrawInstanced((UINT)modelData->vertices.size(), 1, 0, 0);
 }

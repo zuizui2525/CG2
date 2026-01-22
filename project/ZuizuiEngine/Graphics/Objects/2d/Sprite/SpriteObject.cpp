@@ -80,38 +80,48 @@ void SpriteObject::Draw(const std::string& textureKey, bool draw) {
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(5, sTexMgr->GetGpuHandle(textureKey));
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
 
     sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void SpriteObject::ImGuiControl(const char* name) {
-    ImGui::Begin(name);
-    if (ImGui::CollapsingHeader("Sprite Settings")) {
-        float size[2] = { width_, height_ };
-        if (ImGui::DragFloat2("Size", size, 1.0f)) {
-            SetSize(size[0], size[1]);
-        }
-    }
-
-    if (ImGui::CollapsingHeader("SRT")) {
-        ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-        ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
-        ImGui::DragFloat3("Translate", &transform_.translate.x, 1.0f);
-    }
-    if (ImGui::CollapsingHeader("Color")) {
-        ImGui::ColorEdit4("Color", &materialData_->color.x, true);
-    }
-    if (ImGui::CollapsingHeader("Lighting")) {
-        ImGui::RadioButton("None", &materialData_->enableLighting, 0);
-        ImGui::RadioButton("Lambert", &materialData_->enableLighting, 1);
-        ImGui::RadioButton("HalfLambert", &materialData_->enableLighting, 2);
-    }
-    ImGui::Separator();
-    if (ImGui::CollapsingHeader("uvSRT")) {
-        ImGui::DragFloat2("uvScale", &uvTransform_.scale.x, 0.01f);
-        ImGui::DragFloat("uvRotate", &uvTransform_.rotate.z, 0.01f);
-        ImGui::DragFloat2("uvTranslate", &uvTransform_.translate.x, 0.01f);
-    }
+void SpriteObject::ImGuiControl(const std::string& name) {
+    ImGui::Begin("Sprite List");
+    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
+
+    if (isWindowOpen_) {
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+
+            std::string label = "##" + name;
+
+            // --- Sprite特有の設定 (サイズ) ---
+            if (ImGui::CollapsingHeader(("Sprite Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                float size[2] = { width_, height_ };
+                if (ImGui::DragFloat2(("Size" + label).c_str(), size, 1.0f)) {
+                    SetSize(size[0], size[1]);
+                }
+            }
+
+            // --- 共通のSRT設定 ---
+            if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f);
+                ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
+                ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 1.0f);
+            }
+
+            // --- カラー設定 ---
+            if (ImGui::CollapsingHeader(("Color" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
+            }
+
+            // --- UV設定 (Sprite特有) ---
+            if (ImGui::CollapsingHeader(("UV Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::DragFloat2(("uvScale" + label).c_str(), &uvTransform_.scale.x, 0.01f);
+                ImGui::DragFloat(("uvRotate" + label).c_str(), &uvTransform_.rotate.z, 0.01f);
+                ImGui::DragFloat2(("uvTranslate" + label).c_str(), &uvTransform_.translate.x, 0.01f);
+            }
+        }
+        ImGui::End();
+    }
 }

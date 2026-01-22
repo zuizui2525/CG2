@@ -23,7 +23,7 @@ public:
     // 描画処理
     void Draw(const std::string& textureKey, bool draw = true);
 
-    void ImGuiControl(const char* name);
+    void ImGuiControl(const std::string& name);
 
     // Getter
     Transform& GetTransform() { return transform_; }
@@ -66,4 +66,7 @@ private:
 
     float width_ = 100.0f;  // デフォルト幅
     float height_ = 100.0f; // デフォルト高さ
+
+    // ImGuiウィンドウの開閉状態
+    bool isWindowOpen_ = false;
 };

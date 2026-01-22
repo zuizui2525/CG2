@@ -131,6 +131,18 @@ struct PointLight {
     float padding[2];  //!< 16バイトアライメントのためのパディング
 };
 
+struct SpotLight {
+    Vector4 color;             //!< ライトの色 (RGBA)
+    Vector3 position;          //!< ライトの位置
+    float intensity;           //!< 輝度
+    Vector3 direction;         //!< ライトの方向
+    float distance;            //!< ライトの届く最大距離
+    float decay;               //!< 減衰率
+    float cosAngle;            //!< スポットライトの余弦 (外角)
+    float cosFalloffStart;     //!< 減衰開始の余弦 (内角)
+    float padding;             //!< 16バイトアライメント用パディング
+};
+
 struct VertexData {
     Vector4 position;
     Vector2 texcoord;

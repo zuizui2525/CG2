@@ -3,6 +3,8 @@
 #include "Zuizui.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
+#include "PointLight.h"
+#include "SpotLight.h"
 #include "TextureManager.h"
 
 void TriangleObject::Initialize(int lightingMode) {
@@ -63,7 +65,13 @@ void TriangleObject::Draw(const std::string& textureKey, bool draw) {
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sDirLight->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(5, sTexMgr->GetGpuHandle(textureKey));
+    if (sPointLight) {
+        sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, sPointLight->GetGPUVirtualAddress());
+    }
+    if (sSpotLight) {
+        sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, sSpotLight->GetGPUVirtualAddress());
+    }
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
 
     sEngine->GetDxCommon()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

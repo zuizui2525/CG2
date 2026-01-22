@@ -13,7 +13,7 @@ public:
     void Update();
 
     // ImGui操作
-    void ImGuiControl();
+    void ImGuiControl(const std::string& name);
 
     // GPU仮想アドレスを取得（描画時に使う）
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const {
@@ -26,4 +26,7 @@ public:
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> resource_; // GPUバッファ
     DirectionalLight* lightData_ = nullptr;           // マップ先
+
+    // ImGuiウィンドウの開閉状態
+    bool isWindowOpen_ = false;
 };

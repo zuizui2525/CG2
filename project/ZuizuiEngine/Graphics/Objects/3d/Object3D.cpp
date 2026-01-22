@@ -30,30 +30,39 @@ void Object3D::Initialize(int lightingMode) {
 }
 
 void Object3D::ImGuiControl(const std::string& name) {
-    ImGuiSRTControl(name);
-    ImGuiLightingControl(name);
-    ImGui::Separator();
+    ImGui::Begin("Object List");
+    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
+    ImGui::End();
+    
+    if (isWindowOpen_) {
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+            ImGuiSRTControl(name);
+            ImGuiLightingControl(name);
+
+        }
+        ImGui::End();
+    }
 }
 
 void Object3D::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
-    
-    if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
-        ImGui::DragFloat3(("scale" + label).c_str(), &transform_.scale.x, 0.01f);
-        ImGui::DragFloat3(("rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
+
+    if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f);
+        ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
         ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f);
     }
-    if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
-       ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
+
+    if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
     }
 }
 
 void Object3D::ImGuiLightingControl(const std::string& name) {
     std::string label = "##" + name;
-
-    if (ImGui::CollapsingHeader(("lighting" + label).c_str())) {
-        ImGui::RadioButton(("None" + label).c_str(), &materialData_->enableLighting, 0);
-        ImGui::RadioButton(("Lambert" + label).c_str(), &materialData_->enableLighting, 1);
-        ImGui::RadioButton(("HalfLambert" + label).c_str(), &materialData_->enableLighting, 2);
+    if (ImGui::CollapsingHeader(("Lighting" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::RadioButton(("None" + label).c_str(), (int*)&materialData_->enableLighting, 0); ImGui::SameLine();
+        ImGui::RadioButton(("Lambert" + label).c_str(), (int*)&materialData_->enableLighting, 1); ImGui::SameLine();
+        ImGui::RadioButton(("HalfLambert" + label).c_str(), (int*)&materialData_->enableLighting, 2);
     }
 }

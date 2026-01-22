@@ -230,71 +230,92 @@ void ParticleObject::Draw(const std::string& textureKey, bool draw) {
 }
 
 void ParticleObject::ImGuiControl(const std::string& name) {
-    ImGuiSRTControl(name);
-    ImGuiParticleControl(name);
+    ImGui::Begin("Particle List");
+    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
+    ImGui::End();
+
+    if (isWindowOpen_) {
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+            ImGuiSRTControl(name);
+            ImGuiParticleControl(name);
+
+        }
+        ImGui::End();
+    }
 }
 
 void ParticleObject::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
-    if (ImGui::CollapsingHeader(("SRT" + label).c_str())) {
+
+    if (ImGui::CollapsingHeader(("Emitter Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::DragFloat3(("scale" + label).c_str(), &emitter_.transform.scale.x, 0.01f);
         ImGui::DragFloat3(("rotate" + label).c_str(), &emitter_.transform.rotate.x, 0.01f);
         ImGui::DragFloat3(("Translate" + label).c_str(), &emitter_.transform.translate.x, 0.01f);
     }
-    if (ImGui::CollapsingHeader(("Color" + label).c_str())) {
-        ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, true);
+
+    if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::ColorEdit4(("Base Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
     }
 }
 
 void ParticleObject::ImGuiParticleControl(const std::string& name) {
     std::string label = "##" + name;
-    if (ImGui::CollapsingHeader(("Particles" + label).c_str())) {
-        ImGui::Text("numInstance:%d / maxInstance:%d", numInstance_, numMaxInstance_);
+    if (ImGui::CollapsingHeader(("Particle System" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Active Particles: %d / %d", numInstance_, numMaxInstance_);
 
         float min_dist = distribution_.a();
         float max_dist = distribution_.b();
         float min_time = distTime_.a();
         float max_time = distTime_.b();
 
-        ImGui::DragFloat(("dist.min" + label).c_str(), &min_dist, 0.1f, -100.0f, (max_dist - 0.01f));
-        ImGui::DragFloat(("dist.max" + label).c_str(), &max_dist, 0.1f, (min_dist + 0.01f), 100.0f);
-        ImGui::DragFloat(("time.min" + label).c_str(), &min_time, 0.1f, 0.0f, (max_time - 0.01f));
-        ImGui::DragFloat(("time.max" + label).c_str(), &max_time, 0.1f, (min_time + 0.01f), 100.0f);
-
-        if (min_dist != distribution_.a() || max_dist != distribution_.b()) {
+        ImGui::SeparatorText("Random Ranges");
+        if (ImGui::DragFloat(("Velocity Min" + label).c_str(), &min_dist, 0.1f)) {
             distribution_ = std::uniform_real_distribution<float>(min_dist, max_dist);
         }
-        if (min_time != distTime_.a() || max_time != distTime_.b()) {
+        if (ImGui::DragFloat(("Velocity Max" + label).c_str(), &max_dist, 0.1f)) {
+            distribution_ = std::uniform_real_distribution<float>(min_dist, max_dist);
+        }
+        if (ImGui::DragFloat(("Life Min" + label).c_str(), &min_time, 0.1f)) {
+            distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
+        }
+        if (ImGui::DragFloat(("Life Max" + label).c_str(), &max_time, 0.1f)) {
             distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
         }
 
+        ImGui::SeparatorText("Emitter Settings");
         int maxInst = static_cast<int>(numMaxInstance_);
-        if (ImGui::DragInt(("maxInstance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance)) {
+        if (ImGui::DragInt(("Max Instance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance)) {
             SetMaxInstance(static_cast<uint32_t>(maxInst));
         }
 
         int count = static_cast<int>(emitter_.count);
-        if (ImGui::DragInt(("count" + label).c_str(), &count, 1, 1, numMaxInstance_)) {
+        if (ImGui::DragInt(("Emit Count" + label).c_str(), &count, 1, 1, numMaxInstance_)) {
             emitter_.count = static_cast<uint32_t>(count);
         }
-        ImGui::DragFloat(("frequency" + label).c_str(), &emitter_.frequency, 0.1f, 0.01f, 50.0f);
+        ImGui::DragFloat(("Frequency" + label).c_str(), &emitter_.frequency, 0.01f, 0.01f, 10.0f);
 
-        if (ImGui::Button(("+1Particle" + label).c_str())) {
+        if (ImGui::Button(("Force Spawn 1 Particle" + label).c_str())) {
             if (numInstance_ < numMaxInstance_) {
                 particles_.push_back(MakeNewParticle(randomEngine_, emitter_.transform.translate));
             }
         }
 
-        ImGui::Checkbox(("billboard" + label).c_str(), &billboardActive_);
-        ImGui::Checkbox(("wind" + label).c_str(), &windActive_);
+        ImGui::SeparatorText("Features");
+        ImGui::Checkbox(("Billboard" + label).c_str(), &billboardActive_);
+        ImGui::Checkbox(("Wind (Field)" + label).c_str(), &windActive_);
+
         if (windActive_) {
-            ImGui::DragFloat3(("field min" + label).c_str(), &accelerationFeild_.area.min.x, 0.01f);
-            ImGui::DragFloat3(("field max" + label).c_str(), &accelerationFeild_.area.max.x, 0.01f);
-            ImGui::DragFloat3(("acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.01f);
+            ImGui::Indent();
+            ImGui::DragFloat3(("Field Min" + label).c_str(), &accelerationFeild_.area.min.x, 0.1f);
+            ImGui::DragFloat3(("Field Max" + label).c_str(), &accelerationFeild_.area.max.x, 0.1f);
+            ImGui::DragFloat3(("Acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.1f);
+            ImGui::Unindent();
         }
+
         ImGui::Separator();
-        if (ImGui::Checkbox(("loop" + label).c_str(), &loopActive_)) { emitterActive_ = false; }
-        if (ImGui::Checkbox(("emit" + label).c_str(), &emitterActive_)) { loopActive_ = false; }
+        if (ImGui::Checkbox(("Loop Mode" + label).c_str(), &loopActive_)) { if (loopActive_) emitterActive_ = false; }
+        ImGui::SameLine();
+        if (ImGui::Checkbox(("Emitter Mode" + label).c_str(), &emitterActive_)) { if (emitterActive_) loopActive_ = false; }
     }
 }
 

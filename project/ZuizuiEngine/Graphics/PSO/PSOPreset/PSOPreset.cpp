@@ -24,6 +24,8 @@ PSOPreset PSOPreset::CreateObject3DPreset(
     rs.AddCBV(2, D3D12_SHADER_VISIBILITY_PIXEL);
     // ライティング (b3, PS) pointLight
     rs.AddCBV(3, D3D12_SHADER_VISIBILITY_PIXEL);
+    // ライティング (b4, PS) spotLight
+    rs.AddCBV(4, D3D12_SHADER_VISIBILITY_PIXEL);
     // テクスチャ (t0, PS)
     rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
     // サンプラー (s0)

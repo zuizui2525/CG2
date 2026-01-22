@@ -67,19 +67,44 @@ void Camera::Update() {
     }
 }
 
-void Camera::ImGuiControl() {
+void Camera::ImGuiControl(const std::string& name) {
 #ifdef _DEBUG
-    ImGui::Text("Camera");
-    ImGui::DragFloat3("Scale(Camera)", &transform_.scale.x, 0.01f);
-    ImGui::DragFloat3("Rotate(Camera)", &transform_.rotate.x, 0.01f);
-    ImGui::DragFloat3("Translate(Camera)", &transform_.translate.x, 0.01f);
-    ImGui::Separator();
-    ImGui::Text("DebugCamera");
-    if (useDebugCamera_) {
-        ImGui::Text("Running (TAB to disable)");
-    } else {
-        ImGui::Text("Disabled (TAB to enable)");
+    // 管理用ウィンドウにチェックボックスを表示
+    ImGui::Begin("Camera List");
+    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
+    ImGui::End();
+
+    if (isWindowOpen_) {
+        // 個別制御ウィンドウ
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+            std::string label = "##" + name;
+
+            // --- カメラの状態表示 ---
+            if (useDebugCamera_) {
+                ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "Status: Debug Camera Active (TAB to switch)");
+            } else {
+                ImGui::Text("Status: Standard Camera Active (TAB to switch)");
+            }
+            ImGui::Separator();
+
+            // --- 通常カメラのTransform設定 ---
+            if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f);
+                ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
+                ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.1f);
+            }
+
+            // --- 追加情報 (デバッグ用) ---
+            if (ImGui::CollapsingHeader(("Matrix Info" + label).c_str())) {
+                if (useDebugCamera_) {
+                    Vector3 pos = debugCamera_.GetPosition();
+                    ImGui::Text("Debug Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
+                } else {
+                    ImGui::Text("Standard Pos: %.2f, %.2f, %.2f", transform_.translate.x, transform_.translate.y, transform_.translate.z);
+                }
+            }
+        }
+        ImGui::End();
     }
-    ImGui::Separator();
 #endif
 }
