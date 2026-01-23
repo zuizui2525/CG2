@@ -1,4 +1,4 @@
-#ifdef _DEBUG
+#ifdef _USEIMGUI
 #include "ImguiManager.h"
 
 void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCount,

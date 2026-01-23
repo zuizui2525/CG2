@@ -18,14 +18,14 @@ void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t
 
     psoManager = std::make_unique<PSOManager>(dxCommon->GetDevice());
     psoManager->Initialize(dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler());
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     imGui = std::make_unique<ImguiManager>();
     imGui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());
 #endif
 }
 
 void Zuizui::Finalize() {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     imGui->Shutdown();
 #endif
     // COMの終了処理
@@ -37,13 +37,13 @@ void Zuizui::Finalize() {
 }
 
 void Zuizui::ImGuiBegin() {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     imGui->Begin();
 #endif
 }
 
 void Zuizui::ImGuiEnd() {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     imGui->End();
 #endif
 }
@@ -55,7 +55,7 @@ void Zuizui::BeginFrame() {
 }
 
 void Zuizui::EndFrame() {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     dxCommon->DrawImGui();
 #endif
     dxCommon->EndFrame();

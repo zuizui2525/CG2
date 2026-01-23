@@ -74,6 +74,7 @@ void App::Initialize() {
 
 void App::Run() {
     // --- ImGui ---
+#ifdef _USEIMGUI
     engine_->ImGuiBegin();
     camera_->ImGuiControl("camera");
     dirLight_->ImGuiControl("dirLight");
@@ -87,6 +88,7 @@ void App::Run() {
     particle_->ImGuiControl("particle");
     sprite_->ImGuiControl("sprite");
     engine_->ImGuiEnd();
+#endif
 
     // --- 更新 ---
     input_->Update();

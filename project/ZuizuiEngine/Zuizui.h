@@ -39,7 +39,7 @@ private:
     std::unique_ptr<DxCommon> dxCommon;
     std::unique_ptr<PSOManager> psoManager;
 
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     std::unique_ptr<class ImguiManager> imGui;
 #endif
 };

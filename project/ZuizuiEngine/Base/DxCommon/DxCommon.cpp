@@ -81,7 +81,7 @@ void DxCommon::PreDraw() {
 }
 
 void DxCommon::DrawImGui() {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
 	ID3D12DescriptorHeap* heaps[] = { srvDescriptorHeap_.Get() };
 	commandList_->SetDescriptorHeaps(1, heaps);
 

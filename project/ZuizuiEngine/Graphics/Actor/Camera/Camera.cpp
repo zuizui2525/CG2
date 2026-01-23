@@ -68,7 +68,7 @@ void Camera::Update() {
 }
 
 void Camera::ImGuiControl(const std::string& name) {
-#ifdef _DEBUG
+#ifdef _USEIMGUI
     // 管理用ウィンドウにチェックボックスを表示
     ImGui::Begin("Camera List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
