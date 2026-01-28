@@ -57,6 +57,7 @@ void App::Initialize() {
 
     skydome_ = std::make_unique<ModelObject>();
     skydome_->Initialize();
+    skydome_->SetLightingMode(0);
     skydome_->SetPosition({ 0.0f, 0.0f, 0.0f });
 
     teapot_ = std::make_unique<ModelObject>();

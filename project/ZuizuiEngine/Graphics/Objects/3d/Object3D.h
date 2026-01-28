@@ -27,12 +27,18 @@ public:
     Transform& GetUVTransform() { return uvTransform_; }
     Material* GetMaterialData() { return materialData_; }
     TransformationMatrix* GetWvpData() { return wvpData_; }
+    int GetLightingMode() const { return materialData_ ? materialData_->enableLighting : 0; }
 
     // Setter
     void SetTransform(Transform transform) { transform_ = transform; }
     void SetScale(Vector3 scale) { transform_.scale = scale; }
     void SetRotate(Vector3 rotate) { transform_.rotate = rotate; }
     void SetPosition(Vector3 position) { transform_.translate = position; }
+    void SetLightingMode(int lightingMode) {
+        if (materialData_) {
+            materialData_->enableLighting = lightingMode;
+        }
+    }
 
 protected:
     // ImGui
