@@ -7,7 +7,7 @@
 class SpotLightObject {
 public:
     // リソースの生成と初期値の設定
-    void Initialize(ID3D12Device* device);
+    void Initialize();
 
     // データの更新（方向の正規化や角度の計算）
     void Update();
@@ -15,22 +15,25 @@ public:
     // デバッグ用のUI操作
     void ImGuiControl(const std::string& name);
 
-    // 描画時に使用するGPUアドレスの取得
-    D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const {
-        return resource_->GetGPUVirtualAddress();
-    }
+    // 実体の参照を返す
+    SpotLight& GetLightData() { return data_; }
 
-    // 生データへのポインタ取得
-    SpotLight* GetLightData() { return lightData_; }
+    // Getter
+    const Vector3& GetPosition() const { return data_.position; }
+    const Vector3& GetDirection() const { return data_.direction; }
+    float GetIntensity() const { return data_.intensity; }
+    float GetAngle() const { return inputAngle_; }
+
+    // Setter
+    void SetPosition(const Vector3& position) { data_.position = position; }
+    void SetDirection(const Vector3& direction) { data_.direction = direction; }
+    void SetIntensity(float intensity) { data_.intensity = intensity; }
+    void SetDistance(float distance) { data_.distance = distance; }
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
-    SpotLight* lightData_ = nullptr;
+    SpotLight data_;
 
-    // 内部調整用変数（度数法で保持）
     float inputAngle_ = 45.0f;
     float inputFalloffStart_ = 30.0f;
-
-    // ImGuiウィンドウの開閉状態
     bool isWindowOpen_ = false;
 };

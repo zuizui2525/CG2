@@ -49,6 +49,21 @@ struct SpotLight
     float padding;
 };
 
+static const int kMaxPointLights = 10;
+static const int kMaxSpotLights = 10;
+
+struct PointLightGroup
+{
+    PointLight lights[kMaxPointLights];
+    int32_t numLights;
+};
+
+struct SpotLightGroup
+{
+    SpotLight lights[kMaxSpotLights];
+    int32_t numLights;
+};
+
 struct PixelShaderOutput
 {
     float32_t4 color : SV_TARGET0;
@@ -58,8 +73,8 @@ struct PixelShaderOutput
 ConstantBuffer<Material> gMaterial : register(b0);
 ConstantBuffer<Camera> gCamera : register(b1);
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b2);
-ConstantBuffer<PointLight> gPointLight : register(b3);
-ConstantBuffer<SpotLight> gSpotLight : register(b4);
+ConstantBuffer<PointLightGroup> gPointLightGroup : register(b3);
+ConstantBuffer<SpotLightGroup> gSpotLightGroup : register(b4);
 
 // --- ヘルパー関数 ---
 // ライティングの共通計算（Lambert or Half-Lambert）
@@ -112,42 +127,47 @@ PixelShaderOutput main(VertexShaderOutput input)
         }
 
         // --- 2.2. 点光源 (Point Light) ---
+        for (int i = 0; i < gPointLightGroup.numLights; ++i)
         {
-            float32_t3 lightVec = input.worldPosition - gPointLight.position;
+            PointLight light = gPointLightGroup.lights[i]; // i番目のライトを取り出す
+    
+            float32_t3 lightVec = input.worldPosition - light.position;
             float dist = length(lightVec);
             float32_t3 L = normalize(-lightVec);
-            float attenuation = pow(saturate(-dist / gPointLight.radius + 1.0f), gPointLight.decay);
 
+            float attenuation = pow(saturate(-dist / light.radius + 1.0f), light.decay);
             float NdotL = dot(normal, L);
             float cos = CalculateCos(NdotL, gMaterial.enableLighting);
 
-            totalDiffuse += (materialColor * gPointLight.color.rgb * cos * gPointLight.intensity) * attenuation;
+            totalDiffuse += (materialColor * light.color.rgb * cos * light.intensity) * attenuation;
 
             float32_t3 halfVector = normalize(L + toEye);
             float spec = pow(saturate(dot(normal, halfVector)), gMaterial.shininess);
-            totalSpecular += (gPointLight.color.rgb * gPointLight.intensity * spec) * attenuation;
+            totalSpecular += (light.color.rgb * light.intensity * spec) * attenuation;
         }
 
         // --- 2.3. スポットライト (Spot Light) ---
+        for (int j = 0; j < gSpotLightGroup.numLights; ++j)
         {
-            float32_t3 lightVec = input.worldPosition - gSpotLight.position;
+            SpotLight light = gSpotLightGroup.lights[j]; // j番目のライトを取り出す
+    
+            float32_t3 lightVec = input.worldPosition - light.position;
             float dist = length(lightVec);
             float32_t3 L = normalize(-lightVec);
 
-            // 減衰計算（距離・角度）
-            float distAtten = pow(saturate(-dist / gSpotLight.distance + 1.0f), gSpotLight.decay);
-            float cosDiffuse = dot(L, -gSpotLight.direction);
-            float angleAtten = saturate((cosDiffuse - gSpotLight.cosAngle) / (gSpotLight.cosFalloffStart - gSpotLight.cosAngle));
+            float distAtten = pow(saturate(-dist / light.distance + 1.0f), light.decay);
+            float cosDiffuse = dot(L, -light.direction);
+            float angleAtten = saturate((cosDiffuse - light.cosAngle) / (light.cosFalloffStart - light.cosAngle));
             float totalAtten = distAtten * angleAtten;
 
             float NdotL = dot(normal, L);
             float cos = CalculateCos(NdotL, gMaterial.enableLighting);
 
-            totalDiffuse += (materialColor * gSpotLight.color.rgb * cos * gSpotLight.intensity) * totalAtten;
+            totalDiffuse += (materialColor * light.color.rgb * cos * light.intensity) * totalAtten;
 
             float32_t3 halfVector = normalize(L + toEye);
             float spec = pow(saturate(dot(normal, halfVector)), gMaterial.shininess);
-            totalSpecular += (gSpotLight.color.rgb * gSpotLight.intensity * spec) * totalAtten;
+            totalSpecular += (light.color.rgb * light.intensity * spec) * totalAtten;
         }
 
         // 最終色の合成

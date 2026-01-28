@@ -3,14 +3,14 @@
 class Zuizui;
 class Camera;
 class DirectionalLightObject;
-class PointLightObject;
-class SpotLightObject;
+class LightManager;
 class TextureManager;
 class ModelManager;
 
 class EngineResource {
 public:
     static void SetEngine(Zuizui* engine) { sEngine = engine; }
+    static Zuizui* GetEngine();
 protected:
     static Zuizui* sEngine;
 };
@@ -18,6 +18,7 @@ protected:
 class TextureResource {
 public:
     static void SetTextureManager(TextureManager* texMgr) { sTexMgr = texMgr; }
+    static TextureManager* GetTextureManager();
 protected:
     static TextureManager* sTexMgr;
 };
@@ -25,6 +26,7 @@ protected:
 class CameraResource {
 public:
     static void SetCamera(Camera* camera) { sCamera = camera; }
+    static Camera* GetCamera();
 protected:
     static Camera* sCamera;
 };
@@ -32,17 +34,18 @@ protected:
 class LightResource {
 public:
     static void SetLight(DirectionalLightObject* light) { sDirLight = light; }
-    static void SetPointLight(PointLightObject* light) { sPointLight = light; }
-    static void SetSpotLight(SpotLightObject* light) { sSpotLight = light; }
+    static DirectionalLightObject* GetLight();
+    static void SetLightManager(LightManager* lightMgr) { sLightMgr = lightMgr; }
+    static LightManager* GetLightManager();
 protected:
     static DirectionalLightObject* sDirLight;
-    static PointLightObject* sPointLight;
-    static SpotLightObject* sSpotLight;
+    static LightManager* sLightMgr;
 };
 
 class ModelResource {
 public:
     static void SetModelManager(ModelManager* modelMgr) { sModelMgr = modelMgr; }
+    static ModelManager* GetModelManager();
 protected:
     static ModelManager* sModelMgr;
 };

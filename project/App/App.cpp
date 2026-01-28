@@ -4,30 +4,29 @@ void App::Initialize() {
     // システム
     engine_ = Zuizui::GetInstance();
     engine_->Initialize(L"LE2B_02_イトウカズイ");
+    EngineResource::SetEngine(engine_);
 
     input_ = std::make_unique<Input>();
-    camera_ = std::make_unique<Camera>();
-    dirLight_ = std::make_unique<DirectionalLightObject>();
-    pointLight_ = std::make_unique<PointLightObject>();
-    spotLight_ = std::make_unique<SpotLightObject>();
-    texMgr_ = std::make_unique<TextureManager>();
-    modelMgr_ = std::make_unique<ModelManager>();
-
     input_->Initialize(engine_->GetWindow()->GetInstance(), engine_->GetWindow()->GetHWND());
-    camera_->Initialize(engine_->GetDevice(), input_.get());
-    dirLight_->Initialize(engine_->GetDevice());
-    pointLight_->Initialize(engine_->GetDevice());
-    spotLight_->Initialize(engine_->GetDevice());
-    texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
-    modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
 
-    // 静的リソース（シングルトン的な役割）への登録
-    EngineResource::SetEngine(engine_);
-    TextureResource::SetTextureManager(texMgr_.get());
+    camera_ = std::make_unique<Camera>();
+    camera_->Initialize(engine_->GetDevice(), input_.get());
     CameraResource::SetCamera(camera_.get());
+
+    dirLight_ = std::make_unique<DirectionalLightObject>();
+    dirLight_->Initialize(engine_->GetDevice());
     LightResource::SetLight(dirLight_.get());
-    LightResource::SetPointLight(pointLight_.get());
-    LightResource::SetSpotLight(spotLight_.get());
+
+    lightManager_ = std::make_unique<LightManager>();
+    lightManager_->Initialize();
+    LightResource::SetLightManager(lightManager_.get());
+
+    texMgr_ = std::make_unique<TextureManager>();
+    texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
+    TextureResource::SetTextureManager(texMgr_.get());
+
+    modelMgr_ = std::make_unique<ModelManager>();
+    modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
     ModelResource::SetModelManager(modelMgr_.get());
 
     // テクスチャ
@@ -42,6 +41,19 @@ void App::Initialize() {
     modelMgr_->LoadModel("terrain", "resources/obj/terrain/terrain.obj");
 
     // ゲームオブジェクト
+    pointLight_ = std::make_unique<PointLightObject>();
+    pointLight_->Initialize();
+    lightManager_->AddPointLight(pointLight_.get());
+
+    pointLight2_ = std::make_unique<PointLightObject>();
+    pointLight2_->Initialize();
+    pointLight2_->SetPosition({ -5.0f, 2.0f, 0.0f });
+    lightManager_->AddPointLight(pointLight2_.get());
+
+    spotLight_ = std::make_unique<SpotLightObject>();
+    spotLight_->Initialize();
+    lightManager_->AddSpotLight(spotLight_.get());
+
     teapot_ = std::make_unique<ModelObject>();
     teapot_->Initialize();
     teapot_->SetPosition({ 0.0f, 0.0f, 0.0f });
@@ -79,6 +91,7 @@ void App::Run() {
     camera_->ImGuiControl("camera");
     dirLight_->ImGuiControl("dirLight");
     pointLight_->ImGuiControl("pointLight");
+    pointLight2_->ImGuiControl("pointLight2");
     spotLight_->ImGuiControl("spotLight");
     teapot_->ImGuiControl("teapot");
     bunny_->ImGuiControl("bunny");
@@ -94,7 +107,9 @@ void App::Run() {
     input_->Update();
     camera_->Update();
     dirLight_->Update();
+    lightManager_->Update();
     pointLight_->Update();
+    pointLight2_->Update();
     spotLight_->Update();
     teapot_->Update();
     bunny_->Update();

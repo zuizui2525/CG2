@@ -2,8 +2,7 @@
 #include "Zuizui.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
+#include "LightManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "Matrix.h"
@@ -48,11 +47,10 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(3, sDirLight->GetGPUVirtualAddress());
-    if (sPointLight) {
-        commandList->SetGraphicsRootConstantBufferView(4, sPointLight->GetGPUVirtualAddress());
-    }
-    if (sSpotLight) {
-        commandList->SetGraphicsRootConstantBufferView(5, sSpotLight->GetGPUVirtualAddress());
+    auto lightMgr = LightResource::GetLightManager();
+    if (lightMgr) {
+        commandList->SetGraphicsRootConstantBufferView(4, lightMgr->GetPointLightGroupAddress());
+        commandList->SetGraphicsRootConstantBufferView(5, lightMgr->GetSpotLightGroupAddress());
     }
     // 指定されたキーでテクスチャ取得
     commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
