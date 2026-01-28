@@ -1,7 +1,6 @@
 #include "ModelObject.h"
 #include "Zuizui.h"
 #include "Camera.h"
-#include "DirectionalLight.h"
 #include "LightManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
@@ -35,25 +34,25 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
    
     auto modelData = sModelMgr->GetModelData(modelKey);
     assert(modelData);
-
-    auto commandList = sEngine->GetDxCommon()->GetCommandList();
-    commandList->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
-    commandList->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Object3D"));
-
-    // マネージャが持っているVBVを使用
+    // コマンドリスト
+    auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
+    // パイプラインの選択
+    commandList->SetGraphicsRootSignature(EngineResource::GetEngine()->GetPSOManager()->GetRootSignature("Object3D"));
+    commandList->SetPipelineState(EngineResource::GetEngine()->GetPSOManager()->GetPSO("Object3D"));
+    // VBV設定
     commandList->IASetVertexBuffers(0, 1, &modelData->vbv);
-
+    // 定数バッファ設定
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(3, sDirLight->GetGPUVirtualAddress());
     auto lightMgr = LightResource::GetLightManager();
     if (lightMgr) {
+        commandList->SetGraphicsRootConstantBufferView(3, lightMgr->GetDirectionalLightGroupAddress());
         commandList->SetGraphicsRootConstantBufferView(4, lightMgr->GetPointLightGroupAddress());
         commandList->SetGraphicsRootConstantBufferView(5, lightMgr->GetSpotLightGroupAddress());
     }
     // 指定されたキーでテクスチャ取得
     commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
-
+    // DrawInstanced
     commandList->DrawInstanced((UINT)modelData->vertices.size(), 1, 0, 0);
 }

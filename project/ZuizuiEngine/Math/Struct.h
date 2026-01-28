@@ -143,18 +143,26 @@ struct SpotLight {
     float padding;             //!< 16バイトアライメント用パディング
 };
 
-// 追加：最大数の定義
+// 最大数の定義
+static const int kMaxDirectionalLights = 2;
 static const int kMaxPointLights = 10;
 static const int kMaxSpotLights = 10;
 
-// 追加：点光源をまとめる箱
+// 平行光源をまとめる箱
+struct DirectionalLightGroup {
+    DirectionalLight lights[kMaxDirectionalLights]; // 配列
+    int32_t numLights;                              // 有効なライト数
+    float padding[3];                               // アライメント調整
+};
+
+// 点光源をまとめる箱
 struct PointLightGroup {
     PointLight lights[kMaxPointLights]; // 10個の配列
     int32_t numLights;                  // 実際に使う数
     float padding[3];                   // 16バイトアライメントのための隙間
 };
 
-// 追加：スポットライトをまとめる箱
+// スポットライトをまとめる箱
 struct SpotLightGroup {
     SpotLight lights[kMaxSpotLights];   // 10個の配列
     int32_t numLights;                  // 実際に使う数

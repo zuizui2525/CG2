@@ -6,7 +6,7 @@
 
 class PointLightObject {
 public:
-    // 初期化（デバイス渡し）
+    // 初期化
     void Initialize();
 
     // 毎フレーム更新

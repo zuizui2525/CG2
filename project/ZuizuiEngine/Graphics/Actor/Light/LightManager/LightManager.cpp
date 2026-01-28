@@ -6,6 +6,10 @@
 void LightManager::Initialize() {
     auto device = EngineResource::GetEngine()->GetDevice();
 
+    // 平行光源グループのバッファ作成
+    directionalLightResource_ = CreateBufferResource(device, sizeof(DirectionalLightGroup));
+    directionalLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData_));
+
     // 点光源グループのバッファ作成
     pointLightResource_ = CreateBufferResource(device, sizeof(PointLightGroup));
     pointLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData_));
@@ -16,6 +20,12 @@ void LightManager::Initialize() {
 }
 
 void LightManager::Update() {
+    // 平行光源のデータを集計
+    directionalLightData_->numLights = static_cast<int32_t>((std::min)((int)directionalLights_.size(), kMaxDirectionalLights));
+    for (int i = 0; i < directionalLightData_->numLights; ++i) {
+        directionalLightData_->lights[i] = directionalLights_[i]->GetLightData();
+    }
+
     // 点光源のデータを集計
     pointLightData_->numLights = static_cast<int32_t>((std::min)((int)pointLights_.size(), kMaxPointLights));
     for (int i = 0; i < pointLightData_->numLights; ++i) {
@@ -24,7 +34,7 @@ void LightManager::Update() {
 
     // スポットライトのデータを集計
     spotLightData_->numLights = static_cast<int32_t>((std::min)((int)spotLights_.size(), kMaxSpotLights));
-    for (int j = 0; j < spotLightData_->numLights; ++j) {
-        spotLightData_->lights[j] = spotLights_[j]->GetLightData();
+    for (int i = 0; i < spotLightData_->numLights; ++i) {
+        spotLightData_->lights[i] = spotLights_[i]->GetLightData();
     }
 }

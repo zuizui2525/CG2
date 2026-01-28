@@ -1,24 +1,15 @@
 #include "DirectionalLight.h"
 #include "Matrix.h"
 
-void DirectionalLightObject::Initialize(ID3D12Device* device) {
-    // リソースを作成
-    resource_ = CreateBufferResource(device, sizeof(DirectionalLight));
-
-    // マップしてポインタを取得
-    resource_->Map(0, nullptr, reinterpret_cast<void**>(&lightData_));
-
-    // 初期値
-    lightData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    lightData_->direction = { 0.0f, -1.0f, 0.0f };
-    lightData_->intensity = 1.0f;
-
-    // Unmap はしない（ずっと書き換えるため）
+void DirectionalLightObject::Initialize() {
+    data_.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    data_.direction = { 0.0f, -1.0f, 0.0f };
+    data_.intensity = 1.0f;
 }
 
 void DirectionalLightObject::Update() {
     // 毎フレーム方向を正規化して安全に保つ
-    lightData_->direction = Math::Normalize(lightData_->direction);
+    data_.direction = Math::Normalize(data_.direction);
 }
 
 void DirectionalLightObject::ImGuiControl(const std::string& name) {
@@ -31,9 +22,9 @@ void DirectionalLightObject::ImGuiControl(const std::string& name) {
             std::string label = "##" + name;
 
             if (ImGui::CollapsingHeader(("Directional Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::ColorEdit4(("Color" + label).c_str(), &lightData_->color.x);
-                ImGui::DragFloat3(("Direction" + label).c_str(), &lightData_->direction.x, 0.01f);
-                ImGui::DragFloat(("Intensity" + label).c_str(), &lightData_->intensity, 0.01f);
+                ImGui::ColorEdit4(("Color" + label).c_str(), &data_.color.x);
+                ImGui::DragFloat3(("Direction" + label).c_str(), &data_.direction.x, 0.01f);
+                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f);
             }
         }
         ImGui::End();

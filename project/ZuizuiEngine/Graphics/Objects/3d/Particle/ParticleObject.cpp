@@ -3,7 +3,7 @@
 #include "Matrix.h" 
 #include "Zuizui.h"
 #include "Camera.h"
-#include "DirectionalLight.h"
+#include "LightManager.h"
 #include "TextureManager.h"
 #include "Collision.h"
 #include <stdexcept>
@@ -214,18 +214,26 @@ void ParticleObject::Update() {
 
 void ParticleObject::Draw(const std::string& textureKey, bool draw) {
     if (!draw) return;
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Particle"));
-    sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Particle"));
-    sEngine->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbv_);
-
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sDirLight->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(3, sTexMgr->GetGpuHandle(textureKey));
-
+    // コマンドリスト
+    auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
+    // パイプラインの選択
+    commandList->SetGraphicsRootSignature(EngineResource::GetEngine()->GetPSOManager()->GetRootSignature("Particle"));
+    commandList->SetPipelineState(EngineResource::GetEngine()->GetPSOManager()->GetPSO("Particle"));
+    // VBV設定
+    commandList->IASetVertexBuffers(0, 1, &vbv_);
+    // 定数バッファ設定
+    commandList->SetGraphicsRootDescriptorTable(0, instanceSrvHandleGPU_);
+    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    auto lightMgr = LightResource::GetLightManager();
+    if (lightMgr) {
+        commandList->SetGraphicsRootConstantBufferView(2, lightMgr->GetDirectionalLightGroupAddress());
+    }
+    // 指定されたキーでテクスチャ取得
+    commandList->SetGraphicsRootDescriptorTable(3, sTexMgr->GetGpuHandle(textureKey));
+    // DrawInstanced
     if (draw && numInstance_ > 0) {
         UINT vertexCount = (UINT)vertices_.size();
-        sEngine->GetDxCommon()->GetCommandList()->DrawInstanced(vertexCount, numInstance_, 0, 0);
+        commandList->DrawInstanced(vertexCount, numInstance_, 0, 0);
     }
 }
 

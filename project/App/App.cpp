@@ -13,10 +13,6 @@ void App::Initialize() {
     camera_->Initialize(engine_->GetDevice(), input_.get());
     CameraResource::SetCamera(camera_.get());
 
-    dirLight_ = std::make_unique<DirectionalLightObject>();
-    dirLight_->Initialize(engine_->GetDevice());
-    LightResource::SetLight(dirLight_.get());
-
     lightManager_ = std::make_unique<LightManager>();
     lightManager_->Initialize();
     LightResource::SetLightManager(lightManager_.get());
@@ -42,6 +38,16 @@ void App::Initialize() {
     modelMgr_->LoadModel("skydome", "resources/obj/skydome/skydome.obj");
 
     // ゲームオブジェクト
+    dirLight_ = std::make_unique<DirectionalLightObject>();
+    dirLight_->Initialize();
+    lightManager_->AddDirectionalLight(dirLight_.get());
+
+    dirLight2_ = std::make_unique<DirectionalLightObject>();
+    dirLight2_->Initialize();
+    dirLight2_->GetLightData().color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    dirLight2_->GetLightData().direction = { 1.0f, -1.0f, 0.0f };
+    lightManager_->AddDirectionalLight(dirLight2_.get());
+
     pointLight_ = std::make_unique<PointLightObject>();
     pointLight_->Initialize();
     lightManager_->AddPointLight(pointLight_.get());
@@ -96,6 +102,7 @@ void App::Run() {
     engine_->ImGuiBegin();
     camera_->ImGuiControl("camera");
     dirLight_->ImGuiControl("dirLight");
+    dirLight2_->ImGuiControl("dirLight2");
     pointLight_->ImGuiControl("pointLight");
     pointLight2_->ImGuiControl("pointLight2");
     spotLight_->ImGuiControl("spotLight");
@@ -113,8 +120,9 @@ void App::Run() {
     // --- 更新 ---
     input_->Update();
     camera_->Update();
-    dirLight_->Update();
     lightManager_->Update();
+    dirLight_->Update();
+    dirLight2_->Update();
     pointLight_->Update();
     pointLight2_->Update();
     spotLight_->Update();

@@ -3,9 +3,6 @@
 #include <vector>
 #include "Zuizui.h"
 #include "Camera.h"
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
 #include "LightManager.h"
 #include "Input.h"
 #include "TextureManager.h"
@@ -32,15 +29,17 @@ private:
     // マネージャ・リソース
     std::unique_ptr<Input> input_;
     std::unique_ptr<Camera> camera_;
-    std::unique_ptr<DirectionalLightObject> dirLight_;
     std::unique_ptr<LightManager> lightManager_;
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
 
     // ゲームオブジェクト
+    std::unique_ptr<DirectionalLightObject> dirLight_;
+    std::unique_ptr<DirectionalLightObject> dirLight2_;
     std::unique_ptr<PointLightObject> pointLight_;
     std::unique_ptr<PointLightObject> pointLight2_;
     std::unique_ptr<SpotLightObject> spotLight_;
+
     std::unique_ptr<ModelObject> skydome_;
     std::unique_ptr<ModelObject> teapot_;
     std::unique_ptr<ModelObject> bunny_;

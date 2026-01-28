@@ -6,8 +6,8 @@
 
 class DirectionalLightObject {
 public:
-    // 初期化（デバイス渡し）
-    void Initialize(ID3D12Device* device);
+    // 初期化
+    void Initialize();
 
     // 毎フレーム更新（正規化とか）
     void Update();
@@ -15,18 +15,11 @@ public:
     // ImGui操作
     void ImGuiControl(const std::string& name);
 
-    // GPU仮想アドレスを取得（描画時に使う）
-    D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const {
-        return resource_->GetGPUVirtualAddress();
-    }
-
-    // CPU側のライトデータへのアクセス
-    DirectionalLight* GetLightData() { return lightData_; }
+    // 実体の参照を返す
+    DirectionalLight& GetLightData() { return data_; }
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource_; // GPUバッファ
-    DirectionalLight* lightData_ = nullptr;           // マップ先
+    DirectionalLight data_;
 
-    // ImGuiウィンドウの開閉状態
     bool isWindowOpen_ = false;
 };

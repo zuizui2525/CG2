@@ -44,29 +44,29 @@ void SphereObject::Update() {
 
 void SphereObject::Draw(const std::string& textureKey, bool draw) {
     if (!draw) return;
-
+    // コマンドリスト
+    auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
     // パイプラインの選択
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
-    sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Object3D"));
-
+    commandList->SetGraphicsRootSignature(EngineResource::GetEngine()->GetPSOManager()->GetRootSignature("Object3D"));
+    commandList->SetPipelineState(EngineResource::GetEngine()->GetPSOManager()->GetPSO("Object3D"));
     // VBV設定
-    sEngine->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView_);
-    sEngine->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
-
+    commandList->IASetVertexBuffers(0, 1, &vbView_);
+    commandList->IASetIndexBuffer(&ibView_);
     // 定数バッファ設定
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sDirLight->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
     auto lightMgr = LightResource::GetLightManager();
     if (lightMgr) {
-        sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, lightMgr->GetPointLightGroupAddress());
-        sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, lightMgr->GetSpotLightGroupAddress());
+        commandList->SetGraphicsRootConstantBufferView(3, lightMgr->GetDirectionalLightGroupAddress());
+        commandList->SetGraphicsRootConstantBufferView(4, lightMgr->GetPointLightGroupAddress());
+        commandList->SetGraphicsRootConstantBufferView(5, lightMgr->GetSpotLightGroupAddress());
     }
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
-
+    // 指定されたキーでテクスチャ取得
+    commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
+    // DrawInstanced
     uint32_t indexCount = subdivision_ * subdivision_ * 6;
-    sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+    commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 }
 
 void SphereObject::CreateMesh() {

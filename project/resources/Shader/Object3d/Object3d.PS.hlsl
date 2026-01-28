@@ -49,8 +49,15 @@ struct SpotLight
     float padding;
 };
 
+static const int kMaxDirectionalLights = 2;
 static const int kMaxPointLights = 10;
 static const int kMaxSpotLights = 10;
+
+struct DirectionalLightGroup
+{
+    DirectionalLight lights[kMaxDirectionalLights];
+    int32_t numLights;
+};
 
 struct PointLightGroup
 {
@@ -72,7 +79,7 @@ struct PixelShaderOutput
 // --- 定数バッファ ---
 ConstantBuffer<Material> gMaterial : register(b0);
 ConstantBuffer<Camera> gCamera : register(b1);
-ConstantBuffer<DirectionalLight> gDirectionalLight : register(b2);
+ConstantBuffer<DirectionalLightGroup> gDirectionalLightGroup : register(b2);
 ConstantBuffer<PointLightGroup> gPointLightGroup : register(b3);
 ConstantBuffer<SpotLightGroup> gSpotLightGroup : register(b4);
 
@@ -114,16 +121,20 @@ PixelShaderOutput main(VertexShaderOutput input)
         float32_t3 totalSpecular = float32_t3(0.0f, 0.0f, 0.0f);
 
         // --- 2.1. 平行光源 (Directional Light) ---
+        for (int i = 0; i < gDirectionalLightGroup.numLights; ++i)
         {
-            float32_t3 L = normalize(-gDirectionalLight.direction);
+            DirectionalLight light = gDirectionalLightGroup.lights[i];
+   
+            float32_t3 L = normalize(-light.direction);
+    
             float NdotL = dot(normal, L);
             float cos = CalculateCos(NdotL, gMaterial.enableLighting);
-
-            totalDiffuse += materialColor * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-
+    
+            totalDiffuse += materialColor * light.color.rgb * cos * light.intensity;
+    
             float32_t3 halfVector = normalize(L + toEye);
             float spec = pow(saturate(dot(normal, halfVector)), gMaterial.shininess);
-            totalSpecular += gDirectionalLight.color.rgb * gDirectionalLight.intensity * spec;
+            totalSpecular += light.color.rgb * light.intensity * spec;
         }
 
         // --- 2.2. 点光源 (Point Light) ---
