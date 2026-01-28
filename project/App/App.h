@@ -41,6 +41,7 @@ private:
     std::unique_ptr<PointLightObject> pointLight_;
     std::unique_ptr<PointLightObject> pointLight2_;
     std::unique_ptr<SpotLightObject> spotLight_;
+    std::unique_ptr<ModelObject> skydome_;
     std::unique_ptr<ModelObject> teapot_;
     std::unique_ptr<ModelObject> bunny_;
     std::unique_ptr<ModelObject> terrain_;

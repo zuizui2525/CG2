@@ -39,6 +39,7 @@ void App::Initialize() {
     modelMgr_->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
     modelMgr_->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
     modelMgr_->LoadModel("terrain", "resources/obj/terrain/terrain.obj");
+    modelMgr_->LoadModel("skydome", "resources/obj/skydome/skydome.obj");
 
     // ゲームオブジェクト
     pointLight_ = std::make_unique<PointLightObject>();
@@ -53,6 +54,10 @@ void App::Initialize() {
     spotLight_ = std::make_unique<SpotLightObject>();
     spotLight_->Initialize();
     lightManager_->AddSpotLight(spotLight_.get());
+
+    skydome_ = std::make_unique<ModelObject>();
+    skydome_->Initialize();
+    skydome_->SetPosition({ 0.0f, 0.0f, 0.0f });
 
     teapot_ = std::make_unique<ModelObject>();
     teapot_->Initialize();
@@ -93,6 +98,7 @@ void App::Run() {
     pointLight_->ImGuiControl("pointLight");
     pointLight2_->ImGuiControl("pointLight2");
     spotLight_->ImGuiControl("spotLight");
+    skydome_->ImGuiControl("skydome");
     teapot_->ImGuiControl("teapot");
     bunny_->ImGuiControl("bunny");
     terrain_->ImGuiControl("terrain");
@@ -111,6 +117,7 @@ void App::Run() {
     pointLight_->Update();
     pointLight2_->Update();
     spotLight_->Update();
+    skydome_->Update();
     teapot_->Update();
     bunny_->Update();
     terrain_->Update();
@@ -121,6 +128,7 @@ void App::Run() {
 
     // --- 描画 ---
     engine_->BeginFrame();
+    skydome_->Draw("skydome", "skydome");
     terrain_->Draw("terrain", "terrain");
     teapot_->Draw("teapot", "teapot");
     bunny_->Draw("bunny", "bunny");
