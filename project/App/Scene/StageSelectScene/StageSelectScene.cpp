@@ -4,6 +4,8 @@ StageSelectScene::StageSelectScene() {
 }
 
 StageSelectScene::~StageSelectScene() {
+	audio_->Unload(clickSE_);
+	audio_->Unload(moveSE_);
 }
 
 void StageSelectScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
@@ -37,6 +39,11 @@ void StageSelectScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, Te
 
 	stageNum_ = 1;
 	stageNumName_ = "stage1";
+
+	audio_ = std::make_unique<Audio>();
+	audio_->Initialize();
+	clickSE_ = audio_->LoadSound("resources/AL/SE/click.mp3");
+	moveSE_ = audio_->LoadSound("resources/AL/SE/move.mp3");
 }
 
 void StageSelectScene::Update() {
@@ -46,13 +53,16 @@ void StageSelectScene::Update() {
 	if (input_->Trigger(DIK_SPACE)) {
 		selectedStageNum_ = stageNum_;
 		nextScene_ = SceneLabel::Play;
+		audio_->PlaySoundW(clickSE_);
 		isFinish_ = true;
 	}
 
 	if (input_->Trigger(DIK_D)) {
+		audio_->PlaySoundW(moveSE_);
 		stageNum_++;
 	}
 	if (input_->Trigger(DIK_A)) {
+		audio_->PlaySoundW(moveSE_);
 		stageNum_--;
 	}
 

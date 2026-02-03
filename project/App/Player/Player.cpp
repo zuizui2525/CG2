@@ -8,13 +8,25 @@
 #endif
 
 Player::Player() {}
-Player::~Player() {}
+Player::~Player() {
+    audio_->Unload(jumpSE_);
+    audio_->Unload(attackSE_);
+    audio_->Unload(deadSE_);
+    audio_->Unload(dead2SE_);
+}
 
 void Player::Initialize(DxCommon* dxCommon, TextureManager* textureManager, Input* input) {
     input_ = input;
     model_ = std::make_unique<ModelObject>(dxCommon->GetDevice(), "resources/AL/player/player.obj", position_);
     rotation_.y = M_PI / 2.0f;
     textureManager->LoadTexture("player", model_->GetModelData()->material.textureFilePath);
+
+    audio_ = std::make_unique<Audio>();
+    audio_->Initialize();
+    jumpSE_ = audio_->LoadSound("resources/AL/SE/jump.mp3");
+    attackSE_ = audio_->LoadSound("resources/AL/SE/attack.mp3");
+    deadSE_ = audio_->LoadSound("resources/AL/SE/dead.mp3");
+    dead2SE_ = audio_->LoadSound("resources/AL/SE/dead2.mp3");
 }
 
 void Player::Update(Camera* camera) {
@@ -76,7 +88,10 @@ void Player::BehaviorRootUpdate() {
     contactWithAWall(info);
     SwitchingInstallationStatus(info);
 
-    if (input_->Trigger(DIK_LSHIFT) && !input_->Press(DIK_SPACE)) behaviorRequest_ = Behavior::kAttack;
+    if (input_->Trigger(DIK_LSHIFT) && !input_->Press(DIK_SPACE)) {
+        behaviorRequest_ = Behavior::kAttack;
+        audio_->PlaySoundW(attackSE_);
+    }
 }
 
 void Player::BehaviorAttackInitialize() {
@@ -138,6 +153,7 @@ void Player::HandleMoveInput() {
 
         // 地上ジャンプ
         if (input_->Trigger(DIK_SPACE) && !input_->Press(DIK_LSHIFT)) {
+            audio_->PlaySoundW(jumpSE_);
             velocity_.y = kJumpAcceleration;
             onGround_ = false;
         }
@@ -165,6 +181,7 @@ void Player::HandleMoveInput() {
 
         // 空中でのジャンプ入力
         if (input_->Trigger(DIK_SPACE)) {
+            audio_->PlaySoundW(jumpSE_);
             // 1. まず壁ジャンプができるか確認
             CollisionMapInfo wallCheck;
             // 左右に少しだけ判定を出して壁があるか見る
@@ -326,6 +343,8 @@ void Player::Draw(DxCommon* dxCommon, TextureManager* textureManager, PSOManager
 void Player::StartDead() {
     if (behavior_ == Behavior::kDead) return;
     behavior_ = Behavior::kDead;
+    audio_->PlaySoundW(deadSE_);
+    audio_->PlaySoundW(dead2SE_);
     deadTimer_ = 0.0f;
     // 死亡時の初期速度（上に少し跳ねる）
     velocity_ = { 0.0f, 0.1f, 0.0f };

@@ -4,6 +4,7 @@ ClearScene::ClearScene() {
 }
 
 ClearScene::~ClearScene() {
+	audio_->Unload(soundData_);
 }
 
 void ClearScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
@@ -32,6 +33,10 @@ void ClearScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureM
 	// Skydomeの生成と初期化
 	skydome_ = std::make_unique<Skydome>();
 	skydome_->Initialize(dxCommon_, textureManager_);
+
+	audio_ = std::make_unique<Audio>();
+	audio_->Initialize();
+	soundData_ = audio_->LoadSound("resources/AL/SE/click.mp3");
 }
 
 void ClearScene::Update() {
@@ -40,6 +45,7 @@ void ClearScene::Update() {
 
 	if (input_->Trigger(DIK_SPACE)) {
 		nextScene_ = SceneLabel::StageSelect;
+		audio_->PlaySoundW(soundData_);
 		isFinish_ = true;
 	}
 

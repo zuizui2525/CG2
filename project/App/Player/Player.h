@@ -6,6 +6,7 @@
 #include "PSOManager.h"
 #include "DirectionalLight.h"
 #include "Input.h"
+#include "Audio.h"
 #include <memory>
 #include <vector>
 
@@ -101,4 +102,10 @@ private:
     bool isDead_ = false;
     float deadTimer_ = 0.0f;
     static inline const float kMaxDeadTime = 1.0f;
+
+    std::unique_ptr<Audio> audio_;
+    SoundData jumpSE_;
+    SoundData attackSE_;
+    SoundData deadSE_;
+    SoundData dead2SE_;
 };

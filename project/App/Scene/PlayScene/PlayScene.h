@@ -11,6 +11,7 @@
 #include "CameraControl.h"
 #include "Clear.h"
 #include "Enemy.h"
+#include "Audio.h"
 #include <memory>
 #include <list>
 
@@ -59,4 +60,7 @@ private:
 
 	// 描画フラグ
 	bool drawModel_ = true;
+
+	std::unique_ptr<Audio> audio_;
+	SoundData clearSE_;
 };

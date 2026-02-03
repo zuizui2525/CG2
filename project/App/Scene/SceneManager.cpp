@@ -8,14 +8,17 @@ SceneManager::SceneManager() {
     playScene_ = std::make_unique<PlayScene>();
     clearScene_ = std::make_unique<ClearScene>();
     gameOverScene_ = std::make_unique<GameOverScene>();
-    currentScene_ = playScene_.get();
+    currentScene_ = titleScene_.get(); // 初期シーンをTitleに設定
     audio_ = std::make_unique<Audio>();
 }
 
-SceneManager::~SceneManager() {}
+SceneManager::~SceneManager() {
+    audio_->StopSound(soundData_);
+    audio_->Unload(soundData_);
+}
 
 void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
-    // 基盤システムのポインタを保存しておく
+    // 基盤システムのポインタを保存
     dxCommon_ = dxCommon;
     psoManager_ = psoManager;
     textureManager_ = textureManager;
@@ -23,60 +26,65 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
 
     audio_->Initialize();
 
-    // 引数で初期化のシーンを選択
+    // 起動時のシーン判別
     switch (scene) {
-    case SceneLabel::Title:
-        currentScene_ = titleScene_.get();
-        soundData_ = audio_->LoadSound("resources/AL/BGM/title.mp3");
-        break;
-    case SceneLabel::StageSelect:
-        currentScene_ = stageSelectScene_.get();
-        soundData_ = audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
-        break;
-    case SceneLabel::Play:
-        currentScene_ = playScene_.get();
-        soundData_ = audio_->LoadSound("resources/AL/BGM/game.mp3");
-        break;
-    case SceneLabel::Clear:
-        currentScene_ = clearScene_.get();
-        soundData_ = audio_->LoadSound("resources/AL/BGM/clear.mp3");
-        break;
-    case SceneLabel::Gameover:
-        currentScene_ = gameOverScene_.get();
-        soundData_ = audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
-        break;
+    case SceneLabel::Title:       currentScene_ = titleScene_.get(); break;
+    case SceneLabel::StageSelect: currentScene_ = stageSelectScene_.get(); break;
+    case SceneLabel::Play:        currentScene_ = playScene_.get(); break;
+    case SceneLabel::Clear:       currentScene_ = clearScene_.get(); break;
+    case SceneLabel::Gameover:    currentScene_ = gameOverScene_.get(); break;
     }
 
-    // 現在のシーンに基盤を渡して初期化
+    // BGMの再生
+    ChangeBGM(scene);
+
+    // 現在のシーンの初期化
     currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
 }
 
 void SceneManager::Update() {
     currentScene_->Update();
-    
+
     // シーン切り替えフラグが立っていた場合
     if (currentScene_->GetIsFinish()) {
-        switch (currentScene_->GetNextScene()) {
-        case SceneLabel::Title:
-            currentScene_ = titleScene_.get();
-            break;
-        case SceneLabel::StageSelect:
-            currentScene_ = stageSelectScene_.get();
-            break;
-        case SceneLabel::Play:
-            currentScene_ = playScene_.get();
-            break;
-        case SceneLabel::Clear:
-            currentScene_ = clearScene_.get();
-            break;
-        case SceneLabel::Gameover:
-            currentScene_ = gameOverScene_.get();
-            break;
+        SceneLabel nextScene = currentScene_->GetNextScene();
+
+        // 次のシーンインスタンスに切り替え
+        switch (nextScene) {
+        case SceneLabel::Title:       currentScene_ = titleScene_.get(); break;
+        case SceneLabel::StageSelect: currentScene_ = stageSelectScene_.get(); break;
+        case SceneLabel::Play:        currentScene_ = playScene_.get(); break;
+        case SceneLabel::Clear:       currentScene_ = clearScene_.get(); break;
+        case SceneLabel::Gameover:    currentScene_ = gameOverScene_.get(); break;
         }
 
-        // 次のシーンも同じ基盤システムで初期化する
+        // BGMの切り替え（停止・解放・読み込み・再生を一括で行う）
+        ChangeBGM(nextScene);
+
+        // 次のシーンを初期化
         currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
-        audio_->StopSound(soundData_);
+    }
+}
+
+void SceneManager::ChangeBGM(SceneLabel scene) {
+    // 1. 現在の音を止めてメモリを解放（これをしないと前の音が残り、メモリも食いつぶします）
+    audio_->StopSound(soundData_);
+    audio_->Unload(soundData_);
+
+    // 2. 次のシーンに応じたパスを選択
+    std::string filePath = "";
+    switch (scene) {
+    case SceneLabel::Title:       filePath = "resources/AL/BGM/title.mp3"; break;
+    case SceneLabel::StageSelect: filePath = "resources/AL/BGM/stageSelect.mp3"; break;
+    case SceneLabel::Play:        filePath = "resources/AL/BGM/game.mp3"; break;
+    case SceneLabel::Clear:       filePath = "resources/AL/BGM/clear.mp3"; break;
+    case SceneLabel::Gameover:    filePath = "resources/AL/BGM/gameOver.mp3"; break;
+    }
+
+    // 3. ロードして再生
+    if (!filePath.empty()) {
+        soundData_ = audio_->LoadSound(filePath);
+        audio_->PlaySoundW(soundData_, 1.0f, true);
     }
 }
 
@@ -87,21 +95,11 @@ void SceneManager::Draw() {
 void SceneManager::ImGuiControl() {
     ImGui::Begin("Scene");
     switch (currentScene_->GetNowScene()) {
-    case SceneLabel::Title:
-        ImGui::Text("Scene = Title");
-        break;
-    case SceneLabel::StageSelect:
-        ImGui::Text("Scene = StageSelect");
-        break;
-    case SceneLabel::Play:
-        ImGui::Text("Scene = Play");
-        break;
-    case SceneLabel::Clear:
-        ImGui::Text("Scene = Clear");
-        break;
-    case SceneLabel::Gameover:
-        ImGui::Text("Scene = GameOver");
-        break;
+    case SceneLabel::Title:       ImGui::Text("Scene = Title"); break;
+    case SceneLabel::StageSelect: ImGui::Text("Scene = StageSelect"); break;
+    case SceneLabel::Play:        ImGui::Text("Scene = Play"); break;
+    case SceneLabel::Clear:       ImGui::Text("Scene = Clear"); break;
+    case SceneLabel::Gameover:    ImGui::Text("Scene = GameOver"); break;
     }
     ImGui::End();
     currentScene_->ImGuiControl();

@@ -5,6 +5,7 @@ PlayScene::PlayScene() {
 }
 
 PlayScene::~PlayScene() {
+	audio_->Unload(clearSE_);
 }
 
 void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureManager* textureManager, Input* input) {
@@ -75,6 +76,10 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 	// スプライト生成
 	sprite_ = std::make_unique<SpriteObject>(dxCommon_->GetDevice(), 1280, 720);
 	textureManager_->LoadTexture("gameHUD", "resources/AL/gameHUD.png");
+
+	audio_ = std::make_unique<Audio>();
+	audio_->Initialize();
+	clearSE_ = audio_->LoadSound("resources/AL/SE/clear.mp3");
 }
 
 void PlayScene::Update() {
@@ -154,6 +159,7 @@ void PlayScene::Update() {
 		pPos.y >= goalAABB.min.y && pPos.y <= goalAABB.max.y) {
 
 		// クリアフラグを立てる
+		audio_->PlaySoundW(clearSE_);
 		nextScene_ = SceneLabel::Clear;
 		isFinish_ = true;
 	}

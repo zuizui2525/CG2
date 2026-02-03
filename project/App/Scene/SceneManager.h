@@ -19,6 +19,10 @@ public:
     void ImGuiControl();
 
 private:
+    // BGMの切り替え処理（内部用）
+    void ChangeBGM(SceneLabel scene);
+
+private:
     std::unique_ptr<TitleScene> titleScene_;
     std::unique_ptr<StageSelectScene> stageSelectScene_;
     std::unique_ptr<PlayScene> playScene_;
@@ -26,12 +30,12 @@ private:
     std::unique_ptr<GameOverScene> gameOverScene_;
 
     SceneLabel scene_;
-    Scene* currentScene_; 
+    Scene* currentScene_;
 
     std::unique_ptr<Audio> audio_;
     SoundData soundData_;
 
-    // 後ほどシーン切り替えが発生した時のために、ポインタを保持しておく
+    // 基盤システムのポインタ保持用
     DxCommon* dxCommon_ = nullptr;
     PSOManager* psoManager_ = nullptr;
     TextureManager* textureManager_ = nullptr;

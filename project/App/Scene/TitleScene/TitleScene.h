@@ -6,6 +6,7 @@
 #include "SphereObject.h"
 #include "Camera.h"
 #include "Skydome.h"
+#include "Audio.h"
 #include <memory>
 
 class TitleScene : public Scene {
@@ -27,6 +28,9 @@ private:
 	std::unique_ptr<SpriteObject> title_;
 	// skydome
 	std::unique_ptr<Skydome> skydome_;
+
+	std::unique_ptr<Audio> audio_;
+	SoundData soundData_;
 
 	// 描画フラグ
 	bool drawModel_ = true;
