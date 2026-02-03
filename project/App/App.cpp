@@ -130,6 +130,10 @@ void App::Run() {
 #endif
 
     // --- 更新 ---
+    // 1. システム入力の更新 (最優先)
+    input_->Update();
+
+    // 2. モード切り替えなどの判定
     if (input_->Trigger(DIK_TAB)) {
         static bool isDebug = false;
         isDebug = !isDebug;
@@ -137,28 +141,34 @@ void App::Run() {
         debugCamera_->SetActive(isDebug);
     }
 
-    if (cameraMgr_->GetActiveCamera() == mainCamera_.get()) {
-        mainCamera_->Update();
-    }else if (cameraMgr_->GetActiveCamera() == debugCamera_.get()) {
-        debugCamera_->Update(input_.get());
-    }
-
-    input_->Update();
-    cameraMgr_->Update();
+    // 3. ゲームロジック（オブジェクトやライト）の更新
+    // ※カメラに依存しないものを先に動かす
     lightMgr_->Update();
     dirLight_->Update();
     dirLight2_->Update();
     pointLight_->Update();
     pointLight2_->Update();
     spotLight_->Update();
+
     skydome_->Update();
+    terrain_->Update();
     teapot_->Update();
     bunny_->Update();
-    terrain_->Update();
     sphere_->Update();
     triangle_->Update();
     particle_->Update();
     sprite_->Update();
+
+    // 4. カメラの更新 (描画の直前に行う)
+    // アクティブなカメラだけを動かす
+    if (cameraMgr_->GetActiveCamera() == debugCamera_.get()) {
+        debugCamera_->Update(input_.get());
+    } else {
+        mainCamera_->Update();
+    }
+
+    // 5. カメラマネージャの最終処理 (定数バッファ転送など)
+    cameraMgr_->Update();
 
     // --- 描画 ---
     engine_->BeginFrame();
