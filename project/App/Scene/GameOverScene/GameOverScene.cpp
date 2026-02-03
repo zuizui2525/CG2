@@ -39,7 +39,7 @@ void GameOverScene::Update() {
 	dirLight_->Update();
 
 	if (input_->Trigger(DIK_SPACE)) {
-		nextScene_ = SceneLabel::Title;
+		nextScene_ = SceneLabel::StageSelect;
 		isFinish_ = true;
 	}
 

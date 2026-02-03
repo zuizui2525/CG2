@@ -230,6 +230,7 @@
     <ClCompile Include="App\Enemy\Enemy.cpp" />
     <ClCompile Include="App\Scene\ClearScene\ClearScene.cpp" />
     <ClCompile Include="App\Scene\GameOverScene\GameOverScene.cpp" />
+    <ClCompile Include="App\Scene\StageSelectScene\StageSelectScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -367,6 +368,7 @@
     <ClInclude Include="App\Enemy\Enemy.h" />
     <ClInclude Include="App\Scene\ClearScene\ClearScene.h" />
     <ClInclude Include="App\Scene\GameOverScene\GameOverScene.h" />
+    <ClInclude Include="App\Scene\StageSelectScene\StageSelectScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

@@ -37,7 +37,8 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 
 	// mapChipFieldの生成と初期化
 	mapChipField_ = std::make_unique<MapChipField>();
-	mapChipField_->LoadMapChipCsv("resources/AL/map/map.csv");
+	std::string mapPath = "resources/AL/map/map" + std::to_string(selectedStageNum_) + ".csv";
+	mapChipField_->LoadMapChipCsv(mapPath);
 	for (uint32_t y = 0; y < mapChipField_->GetNumBlockVertical(); ++y) {
 		for (uint32_t x = 0; x < mapChipField_->GetNumBlockHorizontal(); ++x) {
 			if (mapChipField_->GetMapChipTypeByIndex(x, y) == MapChipField::MapChipType::kBlock) {
@@ -87,8 +88,8 @@ void PlayScene::Update() {
 	camera_->Update(input_);
 	dirLight_->Update();
 
-	if (input_->Trigger(DIK_RETURN)) {
-		nextScene_ = SceneLabel::Title;
+	if (input_->Trigger(DIK_RETURN) || input_->Trigger(DIK_R) || input_->Trigger(DIK_E) || input_->Trigger(DIK_Q) || input_->Trigger(DIK_F) || input_->Trigger(DIK_Z) || input_->Trigger(DIK_X) || input_->Trigger(DIK_C) || input_->Trigger(DIK_V)) {
+		nextScene_ = SceneLabel::StageSelect;
 		isFinish_ = true;
 	}
 

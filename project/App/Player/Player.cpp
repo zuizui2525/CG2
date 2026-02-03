@@ -76,7 +76,7 @@ void Player::BehaviorRootUpdate() {
     contactWithAWall(info);
     SwitchingInstallationStatus(info);
 
-    if (input_->Trigger(DIK_LSHIFT)) behaviorRequest_ = Behavior::kAttack;
+    if (input_->Trigger(DIK_LSHIFT) && !input_->Press(DIK_SPACE)) behaviorRequest_ = Behavior::kAttack;
 }
 
 void Player::BehaviorAttackInitialize() {
@@ -137,7 +137,7 @@ void Player::HandleMoveInput() {
         }
 
         // 地上ジャンプ
-        if (input_->Trigger(DIK_SPACE)) {
+        if (input_->Trigger(DIK_SPACE) && !input_->Press(DIK_LSHIFT)) {
             velocity_.y = kJumpAcceleration;
             onGround_ = false;
         }

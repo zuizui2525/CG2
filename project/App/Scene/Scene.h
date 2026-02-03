@@ -6,6 +6,7 @@
 
 enum class SceneLabel {
 	Title,
+	StageSelect,
 	Play,
 	Clear,
 	Gameover,
@@ -31,6 +32,7 @@ protected:
 	bool isFinish_ = false;
 	SceneLabel nowScene_;
 	SceneLabel nextScene_;
+	static inline int selectedStageNum_ = 1;
 
 	// 各シーンで使い回すためのポインタを保持
 	DxCommon* dxCommon_ = nullptr;

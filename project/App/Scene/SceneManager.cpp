@@ -4,10 +4,12 @@
 SceneManager::SceneManager() {
     scene_ = SceneLabel::Title;
     titleScene_ = std::make_unique<TitleScene>();
+    stageSelectScene_ = std::make_unique<StageSelectScene>();
     playScene_ = std::make_unique<PlayScene>();
     clearScene_ = std::make_unique<ClearScene>();
     gameOverScene_ = std::make_unique<GameOverScene>();
     currentScene_ = playScene_.get();
+    audio_ = std::make_unique<Audio>();
 }
 
 SceneManager::~SceneManager() {}
@@ -19,10 +21,20 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
     textureManager_ = textureManager;
     input_ = input;
 
+    audio_->Initialize();
+    audio_->LoadSound("resources/AL/BGM/title.mp3");
+    audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
+    audio_->LoadSound("resources/AL/BGM/game.mp3");
+    audio_->LoadSound("resources/AL/BGM/clear.mp3");
+    audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
+
     // 引数で初期化のシーンを選択
     switch (scene) {
     case SceneLabel::Title:
         currentScene_ = titleScene_.get();
+        break;
+    case SceneLabel::StageSelect:
+        currentScene_ = stageSelectScene_.get();
         break;
     case SceneLabel::Play:
         currentScene_ = playScene_.get();
@@ -47,6 +59,9 @@ void SceneManager::Update() {
         switch (currentScene_->GetNextScene()) {
         case SceneLabel::Title:
             currentScene_ = titleScene_.get();
+            break;
+        case SceneLabel::StageSelect:
+            currentScene_ = stageSelectScene_.get();
             break;
         case SceneLabel::Play:
             currentScene_ = playScene_.get();
@@ -73,6 +88,9 @@ void SceneManager::ImGuiControl() {
     switch (currentScene_->GetNowScene()) {
     case SceneLabel::Title:
         ImGui::Text("Scene = Title");
+        break;
+    case SceneLabel::StageSelect:
+        ImGui::Text("Scene = StageSelect");
         break;
     case SceneLabel::Play:
         ImGui::Text("Scene = Play");

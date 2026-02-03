@@ -39,7 +39,7 @@ void TitleScene::Update() {
 	dirLight_->Update();
 
 	if (input_->Trigger(DIK_SPACE)) {
-		nextScene_ = SceneLabel::Play;
+		nextScene_ = SceneLabel::StageSelect;
 		isFinish_ = true;
 	}
 
