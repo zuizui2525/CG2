@@ -29,6 +29,12 @@ private:
     Scene* currentScene_; 
 
     std::unique_ptr<Audio> audio_;
+    SoundData titleSoundData_;
+    SoundData stageSelectSoundData_;
+    SoundData gameSoundData_;
+    SoundData clearSoundData_;
+    SoundData gameOverSoundData_;
+    SoundData soundData_;
 
     // 後ほどシーン切り替えが発生した時のために、ポインタを保持しておく
     DxCommon* dxCommon_ = nullptr;

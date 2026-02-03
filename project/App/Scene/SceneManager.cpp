@@ -22,11 +22,13 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
     input_ = input;
 
     audio_->Initialize();
-    audio_->LoadSound("resources/AL/BGM/title.mp3");
-    audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
-    audio_->LoadSound("resources/AL/BGM/game.mp3");
-    audio_->LoadSound("resources/AL/BGM/clear.mp3");
-    audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
+    titleSoundData_ = audio_->LoadSound("resources/AL/BGM/title.mp3");
+    stageSelectSoundData_ = audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
+    gameSoundData_ = audio_->LoadSound("resources/AL/BGM/game.mp3");
+    clearSoundData_ = audio_->LoadSound("resources/AL/BGM/clear.mp3");
+    gameOverSoundData_ = audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
+
+    soundData_ = titleSoundData_;
 
     // 引数で初期化のシーンを選択
     switch (scene) {
