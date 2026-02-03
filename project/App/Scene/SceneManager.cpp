@@ -22,30 +22,28 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
     input_ = input;
 
     audio_->Initialize();
-    titleSoundData_ = audio_->LoadSound("resources/AL/BGM/title.mp3");
-    stageSelectSoundData_ = audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
-    gameSoundData_ = audio_->LoadSound("resources/AL/BGM/game.mp3");
-    clearSoundData_ = audio_->LoadSound("resources/AL/BGM/clear.mp3");
-    gameOverSoundData_ = audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
-
-    soundData_ = titleSoundData_;
 
     // 引数で初期化のシーンを選択
     switch (scene) {
     case SceneLabel::Title:
         currentScene_ = titleScene_.get();
+        soundData_ = audio_->LoadSound("resources/AL/BGM/title.mp3");
         break;
     case SceneLabel::StageSelect:
         currentScene_ = stageSelectScene_.get();
+        soundData_ = audio_->LoadSound("resources/AL/BGM/stageSelect.mp3");
         break;
     case SceneLabel::Play:
         currentScene_ = playScene_.get();
+        soundData_ = audio_->LoadSound("resources/AL/BGM/game.mp3");
         break;
     case SceneLabel::Clear:
         currentScene_ = clearScene_.get();
+        soundData_ = audio_->LoadSound("resources/AL/BGM/clear.mp3");
         break;
     case SceneLabel::Gameover:
         currentScene_ = gameOverScene_.get();
+        soundData_ = audio_->LoadSound("resources/AL/BGM/gameOver.mp3");
         break;
     }
 
@@ -55,7 +53,7 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
 
 void SceneManager::Update() {
     currentScene_->Update();
-
+    
     // シーン切り替えフラグが立っていた場合
     if (currentScene_->GetIsFinish()) {
         switch (currentScene_->GetNextScene()) {
@@ -78,6 +76,7 @@ void SceneManager::Update() {
 
         // 次のシーンも同じ基盤システムで初期化する
         currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
+        audio_->StopSound(soundData_);
     }
 }
 
