@@ -5,6 +5,8 @@ SceneManager::SceneManager() {
     scene_ = SceneLabel::Title;
     titleScene_ = std::make_unique<TitleScene>();
     playScene_ = std::make_unique<PlayScene>();
+    clearScene_ = std::make_unique<ClearScene>();
+    gameOverScene_ = std::make_unique<GameOverScene>();
     currentScene_ = playScene_.get();
 }
 
@@ -25,6 +27,12 @@ void SceneManager::Initialize(SceneLabel scene, DxCommon* dxCommon, PSOManager* 
     case SceneLabel::Play:
         currentScene_ = playScene_.get();
         break;
+    case SceneLabel::Clear:
+        currentScene_ = clearScene_.get();
+        break;
+    case SceneLabel::Gameover:
+        currentScene_ = gameOverScene_.get();
+        break;
     }
 
     // 現在のシーンに基盤を渡して初期化
@@ -43,11 +51,16 @@ void SceneManager::Update() {
         case SceneLabel::Play:
             currentScene_ = playScene_.get();
             break;
+        case SceneLabel::Clear:
+            currentScene_ = clearScene_.get();
+            break;
+        case SceneLabel::Gameover:
+            currentScene_ = gameOverScene_.get();
+            break;
         }
 
         // 次のシーンも同じ基盤システムで初期化する
         currentScene_->Initialize(dxCommon_, psoManager_, textureManager_, input_);
-        currentScene_->Update();
     }
 }
 
@@ -63,6 +76,12 @@ void SceneManager::ImGuiControl() {
         break;
     case SceneLabel::Play:
         ImGui::Text("Scene = Play");
+        break;
+    case SceneLabel::Clear:
+        ImGui::Text("Scene = Clear");
+        break;
+    case SceneLabel::Gameover:
+        ImGui::Text("Scene = GameOver");
         break;
     }
     ImGui::End();

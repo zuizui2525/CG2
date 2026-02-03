@@ -5,8 +5,9 @@
 
 ModelObject::ModelObject(ID3D12Device* device,
     const std::string& filename,
-    const Vector3& initialPosition)
-    : Object3D(device, 2) // 2 = ライティング有効
+    const Vector3& initialPosition,
+    const int lightMode)
+    : Object3D(device, lightMode) // 2 = ライティング有効
 {
     // 初期位置をセット
     transform_.translate = initialPosition;

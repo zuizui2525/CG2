@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include "TitleScene.h"
 #include "PlayScene.h"
+#include "ClearScene.h"
+#include "GameOverScene.h"
 #include <memory>
 
 class SceneManager {
@@ -17,6 +19,8 @@ public:
 private:
     std::unique_ptr<TitleScene> titleScene_;
     std::unique_ptr<PlayScene> playScene_;
+    std::unique_ptr<ClearScene> clearScene_;
+    std::unique_ptr<GameOverScene> gameOverScene_;
 
     SceneLabel scene_;
     Scene* currentScene_;

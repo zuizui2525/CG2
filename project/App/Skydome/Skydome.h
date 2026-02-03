@@ -15,4 +15,5 @@ public:
 
 private:
     std::unique_ptr<ModelObject> model_;
+    Vector3 rotate_;
 };

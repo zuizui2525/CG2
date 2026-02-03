@@ -12,7 +12,8 @@ class ModelObject : public Object3D {
 public:
     ModelObject(ID3D12Device* device,
         const std::string& filename,
-        const Vector3& initialPosition = { 0.0f, 0.0f, 0.0f }); // ★ 初期位置追加
+        const Vector3& initialPosition = { 0.0f, 0.0f, 0.0f },
+        const int lightMode = 2);
 
     // 頂点バッファビュー取得
     D3D12_VERTEX_BUFFER_VIEW GetVBV() const { return vbv_; }

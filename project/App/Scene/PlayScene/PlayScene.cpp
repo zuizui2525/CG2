@@ -79,7 +79,7 @@ void PlayScene::Initialize(DxCommon* dxCommon, PSOManager* psoManager, TextureMa
 void PlayScene::Update() {
 	// 1. プレイヤーの死亡演出が終わったかチェック
 	if (player_->IsDeadFinished()) {
-		nextScene_ = SceneLabel::Title;
+		nextScene_ = SceneLabel::Gameover;
 		isFinish_ = true;
 		return;
 	}
@@ -153,7 +153,7 @@ void PlayScene::Update() {
 		pPos.y >= goalAABB.min.y && pPos.y <= goalAABB.max.y) {
 
 		// クリアフラグを立てる
-		nextScene_ = SceneLabel::Title;
+		nextScene_ = SceneLabel::Clear;
 		isFinish_ = true;
 	}
 
