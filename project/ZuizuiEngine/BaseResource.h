@@ -1,7 +1,7 @@
 #pragma once
 
 class Zuizui;
-class Camera;
+class CameraManager;
 class LightManager;
 class TextureManager;
 class ModelManager;
@@ -24,10 +24,10 @@ protected:
 
 class CameraResource {
 public:
-    static void SetCamera(Camera* camera) { sCamera = camera; }
-    static Camera* GetCamera();
+    static void SetCameraManager(CameraManager* cameraMgr) { sCameraMgr = cameraMgr; }
+    static CameraManager* GetCameraManager();
 protected:
-    static Camera* sCamera;
+    static CameraManager* sCameraMgr;
 };
 
 class LightResource {

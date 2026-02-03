@@ -1,130 +1,89 @@
 #include "DebugCamera.h"
+#include <algorithm>
+#include "imgui.h"
 
 void DebugCamera::Initialize() {
-    projectionMatrix_ = Math::MakePerspectiveFovMatrix(0.45f, 16.0f / 9.0f, 0.1f, 1000.0f); // 仮の値
+    BaseCamera::Initialize();
 }
 
 void DebugCamera::Update(Input* input) {
-    POINT center;
-    center.x = 640;
-    center.y = 360;
+    if (!hwnd_ || !isActive_) return;
 
-    // 1フレームだけマウス移動による回転をスキップする
-    if (skipNextMouseUpdate_) {
-        skipNextMouseUpdate_ = false;
-        ClientToScreen(hwnd_, &center);
-        SetCursorPos(center.x, center.y);
-        return;
-    }
+    // --- 1. カーソル制御と中央固定 ---
+    int centerX = WindowApp::kClientWidth / 2;
+    int centerY = WindowApp::kClientHeight / 2;
+    POINT center = { centerX, centerY };
 
-    // 右クリック中のみ視点回転
-    if (input->MousePress(1)) {
-        POINT currentPos;
-        GetCursorPos(&currentPos);
-        ScreenToClient(hwnd_, &currentPos);
+    // 操作中はカーソルを隠す
+    SetCursorVisible(false);
 
-        int dx = currentPos.x - center.x;
-        int dy = currentPos.y - center.y;
+    POINT currentPos;
+    GetCursorPos(&currentPos);
+    ScreenToClient(hwnd_, &currentPos);
 
-        rotation_.x += static_cast<float>(dy) * rotateSpeed;
-        rotation_.y += static_cast<float>(dx) * rotateSpeed;
-        rotation_.x = std::clamp(rotation_.x, -1.57f, 1.57f);
-        rotation_.z = 0.0f;
-    }
+    // 中心からの移動量を取得
+    int dx = currentPos.x - center.x;
+    int dy = currentPos.y - center.y;
 
-    // 毎フレーム カーソルを中央に戻す（右クリックしていなくても！）
+    // マウスを中央に戻す
     ClientToScreen(hwnd_, &center);
     SetCursorPos(center.x, center.y);
 
-    // Wキーが押されている場合、前方へ移動
-    if (input->Press(DIK_W)) {
-        translation_.x += forwardVector_.x * moveSpeed_;
-        translation_.y += forwardVector_.y * moveSpeed_;
-        translation_.z += forwardVector_.z * moveSpeed_;
+    // --- 2. 回転処理 (右クリック不要) ---
+    transform_.rotate.x += static_cast<float>(dy) * rotateSpeed_;
+    transform_.rotate.y += static_cast<float>(dx) * rotateSpeed_;
+
+    // 垂直方向の回転制限
+    transform_.rotate.x = std::clamp(transform_.rotate.x, -1.57f, 1.57f);
+
+    // --- 3. 移動処理 (WASD) ---
+    Matrix4x4 rotateMatrix = Math::MakeRotateMatrix(transform_.rotate.x, transform_.rotate.y, transform_.rotate.z);
+    Vector3 forward = Math::TransformNormal({ 0, 0, 1 }, rotateMatrix);
+    Vector3 right = Math::TransformNormal({ 1, 0, 0 }, rotateMatrix);
+    Vector3 up = { 0, 1, 0 };
+
+    Vector3 move = { 0, 0, 0 };
+    if (input->Press(DIK_W)) move = move + forward;
+    if (input->Press(DIK_S)) move = move - forward;
+    if (input->Press(DIK_D)) move = move + right;
+    if (input->Press(DIK_A)) move = move - right;
+    if (input->Press(DIK_SPACE)) move = move + up;
+    if (input->Press(DIK_LSHIFT)) move = move - up;
+
+    if (Math::Length(move) > 0) {
+        move = Math::Normalize(move) * moveSpeed_;
+        transform_.translate = transform_.translate + move;
     }
 
-    // Sキーが押されている場合、後方へ移動
-    if (input->Press(DIK_S)) {
-        translation_.x -= forwardVector_.x * moveSpeed_;
-        translation_.y -= forwardVector_.y * moveSpeed_;
-        translation_.z -= forwardVector_.z * moveSpeed_;
-    }
-
-    // Aキーが押されている場合、左へ移動
-    if (input->Press(DIK_A)) {
-        translation_.x -= rightVector_.x * moveSpeed_;
-        translation_.y -= rightVector_.y * moveSpeed_;
-        translation_.z -= rightVector_.z * moveSpeed_;
-    }
-
-    // Dキーが押されている場合、右へ移動
-    if (input->Press(DIK_D)) {
-        translation_.x += rightVector_.x * moveSpeed_;
-        translation_.y += rightVector_.y * moveSpeed_;
-        translation_.z += rightVector_.z * moveSpeed_;
-    }
-
-    // SPACEキーが押されている場合、上昇
-    if (input->Press(DIK_SPACE)) {
-        translation_.y += upVector_.y * moveSpeed_; // Y軸プラス方向へ移動
-    }
-
-    // LSHIFTキーが押されている場合、下降
-    if (input->Press(DIK_LSHIFT)) {
-        translation_.y -= upVector_.y * moveSpeed_; // Y軸マイナス方向へ移動
-    }
-
-    // Rキー押されたら初期化
-    if (input->Press(DIK_R)) {
-        ResetPosition();
-
-        // もし必要ならマウスカーソル位置も中央に戻す
-        POINT center = { 640, 360 };
-        ClientToScreen(hwnd_, &center);
-        SetCursorPos(center.x, center.y);
-
-        // マウス移動の差分リセット用フラグも立てておく
-        skipNextMouseUpdate_ = true;
-    }
-
-    // カメラの回転行列を先に計算します
-    Matrix4x4 rotateXMatrix = Math::MakeRotateXMatrix(rotation_.x);
-    Matrix4x4 rotateYMatrix = Math::MakeRotateYMatrix(rotation_.y);
-
-    // 回転の適用順序は、X -> Y -> Z が一般的ですが、ジンバルロックに注意
-    Matrix4x4 rotateMatrix = Math::Multiply(rotateXMatrix, rotateYMatrix);
-
-    // カメラの向きを更新
-    forwardVector_ = Math::Normalize(Math::TransformNormal({ 0, 0, 1 }, rotateMatrix));
-    // rightVector_はforwardとワールドアップ（0,1,0）の外積
-    rightVector_ = Math::Normalize(Math::Cross({ 0.0f, 1.0f, 0.0f }, forwardVector_));
-    // upVector_はrightとforwardの外積（こっちも逆になるかも。こっちは普通に）
-    upVector_ = Math::Cross(forwardVector_, rightVector_);
-
-    // カメラの位置と回転からビュー行列を作成（傾かない版）
-    viewMatrix_ = Math::MakeLookAtMatrix(
-        translation_,
-        Math::Add(translation_,forwardVector_),
-        { 0.0f, 1.0f, 0.0f }
-    );
+    BaseCamera::Update();
 }
 
-void DebugCamera::HideCursor() {
-    if (!isCursorHidden_) {
-        while (ShowCursor(FALSE) >= 0); // 完全に非表示に
-        SetCursor(nullptr);
-        isCursorHidden_ = true;
+void DebugCamera::SetCursorVisible(bool isVisible) {
+    if (isVisible && !isCursorVisible_) {
+        while (ShowCursor(TRUE) < 0);
+        isCursorVisible_ = true;
+    } else if (!isVisible && isCursorVisible_) {
+        while (ShowCursor(FALSE) >= 0);
+        isCursorVisible_ = false;
     }
 }
 
-void DebugCamera::ShowCursorBack() {
-    if (isCursorHidden_) {
-        while (ShowCursor(TRUE) < 0); // 完全に表示に
-        isCursorHidden_ = false;
+void DebugCamera::SetActive(bool active) {
+    isActive_ = active;
+    // 非アクティブになる瞬間にカーソルを表示させる
+    if (!isActive_) {
+        DebugCamera::SetCursorVisible(true);
     }
 }
 
-void DebugCamera::ResetPosition() {
-    translation_ = { 0.0f, 0.0f, -10.0f };  // 好きな初期位置に設定
-    rotation_ = { 0.0f, 0.0f, 0.0f };     // 回転リセット
+void DebugCamera::ImGuiControl() {
+    ImGui::Begin("Debug Camera Guide");
+    ImGui::Text("Mode: FPS Control");
+    ImGui::Separator();
+    ImGui::BulletText("Move: W, A, S, D, SPACE, LSHIFT");
+    ImGui::BulletText("Look: Mouse Move (Always active)");
+    ImGui::BulletText("Switch Mode: TAB");
+    ImGui::Spacing();
+    ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "Cursor is HIDDEN and LOCKED");
+    ImGui::End();
 }

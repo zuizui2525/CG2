@@ -1,6 +1,6 @@
 #include "SpriteObject.h"
 #include "Zuizui.h"
-#include "Camera.h"
+#include "CameraManager.h"
 #include "TextureManager.h"
 #include <imgui.h>
 
@@ -59,7 +59,7 @@ void SpriteObject::Initialize(int lightingMode) {
 
 void SpriteObject::Update() {
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, sCamera->GetViewMatrix2D()), sCamera->GetProjectionMatrix2D());
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, CameraResource::GetCameraManager()->GetViewMatrix2D()), CameraResource::GetCameraManager()->GetProjectionMatrix2D());
     wvpData_->WVP = wvp;
     wvpData_->world = world;
 
@@ -79,7 +79,7 @@ void SpriteObject::Draw(const std::string& textureKey, bool draw) {
     sEngine->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&ibView_);
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
+    sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, CameraResource::GetCameraManager()->GetGPUVirtualAddress());
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
 
     sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);

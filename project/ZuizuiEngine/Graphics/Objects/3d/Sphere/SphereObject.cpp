@@ -1,7 +1,7 @@
 #include "SphereObject.h"
 #include "Function.h"
 #include "Zuizui.h"
-#include "Camera.h"
+#include "CameraManager.h"
 #include "DirectionalLight.h"
 #include "LightManager.h"
 #include "TextureManager.h"
@@ -24,7 +24,7 @@ void SphereObject::Update() {
 
     // 行列更新
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, sCamera->GetViewMatrix3D()), sCamera->GetProjectionMatrix3D());
+    Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, CameraResource::GetCameraManager()->GetViewMatrix3D()), CameraResource::GetCameraManager()->GetProjectionMatrix3D());
 
     Matrix4x4 worldForNormal = world;
     worldForNormal.m[3][0] = 0.0f;
@@ -55,7 +55,7 @@ void SphereObject::Draw(const std::string& textureKey, bool draw) {
     // 定数バッファ設定
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(2, CameraResource::GetCameraManager()->GetGPUVirtualAddress());
     auto lightMgr = LightResource::GetLightManager();
     if (lightMgr) {
         commandList->SetGraphicsRootConstantBufferView(3, lightMgr->GetDirectionalLightGroupAddress());

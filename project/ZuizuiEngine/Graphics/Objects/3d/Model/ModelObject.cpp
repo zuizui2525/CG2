@@ -1,6 +1,6 @@
 #include "ModelObject.h"
 #include "Zuizui.h"
-#include "Camera.h"
+#include "CameraManager.h"
 #include "LightManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
@@ -13,8 +13,8 @@ void ModelObject::Initialize(int lightingMode) {
 
 void ModelObject::Update() {
     Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 viewMatrix = sCamera->GetViewMatrix3D();
-    Matrix4x4 projectionMatrix = sCamera->GetProjectionMatrix3D();
+    Matrix4x4 viewMatrix = CameraResource::GetCameraManager()->GetViewMatrix3D();
+    Matrix4x4 projectionMatrix = CameraResource::GetCameraManager()->GetProjectionMatrix3D();
     Matrix4x4 wvpMatrix = Math::Multiply(worldMatrix, Math::Multiply(viewMatrix, projectionMatrix));
 
     // 法線用行列（逆転置）
@@ -44,7 +44,7 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     // 定数バッファ設定
     commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
     commandList->SetGraphicsRootConstantBufferView(1, materialResource_->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootConstantBufferView(2, sCamera->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(2, CameraResource::GetCameraManager()->GetGPUVirtualAddress());
     auto lightMgr = LightResource::GetLightManager();
     if (lightMgr) {
         commandList->SetGraphicsRootConstantBufferView(3, lightMgr->GetDirectionalLightGroupAddress());

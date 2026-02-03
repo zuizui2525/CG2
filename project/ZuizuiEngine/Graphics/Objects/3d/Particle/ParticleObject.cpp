@@ -2,7 +2,7 @@
 #include "Function.h"
 #include "Matrix.h" 
 #include "Zuizui.h"
-#include "Camera.h"
+#include "CameraManager.h"
 #include "LightManager.h"
 #include "TextureManager.h"
 #include "Collision.h"
@@ -142,7 +142,7 @@ void ParticleObject::Update() {
 
     Matrix4x4 billBoardMatrix = Math::MakeIdentity();
     if (billboardActive_) {
-        billBoardMatrix = Math::Inverse(sCamera->GetViewMatrix3D());
+        billBoardMatrix = Math::Inverse(CameraResource::GetCameraManager()->GetViewMatrix3D());
         billBoardMatrix.m[3][0] = 0.0f;
         billBoardMatrix.m[3][1] = 0.0f;
         billBoardMatrix.m[3][2] = 0.0f;
@@ -163,7 +163,7 @@ void ParticleObject::Update() {
         particleWorldMatrix = Math::Multiply(billBoardMatrix, particleWorldMatrix);
         particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
 
-        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(sCamera->GetViewMatrix3D(), sCamera->GetProjectionMatrix3D()));
+        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(CameraResource::GetCameraManager()->GetViewMatrix3D(), CameraResource::GetCameraManager()->GetProjectionMatrix3D()));
         Matrix4x4 worldMatrix = particleWorldMatrix;
 
         // Fieldの範囲内のParticleには加速度を適応する

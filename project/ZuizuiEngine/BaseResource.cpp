@@ -2,12 +2,12 @@
 
 Zuizui* EngineResource::sEngine = nullptr;
 TextureManager* TextureResource::sTexMgr = nullptr;
-Camera* CameraResource::sCamera = nullptr;
+CameraManager* CameraResource::sCameraMgr = nullptr;
 LightManager* LightResource::sLightMgr = nullptr;
 ModelManager* ModelResource::sModelMgr = nullptr;
 
 Zuizui* EngineResource::GetEngine() { return sEngine; }
 TextureManager* TextureResource::GetTextureManager() { return sTexMgr; }
-Camera* CameraResource::GetCamera() { return sCamera; }
+CameraManager* CameraResource::GetCameraManager() { return sCameraMgr; }
 LightManager* LightResource::GetLightManager() { return sLightMgr; }
 ModelManager* ModelResource::GetModelManager() { return sModelMgr; }

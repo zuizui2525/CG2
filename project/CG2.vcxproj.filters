@@ -177,9 +177,6 @@
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp">
       <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClCompile>
-    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.cpp">
-      <Filter>ZuizuiEngine\Graphics\Actor\Camera</Filter>
-    </ClCompile>
     <ClCompile Include="ZuizuiEngine\Graphics\Texture\Texture.cpp">
       <Filter>ZuizuiEngine\Graphics\Texture</Filter>
     </ClCompile>
@@ -247,6 +244,8 @@
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\PointLight\PointLight.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\SpotLight\SpotLight.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.cpp" />
+    <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -317,9 +316,6 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.h">
       <Filter>ZuizuiEngine\Graphics\Actor\Light\DirectionalLight</Filter>
     </ClInclude>
-    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\Camera.h">
-      <Filter>ZuizuiEngine\Graphics\Actor\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h">
       <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClInclude>
@@ -389,6 +385,8 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\PointLight\PointLight.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\SpotLight\SpotLight.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.h" />
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.h" />
+    <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

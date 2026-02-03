@@ -9,13 +9,13 @@ void App::Initialize() {
     input_ = std::make_unique<Input>();
     input_->Initialize(engine_->GetWindow()->GetInstance(), engine_->GetWindow()->GetHWND());
 
-    camera_ = std::make_unique<Camera>();
-    camera_->Initialize(engine_->GetDevice(), input_.get());
-    CameraResource::SetCamera(camera_.get());
+    cameraMgr_ = std::make_unique<CameraManager>();
+    cameraMgr_->Initialize(engine_->GetDevice());
+    CameraResource::SetCameraManager(cameraMgr_.get());
 
-    lightManager_ = std::make_unique<LightManager>();
-    lightManager_->Initialize();
-    LightResource::SetLightManager(lightManager_.get());
+    lightMgr_ = std::make_unique<LightManager>();
+    lightMgr_->Initialize();
+    LightResource::SetLightManager(lightMgr_.get());
 
     texMgr_ = std::make_unique<TextureManager>();
     texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
@@ -38,28 +38,40 @@ void App::Initialize() {
     modelMgr_->LoadModel("skydome", "resources/obj/skydome/skydome.obj");
 
     // ゲームオブジェクト
+    mainCamera_ = std::make_shared<BaseCamera>();
+    mainCamera_->Initialize();
+    cameraMgr_->AddCamera("Main", mainCamera_);
+
+    debugCamera_ = std::make_shared<DebugCamera>();
+    debugCamera_->Initialize();
+    debugCamera_->SetHwnd(engine_->GetWindow()->GetHWND());
+    cameraMgr_->AddCamera("Debug", debugCamera_);
+
+    // 初期カメラの設定
+    cameraMgr_->SetActiveCamera("Main");
+
     dirLight_ = std::make_unique<DirectionalLightObject>();
     dirLight_->Initialize();
-    lightManager_->AddDirectionalLight(dirLight_.get());
+    lightMgr_->AddDirectionalLight(dirLight_.get());
 
     dirLight2_ = std::make_unique<DirectionalLightObject>();
     dirLight2_->Initialize();
     dirLight2_->GetLightData().color = { 1.0f, 0.0f, 0.0f, 1.0f };
     dirLight2_->GetLightData().direction = { 1.0f, -1.0f, 0.0f };
-    lightManager_->AddDirectionalLight(dirLight2_.get());
+    lightMgr_->AddDirectionalLight(dirLight2_.get());
 
     pointLight_ = std::make_unique<PointLightObject>();
     pointLight_->Initialize();
-    lightManager_->AddPointLight(pointLight_.get());
+    lightMgr_->AddPointLight(pointLight_.get());
 
     pointLight2_ = std::make_unique<PointLightObject>();
     pointLight2_->Initialize();
     pointLight2_->SetPosition({ -5.0f, 2.0f, 0.0f });
-    lightManager_->AddPointLight(pointLight2_.get());
+    lightMgr_->AddPointLight(pointLight2_.get());
 
     spotLight_ = std::make_unique<SpotLightObject>();
     spotLight_->Initialize();
-    lightManager_->AddSpotLight(spotLight_.get());
+    lightMgr_->AddSpotLight(spotLight_.get());
 
     skydome_ = std::make_unique<ModelObject>();
     skydome_->Initialize();
@@ -100,7 +112,7 @@ void App::Run() {
     // --- ImGui ---
 #ifdef _USEIMGUI
     engine_->ImGuiBegin();
-    camera_->ImGuiControl("camera");
+    debugCamera_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
     dirLight2_->ImGuiControl("dirLight2");
     pointLight_->ImGuiControl("pointLight");
@@ -118,9 +130,22 @@ void App::Run() {
 #endif
 
     // --- 更新 ---
+    if (input_->Trigger(DIK_TAB)) {
+        static bool isDebug = false;
+        isDebug = !isDebug;
+        cameraMgr_->SetActiveCamera(isDebug ? "Debug" : "Main");
+        debugCamera_->SetActive(isDebug);
+    }
+
+    if (cameraMgr_->GetActiveCamera() == mainCamera_.get()) {
+        mainCamera_->Update();
+    }else if (cameraMgr_->GetActiveCamera() == debugCamera_.get()) {
+        debugCamera_->Update(input_.get());
+    }
+
     input_->Update();
-    camera_->Update();
-    lightManager_->Update();
+    cameraMgr_->Update();
+    lightMgr_->Update();
     dirLight_->Update();
     dirLight2_->Update();
     pointLight_->Update();

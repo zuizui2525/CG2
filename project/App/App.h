@@ -2,7 +2,8 @@
 #include <memory>
 #include <vector>
 #include "Zuizui.h"
-#include "Camera.h"
+#include "CameraManager.h"
+#include "DebugCamera.h"
 #include "LightManager.h"
 #include "Input.h"
 #include "TextureManager.h"
@@ -28,12 +29,15 @@ private:
 
     // マネージャ・リソース
     std::unique_ptr<Input> input_;
-    std::unique_ptr<Camera> camera_;
-    std::unique_ptr<LightManager> lightManager_;
+    std::unique_ptr<CameraManager> cameraMgr_;
+    std::unique_ptr<LightManager> lightMgr_;
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
 
     // ゲームオブジェクト
+    std::shared_ptr<DebugCamera> debugCamera_;
+    std::shared_ptr<BaseCamera> mainCamera_;
+
     std::unique_ptr<DirectionalLightObject> dirLight_;
     std::unique_ptr<DirectionalLightObject> dirLight2_;
     std::unique_ptr<PointLightObject> pointLight_;
