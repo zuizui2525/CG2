@@ -12,6 +12,7 @@ public:
         Matrix4x4 view;
         Matrix4x4 projection;
         Vector3 worldPosition;
+        float padding;
     };
 
     void Initialize(ID3D12Device* device);
