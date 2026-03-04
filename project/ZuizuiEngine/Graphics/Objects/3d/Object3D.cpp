@@ -30,6 +30,7 @@ void Object3D::Initialize(int lightingMode) {
 }
 
 void Object3D::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     ImGui::Begin("Object List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
@@ -42,9 +43,11 @@ void Object3D::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }
 
 void Object3D::ImGuiSRTControl(const std::string& name) {
+#ifdef _USEIMGUI
     std::string label = "##" + name;
 
     if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -56,13 +59,16 @@ void Object3D::ImGuiSRTControl(const std::string& name) {
     if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
     }
+#endif
 }
 
 void Object3D::ImGuiLightingControl(const std::string& name) {
+#ifdef _USEIMGUI
     std::string label = "##" + name;
     if (ImGui::CollapsingHeader(("Lighting" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::RadioButton(("None" + label).c_str(), (int*)&materialData_->enableLighting, 0); ImGui::SameLine();
         ImGui::RadioButton(("Lambert" + label).c_str(), (int*)&materialData_->enableLighting, 1); ImGui::SameLine();
         ImGui::RadioButton(("HalfLambert" + label).c_str(), (int*)&materialData_->enableLighting, 2);
     }
+#endif
 }

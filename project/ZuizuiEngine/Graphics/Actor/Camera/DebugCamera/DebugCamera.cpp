@@ -77,6 +77,7 @@ void DebugCamera::SetActive(bool active) {
 }
 
 void DebugCamera::ImGuiControl() {
+#ifdef _USEIMGUI
     ImGui::Begin("Debug Camera Guide");
     ImGui::Text("Mode: FPS Control");
     ImGui::Separator();
@@ -86,4 +87,5 @@ void DebugCamera::ImGuiControl() {
     ImGui::Spacing();
     ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "Cursor is HIDDEN and LOCKED");
     ImGui::End();
+#endif
 }

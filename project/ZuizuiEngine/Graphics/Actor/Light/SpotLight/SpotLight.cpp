@@ -32,6 +32,7 @@ void SpotLightObject::Update() {
 }
 
 void SpotLightObject::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     ImGui::Begin("Light List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
@@ -59,4 +60,5 @@ void SpotLightObject::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }
