@@ -13,6 +13,7 @@ void DirectionalLightObject::Update() {
 }
 
 void DirectionalLightObject::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     ImGui::Begin("Light List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
@@ -29,4 +30,5 @@ void DirectionalLightObject::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }

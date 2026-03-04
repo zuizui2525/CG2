@@ -238,6 +238,7 @@ void ParticleObject::Draw(const std::string& textureKey, bool draw) {
 }
 
 void ParticleObject::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     ImGui::Begin("Particle List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
@@ -250,9 +251,11 @@ void ParticleObject::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }
 
 void ParticleObject::ImGuiSRTControl(const std::string& name) {
+#ifdef _USEIMGUI
     std::string label = "##" + name;
 
     if (ImGui::CollapsingHeader(("Emitter Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -264,9 +267,11 @@ void ParticleObject::ImGuiSRTControl(const std::string& name) {
     if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::ColorEdit4(("Base Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
     }
+#endif
 }
 
 void ParticleObject::ImGuiParticleControl(const std::string& name) {
+#ifdef _USEIMGUI
     std::string label = "##" + name;
     if (ImGui::CollapsingHeader(("Particle System" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Text("Active Particles: %d / %d", numInstance_, numMaxInstance_);
@@ -325,6 +330,7 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
         ImGui::SameLine();
         if (ImGui::Checkbox(("Emitter Mode" + label).c_str(), &emitterActive_)) { if (emitterActive_) loopActive_ = false; }
     }
+#endif
 }
 
 Particle ParticleObject::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {

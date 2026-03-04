@@ -86,6 +86,7 @@ void SpriteObject::Draw(const std::string& textureKey, bool draw) {
 }
 
 void SpriteObject::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     ImGui::Begin("Sprite List");
     ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
     ImGui::End();
@@ -124,4 +125,5 @@ void SpriteObject::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }

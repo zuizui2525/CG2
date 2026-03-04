@@ -61,9 +61,11 @@ bool WindowApp::ProcessMessage() {
 
 LRESULT CALLBACK WindowApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     // ImGui用の処理を先に通す（ここ重要！）
+#ifdef _USEIMGUI
     if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
         return true;
     }
+#endif
 
     switch (msg) {
     case WM_DESTROY:
