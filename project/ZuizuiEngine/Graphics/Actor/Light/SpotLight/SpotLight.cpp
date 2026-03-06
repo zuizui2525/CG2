@@ -43,17 +43,17 @@ void SpotLightObject::ImGuiControl(const std::string& name) {
 
             if (ImGui::CollapsingHeader(("SpotLight Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::ColorEdit4(("Color" + label).c_str(), &data_.color.x);
-                ImGui::DragFloat3(("Position" + label).c_str(), &data_.position.x, 0.1f);
-                ImGui::DragFloat3(("Direction" + label).c_str(), &data_.direction.x, 0.01f);
-                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f);
-                ImGui::DragFloat(("Distance" + label).c_str(), &data_.distance, 0.1f);
-                ImGui::DragFloat(("Decay" + label).c_str(), &data_.decay, 0.01f);
+                ImGui::DragFloat3(("Position" + label).c_str(), &data_.position.x, 0.1f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat3(("Direction" + label).c_str(), &data_.direction.x, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Distance" + label).c_str(), &data_.distance, 0.1f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Decay" + label).c_str(), &data_.decay, 0.01f, 0.0f, 0.0f, "%.1f");
 
                 // 角度設定
-                if (ImGui::DragFloat(("Angle" + label).c_str(), &inputAngle_, 0.5f, 0.0f, 90.0f)) {
+                if (ImGui::DragFloat(("Angle" + label).c_str(), &inputAngle_, 0.5f, 0.0f, 90.0f, "%.1f")) {
                     if (inputAngle_ < inputFalloffStart_) inputFalloffStart_ = inputAngle_;
                 }
-                if (ImGui::DragFloat(("FalloffStart" + label).c_str(), &inputFalloffStart_, 0.5f, 0.0f, 90.0f)) {
+                if (ImGui::DragFloat(("FalloffStart" + label).c_str(), &inputFalloffStart_, 0.5f, 0.0f, 90.0f, "%.1f")) {
                     if (inputFalloffStart_ > inputAngle_) inputAngle_ = inputFalloffStart_;
                 }
             }

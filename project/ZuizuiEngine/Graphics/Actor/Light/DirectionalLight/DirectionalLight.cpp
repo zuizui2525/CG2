@@ -24,8 +24,8 @@ void DirectionalLightObject::ImGuiControl(const std::string& name) {
 
             if (ImGui::CollapsingHeader(("Directional Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::ColorEdit4(("Color" + label).c_str(), &data_.color.x);
-                ImGui::DragFloat3(("Direction" + label).c_str(), &data_.direction.x, 0.01f);
-                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f);
+                ImGui::DragFloat3(("Direction" + label).c_str(), &data_.direction.x, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f, 0.0f, 0.0f, "%.1f");
             }
         }
         ImGui::End();

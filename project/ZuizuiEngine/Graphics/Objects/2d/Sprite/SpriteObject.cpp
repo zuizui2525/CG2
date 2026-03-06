@@ -99,16 +99,16 @@ void SpriteObject::ImGuiControl(const std::string& name) {
             // --- Sprite特有の設定 (サイズ) ---
             if (ImGui::CollapsingHeader(("Sprite Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 float size[2] = { width_, height_ };
-                if (ImGui::DragFloat2(("Size" + label).c_str(), size, 1.0f)) {
+                if (ImGui::DragFloat2(("Size" + label).c_str(), size, 1.0f, 0.0f, 0.0f, "%.1f")) {
                     SetSize(size[0], size[1]);
                 }
             }
 
             // --- 共通のSRT設定 ---
             if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f);
-                ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
-                ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 1.0f);
+                ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 1.0f, 0.0f, 0.0f, "%.1f");
             }
 
             // --- カラー設定 ---
@@ -118,9 +118,9 @@ void SpriteObject::ImGuiControl(const std::string& name) {
 
             // --- UV設定 (Sprite特有) ---
             if (ImGui::CollapsingHeader(("UV Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::DragFloat2(("uvScale" + label).c_str(), &uvTransform_.scale.x, 0.01f);
-                ImGui::DragFloat(("uvRotate" + label).c_str(), &uvTransform_.rotate.z, 0.01f);
-                ImGui::DragFloat2(("uvTranslate" + label).c_str(), &uvTransform_.translate.x, 0.01f);
+                ImGui::DragFloat2(("uvScale" + label).c_str(), &uvTransform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("uvRotate" + label).c_str(), &uvTransform_.rotate.z, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat2(("uvTranslate" + label).c_str(), &uvTransform_.translate.x, 0.01f, 0.0f, 0.0f, "%.1f");
             }
         }
         ImGui::End();

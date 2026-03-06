@@ -51,9 +51,9 @@ void Object3D::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
 
     if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f);
-        ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f);
-        ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f);
+        ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 0.01f, 0.0f, 0.0f, "%.1f");
     }
 
     if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {

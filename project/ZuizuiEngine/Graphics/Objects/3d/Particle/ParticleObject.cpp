@@ -259,9 +259,9 @@ void ParticleObject::ImGuiSRTControl(const std::string& name) {
     std::string label = "##" + name;
 
     if (ImGui::CollapsingHeader(("Emitter Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::DragFloat3(("scale" + label).c_str(), &emitter_.transform.scale.x, 0.01f);
-        ImGui::DragFloat3(("rotate" + label).c_str(), &emitter_.transform.rotate.x, 0.01f);
-        ImGui::DragFloat3(("Translate" + label).c_str(), &emitter_.transform.translate.x, 0.01f);
+        ImGui::DragFloat3(("scale" + label).c_str(), &emitter_.transform.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("rotate" + label).c_str(), &emitter_.transform.rotate.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("Translate" + label).c_str(), &emitter_.transform.translate.x, 0.01f, 0.0f, 0.0f, "%.1f");
     }
 
     if (ImGui::CollapsingHeader(("Material" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -282,30 +282,30 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
         float max_time = distTime_.b();
 
         ImGui::SeparatorText("Random Ranges");
-        if (ImGui::DragFloat(("Velocity Min" + label).c_str(), &min_dist, 0.1f)) {
+        if (ImGui::DragFloat(("Velocity Min" + label).c_str(), &min_dist, 0.1f, 0.0f, 0.0f, "%.1f")) {
             distribution_ = std::uniform_real_distribution<float>(min_dist, max_dist);
         }
-        if (ImGui::DragFloat(("Velocity Max" + label).c_str(), &max_dist, 0.1f)) {
+        if (ImGui::DragFloat(("Velocity Max" + label).c_str(), &max_dist, 0.1f, 0.0f, 0.0f, "%.1f")) {
             distribution_ = std::uniform_real_distribution<float>(min_dist, max_dist);
         }
-        if (ImGui::DragFloat(("Life Min" + label).c_str(), &min_time, 0.1f)) {
+        if (ImGui::DragFloat(("Life Min" + label).c_str(), &min_time, 0.1f, 0.0f, 0.0f, "%.1f")) {
             distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
         }
-        if (ImGui::DragFloat(("Life Max" + label).c_str(), &max_time, 0.1f)) {
+        if (ImGui::DragFloat(("Life Max" + label).c_str(), &max_time, 0.1f, 0.0f, 0.0f, "%.1f")) {
             distTime_ = std::uniform_real_distribution<float>(min_time, max_time);
         }
 
         ImGui::SeparatorText("Emitter Settings");
         int maxInst = static_cast<int>(numMaxInstance_);
-        if (ImGui::DragInt(("Max Instance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance)) {
+        if (ImGui::DragInt(("Max Instance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance, "%.1f")) {
             SetMaxInstance(static_cast<uint32_t>(maxInst));
         }
 
         int count = static_cast<int>(emitter_.count);
-        if (ImGui::DragInt(("Emit Count" + label).c_str(), &count, 1, 1, numMaxInstance_)) {
+        if (ImGui::DragInt(("Emit Count" + label).c_str(), &count, 1, 1, numMaxInstance_, "%.1f")) {
             emitter_.count = static_cast<uint32_t>(count);
         }
-        ImGui::DragFloat(("Frequency" + label).c_str(), &emitter_.frequency, 0.01f, 0.01f, 10.0f);
+        ImGui::DragFloat(("Frequency" + label).c_str(), &emitter_.frequency, 0.01f, 0.01f, 10.0f, "%.1f");
 
         if (ImGui::Button(("Force Spawn 1 Particle" + label).c_str())) {
             if (numInstance_ < numMaxInstance_) {
@@ -319,9 +319,9 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
 
         if (windActive_) {
             ImGui::Indent();
-            ImGui::DragFloat3(("Field Min" + label).c_str(), &accelerationFeild_.area.min.x, 0.1f);
-            ImGui::DragFloat3(("Field Max" + label).c_str(), &accelerationFeild_.area.max.x, 0.1f);
-            ImGui::DragFloat3(("Acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.1f);
+            ImGui::DragFloat3(("Field Min" + label).c_str(), &accelerationFeild_.area.min.x, 0.1f, 0.0f, 0.0f, "%.1f");
+            ImGui::DragFloat3(("Field Max" + label).c_str(), &accelerationFeild_.area.max.x, 0.1f, 0.0f, 0.0f, "%.1f");
+            ImGui::DragFloat3(("Acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.1f, 0.0f, 0.0f, "%.1f");
             ImGui::Unindent();
         }
 

@@ -25,10 +25,10 @@ void PointLightObject::ImGuiControl(const std::string& name) {
 
             if (ImGui::CollapsingHeader(("PointLight Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::ColorEdit4(("Color" + label).c_str(), &data_.color.x);
-                ImGui::DragFloat3(("Position" + label).c_str(), &data_.position.x, 0.1f);
-                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f);
-                ImGui::DragFloat(("Radius" + label).c_str(), &data_.radius, 0.1f);
-                ImGui::DragFloat(("Decay" + label).c_str(), &data_.decay, 0.01f);
+                ImGui::DragFloat3(("Position" + label).c_str(), &data_.position.x, 0.1f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Intensity" + label).c_str(), &data_.intensity, 0.01f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Radius" + label).c_str(), &data_.radius, 0.1f, 0.0f, 0.0f, "%.1f");
+                ImGui::DragFloat(("Decay" + label).c_str(), &data_.decay, 0.01f, 0.0f, 0.0f, "%.1f");
             }
         }
         ImGui::End();
