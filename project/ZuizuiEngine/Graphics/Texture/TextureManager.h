@@ -10,7 +10,7 @@ public:
     ~TextureManager() = default;
 
     // 初期化
-    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12DescriptorHeap* srvHeap);
+    void Initialize();
 
     // テクスチャをロードして登録（同じ名前ならスキップ）
     void LoadTexture(const std::string& name, const std::string& filePath);

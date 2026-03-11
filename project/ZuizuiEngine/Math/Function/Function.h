@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800 // 念のため（DirectXTex 内で参照される可能性）
+#endif
 
 #include <cstdint>
 #include <string>

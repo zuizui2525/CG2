@@ -1,9 +1,13 @@
 #include "DebugCamera.h"
 #include <algorithm>
 #include "imgui.h"
+#include "BaseResource.h"
+#include "Zuizui.h"
 
 void DebugCamera::Initialize() {
     BaseCamera::Initialize();
+    hwnd_ = EngineResource::GetEngine()->GetWindow()->GetHWND();
+    assert(hwnd_ != nullptr);
 }
 
 void DebugCamera::Update(Input* input) {
@@ -76,16 +80,30 @@ void DebugCamera::SetActive(bool active) {
     }
 }
 
-void DebugCamera::ImGuiControl() {
-#ifdef _USEIMGUI
-    ImGui::Begin("Debug Camera Guide");
-    ImGui::Text("Mode: FPS Control");
-    ImGui::Separator();
-    ImGui::BulletText("Move: W, A, S, D, SPACE, LSHIFT");
-    ImGui::BulletText("Look: Mouse Move (Always active)");
-    ImGui::BulletText("Switch Mode: TAB");
-    ImGui::Spacing();
-    ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "Cursor is HIDDEN and LOCKED");
-    ImGui::End();
-#endif
+void DebugCamera::ImGuiControl(const std::string& name) {
+    // 1. まず親クラスの共通 UI（座標・回転・Editチェックボックス）を表示
+    BaseCamera::ImGuiControl(name);
+
+    // 2. ウィンドウが開いていて、かつアクティブな時だけ操作ガイドを出す
+    if (isWindowOpen_) {
+        // BaseCamera側で Begin が呼ばれているので、同じ名前で Begin すれば中身を追記できる
+        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
+
+            std::string tag = "##" + name;
+
+            // 操作設定セクション
+            if (ImGui::CollapsingHeader(("Controller Settings" + tag).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                // 移動速度もライトの強さ(Intensity)のように %.1f で調整可能にする
+                ImGui::DragFloat(("Move Speed" + tag).c_str(), &moveSpeed_, 0.01f, 0.01f, 2.0f, "%.2f");
+
+                ImGui::Separator();
+                ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "Controls:");
+                ImGui::BulletText("W/A/S/D : Move");
+                ImGui::BulletText("Space/LShift : Up/Down");
+                ImGui::BulletText("Mouse : Rotate (Auto-lock)");
+                ImGui::TextDisabled("(Press TAB to release mouse/switch camera)");
+            }
+        }
+        ImGui::End();
+    }
 }

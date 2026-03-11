@@ -8,6 +8,7 @@ public:
 
     virtual void Initialize();
     virtual void Update();
+    virtual void ImGuiControl(const std::string& name);
 
     // 座標・回転の操作
     void SetPosition(const Vector3& pos) { transform_.translate = pos; }
@@ -21,7 +22,7 @@ public:
         useTarget_ = true;
     }
     void DisableTarget() { useTarget_ = false; }
-
+    
     // 行列取得
     const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }
     const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }
@@ -30,6 +31,13 @@ protected:
     Transform transform_;
     Matrix4x4 viewMatrix_;
     Matrix4x4 projectionMatrix_;
+
+    bool isWindowOpen_ = false;
+
+    float fov_ = 0.45f;
+    float aspectRatio_ = 16.0f / 9.0f;
+    float nearZ_ = 0.1f;
+    float farZ_ = 1000.0f;
 
     Vector3 target_ = { 0.0f, 0.0f, 0.0f };
     bool useTarget_ = false;

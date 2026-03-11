@@ -15,8 +15,9 @@ public:
         float padding;
     };
 
-    void Initialize(ID3D12Device* device);
+    void Initialize();
     void Update();
+    void ImGuiControl();
 
     // --- カメラ管理 ---
     void AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera);

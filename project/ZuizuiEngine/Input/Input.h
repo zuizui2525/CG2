@@ -10,7 +10,7 @@ public:
     ~Input();
 
     // 初期化（キーボード + マウス）
-    void Initialize(HINSTANCE hInstance, HWND hwnd);
+    void Initialize();
 
     // 毎フレーム更新
     void Update();

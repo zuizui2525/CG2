@@ -7,10 +7,10 @@ void App::Initialize() {
     EngineResource::SetEngine(engine_);
 
     input_ = std::make_unique<Input>();
-    input_->Initialize(engine_->GetWindow()->GetInstance(), engine_->GetWindow()->GetHWND());
+    input_->Initialize();
 
     cameraMgr_ = std::make_unique<CameraManager>();
-    cameraMgr_->Initialize(engine_->GetDevice());
+    cameraMgr_->Initialize();
     CameraResource::SetCameraManager(cameraMgr_.get());
 
     lightMgr_ = std::make_unique<LightManager>();
@@ -18,11 +18,11 @@ void App::Initialize() {
     LightResource::SetLightManager(lightMgr_.get());
 
     texMgr_ = std::make_unique<TextureManager>();
-    texMgr_->Initialize(engine_->GetDevice(), engine_->GetDxCommon()->GetCommandList(), engine_->GetDxCommon()->GetSrvHeap());
+    texMgr_->Initialize();
     TextureResource::SetTextureManager(texMgr_.get());
 
     modelMgr_ = std::make_unique<ModelManager>();
-    modelMgr_->Initialize(engine_->GetDevice(), texMgr_.get());
+    modelMgr_->Initialize();
     ModelResource::SetModelManager(modelMgr_.get());
 
     // テクスチャ
@@ -44,7 +44,6 @@ void App::Initialize() {
 
     debugCamera_ = std::make_shared<DebugCamera>();
     debugCamera_->Initialize();
-    debugCamera_->SetHwnd(engine_->GetWindow()->GetHWND());
     cameraMgr_->AddCamera("Debug", debugCamera_);
 
     // 初期カメラの設定
@@ -113,7 +112,7 @@ void App::Run() {
     // --- ImGui ---
 #ifdef _USEIMGUI
     engine_->ImGuiBegin();
-    debugCamera_->ImGuiControl();
+    cameraMgr_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
     dirLight2_->ImGuiControl("dirLight2");
     pointLight_->ImGuiControl("pointLight");
@@ -134,12 +133,16 @@ void App::Run() {
     // 1. システム入力の更新 (最優先)
     input_->Update();
 
-    // 2. モード切り替えなどの判定
+    // 2. モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
-        static bool isDebug = false;
-        isDebug = !isDebug;
-        cameraMgr_->SetActiveCamera(isDebug ? "Debug" : "Main");
-        debugCamera_->SetActive(isDebug);
+        // 現在アクティブなカメラが Debug かどうかで判断
+        bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
+
+        if (isCurrentlyDebug) {
+            cameraMgr_->SetActiveCamera("Main");
+        } else {
+            cameraMgr_->SetActiveCamera("Debug");
+        }
     }
 
     // 3. ゲームロジック（オブジェクトやライト）の更新
@@ -161,11 +164,17 @@ void App::Run() {
     sprite_->Update();
 
     // 4. カメラの更新 (描画の直前に行う)
-    // アクティブなカメラだけを動かす
-    if (cameraMgr_->GetActiveCamera() == debugCamera_.get()) {
-        debugCamera_->Update(input_.get());
+    BaseCamera* active = cameraMgr_->GetActiveCamera();
+    DebugCamera* dc = dynamic_cast<DebugCamera*>(active);
+
+    if (dc) {
+        // デバッグカメラなら、操作を有効化してUpdateを呼ぶ
+        dc->SetActive(true);
+        dc->Update(input_.get());
     } else {
-        mainCamera_->Update();
+        // それ以外のカメラ（Main等）なら、デバッグカメラの入力を切る
+        debugCamera_->SetActive(false);
+        active->Update();
     }
 
     // 5. カメラマネージャの最終処理 (定数バッファ転送など)

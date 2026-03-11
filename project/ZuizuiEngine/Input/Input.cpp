@@ -1,4 +1,6 @@
 #include "Input.h"
+#include "Zuizui.h"
+#include "BaseResource.h"
 #include <cassert>
 #include <cstring>
 #pragma comment(lib, "dinput8.lib")
@@ -16,30 +18,43 @@ Input::~Input() {
     if (mouse_) mouse_->Unacquire();
 }
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
+void Input::Initialize() {
+    // 1. EngineResourceから必要な情報を取得
+    auto engine = EngineResource::GetEngine();
+    assert(engine != nullptr);
+
+    // 2. DirectInput8Create (ComPtrの扱いを修正)
     HRESULT hr = DirectInput8Create(
-        hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-        (void**)&directInput_, nullptr);
+        engine->GetWindow()->GetInstance(),
+        DIRECTINPUT_VERSION,
+        IID_IDirectInput8,
+        (void**)directInput_.GetAddressOf(), // &ではなくGetAddressOf()を使う
+        nullptr);
     assert(SUCCEEDED(hr));
 
-    // ==== キーボード ====
-    hr = directInput_->CreateDevice(GUID_SysKeyboard, &keyboard_, NULL);
+    // 3. キーボードデバイスの作成
+    hr = directInput_->CreateDevice(GUID_SysKeyboard, keyboard_.GetAddressOf(), NULL);
     assert(SUCCEEDED(hr));
 
     hr = keyboard_->SetDataFormat(&c_dfDIKeyboard);
     assert(SUCCEEDED(hr));
 
-    hr = keyboard_->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+    // engine経由でHWNDを取得
+    hr = keyboard_->SetCooperativeLevel(
+        engine->GetWindow()->GetHWND(),
+        DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
     assert(SUCCEEDED(hr));
 
-    // ==== マウス ====
-    hr = directInput_->CreateDevice(GUID_SysMouse, &mouse_, NULL);
+    // 4. マウスデバイスの作成
+    hr = directInput_->CreateDevice(GUID_SysMouse, mouse_.GetAddressOf(), NULL);
     assert(SUCCEEDED(hr));
 
     hr = mouse_->SetDataFormat(&c_dfDIMouse2);
     assert(SUCCEEDED(hr));
 
-    hr = mouse_->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+    hr = mouse_->SetCooperativeLevel(
+        engine->GetWindow()->GetHWND(),
+        DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
     assert(SUCCEEDED(hr));
 }
 

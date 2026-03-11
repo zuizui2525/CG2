@@ -12,7 +12,7 @@ public:
     ModelManager() = default;
     ~ModelManager() = default;
 
-    void Initialize(ID3D12Device* device, TextureManager* texMgr);
+    void Initialize();
     void LoadModel(const std::string& name, const std::string& filename);
     std::shared_ptr<ModelData> GetModelData(const std::string& name) const;
     void Clear();

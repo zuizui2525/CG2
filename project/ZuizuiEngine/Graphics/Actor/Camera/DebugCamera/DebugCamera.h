@@ -12,9 +12,7 @@ public:
     void Update() override {}
 
     // ImGuiでのガイド表示
-    void ImGuiControl();
-
-    void SetHwnd(HWND hwnd) { hwnd_ = hwnd; }
+    void ImGuiControl(const std::string& name);
 
     // カーソル表示・非表示を外部から強制的に変える（カメラ切り替え時用）
     void SetCursorVisible(bool isVisible);

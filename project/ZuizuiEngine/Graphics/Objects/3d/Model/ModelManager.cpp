@@ -1,9 +1,18 @@
 #include "ModelManager.h"
 #include "TextureManager.h"
 #include "Function.h"
+#include "Zuizui.h"
+#include "BaseResource.h"
 
-void ModelManager::Initialize(ID3D12Device* device, TextureManager* texMgr) {
-    device_ = device;
+void ModelManager::Initialize() {
+    // Engine
+    auto engine = EngineResource::GetEngine();
+    assert(engine != nullptr);
+    device_ = engine->GetDevice();
+
+    // TexMgr
+    auto texMgr = TextureResource::GetTextureManager();
+    assert(texMgr != nullptr);
     texMgr_ = texMgr;
 }
 

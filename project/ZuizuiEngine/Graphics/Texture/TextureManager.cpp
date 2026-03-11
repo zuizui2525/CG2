@@ -1,9 +1,15 @@
 #include "TextureManager.h"
+#include "Zuizui.h"
+#include "BaseResource.h"
 
-void TextureManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12DescriptorHeap* srvHeap) {
-    device_ = device;
-    commandList_ = commandList;
-    srvHeap_ = srvHeap;
+void TextureManager::Initialize() {
+    // Engine
+    auto engine = EngineResource::GetEngine();
+    assert(engine != nullptr);
+
+    device_ = engine->GetDevice();
+    commandList_ = engine->GetDxCommon()->GetCommandList();
+    srvHeap_ = engine->GetDxCommon()->GetSrvHeap();
 }
 
 void TextureManager::LoadTexture(const std::string& name, const std::string& filePath) {
