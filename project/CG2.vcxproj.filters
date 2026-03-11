@@ -246,6 +246,10 @@
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.cpp" />
+    <ClCompile Include="memo.cpp" />
+    <ClCompile Include="App\Scene\SceneManager.cpp" />
+    <ClCompile Include="App\Scene\DebugScene.cpp" />
+    <ClCompile Include="App\Scene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -387,6 +391,11 @@
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.h" />
+    <ClInclude Include="memo.h" />
+    <ClInclude Include="App\Scene\IScene.h" />
+    <ClInclude Include="App\Scene\SceneManager.h" />
+    <ClInclude Include="App\Scene\DebugScene.h" />
+    <ClInclude Include="App\Scene\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

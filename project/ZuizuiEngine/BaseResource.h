@@ -1,6 +1,7 @@
 #pragma once
 
 class Zuizui;
+class Input;
 class CameraManager;
 class LightManager;
 class TextureManager;
@@ -12,6 +13,14 @@ public:
     static Zuizui* GetEngine();
 protected:
     static Zuizui* sEngine;
+};
+
+class InputResource {
+public:
+    static void SetInput(Input* input) { sInput = input; }
+    static Input* GetInput();
+protected:
+    static Input* sInput;
 };
 
 class TextureResource {

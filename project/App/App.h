@@ -2,18 +2,12 @@
 #include <memory>
 #include <vector>
 #include "Zuizui.h"
-#include "CameraManager.h"
-#include "DebugCamera.h"
-#include "LightManager.h"
 #include "Input.h"
+#include "CameraManager.h"
+#include "LightManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "BaseResource.h"
-#include "ModelObject.h"
-#include "SphereObject.h"
-#include "SpriteObject.h"
-#include "TriangleObject.h"
-#include "ParticleObject.h"
 
 class App {
 public:
@@ -33,24 +27,5 @@ private:
     std::unique_ptr<LightManager> lightMgr_;
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
-
-    // ゲームオブジェクト
-    std::shared_ptr<DebugCamera> debugCamera_;
-    std::shared_ptr<BaseCamera> mainCamera_;
-
-    std::unique_ptr<DirectionalLightObject> dirLight_;
-    std::unique_ptr<DirectionalLightObject> dirLight2_;
-    std::unique_ptr<PointLightObject> pointLight_;
-    std::unique_ptr<PointLightObject> pointLight2_;
-    std::unique_ptr<SpotLightObject> spotLight_;
-
-    std::unique_ptr<ModelObject> skydome_;
-    std::unique_ptr<ModelObject> teapot_;
-    std::unique_ptr<ModelObject> bunny_;
-    std::unique_ptr<ModelObject> terrain_;
-    std::unique_ptr<SphereObject> sphere_;
-    std::unique_ptr<TriangleObject> triangle_;
-    std::unique_ptr<ParticleObject> particle_;
-    std::unique_ptr<SpriteObject> sprite_;
 };
 
