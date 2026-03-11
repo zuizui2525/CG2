@@ -81,6 +81,7 @@ void DebugCamera::SetActive(bool active) {
 }
 
 void DebugCamera::ImGuiControl(const std::string& name) {
+#ifdef _USEIMGUI
     // 1. まず親クラスの共通 UI（座標・回転・Editチェックボックス）を表示
     BaseCamera::ImGuiControl(name);
 
@@ -106,4 +107,5 @@ void DebugCamera::ImGuiControl(const std::string& name) {
         }
         ImGui::End();
     }
+#endif
 }
