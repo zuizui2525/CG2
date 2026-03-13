@@ -38,3 +38,9 @@ void LightManager::Update() {
         spotLightData_->lights[i] = spotLights_[i]->GetLightData();
     }
 }
+
+void LightManager::Clear() {
+    directionalLights_.clear();
+    pointLights_.clear();
+    spotLights_.clear();
+}

@@ -68,6 +68,11 @@ void CameraManager::ImGuiControl() {
 #endif
 }
 
+void CameraManager::Clear() {
+    cameras_.clear();
+    activeCamera_ = nullptr;
+}
+
 void CameraManager::AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera) {
     cameras_[name] = camera;
 

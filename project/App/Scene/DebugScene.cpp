@@ -88,7 +88,7 @@ void DebugScene::Initialize() {
     sprite_->SetSize(300.0f, 300.0f);
 }
 
-void DebugScene::Update() {
+void DebugScene::ImGuiControl() {
 #ifdef _USEIMGUI
     // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
@@ -106,7 +106,9 @@ void DebugScene::Update() {
     particle_->ImGuiControl("particle");
     sprite_->ImGuiControl("sprite");
 #endif
+}
 
+void DebugScene::Update() {
     // モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());

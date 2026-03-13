@@ -8,6 +8,7 @@
 class TitleScene : public IScene {
 public:
     void Initialize() override;
+    void ImGuiControl() override;
     void Update() override;
     void Draw() override;
 

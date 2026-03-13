@@ -11,6 +11,7 @@ public:
     // Appクラスのメインループから呼ばれる
     void Update();
     void Draw();
+    void ImGuiControl();
 
     // シーン切り替え予約
     // 次のフレームのUpdate冒頭で新しいシーンを生成する

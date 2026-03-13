@@ -10,6 +10,7 @@ class LightManager {
 public:
     void Initialize();
     void Update();
+    void Clear();
 
     // ライトの追加窓口
     void AddDirectionalLight(DirectionalLightObject* light) { directionalLights_.push_back(light); }

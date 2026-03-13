@@ -26,6 +26,10 @@ void TitleScene::Initialize() {
     bunny_->Initialize();
 }
 
+void TitleScene::ImGuiControl() {
+
+}
+
 void TitleScene::Update() {
     // ライトとオブジェクトの更新
     dirLight_->Update();
@@ -48,5 +52,5 @@ void TitleScene::Update() {
 
 void TitleScene::Draw() {
     // バニーの描画
-    bunny_->Draw("bunny");
+    bunny_->Draw("bunny", "bunny");
 }

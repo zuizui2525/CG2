@@ -25,6 +25,7 @@ class DebugScene : public IScene {
 public:
     // 初期化・更新・描画のオーバーライド
     void Initialize() override;
+    void ImGuiControl() override;
     void Update() override;
     void Draw() override;
 

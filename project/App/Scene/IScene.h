@@ -14,4 +14,7 @@ public:
 
     // 毎フレームの描画処理（描画コマンドの発行）
     virtual void Draw() = 0;
+
+    // ImGuiコントロールの処理
+    virtual void ImGuiControl() = 0;
 };

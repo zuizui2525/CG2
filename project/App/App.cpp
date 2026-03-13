@@ -1,6 +1,7 @@
 #include "App.h"
 #include "SceneManager.h"
 #include "DebugScene.h"
+#include "TitleScene.h"
 
 void App::Initialize() {
     // システム
@@ -43,11 +44,11 @@ void App::Run() {
         SceneManager::GetInstance()->ChangeScene<DebugScene>("Debug");
     }
     if (ImGui::Button("Reset TitleScene")) {
-        SceneManager::GetInstance()->ChangeScene<DebugScene>("Title");
+        SceneManager::GetInstance()->ChangeScene<TitleScene>("Title");
     }
     ImGui::End();
 
-    SceneManager::GetInstance()->Update();
+    SceneManager::GetInstance()->ImGuiControl();
 
     engine_->ImGuiEnd();
 #endif
@@ -56,6 +57,8 @@ void App::Run() {
     input_->Update();
     cameraMgr_->Update();
     lightMgr_->Update();
+
+    SceneManager::GetInstance()->Update();
 
     // --- 描画 ---
     engine_->BeginFrame();

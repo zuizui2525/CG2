@@ -18,6 +18,7 @@ public:
     void Initialize();
     void Update();
     void ImGuiControl();
+    void Clear();
 
     // --- カメラ管理 ---
     void AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera);
