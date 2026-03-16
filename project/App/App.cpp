@@ -1,7 +1,6 @@
 #include "App.h"
 #include "SceneManager.h"
-#include "DebugScene.h"
-#include "TitleScene.h"
+#include "SceneFactory.h"
 
 void App::Initialize() {
     // システム
@@ -29,7 +28,9 @@ void App::Initialize() {
     modelMgr_->Initialize();
     ModelResource::SetModelManager(modelMgr_.get());
 
-    SceneManager::GetInstance()->ChangeScene<DebugScene>("Debug");
+    sceneFactory_ = std::make_unique<SceneFactory>();
+    SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
+    SceneManager::GetInstance()->ChangeScene("Debug");
 }
 
 void App::Run() {
@@ -41,10 +42,10 @@ void App::Run() {
     ImGui::Begin("Scene Manager");
     ImGui::Text("Current Scene: %s", SceneManager::GetInstance()->GetCurrentSceneName().c_str());
     if (ImGui::Button("Reset DebugScene")) {
-        SceneManager::GetInstance()->ChangeScene<DebugScene>("Debug");
+        SceneManager::GetInstance()->ChangeScene("Debug");
     }
     if (ImGui::Button("Reset TitleScene")) {
-        SceneManager::GetInstance()->ChangeScene<TitleScene>("Title");
+        SceneManager::GetInstance()->ChangeScene("Title");
     }
     ImGui::End();
 

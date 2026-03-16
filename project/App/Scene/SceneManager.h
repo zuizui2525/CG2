@@ -2,28 +2,40 @@
 #include <memory>
 #include <string>
 #include "IScene.h"
+#include "AbstractSceneFactory.h" // 抽象工場をインクルード
 
+/**
+ * @brief シーン管理クラス（シングルトン）
+ * * 指摘ポイント：
+ * 1. テンプレートによる生成を廃止し、Factory経由に変更。
+ * 2. 具体的なシーンクラスをインクルードしない（依存性逆転）。
+ */
 class SceneManager {
 public:
-    // シングルトンインスタンスの取得
     static SceneManager* GetInstance();
 
-    // Appクラスのメインループから呼ばれる
     void Update();
     void Draw();
     void ImGuiControl();
 
-    // シーン切り替え予約
-    // 次のフレームのUpdate冒頭で新しいシーンを生成する
-    template <typename T>
+    /**
+     * @brief 次のシーンを名前で予約する
+     * 旧：template <typename T> void ChangeScene(...)
+     * 新：文字列のみを受け取る
+     */
     void ChangeScene(const std::string& sceneName) {
-        nextScene_ = std::make_unique<T>();
         nextSceneName_ = sceneName;
     }
 
-    void ClearCurrentScene() { currentScene_.reset(); }
+    /**
+     * @brief 使用する工場（Factory）を設定する
+     * アプリ起動時に一回呼ぶ必要がある
+     */
+    void SetSceneFactory(AbstractSceneFactory* factory) {
+        sceneFactory_ = factory;
+    }
 
-    // デバッグ表示用に現在のシーン名を取得
+    void ClearCurrentScene() { currentScene_.reset(); }
     const std::string& GetCurrentSceneName() const { return currentSceneName_; }
 
 private:
@@ -32,8 +44,11 @@ private:
     SceneManager(const SceneManager&) = delete;
     SceneManager& operator=(const SceneManager&) = delete;
 
-    std::unique_ptr<IScene> currentScene_ = nullptr; // 現在実行中のシーン
-    std::unique_ptr<IScene> nextScene_ = nullptr;    // 切り替え予約された次のシーン
-    std::string currentSceneName_ = "None";          // 現在のシーン名
-    std::string nextSceneName_ = "";                 // 次のシーン名の予約
+    // 現在使用中の工場へのポインタ
+    AbstractSceneFactory* sceneFactory_ = nullptr;
+
+    std::unique_ptr<IScene> currentScene_ = nullptr;
+    std::unique_ptr<IScene> nextScene_ = nullptr;
+    std::string currentSceneName_ = "None";
+    std::string nextSceneName_ = "";
 };

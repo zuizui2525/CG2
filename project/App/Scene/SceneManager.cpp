@@ -15,22 +15,33 @@ void SceneManager::ImGuiControl() {
 }
 
 void SceneManager::Update() {
-    // 次のシーンが予約されていたら切り替える
-    if (nextScene_) {
-        // ライトとカメラのリセット
-        CameraResource::GetCameraManager()->Clear();
-        LightResource::GetLightManager()->Clear();
-        // currentScene_に代入することで、古いシーンは自動的に破棄される
-        currentScene_ = std::move(nextScene_);
-        currentSceneName_ = nextSceneName_;
+    // 次のシーン名が入っていたら切り替え処理を行う
+    if (!nextSceneName_.empty()) {
 
-        // 新しいシーンの初期化
-        currentScene_->Initialize();
+        // 工場がセットされていない場合はエラー（または早期リターン）
+        if (!sceneFactory_) return;
 
-        nextScene_ = nullptr;
+        // 【Factory Methodパターンの核心】
+        // 名前（文字列）を工場に渡し、具体的なクラスを意識せずにインスタンスを得る
+        nextScene_ = sceneFactory_->CreateScene(nextSceneName_);
+
+        if (nextScene_) {
+            // ライトとカメラのリセット
+            CameraResource::GetCameraManager()->Clear();
+            LightResource::GetLightManager()->Clear();
+
+            // 古いシーンを破棄して新しいシーンへ
+            currentScene_ = std::move(nextScene_);
+            currentSceneName_ = nextSceneName_;
+
+            // 新しいシーンの初期化
+            currentScene_->Initialize();
+        }
+
+        // 予約名をクリア
+        nextSceneName_.clear();
     }
 
-    // 現在のシーンがあれば更新を実行
     if (currentScene_) {
         currentScene_->Update();
     }

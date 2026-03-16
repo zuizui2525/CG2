@@ -8,6 +8,7 @@
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "BaseResource.h"
+#include "AbstractSceneFactory.h"
 
 class App {
 public:
@@ -27,5 +28,6 @@ private:
     std::unique_ptr<LightManager> lightMgr_;
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
+    std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 };
 
