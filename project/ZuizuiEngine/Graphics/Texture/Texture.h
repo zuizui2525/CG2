@@ -2,7 +2,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <string>
-#include "Function.h"
+#include "DirectXTex.h"
 
 class Texture {
 public:
@@ -24,6 +24,16 @@ public:
     D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle() const;
 
 private:
+    DirectX::ScratchImage LoadTextureFile(const std::string& filePath);
+
+    [[nodiscard]]
+    static Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(
+        ID3D12Device* device, const DirectX::TexMetadata& metadata);
+    
+    [[nodiscard]]
+    Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(
+        ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+
     Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource_;
     DirectX::TexMetadata metadata_;

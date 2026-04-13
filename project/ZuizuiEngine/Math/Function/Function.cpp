@@ -56,52 +56,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-// テクスチャを読み込む関数
-DirectX::ScratchImage LoadTexture(const std::string& filePath) {
-	// テクスチャファイルを読んでプログラムで扱えるようにする
-	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-	// ミニマップの作成
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
-
-	// ミップマップ付きのデータを返す
-	return mipImages;
-}
-
-// テクスチャリソースの生成
-[[nodiscard]]
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata) {
-	// 1.metadataを基にResourceの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = UINT(metadata.width); // Textureの幅
-	resourceDesc.Height = UINT(metadata.height); // Textureの高さ
-	resourceDesc.MipLevels = UINT16(metadata.mipLevels); // MipMapの数
-	resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize); // Textureの深さ
-	resourceDesc.Format = metadata.format; // Textureのフォーマット
-	resourceDesc.SampleDesc.Count = 1; // マルチサンプリングの数。1はマルチサンプリングなし
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension); // Textureの次元
-	// 2.利用するheapの設定。
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-	// 3.Resourceの生成
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr; // ResourceをComPtrで宣言
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties, // ヒープの設定
-		D3D12_HEAP_FLAG_NONE, // ヒープのフラグ。特になし
-		&resourceDesc, // Resourceの設定
-		D3D12_RESOURCE_STATE_COPY_DEST, // Resourceの初期状態。
-		nullptr, // テクスチャの初期化情報, 使わないのでnullptr
-		IID_PPV_ARGS(&resource)); // ComPtrの&演算子オーバーロードを利用
-	// Resourceの生成に失敗したので起動できない
-	assert(SUCCEEDED(hr)); // 失敗したらassertで止める
-	return resource; // ComPtr<ID3D12Resource>を返す
-}
-
 // バッファリソースを作成する関数
 [[nodiscard]]
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
@@ -127,26 +81,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device
 		IID_PPV_ARGS(&resource)); // ComPtrの&演算子オーバーロードを利用
 	assert(SUCCEEDED(hr));
 	return resource; // ComPtr<ID3D12Resource>を返す
-}
-
-// テクスチャデータを転送する関数
-Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList) {
-	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = CreateBufferResource(device, intermediateSize);
-	// UpdateSubresourcesには生のポインタを渡すため.Get()を使用
-	UpdateSubresources(commandList, texture, intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
-	// Textureへの転送後は利用できるように、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更すること
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // Resourceの状態を変更する
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグは特になし
-	barrier.Transition.pResource = texture; // Resourceのポインタ
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全てのサブリソースを変更
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST; // 変更前の状態
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ; // 変更後の状態
-	commandList->ResourceBarrier(1, &barrier); // Resourceの状態を変更する
-	return intermediateResource; // 転送用のResource(ComPtr)を返す
 }
 
 // ダンプファイルの生成

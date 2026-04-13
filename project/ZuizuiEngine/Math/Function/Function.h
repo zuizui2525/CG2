@@ -45,19 +45,9 @@ std::string ConvertString(const std::wstring& str);
 // ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// テクスチャを読み込む関数
-DirectX::ScratchImage LoadTexture(const std::string& filePath);
-
-// テクスチャリソースの生成
-[[nodiscard]]
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
-
 // バッファリソースを作成する関数
 [[nodiscard]]
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
-
-// テクスチャデータを転送する関数
-Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 
 // ダンプファイルの生成
 LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception);
