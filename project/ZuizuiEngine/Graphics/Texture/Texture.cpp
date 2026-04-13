@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "d3dx12.h"
 #include "Function.h"
+#include "../../Base/Utils/StringUtility.h"
 #include <cassert>
 
 Texture::Texture() {}

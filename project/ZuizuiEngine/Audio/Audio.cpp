@@ -1,5 +1,6 @@
 #include "Audio.h"
 #include "Function.h"
+#include "../Base/Utils/StringUtility.h"
 #include <iostream>
 #pragma comment(lib, "Mfplat.lib")
 #pragma comment(lib, "mfreadwrite.lib")

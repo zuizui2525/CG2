@@ -250,6 +250,7 @@
     <ClCompile Include="App\Scene\DebugScene.cpp" />
     <ClCompile Include="App\Scene\TitleScene.cpp" />
     <ClCompile Include="App\Scene\SceneFactory.cpp" />
+    <ClCompile Include="ZuizuiEngine\Base\Utils\StringUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -397,6 +398,7 @@
     <ClInclude Include="App\Scene\TitleScene.h" />
     <ClInclude Include="App\Scene\AbstractSceneFactory.h" />
     <ClInclude Include="App\Scene\SceneFactory.h" />
+    <ClInclude Include="ZuizuiEngine\Base\Utils\StringUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

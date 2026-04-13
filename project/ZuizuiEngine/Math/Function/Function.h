@@ -36,11 +36,6 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// string->wstring変換
-std::wstring ConvertString(const std::string& str);
-
-// wstring->string変換
-std::string ConvertString(const std::wstring& str);
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
