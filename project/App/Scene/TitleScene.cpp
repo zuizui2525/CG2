@@ -37,17 +37,6 @@ void TitleScene::Update() {
 
     // カメラ本体の更新
     mainCamera_->Update();
-
-    // もしApp側で cameraMgr_->Update() などを呼んでいない場合はここで呼ぶ
-    // cameraMgr_->Update();
-
-    // 特定のキー（例：SPACE）でDebugSceneへ移るなら
-    /*
-    auto input = InputResource::GetInput();
-    if (input->Trigger(DIK_SPACE)) {
-        SceneManager::GetInstance()->ChangeScene<DebugScene>("Debug");
-    }
-    */
 }
 
 void TitleScene::Draw() {
