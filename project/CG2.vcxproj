@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="App\Scene\TitleScene.cpp" />
     <ClCompile Include="App\Scene\SceneFactory.cpp" />
     <ClCompile Include="ZuizuiEngine\Base\Utils\StringUtility.cpp" />
+    <ClCompile Include="ZuizuiEngine\Base\Utils\DumpExporter.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.cpp" />
     <ClCompile Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.cpp" />
@@ -255,6 +256,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="App\Scene\TitleScene.h" />
     <ClInclude Include="App\Scene\SceneFactory.h" />
     <ClInclude Include="ZuizuiEngine\Base\Utils\StringUtility.h" />
+    <ClInclude Include="ZuizuiEngine\Base\Utils\DumpExporter.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\CameraManager\CameraManager.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Camera\BaseCamera\BaseCamera.h" />
     <ClInclude Include="ZuizuiEngine\Graphics\Actor\Light\LightManager\LightManager.h" />

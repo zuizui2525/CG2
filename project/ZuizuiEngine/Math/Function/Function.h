@@ -15,8 +15,6 @@
 #include <Windows.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
-#include <dbghelp.h>
-#include <strsafe.h>
 #include <wrl.h>
 #include <dxcapi.h>
 
@@ -30,7 +28,6 @@
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxcompiler.lib")
 
@@ -44,8 +41,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 [[nodiscard]]
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
-// ダンプファイルの生成
-LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception);
 
 // Dumpを出力する関数
 Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
