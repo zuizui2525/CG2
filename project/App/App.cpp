@@ -5,7 +5,7 @@
 void App::Initialize() {
     // システム
     engine_ = Zuizui::GetInstance();
-    engine_->Initialize(L"LE2B_02_イトウカズイ");
+    engine_->Initialize(L"LE3B_02_イトウカズイ");
     EngineResource::SetEngine(engine_);
 
     input_ = std::make_unique<Input>();

@@ -1,5 +1,5 @@
 #include "App.h"
-#include "ZuizuiEngine/Base/Utils/DumpExporter.h"
+#include "Engine/Base/Utils/DumpExporter.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // リークチェック
