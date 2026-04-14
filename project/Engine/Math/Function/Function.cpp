@@ -8,26 +8,7 @@
 Log logger;
 
 
-// ウィンドウプロシージャ
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-#ifdef _USEIMGUI
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
-		return true;
-	}
-#endif
 
-	// メッセージに応じてゲーム固有の処理を行う
-	switch (msg) {
-		// ウィンドウが廃棄された
-	case WM_DESTROY:
-		// OSに対して、アプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	// 標準のメッセージ処理を行う
-	return DefWindowProc(hWnd, msg, wParam, lParam);
-}
 
 // バッファリソースを作成する関数
 [[nodiscard]]
