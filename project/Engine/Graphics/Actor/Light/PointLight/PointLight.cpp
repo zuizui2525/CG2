@@ -1,5 +1,5 @@
 #include "PointLight.h"
-#include "imgui.h" // ImGuiを使う場合
+#include "ImGuiManager.h"
 
 void PointLightObject::Initialize() {
     data_.color = { 1.0f, 1.0f, 1.0f, 1.0f };

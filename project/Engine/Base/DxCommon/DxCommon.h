@@ -1,5 +1,20 @@
 #pragma once
-#include "Function.h"
+#include <cstdint>
+#include <cassert>
+#include <chrono>
+
+#include <Windows.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <wrl.h>
+#include <dxcapi.h>
+
+#include "imgui_impl_dx12.h"
+
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxcompiler.lib")
 
 class DxCommon {
 public:

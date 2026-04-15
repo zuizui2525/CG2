@@ -1,5 +1,5 @@
 #include "ParticleObject.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "Matrix.h" 
 #include "Zuizui.h"
 #include "CameraManager.h"
@@ -45,7 +45,7 @@ void ParticleObject::CreateInstanceResource() {
     // 1. インスタンスデータ用リソースの作成
     // numMaxInstance_ が変化したときだけここに来る
     size_t bufferSize = sizeof(ParticleForGPU) * numMaxInstance_;
-    instanceResource_ = CreateBufferResource(device, bufferSize);
+    instanceResource_ = DxUtils::CreateBufferResource(device, bufferSize);
     if (!instanceResource_) throw std::runtime_error("Failed to create instanceResource_");
 
     HRESULT hr = instanceResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceData_));
@@ -53,8 +53,8 @@ void ParticleObject::CreateInstanceResource() {
 
     // 2. 固定された mySrvIndex_ を使用してハンドルを取得
     // これにより、kDescriptorIndex が無限に増えるのを防ぎます
-    instanceSrvHandleCPU_ = GetCPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
-    instanceSrvHandleGPU_ = GetGPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
+    instanceSrvHandleCPU_ = DxUtils::GetCPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
+    instanceSrvHandleGPU_ = DxUtils::GetGPUDescriptorHandle(srvHeap, descriptorSize, mySrvIndex_);
 
     // 3. SRVの設定
     D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
@@ -89,7 +89,7 @@ void ParticleObject::Initialize(int lightingMode) {
     accelerationFeild_.area.max = { 10.0f, 10.0f, 30.0f };
 
     // --- Materialリソースの作成 ---
-    materialResource_ = CreateBufferResource(device, sizeof(Material));
+    materialResource_ = DxUtils::CreateBufferResource(device, sizeof(Material));
     if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
 
     HRESULT hr_mat = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
@@ -112,7 +112,7 @@ void ParticleObject::Initialize(int lightingMode) {
     };
 
     size_t vertexBufferSize = sizeof(VertexData) * vertices_.size();
-    vertexResource_ = CreateBufferResource(device, vertexBufferSize);
+    vertexResource_ = DxUtils::CreateBufferResource(device, vertexBufferSize);
     if (!vertexResource_) throw std::runtime_error("Failed to create vertexResource_");
 
     VertexData* vertexData = nullptr;

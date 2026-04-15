@@ -1,6 +1,7 @@
 #include "ModelManager.h"
+#include "ModelLoader.h"
 #include "TextureManager.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "Zuizui.h"
 #include "BaseResource.h"
 
@@ -19,10 +20,10 @@ void ModelManager::Initialize() {
 void ModelManager::LoadModel(const std::string& name, const std::string& filename) {
     if (models_.find(name) != models_.end()) return;
 
-    auto data = std::make_shared<ModelData>(LoadObjFile(filename));
+    auto data = std::make_shared<ModelData>(ModelLoader::LoadObjFile(filename));
 
     // 頂点リソース作成
-    data->vertexResource = CreateBufferResource(device_, sizeof(VertexData) * data->vertices.size());
+    data->vertexResource = DxUtils::CreateBufferResource(device_, sizeof(VertexData) * data->vertices.size());
     data->vbv.BufferLocation = data->vertexResource->GetGPUVirtualAddress();
     data->vbv.SizeInBytes = sizeof(VertexData) * (UINT)data->vertices.size();
     data->vbv.StrideInBytes = sizeof(VertexData);

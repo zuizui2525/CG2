@@ -1,7 +1,7 @@
 #include "CameraManager.h"
 #include "Zuizui.h"
 #include "BaseResource.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "WindowApp.h"
 #include "Matrix.h"
 
@@ -21,7 +21,7 @@ void CameraManager::Initialize() {
 
     // --- 2. GPU転送用リソースの作成 ---
     // CameraForGPU構造体のサイズでバッファを確保
-    resource_ = CreateBufferResource(engine->GetDevice(), sizeof(CameraForGPU));
+    resource_ = DxUtils::CreateBufferResource(engine->GetDevice(), sizeof(CameraForGPU));
     // 常時マッピングしておく
     resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 }

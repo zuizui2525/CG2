@@ -1,4 +1,5 @@
 #include "DirectionalLight.h"
+#include "ImGuiManager.h"
 #include "Matrix.h"
 
 void DirectionalLightObject::Initialize() {

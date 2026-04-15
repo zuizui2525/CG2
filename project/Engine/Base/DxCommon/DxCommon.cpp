@@ -1,4 +1,5 @@
 #include "DxCommon.h"
+#include "DxUtils.h"
 #include <iostream>
 #include <thread>
 
@@ -255,8 +256,8 @@ void DxCommon::CreateSwapChain(HWND hwnd, int32_t width, int32_t height) {
 }
 
 void DxCommon::CreateRenderTargets() {
-	rtvDescriptorHeap_ = CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap_ = CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	rtvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	srvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
 	HRESULT hr = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResources_[0]));
 	assert(SUCCEEDED(hr));
@@ -284,8 +285,8 @@ void DxCommon::CreateRenderTargets() {
 }
 
 void DxCommon::CreateDepthStencil(int32_t width, int32_t height) {
-	depthStencilResource_ = CreateDepthStencilTextureResource(device_.Get(), width, height);
-	dsvDescriptorHeap_ = CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	depthStencilResource_ = DxUtils::CreateDepthStencilTextureResource(device_.Get(), width, height);
+	dsvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;

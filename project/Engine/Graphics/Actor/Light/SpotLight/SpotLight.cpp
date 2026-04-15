@@ -1,7 +1,7 @@
-#include "SpotLight.h"
-#include "imgui.h"
-#include "Matrix.h"
 #include <cmath>
+#include "SpotLight.h"
+#include "ImGuiManager.h"
+#include "Matrix.h"
 
 void SpotLightObject::Initialize() {
     data_.color = { 1.0f, 1.0f, 1.0f, 1.0f };

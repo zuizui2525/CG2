@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include "d3dx12.h"
-#include "Function.h"
-#include "../../Base/Utils/StringUtility.h"
+#include "DxUtils.h"
+#include "Base/Utils/StringUtility.h"
 #include <cassert>
 
 Texture::Texture() {}
@@ -32,8 +32,8 @@ void Texture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 
     // ディスクリプタ計算
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    textureSrvHandleCPU_ = GetCPUDescriptorHandle(srvHeap, descriptorSize, descriptorIndex);
-    textureSrvHandleGPU_ = GetGPUDescriptorHandle(srvHeap, descriptorSize, descriptorIndex);
+    textureSrvHandleCPU_ = DxUtils::GetCPUDescriptorHandle(srvHeap, descriptorSize, descriptorIndex);
+    textureSrvHandleGPU_ = DxUtils::GetGPUDescriptorHandle(srvHeap, descriptorSize, descriptorIndex);
 
     // SRV作成
     device->CreateShaderResourceView(textureResource_.Get(), &srvDesc, textureSrvHandleCPU_);
@@ -103,7 +103,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Texture::UploadTextureData(ID3D12Resource
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;
     DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
     uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-    Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = CreateBufferResource(device, intermediateSize);
+    Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = DxUtils::CreateBufferResource(device, intermediateSize);
     // UpdateSubresourcesには生のポインタを渡すため.Get()を使用
     UpdateSubresources(commandList, texture, intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
     // Textureへの転送後は利用できるように、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更すること

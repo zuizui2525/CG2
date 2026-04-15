@@ -1,12 +1,12 @@
 #include "Object3D.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "Matrix.h"
 #include "Zuizui.h"
 #include <stdexcept>
 
 void Object3D::Initialize(int lightingMode) {
     // WVPリソース作成
-    wvpResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(TransformationMatrix));
+    wvpResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(TransformationMatrix));
     if (!wvpResource_) throw std::runtime_error("Failed to create wvpResource_");
     HRESULT hr = wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
     if (FAILED(hr) || !wvpData_) throw std::runtime_error("Failed to map wvpResource_");
@@ -14,7 +14,7 @@ void Object3D::Initialize(int lightingMode) {
     wvpData_->world = Math::MakeIdentity();
 
     // Materialリソース作成
-    materialResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(Material));
+    materialResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(Material));
     if (!materialResource_) throw std::runtime_error("Failed to create materialResource_");
     hr = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
     if (FAILED(hr) || !materialData_) throw std::runtime_error("Failed to map materialResource_");

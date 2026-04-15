@@ -1,5 +1,5 @@
 #include "LightManager.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "BaseResource.h"
 #include "Zuizui.h"
 
@@ -7,15 +7,15 @@ void LightManager::Initialize() {
     auto device = EngineResource::GetEngine()->GetDevice();
 
     // 平行光源グループのバッファ作成
-    directionalLightResource_ = CreateBufferResource(device, sizeof(DirectionalLightGroup));
+    directionalLightResource_ = DxUtils::CreateBufferResource(device, sizeof(DirectionalLightGroup));
     directionalLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData_));
 
     // 点光源グループのバッファ作成
-    pointLightResource_ = CreateBufferResource(device, sizeof(PointLightGroup));
+    pointLightResource_ = DxUtils::CreateBufferResource(device, sizeof(PointLightGroup));
     pointLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData_));
 
     // スポットライトグループのバッファ作成
-    spotLightResource_ = CreateBufferResource(device, sizeof(SpotLightGroup));
+    spotLightResource_ = DxUtils::CreateBufferResource(device, sizeof(SpotLightGroup));
     spotLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData_));
 }
 

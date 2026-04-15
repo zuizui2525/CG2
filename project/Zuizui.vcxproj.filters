@@ -153,9 +153,6 @@
     <ClCompile Include="Engine\Zuizui.cpp">
       <Filter>ZuizuiEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Math\Function\Function.cpp">
-      <Filter>ZuizuiEngine\Math\Function</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Math\Matrix\Matrix.cpp">
       <Filter>ZuizuiEngine\Math\Matrix</Filter>
     </ClCompile>
@@ -259,6 +256,9 @@
     <ClCompile Include="Engine\Base\Utils\DumpExporter.cpp">
       <Filter>ZuizuiEngine\Base\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Model\ModelLoader.cpp" />
+    <ClCompile Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -307,9 +307,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Math\Struct.h">
       <Filter>ZuizuiEngine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Math\Function\Function.h">
-      <Filter>ZuizuiEngine\Math\Function</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Audio.h">
       <Filter>ZuizuiEngine\Audio</Filter>
@@ -412,6 +409,9 @@
     <ClInclude Include="Engine\Base\Utils\DumpExporter.h">
       <Filter>ZuizuiEngine\Base\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
+    <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

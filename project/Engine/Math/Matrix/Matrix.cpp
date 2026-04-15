@@ -1,6 +1,6 @@
 #include <cmath>
 #include <assert.h>
-#include "Function.h"
+#include "Matrix.h"
 
 namespace Math {
 

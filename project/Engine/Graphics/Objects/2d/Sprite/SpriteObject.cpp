@@ -2,6 +2,7 @@
 #include "Zuizui.h"
 #include "CameraManager.h"
 #include "TextureManager.h"
+#include "DxUtils.h"
 #include <imgui.h>
 
 void SpriteObject::SetSize(float width, float height) {
@@ -22,7 +23,7 @@ void SpriteObject::UpdateVertexData() {
 
 void SpriteObject::Initialize(int lightingMode) {
     // Material
-    materialResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(Material));
+    materialResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(Material));
     materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
     materialData_->color = { 1,1,1,1 };
     materialData_->enableLighting = 0;
@@ -30,13 +31,13 @@ void SpriteObject::Initialize(int lightingMode) {
     materialData_->shininess = 30.0f;
 
     // WVP
-    wvpResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(TransformationMatrix));
+    wvpResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(TransformationMatrix));
     wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
     wvpData_->WVP = Math::MakeIdentity();
     wvpData_->world = Math::MakeIdentity();
 
     // Vertex
-    vertexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * 4);
+    vertexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * 4);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * 4;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -48,7 +49,7 @@ void SpriteObject::Initialize(int lightingMode) {
     UpdateVertexData();
 
     // Index
-    indexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(uint32_t) * 6);
+    indexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(uint32_t) * 6);
     ibView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     ibView_.SizeInBytes = sizeof(uint32_t) * 6;
     ibView_.Format = DXGI_FORMAT_R32_UINT;

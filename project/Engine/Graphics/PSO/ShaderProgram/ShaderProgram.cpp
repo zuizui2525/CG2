@@ -1,5 +1,5 @@
 #include "ShaderProgram.h"
-#include "Function.h"
+#include "ShaderCompiler.h"
 #include <iostream>
 
 bool ShaderProgram::CompileVS(
@@ -7,7 +7,7 @@ bool ShaderProgram::CompileVS(
     IDxcUtils* utils,
     IDxcCompiler3* compiler,
     IDxcIncludeHandler* includeHandler) {
-    vs_ = CompileShader(std::cout, filepath, L"vs_6_0", utils, compiler, includeHandler);
+    vs_ = ShaderCompiler::Compile(std::cout, filepath, L"vs_6_0", utils, compiler, includeHandler);
     return (vs_ != nullptr);
 }
 
@@ -16,7 +16,7 @@ bool ShaderProgram::CompilePS(
     IDxcUtils* utils,
     IDxcCompiler3* compiler,
     IDxcIncludeHandler* includeHandler) {
-    ps_ = CompileShader(std::cout, filepath, L"ps_6_0", utils, compiler, includeHandler);
+    ps_ = ShaderCompiler::Compile(std::cout, filepath, L"ps_6_0", utils, compiler, includeHandler);
     return (ps_ != nullptr);
 }
 

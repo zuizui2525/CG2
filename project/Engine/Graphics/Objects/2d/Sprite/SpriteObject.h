@@ -6,7 +6,6 @@
 #include <d3d12.h>
 #include "Matrix.h"
 #include "Struct.h"
-#include "Function.h"
 #include "BaseResource.h"
 
 class SpriteObject : Base2D{

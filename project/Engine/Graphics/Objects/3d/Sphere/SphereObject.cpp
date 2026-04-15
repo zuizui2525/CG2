@@ -1,5 +1,5 @@
 #include "SphereObject.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "Zuizui.h"
 #include "CameraManager.h"
 #include "DirectionalLight.h"
@@ -77,7 +77,7 @@ void SphereObject::CreateMesh() {
     float kLatEvery = static_cast<float>(M_PI / subdivision_);
 
     // Vertex Resource 作成 (以前のリソースはComPtrの代入により自動解放される)
-    vertexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * kVertexCount);
+    vertexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * kVertexCount);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * kVertexCount;
     vbView_.StrideInBytes = sizeof(VertexData);
@@ -103,7 +103,7 @@ void SphereObject::CreateMesh() {
     vertexResource_->Unmap(0, nullptr);
 
     // Index Resource 作成
-    indexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(uint32_t) * kIndexCount);
+    indexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(uint32_t) * kIndexCount);
     ibView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     ibView_.SizeInBytes = sizeof(uint32_t) * kIndexCount;
     ibView_.Format = DXGI_FORMAT_R32_UINT;

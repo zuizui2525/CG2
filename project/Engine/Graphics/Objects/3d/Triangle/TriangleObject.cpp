@@ -1,5 +1,5 @@
 #include "TriangleObject.h"
-#include "Function.h"
+#include "DxUtils.h"
 #include "Zuizui.h"
 #include "CameraManager.h"
 #include "DirectionalLight.h"
@@ -11,7 +11,7 @@ void TriangleObject::Initialize(int lightingMode) {
     Object3D::Initialize(lightingMode);
     
     // Vertex (三角形3頂点)
-    vertexResource_ = CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * 3);
+    vertexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * 3);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * 3;
     vbView_.StrideInBytes = sizeof(VertexData);
