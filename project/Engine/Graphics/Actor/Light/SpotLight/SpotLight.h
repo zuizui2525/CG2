@@ -3,6 +3,26 @@
 #include <wrl.h>
 #include "Struct.h"
 
+static const int kMaxSpotLights = 10;
+
+struct SpotLight {
+    Vector4 color;             //!< ライトの色 (RGBA)
+    Vector3 position;          //!< ライトの位置
+    float intensity;           //!< 輝度
+    Vector3 direction;         //!< ライトの方向
+    float distance;            //!< ライトの届く最大距離
+    float decay;               //!< 減衰率
+    float cosAngle;            //!< スポットライトの余弦 (外角)
+    float cosFalloffStart;     //!< 減衰開始の余弦 (内角)
+    float padding;             //!< 16バイトアライメント用パディング
+};
+
+struct SpotLightGroup {
+    SpotLight lights[kMaxSpotLights];   // 10個の配列
+    int32_t numLights;                  // 実際に使う数
+    float padding[3];                   // 16バイトアライメントのための隙間
+};
+
 class SpotLightObject {
 public:
     // リソースの生成と初期値の設定

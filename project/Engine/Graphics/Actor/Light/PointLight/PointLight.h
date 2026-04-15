@@ -3,6 +3,23 @@
 #include <wrl.h>
 #include "Struct.h"
 
+static const int kMaxPointLights = 10;
+
+struct PointLight {
+    Vector4 color;     //!< ライトの色
+    Vector3 position;  //!< ライトの座標
+    float intensity;   //!< 輝度
+    float radius;      //!< ライトの届く最大距離
+    float decay;       //!< 減衰率（値が大きいほど急激に暗くなる）
+    float padding[2];  //!< 16バイトアライメントのためのパディング
+};
+
+struct PointLightGroup {
+    PointLight lights[kMaxPointLights]; // 10個の配列
+    int32_t numLights;                  // 実際に使う数
+    float padding[3];                   // 16バイトアライメントのための隙間
+};
+
 class PointLightObject {
 public:
     // 初期化

@@ -116,59 +116,6 @@ struct CameraForGPU {
     float padding;
 };
 
-struct DirectionalLight {
-    Vector4 color;     //!< ライトの色
-    Vector3 direction; //!< ライトの方向
-    float intensity;   //!< ライトの強度
-};
-
-struct PointLight {
-    Vector4 color;     //!< ライトの色
-    Vector3 position;  //!< ライトの座標
-    float intensity;   //!< 輝度
-    float radius;      //!< ライトの届く最大距離
-    float decay;       //!< 減衰率（値が大きいほど急激に暗くなる）
-    float padding[2];  //!< 16バイトアライメントのためのパディング
-};
-
-struct SpotLight {
-    Vector4 color;             //!< ライトの色 (RGBA)
-    Vector3 position;          //!< ライトの位置
-    float intensity;           //!< 輝度
-    Vector3 direction;         //!< ライトの方向
-    float distance;            //!< ライトの届く最大距離
-    float decay;               //!< 減衰率
-    float cosAngle;            //!< スポットライトの余弦 (外角)
-    float cosFalloffStart;     //!< 減衰開始の余弦 (内角)
-    float padding;             //!< 16バイトアライメント用パディング
-};
-
-// 最大数の定義
-static const int kMaxDirectionalLights = 2;
-static const int kMaxPointLights = 10;
-static const int kMaxSpotLights = 10;
-
-// 平行光源をまとめる箱
-struct DirectionalLightGroup {
-    DirectionalLight lights[kMaxDirectionalLights]; // 配列
-    int32_t numLights;                              // 有効なライト数
-    float padding[3];                               // アライメント調整
-};
-
-// 点光源をまとめる箱
-struct PointLightGroup {
-    PointLight lights[kMaxPointLights]; // 10個の配列
-    int32_t numLights;                  // 実際に使う数
-    float padding[3];                   // 16バイトアライメントのための隙間
-};
-
-// スポットライトをまとめる箱
-struct SpotLightGroup {
-    SpotLight lights[kMaxSpotLights];   // 10個の配列
-    int32_t numLights;                  // 実際に使う数
-    float padding[3];                   // 16バイトアライメントのための隙間
-};
-
 struct VertexData {
     Vector4 position;
     Vector2 texcoord;

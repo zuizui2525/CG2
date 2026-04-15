@@ -3,6 +3,20 @@
 #include <wrl.h>
 #include "Struct.h"
 
+static const int kMaxDirectionalLights = 2;
+
+struct DirectionalLight {
+    Vector4 color;     //!< ライトの色
+    Vector3 direction; //!< ライトの方向
+    float intensity;   //!< ライトの強度
+};
+
+struct DirectionalLightGroup {
+    DirectionalLight lights[kMaxDirectionalLights]; // 配列
+    int32_t numLights;                              // 有効なライト数
+    float padding[3];                               // アライメント調整
+};
+
 class DirectionalLightObject {
 public:
     // 初期化
