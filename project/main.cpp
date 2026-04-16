@@ -1,5 +1,6 @@
 #include "App.h"
 #include "Engine/Base/Utils/DumpExporter.h"
+#include "Engine/Base/Utils/D3DResourceLeakChecker.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // リークチェック

@@ -1,5 +1,7 @@
 #pragma once
-#include "Struct.h"
+#include "Math/MathStructs.h"
+#include "Math/Collision/CollisionStructs.h"
+#include "Graphics/RenderStructs.h"
 #include "BaseResource.h"
 #include <memory>
 #include <vector>

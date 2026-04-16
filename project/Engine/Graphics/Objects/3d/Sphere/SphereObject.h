@@ -5,7 +5,6 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <string>
-#include "Struct.h"
 #include "Object3D.h"
 
 class SphereObject : public Object3D {

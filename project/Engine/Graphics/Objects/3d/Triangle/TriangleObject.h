@@ -4,7 +4,6 @@
 #include <cassert>
 #include <wrl.h>
 #include <d3d12.h>
-#include "Struct.h"
 #include "Object3D.h"
 
 class TriangleObject: public Object3D {

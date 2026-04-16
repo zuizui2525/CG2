@@ -5,7 +5,8 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Matrix.h"
-#include "Struct.h"
+#include "Math/MathStructs.h"
+#include "Graphics/RenderStructs.h"
 #include "BaseResource.h"
 
 class SpriteObject : Base2D{

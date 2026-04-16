@@ -305,7 +305,7 @@
     <ClInclude Include="Engine\Math\Matrix\Matrix.h">
       <Filter>ZuizuiEngine\Math\Matrix</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Math\Struct.h">
+    <ClInclude Include="Engine\Base\Utils\D3DResourceLeakChecker.h">
       <Filter>ZuizuiEngine\Math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Audio.h">
@@ -412,6 +412,10 @@
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Math\MathStructs.h" />
+    <ClInclude Include="Engine\Math\Collision\CollisionStructs.h" />
+    <ClInclude Include="Engine\Graphics\RenderStructs.h" />
+    <ClInclude Include="Engine\Audio\AudioStructs.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

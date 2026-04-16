@@ -7,7 +7,6 @@
 #include <dinput.h>
 #include <wrl.h>
 #include <Windows.h>
-#include "Struct.h" // Vector2を参照するため追加
 
 class Input {
 public:

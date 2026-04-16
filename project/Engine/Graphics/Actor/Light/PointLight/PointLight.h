@@ -1,7 +1,8 @@
 #pragma once
 #include <d3d12.h>
 #include <wrl.h>
-#include "Struct.h"
+#include <string>
+#include "Math/MathStructs.h"
 
 static const int kMaxPointLights = 10;
 

@@ -281,6 +281,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h" />
     <ClInclude Include="Engine\Base\DxCommon\DxCommon.h" />
+    <ClInclude Include="Engine\Audio\AudioStructs.h" />
+    <ClInclude Include="Engine\Math\Collision\CollisionStructs.h" />
+    <ClInclude Include="Engine\Math\MathStructs.h" />
+    <ClInclude Include="Engine\Graphics\RenderStructs.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -296,7 +300,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Objects\3d\Sphere\SphereObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\2d\Sprite\SpriteObject.h" />
     <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderProgram.h" />
-    <ClInclude Include="Engine\Math\Struct.h" />
+    <ClInclude Include="Engine\Base\Utils\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Triangle\TriangleObject.h" />
     <ClInclude Include="Engine\Base\WindowApp\WindowApp.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelManager.h" />

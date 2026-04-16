@@ -1,5 +1,5 @@
 #pragma once
-#include "Math/Struct.h"
+#include "Graphics/RenderStructs.h"
 #include <string>
 
 /// @brief モデルの読み込みを担当するクラス

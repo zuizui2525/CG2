@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "Struct.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"

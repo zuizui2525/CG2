@@ -1,5 +1,6 @@
 #pragma once
-#include "Struct.h"
+#include "Math/MathStructs.h"
+#include "Math/Collision/CollisionStructs.h"
 
 // 球同士の当たり判定
 bool IsCollision(const Sphere& sphere1, const Sphere& sphere2);

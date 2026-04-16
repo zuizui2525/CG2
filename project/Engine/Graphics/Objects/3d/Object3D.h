@@ -1,7 +1,8 @@
 #pragma once
 #include <wrl.h>
 #include <d3d12.h>
-#include "Struct.h"
+#include "Math/MathStructs.h"
+#include "Graphics/RenderStructs.h"
 #include "BaseResource.h"
 
 class Zuizui;

@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <d3d12.h>
-#include "Struct.h"
+#include "Graphics/RenderStructs.h"
 
 class TextureManager;
 
