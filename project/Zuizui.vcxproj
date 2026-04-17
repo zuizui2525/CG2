@@ -155,10 +155,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App\App.cpp" />
-    <ClCompile Include="App\Scene\DebugScene.cpp" />
-    <ClCompile Include="App\Scene\SceneManager.cpp" />
-    <ClCompile Include="App\Scene\TitleScene.cpp" />
-    <ClCompile Include="App\Scene\SceneFactory.cpp" />
+    <ClCompile Include="App\\Scene\\Debug\\DebugScene.cpp" />
+    <ClCompile Include="App\\Scene\\Core\\SceneManager.cpp" />
+    <ClCompile Include="App\\Scene\\Title\\TitleScene.cpp" />
+    <ClCompile Include="App\\Scene\\Core\\SceneFactory.cpp" />
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
     <ClCompile Include="Engine\Base\Utils\StringUtility.cpp" />
     <ClCompile Include="Engine\Base\Utils\DumpExporter.cpp" />
@@ -251,12 +251,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
-    <ClInclude Include="App\Scene\AbstractSceneFactory.h" />
-    <ClInclude Include="App\Scene\IScene.h" />
-    <ClInclude Include="App\Scene\DebugScene.h" />
-    <ClInclude Include="App\Scene\SceneManager.h" />
-    <ClInclude Include="App\Scene\TitleScene.h" />
-    <ClInclude Include="App\Scene\SceneFactory.h" />
+    <ClInclude Include="App\\Scene\\Core\\AbstractSceneFactory.h" />
+    <ClInclude Include="App\\Scene\\Core\\IScene.h" />
+    <ClInclude Include="App\\Scene\\Debug\\DebugScene.h" />
+    <ClInclude Include="App\\Scene\\Core\\SceneManager.h" />
+    <ClInclude Include="App\\Scene\\Title\\TitleScene.h" />
+    <ClInclude Include="App\\Scene\\Core\\SceneFactory.h" />
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
     <ClInclude Include="Engine\Base\Utils\StringUtility.h" />
     <ClInclude Include="Engine\Base\Utils\DumpExporter.h" />

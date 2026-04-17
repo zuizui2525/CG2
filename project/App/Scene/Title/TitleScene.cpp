@@ -1,7 +1,7 @@
-﻿#include "App/Scene/TitleScene.h"
+﻿#include "App/Scene/Title/TitleScene.h"
 #include "Engine/Base/BaseResource.h"
-#include "App/Scene/SceneManager.h"
-#include "App/Scene/DebugScene.h"
+#include "App/Scene/Core/SceneManager.h"
+#include "App/Scene/Debug/DebugScene.h"
 
 void TitleScene::Initialize() {
     // 1. 各マネージャの取得

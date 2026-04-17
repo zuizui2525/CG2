@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "App/Scene/IScene.h"
+#include "App/Scene/Core/IScene.h"
 #include <memory>
 #include <string>
 

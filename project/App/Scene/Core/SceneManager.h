@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include <memory>
 #include <string>
-#include "App/Scene/IScene.h"
-#include "App/Scene/AbstractSceneFactory.h"
+#include "App/Scene/Core/IScene.h"
+#include "App/Scene/Core/AbstractSceneFactory.h"
 
 /**
  * @brief シーン管理クラス（シングルトン）

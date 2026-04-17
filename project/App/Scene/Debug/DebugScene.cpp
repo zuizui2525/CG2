@@ -1,4 +1,4 @@
-﻿#include "App/Scene/DebugScene.h"
+﻿#include "App/Scene/Debug/DebugScene.h"
 
 void DebugScene::Initialize() {
     // 1. 各マネージャのポインタを取得して保持する

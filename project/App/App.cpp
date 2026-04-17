@@ -1,6 +1,6 @@
 ﻿#include "App/App.h"
-#include "App/Scene/SceneManager.h"
-#include "App/Scene/SceneFactory.h"
+#include "App/Scene/Core/SceneManager.h"
+#include "App/Scene/Core/SceneFactory.h"
 
 void App::Initialize() {
     // システム

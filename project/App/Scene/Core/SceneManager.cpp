@@ -1,4 +1,4 @@
-﻿#include "App/Scene/SceneManager.h"
+﻿#include "App/Scene/Core/SceneManager.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"

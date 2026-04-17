@@ -244,10 +244,10 @@
     <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.cpp" />
-    <ClCompile Include="App\Scene\SceneManager.cpp" />
-    <ClCompile Include="App\Scene\DebugScene.cpp" />
-    <ClCompile Include="App\Scene\TitleScene.cpp" />
-    <ClCompile Include="App\Scene\SceneFactory.cpp" />
+    <ClCompile Include="App\\Scene\\Core\\SceneManager.cpp" />
+    <ClCompile Include="App\\Scene\\Debug\\DebugScene.cpp" />
+    <ClCompile Include="App\\Scene\\Title\\TitleScene.cpp" />
+    <ClCompile Include="App\\Scene\\Core\\SceneFactory.cpp" />
     <ClCompile Include="Engine\Base\Utils\StringUtility.cpp">
       <Filter>ZuizuiEngine\Base\Utils</Filter>
     </ClCompile>
@@ -393,12 +393,12 @@
     <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.h" />
-    <ClInclude Include="App\Scene\IScene.h" />
-    <ClInclude Include="App\Scene\SceneManager.h" />
-    <ClInclude Include="App\Scene\DebugScene.h" />
-    <ClInclude Include="App\Scene\TitleScene.h" />
-    <ClInclude Include="App\Scene\AbstractSceneFactory.h" />
-    <ClInclude Include="App\Scene\SceneFactory.h" />
+    <ClInclude Include="App\\Scene\\Core\\IScene.h" />
+    <ClInclude Include="App\\Scene\\Core\\SceneManager.h" />
+    <ClInclude Include="App\\Scene\\Debug\\DebugScene.h" />
+    <ClInclude Include="App\\Scene\\Title\\TitleScene.h" />
+    <ClInclude Include="App\\Scene\\Core\\AbstractSceneFactory.h" />
+    <ClInclude Include="App\\Scene\\Core\\SceneFactory.h" />
     <ClInclude Include="Engine\Base\Utils\StringUtility.h">
       <Filter>ZuizuiEngine\Base\Utils</Filter>
     </ClInclude>

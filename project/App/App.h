@@ -8,7 +8,7 @@
 #include "Engine/Graphics/Texture/TextureManager.h"
 #include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
 #include "Engine/Base/BaseResource.h"
-#include "App/Scene/AbstractSceneFactory.h"
+#include "App/Scene/Core/AbstractSceneFactory.h"
 
 class App {
 public:

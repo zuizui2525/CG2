@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "App/Scene/AbstractSceneFactory.h"
+#include "App/Scene/Core/AbstractSceneFactory.h"
 
 /**
  * @brief 具体的なシーン生成工場
