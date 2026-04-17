@@ -1,5 +1,5 @@
-#pragma once
-#include "Math/MathStructs.h"
+﻿#pragma once
+#include "Engine/Math/MathStructs.h"
 
 namespace Math {
 	// ベクトルの加算を計算する関数

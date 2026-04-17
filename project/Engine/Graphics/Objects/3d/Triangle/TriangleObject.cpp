@@ -1,10 +1,10 @@
-#include "TriangleObject.h"
-#include "DxUtils.h"
-#include "Zuizui.h"
-#include "CameraManager.h"
-#include "DirectionalLight.h"
-#include "LightManager.h"
-#include "TextureManager.h"
+﻿#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Directional/DirectionalLight.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
 
 void TriangleObject::Initialize(int lightingMode) {
     // 基底クラスの初期化

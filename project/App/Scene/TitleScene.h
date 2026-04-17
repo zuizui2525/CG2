@@ -1,9 +1,9 @@
-#pragma once
-#include "IScene.h"
+﻿#pragma once
+#include "App/Scene/IScene.h"
 #include <memory>
-#include "ModelObject.h"
-#include "LightManager.h"
-#include "CameraManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 
 class TitleScene : public IScene {
 public:

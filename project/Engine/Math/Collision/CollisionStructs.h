@@ -1,5 +1,5 @@
-#pragma once
-#include "MathStructs.h"
+﻿#pragma once
+#include "Engine/Math/MathStructs.h"
 
 struct Segment {
     Vector3 origin;     //!< 始点

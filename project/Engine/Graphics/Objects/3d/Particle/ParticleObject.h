@@ -1,8 +1,8 @@
-#pragma once
-#include "Math/MathStructs.h"
-#include "Math/Collision/CollisionStructs.h"
-#include "Graphics/RenderStructs.h"
-#include "BaseResource.h"
+﻿#pragma once
+#include "Engine/Math/MathStructs.h"
+#include "Engine/Math/Collision/CollisionStructs.h"
+#include "Engine/Graphics/RenderStructs.h"
+#include "Engine/Base/BaseResource.h"
 #include <memory>
 #include <vector>
 #include <d3d12.h> 

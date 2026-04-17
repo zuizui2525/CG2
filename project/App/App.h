@@ -1,14 +1,14 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include <vector>
-#include "Zuizui.h"
-#include "Input.h"
-#include "CameraManager.h"
-#include "LightManager.h"
-#include "TextureManager.h"
-#include "ModelManager.h"
-#include "BaseResource.h"
-#include "AbstractSceneFactory.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Input/Input.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
+#include "Engine/Base/BaseResource.h"
+#include "App/Scene/AbstractSceneFactory.h"
 
 class App {
 public:

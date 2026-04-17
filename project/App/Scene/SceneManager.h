@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include <string>
-#include "IScene.h"
-#include "AbstractSceneFactory.h" // 抽象工場をインクルード
+#include "App/Scene/IScene.h"
+#include "App/Scene/AbstractSceneFactory.h"
 
 /**
  * @brief シーン管理クラス（シングルトン）

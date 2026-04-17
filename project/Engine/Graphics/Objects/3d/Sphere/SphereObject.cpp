@@ -1,11 +1,11 @@
-#include "SphereObject.h"
-#include "DxUtils.h"
-#include "Zuizui.h"
-#include "CameraManager.h"
-#include "DirectionalLight.h"
-#include "LightManager.h"
-#include "TextureManager.h"
-#include "Matrix.h"
+﻿#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Directional/DirectionalLight.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Math/Matrix/Matrix.h"
 
 void SphereObject::Initialize(int lightingMode) {
     // 基底クラスの初期化

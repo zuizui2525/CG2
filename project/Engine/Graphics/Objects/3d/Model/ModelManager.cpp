@@ -1,9 +1,9 @@
-#include "ModelManager.h"
-#include "ModelLoader.h"
-#include "TextureManager.h"
-#include "DxUtils.h"
-#include "Zuizui.h"
-#include "BaseResource.h"
+﻿#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelLoader.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Base/BaseResource.h"
 
 void ModelManager::Initialize() {
     // Engine

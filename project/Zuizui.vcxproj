@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -81,7 +81,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)App\Scene;$(SolutionDir)App;$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)Engine\Graphics\Texture;$(SolutionDir)Engine\Graphics\PSO\ShaderProgram;$(SolutionDir)Engine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)Engine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)Engine\Graphics\PSO\PSOPreset;$(SolutionDir)Engine\Graphics\PSO\PSOManager;$(SolutionDir)Engine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)Engine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)Engine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)Engine\Graphics\Objects\3d\Particle;$(SolutionDir)Engine\Graphics\Objects\3d\Model;$(SolutionDir)Engine\Graphics\Objects\3d\Triangle;$(SolutionDir)Engine\Graphics\Objects\3d\Sphere;$(SolutionDir)Engine\Graphics\Objects\3d;$(SolutionDir)Engine\Graphics\Objects\2d\Sprite;$(SolutionDir)Engine\Graphics\Objects;$(SolutionDir)Engine\Graphics\Actor\Light\LightManager;$(SolutionDir)Engine\Graphics\Actor\Light\SpotLight;$(SolutionDir)Engine\Graphics\Actor\Light\PointLight;$(SolutionDir)Engine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)Engine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)Engine\Graphics\Actor\Camera\CameraManager;$(SolutionDir)Engine\Graphics\Actor\Camera\BaseCamera;$(SolutionDir)Engine\Graphics\Actor\Camera;$(SolutionDir)Engine\Math\Collision;$(SolutionDir)Engine\Math\Function;$(SolutionDir)Engine\Math\Matrix;$(SolutionDir)Engine\Math;$(SolutionDir)Engine\Base\WindowApp;$(SolutionDir)Engine\Base\Log;$(SolutionDir)Engine\Base\DxCommon;$(SolutionDir)Engine\Base\Utils;$(SolutionDir)Engine\Base;$(SolutionDir)Engine\Input;$(SolutionDir)Engine\Audio;$(SolutionDir)Engine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui;$(SolutionDir)externals\imgui\ImguiManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,7 +109,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)App\Scene;$(SolutionDir)App;$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)Engine\Graphics\Texture;$(SolutionDir)Engine\Graphics\PSO\ShaderProgram;$(SolutionDir)Engine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)Engine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)Engine\Graphics\PSO\PSOPreset;$(SolutionDir)Engine\Graphics\PSO\PSOManager;$(SolutionDir)Engine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)Engine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)Engine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)Engine\Graphics\Objects\3d\Particle;$(SolutionDir)Engine\Graphics\Objects\3d\Model;$(SolutionDir)Engine\Graphics\Objects\3d\Triangle;$(SolutionDir)Engine\Graphics\Objects\3d\Sphere;$(SolutionDir)Engine\Graphics\Objects\3d;$(SolutionDir)Engine\Graphics\Objects\2d\Sprite;$(SolutionDir)Engine\Graphics\Objects;$(SolutionDir)Engine\Graphics\Actor\Light\LightManager;$(SolutionDir)Engine\Graphics\Actor\Light\SpotLight;$(SolutionDir)Engine\Graphics\Actor\Light\PointLight;$(SolutionDir)Engine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)Engine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)Engine\Graphics\Actor\Camera\CameraManager;$(SolutionDir)Engine\Graphics\Actor\Camera\BaseCamera;$(SolutionDir)Engine\Graphics\Actor\Camera;$(SolutionDir)Engine\Math\Collision;$(SolutionDir)Engine\Math\Function;$(SolutionDir)Engine\Math\Matrix;$(SolutionDir)Engine\Math;$(SolutionDir)Engine\Base\WindowApp;$(SolutionDir)Engine\Base\Log;$(SolutionDir)Engine\Base\DxCommon;$(SolutionDir)Engine\Base\Utils;$(SolutionDir)Engine\Base;$(SolutionDir)Engine\Input;$(SolutionDir)Engine\Audio;$(SolutionDir)Engine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui;$(SolutionDir)externals\imgui\ImguiManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,7 +137,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)App\Scene;$(SolutionDir)App;$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui\ImguiManager;$(SolutionDir)externals\imgui;$(SolutionDir)Engine\Graphics\Texture;$(SolutionDir)Engine\Graphics\PSO\ShaderProgram;$(SolutionDir)Engine\Graphics\PSO\RootSignatureBuilder;$(SolutionDir)Engine\Graphics\PSO\RasterizerStateBuilder;$(SolutionDir)Engine\Graphics\PSO\PSOPreset;$(SolutionDir)Engine\Graphics\PSO\PSOManager;$(SolutionDir)Engine\Graphics\PSO\InputLayoutBuilder;$(SolutionDir)Engine\Graphics\PSO\DepthStencilStateBuilder;$(SolutionDir)Engine\Graphics\PSO\BlendStateBuilder;$(SolutionDir)Engine\Graphics\Objects\3d\Particle;$(SolutionDir)Engine\Graphics\Objects\3d\Model;$(SolutionDir)Engine\Graphics\Objects\3d\Triangle;$(SolutionDir)Engine\Graphics\Objects\3d\Sphere;$(SolutionDir)Engine\Graphics\Objects\3d;$(SolutionDir)Engine\Graphics\Objects\2d\Sprite;$(SolutionDir)Engine\Graphics\Objects;$(SolutionDir)Engine\Graphics\Actor\Light\LightManager;$(SolutionDir)Engine\Graphics\Actor\Light\SpotLight;$(SolutionDir)Engine\Graphics\Actor\Light\PointLight;$(SolutionDir)Engine\Graphics\Actor\Light\DirectionalLight;$(SolutionDir)Engine\Graphics\Actor\Camera\DebugCamera;$(SolutionDir)Engine\Graphics\Actor\Camera\CameraManager;$(SolutionDir)Engine\Graphics\Actor\Camera\BaseCamera;$(SolutionDir)Engine\Graphics\Actor\Camera;$(SolutionDir)Engine\Math\Collision;$(SolutionDir)Engine\Math\Function;$(SolutionDir)Engine\Math\Matrix;$(SolutionDir)Engine\Math;$(SolutionDir)Engine\Base\WindowApp;$(SolutionDir)Engine\Base\Log;$(SolutionDir)Engine\Base\DxCommon;$(SolutionDir)Engine\Base\Utils;$(SolutionDir)Engine\Base;$(SolutionDir)Engine\Input;$(SolutionDir)Engine\Audio;$(SolutionDir)Engine;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)externals\assimp\include;$(SolutionDir)externals\DirectXTex;$(SolutionDir)externals\imgui;$(SolutionDir)externals\imgui\ImguiManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,27 +162,27 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
     <ClCompile Include="Engine\Base\Utils\StringUtility.cpp" />
     <ClCompile Include="Engine\Base\Utils\DumpExporter.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Camera\CameraManager\CameraManager.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Camera\BaseCamera\BaseCamera.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\LightManager\LightManager.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\SpotLight\SpotLight.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\PointLight\PointLight.cpp" />
-    <ClCompile Include="Engine\BaseResource.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Spot\SpotLight.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Point\PointLight.cpp" />
+    <ClCompile Include="Engine\Base\BaseResource.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Model\ModelLoader.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.cpp" />
+    <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\PSOManager\PSOManager.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\PSOPreset\PSOPreset.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\RasterizerState\RasterizerStateBuilder.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\BlendState\BlendStateBuilder.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\InputLayout\InputLayoutBuilder.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\RootSignature\RootSignatureBuilder.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Directional\DirectionalLight.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.cpp" />
     <ClCompile Include="Engine\Base\DxCommon\DxCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -214,7 +214,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Objects\3d\Sphere\SphereObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\2d\Sprite\SpriteObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Triangle\TriangleObject.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\ShaderProgram\ShaderProgram.cpp" />
+    <ClCompile Include="Engine\\Graphics\\PSO\\Shader\ShaderProgram.cpp" />
     <ClCompile Include="Engine\Base\WindowApp\WindowApp.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Graphics\Texture\Texture.cpp" />
@@ -260,26 +260,26 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
     <ClInclude Include="Engine\Base\Utils\StringUtility.h" />
     <ClInclude Include="Engine\Base\Utils\DumpExporter.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Camera\CameraManager\CameraManager.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Camera\BaseCamera\BaseCamera.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\LightManager\LightManager.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\SpotLight\SpotLight.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\PointLight\PointLight.h" />
-    <ClInclude Include="Engine\BaseResource.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Spot\SpotLight.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Point\PointLight.h" />
+    <ClInclude Include="Engine\Base\BaseResource.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
-    <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\Collision\Collision.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.h" />
-    <ClInclude Include="Engine\Graphics\PSO\PSOManager\PSOManager.h" />
-    <ClInclude Include="Engine\Graphics\PSO\PSOPreset\PSOPreset.h" />
-    <ClInclude Include="Engine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h" />
-    <ClInclude Include="Engine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h" />
-    <ClInclude Include="Engine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.h" />
-    <ClInclude Include="Engine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.h" />
-    <ClInclude Include="Engine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\RasterizerState\RasterizerStateBuilder.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\BlendState\BlendStateBuilder.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\InputLayout\InputLayoutBuilder.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\RootSignature\RootSignatureBuilder.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Directional\DirectionalLight.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.h" />
     <ClInclude Include="Engine\Base\DxCommon\DxCommon.h" />
     <ClInclude Include="Engine\Audio\AudioStructs.h" />
     <ClInclude Include="Engine\Math\Collision\CollisionStructs.h" />
@@ -299,7 +299,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Objects\3d\Object3D.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Sphere\SphereObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\2d\Sprite\SpriteObject.h" />
-    <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderProgram.h" />
+    <ClInclude Include="Engine\\Graphics\\PSO\\Shader\ShaderProgram.h" />
     <ClInclude Include="Engine\Base\Utils\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Triangle\TriangleObject.h" />
     <ClInclude Include="Engine\Base\WindowApp\WindowApp.h" />

@@ -1,8 +1,8 @@
-#include "SpriteObject.h"
-#include "Zuizui.h"
-#include "CameraManager.h"
-#include "TextureManager.h"
-#include "DxUtils.h"
+﻿#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Base/Utils/DxUtils.h"
 #include <imgui.h>
 
 void SpriteObject::SetSize(float width, float height) {

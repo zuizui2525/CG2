@@ -1,6 +1,6 @@
-#include "SceneFactory.h"
-#include "TitleScene.h"
-#include "DebugScene.h"
+﻿#include "App/Scene/SceneFactory.h"
+#include "App/Scene/TitleScene.h"
+#include "App/Scene/DebugScene.h"
 
 std::unique_ptr<IScene> SceneFactory::CreateScene(const std::string& sceneName) {
     std::unique_ptr<IScene> newScene = nullptr;

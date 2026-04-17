@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <xaudio2.h>
 #include <wrl.h>
 #include <mfapi.h>

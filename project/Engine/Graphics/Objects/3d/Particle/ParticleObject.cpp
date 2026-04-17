@@ -1,11 +1,11 @@
-#include "ParticleObject.h"
-#include "DxUtils.h"
-#include "Matrix.h" 
-#include "Zuizui.h"
-#include "CameraManager.h"
-#include "LightManager.h"
-#include "TextureManager.h"
-#include "Collision.h"
+#include "Engine/Graphics/Objects/3d/Particle/ParticleObject.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Math/Matrix/Matrix.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Math/Collision/Collision.h"
 #include <stdexcept>
 #include <array>
 #include <cassert>
@@ -297,12 +297,12 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
 
         ImGui::SeparatorText("Emitter Settings");
         int maxInst = static_cast<int>(numMaxInstance_);
-        if (ImGui::DragInt(("Max Instance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance, "%.1f")) {
+        if (ImGui::DragInt(("Max Instance" + label).c_str(), &maxInst, 1, 1, kNumMaxInstance, "%d")) {
             SetMaxInstance(static_cast<uint32_t>(maxInst));
         }
 
         int count = static_cast<int>(emitter_.count);
-        if (ImGui::DragInt(("Emit Count" + label).c_str(), &count, 1, 1, numMaxInstance_, "%.1f")) {
+        if (ImGui::DragInt(("Emit Count" + label).c_str(), &count, 1, 1, numMaxInstance_, "%d")) {
             emitter_.count = static_cast<uint32_t>(count);
         }
         ImGui::DragFloat(("Frequency" + label).c_str(), &emitter_.frequency, 0.01f, 0.01f, 10.0f, "%.1f");

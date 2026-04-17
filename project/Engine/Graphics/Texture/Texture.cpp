@@ -1,7 +1,7 @@
-#include "Texture.h"
+﻿#include "Engine/Graphics/Texture/Texture.h"
 #include "d3dx12.h"
-#include "DxUtils.h"
-#include "Base/Utils/StringUtility.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Base/Utils/StringUtility.h"
 #include <cassert>
 
 Texture::Texture() {}

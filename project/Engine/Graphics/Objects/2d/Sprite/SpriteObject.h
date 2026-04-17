@@ -1,13 +1,13 @@
-#pragma once
+﻿#pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
 #include <wrl.h>
 #include <d3d12.h>
-#include "Matrix.h"
-#include "Math/MathStructs.h"
-#include "Graphics/RenderStructs.h"
-#include "BaseResource.h"
+#include "Engine/Math/Matrix/Matrix.h"
+#include "Engine/Math/MathStructs.h"
+#include "Engine/Graphics/RenderStructs.h"
+#include "Engine/Base/BaseResource.h"
 
 class SpriteObject : Base2D{
 public:

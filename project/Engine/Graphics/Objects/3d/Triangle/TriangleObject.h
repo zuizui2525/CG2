@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
 #include <wrl.h>
 #include <d3d12.h>
-#include "Object3D.h"
+#include "Engine/Graphics/Objects/3d/Object3D.h"
 
 class TriangleObject: public Object3D {
 public:

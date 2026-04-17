@@ -1,7 +1,7 @@
-#include "Object3D.h"
-#include "DxUtils.h"
-#include "Matrix.h"
-#include "Zuizui.h"
+﻿#include "Engine/Graphics/Objects/3d/Object3D.h"
+#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Math/Matrix/Matrix.h"
+#include "Engine/Zuizui.h"
 #include <stdexcept>
 
 void Object3D::Initialize(int lightingMode) {

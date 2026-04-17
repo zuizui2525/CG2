@@ -1,7 +1,7 @@
-#include "SceneManager.h"
-#include "BaseResource.h"
-#include "CameraManager.h"
-#include "LightManager.h"
+﻿#include "App/Scene/SceneManager.h"
+#include "Engine/Base/BaseResource.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 
 SceneManager* SceneManager::GetInstance() {
     static SceneManager instance;

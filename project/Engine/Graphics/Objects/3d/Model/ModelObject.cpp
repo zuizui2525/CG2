@@ -1,10 +1,10 @@
-#include "ModelObject.h"
-#include "Zuizui.h"
-#include "CameraManager.h"
-#include "LightManager.h"
-#include "TextureManager.h"
-#include "ModelManager.h"
-#include "Matrix.h"
+﻿#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
+#include "Engine/Math/Matrix/Matrix.h"
 #include <cassert>
 
 void ModelObject::Initialize(int lightingMode) {

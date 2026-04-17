@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "DxCommon.h"
-#include "WindowApp.h"
-#include "PSOManager.h"
-#include "Log.h"
+#include "Engine/Base/DxCommon/DxCommon.h"
+#include "Engine/Base/WindowApp/WindowApp.h"
+#include "Engine/Graphics/PSO/Manager/PSOManager.h"
+#include "Engine/Base/Log/Log.h"
 
 class Zuizui {
 public:

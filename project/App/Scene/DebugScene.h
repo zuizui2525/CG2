@@ -1,21 +1,21 @@
-#pragma once
-#include "IScene.h"
+﻿#pragma once
+#include "App/Scene/IScene.h"
 #include <memory>
 #include <string>
 
-#include "Zuizui.h"
-#include "BaseResource.h"
-#include "Input.h"
-#include "CameraManager.h"
-#include "DebugCamera.h"
-#include "LightManager.h"
-#include "TextureManager.h"
-#include "ModelManager.h"
-#include "ModelObject.h"
-#include "SphereObject.h"
-#include "SpriteObject.h"
-#include "TriangleObject.h"
-#include "ParticleObject.h"
+#include "Engine/Zuizui.h"
+#include "Engine/Base/BaseResource.h"
+#include "Engine/Input/Input.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Texture/TextureManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
+#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
+#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
+#include "Engine/Graphics/Objects/3d/Particle/ParticleObject.h"
 
 #ifdef _USEIMGUI
 #include "imguiManager.h"

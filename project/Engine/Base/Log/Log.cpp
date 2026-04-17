@@ -1,4 +1,4 @@
-#include "Log.h"
+﻿#include "Engine/Base/Log/Log.h"
 
 Log::Log() {
     // ディレクトリ作成

@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include <string>
-#include "IScene.h"
+#include "App/Scene/IScene.h"
 
 /**
  * @brief シーン生成のための抽象工場（インターフェース）

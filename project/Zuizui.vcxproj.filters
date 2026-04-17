@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="imgui">
@@ -171,10 +171,10 @@
     <ClCompile Include="Engine\Base\WindowApp\WindowApp.cpp">
       <Filter>ZuizuiEngine\Base\WindowApp</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.cpp">
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Directional\DirectionalLight.cpp">
       <Filter>ZuizuiEngine\Graphics\Actor\Light\DirectionalLight</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\Actor\Camera\DebugCamera\DebugCamera.cpp">
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.cpp">
       <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Graphics\Texture\Texture.cpp">
@@ -201,51 +201,49 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Triangle\TriangleObject.cpp">
       <Filter>ZuizuiEngine\Graphics\Objects\3d\Triangle</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\BlendState\BlendStateBuilder.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\BlendStateBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\InputLayout\InputLayoutBuilder.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\InputLayoutBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\PSOManager\PSOManager.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\PSOManager</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\PSOPreset\PSOPreset.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\PSOPreset</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\RasterizerState\RasterizerStateBuilder.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\RootSignature\RootSignatureBuilder.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\RootSignatureBuilder</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\PSO\ShaderProgram\ShaderProgram.cpp">
+    <ClCompile Include="Engine\\Graphics\\PSO\\Shader\ShaderProgram.cpp">
       <Filter>ZuizuiEngine\Graphics\PSO\ShaderProgram</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\ImguiManager\ImguiManager.cpp">
       <Filter>imgui\ImguiManager</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\BaseResource.cpp">
+    <ClCompile Include="Engine\Base\BaseResource.cpp">
       <Filter>ZuizuiEngine\Graphics\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Math\Collision\Collision.cpp">
       <Filter>ZuizuiEngine\Math\Collision</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.cpp">
-      <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
-    </ClCompile>
-    <ClCompile Include="App\App.cpp">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\App.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphics\Actor\Light\PointLight\PointLight.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\SpotLight\SpotLight.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Light\LightManager\LightManager.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Camera\BaseCamera\BaseCamera.cpp" />
-    <ClCompile Include="Engine\Graphics\Actor\Camera\CameraManager\CameraManager.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Point\PointLight.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Spot\SpotLight.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.cpp" />
+    <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.cpp" />
     <ClCompile Include="App\Scene\SceneManager.cpp" />
     <ClCompile Include="App\Scene\DebugScene.cpp" />
     <ClCompile Include="App\Scene\TitleScene.cpp" />
@@ -258,7 +256,7 @@
     </ClCompile>
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Model\ModelLoader.cpp" />
-    <ClCompile Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.cpp" />
+    <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl">
@@ -323,10 +321,10 @@
     <ClInclude Include="Engine\Base\WindowApp\WindowApp.h">
       <Filter>ZuizuiEngine\Base\WindowApp</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\Actor\Light\DirectionalLight\DirectionalLight.h">
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Directional\DirectionalLight.h">
       <Filter>ZuizuiEngine\Graphics\Actor\Light\DirectionalLight</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\Actor\Camera\DebugCamera\DebugCamera.h">
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.h">
       <Filter>ZuizuiEngine\Graphics\Actor\Camera\DebugCamera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphics\Texture\Texture.h">
@@ -353,50 +351,48 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Object3D.h">
       <Filter>ZuizuiEngine\Graphics\Objects\3d</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\BlendStateBuilder\BlendStateBuilder.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\BlendState\BlendStateBuilder.h">
       <Filter>ZuizuiEngine\Graphics\PSO\BlendStateBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\DepthStencilStateBuilder\DepthStencilStateBuilder.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.h">
       <Filter>ZuizuiEngine\Graphics\PSO\DepthStencilStateBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\InputLayoutBuilder\InputLayoutBuilder.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\InputLayout\InputLayoutBuilder.h">
       <Filter>ZuizuiEngine\Graphics\PSO\InputLayoutBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\PSOManager\PSOManager.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h">
       <Filter>ZuizuiEngine\Graphics\PSO\PSOManager</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\PSOPreset\PSOPreset.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.h">
       <Filter>ZuizuiEngine\Graphics\PSO\PSOPreset</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\RasterizerStateBuilder\RasterizerStateBuilder.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\RasterizerState\RasterizerStateBuilder.h">
       <Filter>ZuizuiEngine\Graphics\PSO\RasterizerStateBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\RootSignatureBuilder\RootSignatureBuilder.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\RootSignature\RootSignatureBuilder.h">
       <Filter>ZuizuiEngine\Graphics\PSO\RootSignatureBuilder</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderProgram.h">
+    <ClInclude Include="Engine\\Graphics\\PSO\\Shader\ShaderProgram.h">
       <Filter>ZuizuiEngine\Graphics\PSO\ShaderProgram</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h">
       <Filter>imgui\ImguiManager</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BaseResource.h">
+    <ClInclude Include="Engine\Base\BaseResource.h">
       <Filter>ZuizuiEngine\Graphics\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Collision\Collision.h">
       <Filter>ZuizuiEngine\Math\Collision</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.h">
-      <Filter>ZuizuiEngine\Graphics\Objects\3d\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="App\App.h">
+      <Filter>ZuizuiEngine\Graphics\Objects\3d\App.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\Actor\Light\PointLight\PointLight.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\SpotLight\SpotLight.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Light\LightManager\LightManager.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Camera\BaseCamera\BaseCamera.h" />
-    <ClInclude Include="Engine\Graphics\Actor\Camera\CameraManager\CameraManager.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Point\PointLight.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Spot\SpotLight.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.h" />
+    <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.h" />
     <ClInclude Include="App\Scene\IScene.h" />
     <ClInclude Include="App\Scene\SceneManager.h" />
     <ClInclude Include="App\Scene\DebugScene.h" />
@@ -411,7 +407,7 @@
     </ClInclude>
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
-    <ClInclude Include="Engine\Graphics\PSO\ShaderProgram\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\MathStructs.h" />
     <ClInclude Include="Engine\Math\Collision\CollisionStructs.h" />
     <ClInclude Include="Engine\Graphics\RenderStructs.h" />
