@@ -2,8 +2,6 @@
 
 void DebugScene::Initialize() {
     // 1. 各マネージャのポインタを取得して保持する
-    texMgr_ = TextureResource::GetTextureManager();
-    modelMgr_ = ModelResource::GetModelManager();
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();
     input_ = InputResource::GetInput();

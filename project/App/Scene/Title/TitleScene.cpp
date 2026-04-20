@@ -6,7 +6,6 @@ void TitleScene::Initialize() {
     // 1. 各マネージャの取得
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();
-    modelMgr_ = ModelResource::GetModelManager();
 
     // 2. カメラの生成と登録
     mainCamera_ = std::make_shared<BaseCamera>();
@@ -25,7 +24,12 @@ void TitleScene::Initialize() {
 }
 
 void TitleScene::ImGuiControl() {
-
+#ifdef _USEIMGUI
+    // シーン内のオブジェクトのデバッグ表示
+    cameraMgr_->ImGuiControl();
+    dirLight_->ImGuiControl("dirLight");
+    bunny_->ImGuiControl("bunny");
+#endif
 }
 
 void TitleScene::Update() {

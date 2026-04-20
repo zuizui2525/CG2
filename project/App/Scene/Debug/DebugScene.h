@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "App/Scene/Core/IScene.h"
 #include <memory>
 #include <string>
@@ -9,8 +9,6 @@
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
-#include "Engine/Graphics/Texture/TextureManager.h"
-#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
 #include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 #include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
@@ -32,8 +30,6 @@ public:
 private:
     // --- 各システムマネージャへのポインタ ---
     Input* input_ = nullptr;
-    TextureManager* texMgr_ = nullptr;
-    ModelManager* modelMgr_ = nullptr;
     CameraManager* cameraMgr_ = nullptr;
     LightManager* lightMgr_ = nullptr;
 
