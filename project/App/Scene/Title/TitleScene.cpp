@@ -1,13 +1,12 @@
-﻿#include "App/Scene/Title/TitleScene.h"
+#include "App/Scene/Title/TitleScene.h"
 #include "Engine/Base/BaseResource.h"
 #include "App/Scene/Core/SceneManager.h"
-#include "App/Scene/Debug/DebugScene.h"
 
 void TitleScene::Initialize() {
     // 1. 各マネージャの取得
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();
-    auto modelMgr = ModelResource::GetModelManager();
+    modelMgr_ = ModelResource::GetModelManager();
 
     // 2. カメラの生成と登録
     mainCamera_ = std::make_shared<BaseCamera>();
@@ -20,8 +19,7 @@ void TitleScene::Initialize() {
     dirLight_->Initialize();
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
-    // 4. モデルのロードと生成
-    modelMgr->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
+    // 4. モデルのロードと生成（ロード済み）
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
 }

@@ -1,6 +1,7 @@
-﻿#include "App/App.h"
+#include "App/App.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
+#include "App/Load/ResourceLoader.h"
 
 void App::Initialize() {
     // システム
@@ -27,6 +28,9 @@ void App::Initialize() {
     modelMgr_ = std::make_unique<ModelManager>();
     modelMgr_->Initialize();
     ModelResource::SetModelManager(modelMgr_.get());
+
+    // リソースの一括ロード
+    ResourceLoader::LoadAll();
 
     sceneFactory_ = std::make_unique<SceneFactory>();
     SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());

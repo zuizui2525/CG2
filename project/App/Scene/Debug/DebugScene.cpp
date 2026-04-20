@@ -1,4 +1,4 @@
-﻿#include "App/Scene/Debug/DebugScene.h"
+#include "App/Scene/Debug/DebugScene.h"
 
 void DebugScene::Initialize() {
     // 1. 各マネージャのポインタを取得して保持する
@@ -8,16 +8,7 @@ void DebugScene::Initialize() {
     lightMgr_ = LightResource::GetLightManager();
     input_ = InputResource::GetInput();
 
-    // 2. リソースの読み込み
-    texMgr_->LoadTexture("white", "resources/white.png");
-    texMgr_->LoadTexture("monsterBall", "resources/monsterBall.png");
-    texMgr_->LoadTexture("circle", "resources/circle.png");
-    texMgr_->LoadTexture("uvChecker", "resources/uvChecker.png");
-
-    modelMgr_->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
-    modelMgr_->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
-    modelMgr_->LoadModel("terrain", "resources/obj/terrain/terrain.obj");
-    modelMgr_->LoadModel("skydome", "resources/obj/skydome/skydome.obj");
+    // 2. リソースの読み込み（App::Initialize内でResourceLoader経由で一括ロード済み）
 
     // 3. カメラの生成と設定
     mainCamera_ = std::make_shared<BaseCamera>();

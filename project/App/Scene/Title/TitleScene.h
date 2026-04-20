@@ -1,9 +1,10 @@
-﻿#pragma once
+#pragma once
 #include "App/Scene/Core/IScene.h"
 #include <memory>
 #include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
 
 class TitleScene : public IScene {
 public:
@@ -16,7 +17,8 @@ private:
     // マネージャへのポインタ
     CameraManager* cameraMgr_ = nullptr;
     LightManager* lightMgr_ = nullptr;
-
+    ModelManager* modelMgr_ = nullptr;
+    
     // オブジェクト
     std::shared_ptr<BaseCamera> mainCamera_;
     std::unique_ptr<DirectionalLightObject> dirLight_;
