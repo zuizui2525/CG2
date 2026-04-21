@@ -16,6 +16,7 @@ void ResourceLoader::LoadTextures() {
 	texMgr->LoadTexture("monsterBall", "resources/monsterBall.png");
 	texMgr->LoadTexture("circle", "resources/circle.png");
 	texMgr->LoadTexture("uvChecker", "resources/uvChecker.png");
+	texMgr->LoadTexture("skyboxTex", "resources/rostock_laage_airport_4k.dds");
 }
 
 void ResourceLoader::LoadModels() {

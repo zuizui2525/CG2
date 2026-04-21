@@ -1,0 +1,41 @@
+【Skybox（スカイボックス）の使い方について】
+
+■ 基本的な仕組み
+Skyboxはカメラを中心に生成される「箱」のモデルで、内側に全天球（キューブマップ）のパノラマテクスチャを貼り付けることで無限遠の背景を表現します。
+
+■ 実装されている場所
+クラス構造: `Engine/Graphics/Objects/3d/Skybox/`
+シェーダー: `resources/Shader/Skybox/`
+PSO定義: `Engine/Graphics/PSO/Preset/PSOPreset.cpp` の `CreateSkyboxPreset`
+
+■ シーンへの導入ステップ
+1. テクスチャのロード (ResourceLoader.cpp で実行済み)
+--------------------------------------------------
+TextureManagerの LoadTexture() を使って ".dds" ファイルを読み込みます。
+例: texMgr->LoadTexture("skyboxTex", "resources/rostock_laage_airport_4k.dds");
+(.dds拡張子のものは自動でキューブマップとして登録されるようになっています)
+
+
+2. シーンクラスでの宣言 (TitleScene.h)
+--------------------------------------------------
+#include "Engine/Graphics/Objects/3d/Skybox/Skybox.h"
+std::unique_ptr<Skybox> skybox_;
+
+
+3. 初期化 (TitleScene.cpp - Initialize)
+--------------------------------------------------
+skybox_ = std::make_unique<Skybox>();
+skybox_->Initialize();
+
+
+4. 更新 (TitleScene.cpp - Update)
+--------------------------------------------------
+skybox_->Update();
+(※このUpdate()の中で自動的にカメラの座標を取得し、箱がカメラに追従するよう計算されます)
+
+
+5. 描画 (TitleScene.cpp - Draw)
+--------------------------------------------------
+skybox_->Draw("skyboxTex");
+(※"skyboxTex" は手順1でLoadTexture()したときの名前を指定します)
+(※描画順は基本的に「一番最初（不透明オブジェクトの直前または直後）」に置くのが良いです。奥に描画されるようになっているため、他のモデルより後にDraw()しても被っていれば隠れます)

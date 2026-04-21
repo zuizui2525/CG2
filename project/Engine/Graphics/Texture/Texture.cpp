@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Texture/Texture.h"
+#include "Engine/Graphics/Texture/Texture.h"
 #include "d3dx12.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Base/Utils/StringUtility.h"
@@ -27,8 +27,16 @@ void Texture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* comman
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
     srvDesc.Format = metadata_.format;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = UINT(metadata_.mipLevels);
+
+    if (metadata_.IsCubemap()) {
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+        srvDesc.TextureCube.MostDetailedMip = 0;
+        srvDesc.TextureCube.MipLevels = UINT(metadata_.mipLevels);
+        srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+    } else {
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = UINT(metadata_.mipLevels);
+    }
 
     // ディスクリプタ計算
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -63,10 +71,23 @@ DirectX::ScratchImage Texture::LoadTextureFile(const std::string& filePath) {
     DirectX::ScratchImage image{};
     std::wstring filePathW = ConvertString(filePath);
 
-    HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+    HRESULT hr;
+    if (filePath.ends_with(".dds")) {
+        // DDSファイルの場合はLoadFromDDSFileを使用
+        hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
+    } else {
+        // それ以外はWICでロード
+        hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+    }
     assert(SUCCEEDED(hr));
 
     DirectX::ScratchImage mipImages{};
+    
+    // 圧縮フォーマットの場合はミップマップ生成ができないため、そのまま返す
+    if (DirectX::IsCompressed(image.GetMetadata().format)) {
+        return std::move(image);
+    }
+
     hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_DEFAULT, 0, mipImages);
 
     return SUCCEEDED(hr) ? std::move(mipImages) : std::move(image);

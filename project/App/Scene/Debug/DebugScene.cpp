@@ -1,4 +1,5 @@
 #include "App/Scene/Debug/DebugScene.h"
+#include "App/Scene/Core/SceneManager.h"
 
 void DebugScene::Initialize() {
     // 1. 各マネージャのポインタを取得して保持する
@@ -6,9 +7,7 @@ void DebugScene::Initialize() {
     lightMgr_ = LightResource::GetLightManager();
     input_ = InputResource::GetInput();
 
-    // 2. リソースの読み込み（App::Initialize内でResourceLoader経由で一括ロード済み）
-
-    // 3. カメラの生成と設定
+    // 2. カメラの生成と設定
     mainCamera_ = std::make_shared<BaseCamera>();
     mainCamera_->Initialize();
     cameraMgr_->AddCamera("Main", mainCamera_);
@@ -18,7 +17,7 @@ void DebugScene::Initialize() {
     cameraMgr_->AddCamera("Debug", debugCamera_);
     cameraMgr_->SetActiveCamera("Main");
 
-    // 4. ライトの生成
+    // 3. ライトの生成
     dirLight_ = std::make_unique<DirectionalLightObject>();
     dirLight_->Initialize();
     lightMgr_->AddDirectionalLight(dirLight_.get());
@@ -42,7 +41,7 @@ void DebugScene::Initialize() {
     spotLight_->Initialize();
     lightMgr_->AddSpotLight(spotLight_.get());
 
-    // 5. オブジェクトの生成
+    // 4. オブジェクトの生成
     skydome_ = std::make_unique<ModelObject>();
     skydome_->Initialize();
     skydome_->SetLightingMode(0);
@@ -98,6 +97,11 @@ void DebugScene::ImGuiControl() {
 }
 
 void DebugScene::Update() {
+    // シーン切り替え
+    if (input_->Trigger(DIK_SPACE)) {
+        SceneManager::GetInstance()->ChangeScene("Title");
+    }
+
     // モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());

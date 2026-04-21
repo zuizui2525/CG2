@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/PSO/Manager/PSOManager.h"
+#include "Engine/Graphics/PSO/Manager/PSOManager.h"
 #include <cassert>
 
 PSOManager::PSOManager(ID3D12Device* device)
@@ -23,6 +23,14 @@ HRESULT PSOManager::Initialize(
 
     // 登録処理
     RegisterPreset("Particle", particlePreset);
+
+    // Skybox用プリセット作成
+    PSOPreset skyboxPreset = PSOPreset::CreateSkyboxPreset(
+        device_, dxcUtils, dxcCompiler, includeHandler);
+
+    // 登録処理
+    RegisterPreset("Skybox", skyboxPreset);
+
     return S_OK;
 }
 

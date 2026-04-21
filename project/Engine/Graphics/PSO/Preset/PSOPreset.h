@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <d3d12.h>
 #include <wrl.h>
 #include <string>
@@ -22,6 +22,13 @@ public:
 
     // Particle用のプリセット作成関数
     static PSOPreset CreateParticlePreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
+    // Skybox用のプリセット作成関数
+    static PSOPreset CreateSkyboxPreset(
         ID3D12Device* device,
         IDxcUtils* dxcUtils,
         IDxcCompiler3* dxcCompiler,
