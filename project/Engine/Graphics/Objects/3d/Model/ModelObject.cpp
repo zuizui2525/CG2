@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
+#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
@@ -26,7 +26,7 @@ void ModelObject::Update() {
     wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
-void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, bool draw) {
+void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, const std::string& envMapKey, bool draw) {
     if (!draw) return;
 
     assert(!modelKey.empty());
@@ -53,6 +53,15 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     }
     // 指定されたキーでテクスチャ取得
     commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
+    
+    // 環境マップテクスチャ
+    if (!envMapKey.empty()) {
+        commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
+    } else {
+        // TextureCube以外のテクスチャを渡すとエラーになるため、空のときはskyboxTexをダミーとして渡す
+        commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle("skyboxTex")); 
+    }
+
     // DrawInstanced
     commandList->DrawInstanced((UINT)modelData->vertices.size(), 1, 0, 0);
 }

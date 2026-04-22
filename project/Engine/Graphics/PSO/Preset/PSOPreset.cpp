@@ -28,6 +28,8 @@ PSOPreset PSOPreset::CreateObject3DPreset(
     rs.AddCBV(4, D3D12_SHADER_VISIBILITY_PIXEL);
     // テクスチャ (t0, PS)
     rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+    // 環境マップテクスチャ (t1, PS)
+    rs.AddSRV(1, D3D12_SHADER_VISIBILITY_PIXEL);
     // サンプラー (s0)
     D3D12_SAMPLER_DESC sampler{};
     sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;

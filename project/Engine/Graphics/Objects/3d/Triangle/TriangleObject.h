@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
@@ -17,7 +17,7 @@ public:
     void Update();
 
     // 描画処理
-    void Draw(const std::string& textureKey, bool draw = true);
+    void Draw(const std::string& textureKey, const std::string& envMapKey = "", bool draw = true);
   
 private:
     // GPUリソース

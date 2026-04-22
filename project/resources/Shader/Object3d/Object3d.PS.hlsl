@@ -2,6 +2,7 @@
 
 // --- リソース定義 ---
 Texture2D<float32_t4> gTexture : register(t0);
+TextureCube<float32_t4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 // --- 構造体定義 ---
@@ -19,6 +20,7 @@ struct Material
     int32_t enableLighting;
     float32_t4x4 uvTransform;
     float32_t shininess;
+    float32_t environmentCoefficient;
 };
 
 struct DirectionalLight
@@ -186,6 +188,12 @@ PixelShaderOutput main(VertexShaderOutput input)
         // 最終色の合成
         output.color.rgb = totalDiffuse + totalSpecular;
         output.color.a = gMaterial.color.a * textureColor.a;
+
+        // 環境マップ
+        float32_t3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
+        float32_t3 reflectedVector = reflect(cameraToPosition, normalize(input.normal));
+        float32_t4 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
+        output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient;
     }
 
     // 3. アルファテスト

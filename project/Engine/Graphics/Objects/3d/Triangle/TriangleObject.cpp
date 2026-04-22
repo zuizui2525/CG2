@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
+#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
@@ -49,7 +49,7 @@ void TriangleObject::Update() {
     materialData_->uvtransform = uv;
 }
 
-void TriangleObject::Draw(const std::string& textureKey, bool draw) {
+void TriangleObject::Draw(const std::string& textureKey, const std::string& envMapKey, bool draw) {
     if (!draw) return;
     // コマンドリスト
     auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
@@ -70,6 +70,14 @@ void TriangleObject::Draw(const std::string& textureKey, bool draw) {
     }
     // 指定されたキーでテクスチャ取得
     commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
+
+    // 環境マップテクスチャ
+    if (!envMapKey.empty()) {
+        commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
+    } else {
+        // TextureCube以外のテクスチャを渡すとエラーになるため、空のときはskyboxTexをダミーとして渡す
+        commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle("skyboxTex")); 
+    }
     // DrawInstanced
     commandList->DrawInstanced(3, 1, 0, 0);
 }

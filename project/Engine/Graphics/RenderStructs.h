@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Engine/Math/MathStructs.h"
 #include <d3d12.h>
 #include <wrl.h>
@@ -13,6 +13,8 @@ struct Material {
     float padding[3];
     Matrix4x4 uvtransform;
     float shininess;
+    float environmentCoefficient;
+    float padding2[2];
 };
 
 struct TransformationMatrix {

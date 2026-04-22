@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/3d/Object3D.h"
+#include "Engine/Graphics/Objects/3d/Object3D.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Math/Matrix/Matrix.h"
 #include "Engine/Zuizui.h"
@@ -22,6 +22,7 @@ void Object3D::Initialize(int lightingMode) {
     materialData_->enableLighting = lightingMode;
     materialData_->uvtransform = Math::MakeIdentity();
     materialData_->shininess = 30.0f;
+    materialData_->environmentCoefficient = 0.0f;
 
     // Transform初期化
     transform_.scale = { 1,1,1 };
@@ -69,6 +70,7 @@ void Object3D::ImGuiLightingControl(const std::string& name) {
         ImGui::RadioButton(("None" + label).c_str(), (int*)&materialData_->enableLighting, 0); ImGui::SameLine();
         ImGui::RadioButton(("Lambert" + label).c_str(), (int*)&materialData_->enableLighting, 1); ImGui::SameLine();
         ImGui::RadioButton(("HalfLambert" + label).c_str(), (int*)&materialData_->enableLighting, 2);
+        ImGui::DragFloat(("Env Coefficient" + label).c_str(), &materialData_->environmentCoefficient, 0.01f, 0.0f, 10.0f);
     }
 #endif
 }

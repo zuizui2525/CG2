@@ -98,7 +98,7 @@ void DebugScene::ImGuiControl() {
 
 void DebugScene::Update() {
     // シーン切り替え
-    if (input_->Trigger(DIK_SPACE)) {
+    if (input_->Trigger(DIK_N)) {
         SceneManager::GetInstance()->ChangeScene("Title");
     }
 

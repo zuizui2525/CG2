@@ -25,8 +25,14 @@ void TitleScene::Initialize() {
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
     // 4. モデルの生成（ロード済み）
+    sphere_ = std::make_unique<SphereObject>();
+    sphere_->Initialize();
+    sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
+    sphere_->GetMaterialData()->environmentCoefficient = 1.0f;
+
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
+    bunny_->GetMaterialData()->environmentCoefficient = 1.0f;
 
     // 5. Skyboxの生成
     skybox_ = std::make_unique<Skybox>();
@@ -38,13 +44,14 @@ void TitleScene::ImGuiControl() {
     // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
+    sphere_->ImGuiControl("sphere");
     bunny_->ImGuiControl("bunny");
 #endif
 }
 
 void TitleScene::Update() {
     // シーン切り替え
-    if (input_->Trigger(DIK_SPACE)) {
+    if (input_->Trigger(DIK_N)) {
         SceneManager::GetInstance()->ChangeScene("Debug");
     }
 
@@ -56,6 +63,7 @@ void TitleScene::Update() {
 
     // ライトとオブジェクトの更新
     dirLight_->Update();
+    sphere_->Update();
     bunny_->Update();
     skybox_->Update();
 
@@ -74,8 +82,11 @@ void TitleScene::Update() {
 
 void TitleScene::Draw() {
     // Skyboxの描画（透過を含まない他のモデルより先、または後に描画）
-    skybox_->Draw("skyboxTex");
+    skybox_->Draw("forestTex");
 
-    // バニーの描画
-    bunny_->Draw("bunny", "bunny");
+    // 球体の描画
+    sphere_->Draw("white", "forestTex");
+
+    // バニーの描画（第3引数に環境マップのキーを指定）
+    bunny_->Draw("bunny", "white", "skyboxTex");
 }
