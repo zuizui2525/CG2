@@ -1,4 +1,4 @@
-#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
@@ -7,7 +7,7 @@
 #include "Engine/Graphics/Texture/TextureManager.h"
 #include "Engine/Math/Matrix/Matrix.h"
 
-void SphereObject::Initialize(int lightingMode) {
+void SquareObject::Initialize(int lightingMode) {
     // 基底クラスの初期化
     Object3D::Initialize(lightingMode);
     
@@ -15,7 +15,7 @@ void SphereObject::Initialize(int lightingMode) {
     CreateMesh();
 }
 
-void SphereObject::Update() {
+void SquareObject::Update() {
     // パラメータに変更があればメッシュを再生成
     if (needsUpdate_) {
         CreateMesh();
@@ -42,14 +42,14 @@ void SphereObject::Update() {
     materialData_->uvtransform = uv;
 }
 
-void SphereObject::Draw(const std::string& textureKey, const std::string& envMapKey) {
+void SquareObject::Draw(const std::string& textureKey, const std::string& envMapKey) {
     if (!isVisible_) return;
     // コマンドリスト
     auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
     // パイプラインの選択
     commandList->SetGraphicsRootSignature(EngineResource::GetEngine()->GetPSOManager()->GetRootSignature("Object3D"));
     commandList->SetPipelineState(EngineResource::GetEngine()->GetPSOManager()->GetPSO("Object3D"));
-    // VBV設定
+    // VBV, IBV設定
     commandList->IASetVertexBuffers(0, 1, &vbView_);
     commandList->IASetIndexBuffer(&ibView_);
     // 定数バッファ設定
@@ -76,19 +76,18 @@ void SphereObject::Draw(const std::string& textureKey, const std::string& envMap
         // TextureCube以外のテクスチャを渡すとエラーになるため、空のときはskyboxTexをダミーとして渡す
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle("skyboxTex")); 
     }
-    // DrawInstanced
-    uint32_t indexCount = subdivision_ * subdivision_ * 6;
-    commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+    
+    // DrawIndexedInstanced
+    const uint32_t indexCount = 6;
+    const uint32_t instanceCount = 1;
+    commandList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
 }
 
-void SphereObject::CreateMesh() {
-    // 頂点数とインデックス数を計算
-    uint32_t kVertexCount = (subdivision_ + 1) * (subdivision_ + 1);
-    uint32_t kIndexCount = subdivision_ * subdivision_ * 6;
-    float kLonEvery = static_cast<float>(M_PI * 2.0f / subdivision_);
-    float kLatEvery = static_cast<float>(M_PI / subdivision_);
+void SquareObject::CreateMesh() {
+    const uint32_t kVertexCount = 4;
+    const uint32_t kIndexCount = 6;
 
-    // Vertex Resource 作成 (以前のリソースはComPtrの代入により自動解放される)
+    // Vertex Resource 作成
     vertexResource_ = DxUtils::CreateBufferResource(sEngine->GetDevice(), sizeof(VertexData) * kVertexCount);
     vbView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
     vbView_.SizeInBytes = sizeof(VertexData) * kVertexCount;
@@ -97,21 +96,43 @@ void SphereObject::CreateMesh() {
     VertexData* vtx;
     vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vtx));
 
-    for (uint32_t latIndex = 0; latIndex <= subdivision_; ++latIndex) {
-        float lat = static_cast<float>(-M_PI / 2.0f + kLatEvery * latIndex);
-        for (uint32_t lonIndex = 0; lonIndex <= subdivision_; ++lonIndex) {
-            float lon = kLonEvery * lonIndex;
+    const float halfWidth = size_.x / 2.0f;
+    const float halfHeight = size_.y / 2.0f;
 
-            float x = cosf(lat) * cosf(lon) * radius_;
-            float y = sinf(lat) * radius_;
-            float z = cosf(lat) * sinf(lon) * radius_;
+    const float left = -halfWidth;
+    const float right = halfWidth;
+    const float bottom = -halfHeight;
+    const float top = halfHeight;
+    const float zIndex = 0.0f;
+    const float wIndex = 1.0f;
 
-            uint32_t index = latIndex * (subdivision_ + 1) + lonIndex;
-            vtx[index].position = { x, y, z, 1.0f };
-            vtx[index].texcoord = { (float)lonIndex / subdivision_, 1.0f - (float)latIndex / subdivision_ };
-            vtx[index].normal = { x, y, z };
-        }
-    }
+    const float uvLeft = 0.0f;
+    const float uvRight = 1.0f;
+    const float uvTop = 0.0f;
+    const float uvBottom = 1.0f;
+
+    const Vector3 normalFront = { 0.0f, 0.0f, -1.0f };
+
+    // 左下
+    vtx[0].position = { left, bottom, zIndex, wIndex };
+    vtx[0].texcoord = { uvLeft, uvBottom };
+    vtx[0].normal = normalFront;
+
+    // 左上
+    vtx[1].position = { left, top, zIndex, wIndex };
+    vtx[1].texcoord = { uvLeft, uvTop };
+    vtx[1].normal = normalFront;
+
+    // 右下
+    vtx[2].position = { right, bottom, zIndex, wIndex };
+    vtx[2].texcoord = { uvRight, uvBottom };
+    vtx[2].normal = normalFront;
+
+    // 右上
+    vtx[3].position = { right, top, zIndex, wIndex };
+    vtx[3].texcoord = { uvRight, uvTop };
+    vtx[3].normal = normalFront;
+
     vertexResource_->Unmap(0, nullptr);
 
     // Index Resource 作成
@@ -123,20 +144,12 @@ void SphereObject::CreateMesh() {
     uint32_t* idxGPU = nullptr;
     indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&idxGPU));
 
-    uint32_t idx = 0;
-    for (uint32_t latIndex = 0; latIndex < subdivision_; ++latIndex) {
-        for (uint32_t lonIndex = 0; lonIndex < subdivision_; ++lonIndex) {
-            uint32_t current = latIndex * (subdivision_ + 1) + lonIndex;
-            uint32_t next = current + subdivision_ + 1;
+    idxGPU[0] = 0;
+    idxGPU[1] = 1;
+    idxGPU[2] = 2;
+    idxGPU[3] = 2;
+    idxGPU[4] = 1;
+    idxGPU[5] = 3;
 
-            idxGPU[idx++] = current;
-            idxGPU[idx++] = next;
-            idxGPU[idx++] = current + 1;
-
-            idxGPU[idx++] = current + 1;
-            idxGPU[idx++] = next;
-            idxGPU[idx++] = next + 1;
-        }
-    }
     indexResource_->Unmap(0, nullptr);
 }

@@ -26,8 +26,8 @@ void ModelObject::Update() {
     wvpData_->WorldInverseTranspose = Math::Transpose(Math::Inverse(worldForNormal));
 }
 
-void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, const std::string& envMapKey, bool draw) {
-    if (!draw) return;
+void ModelObject::Draw(const std::string& modelKey, const std::string& textureKey, const std::string& envMapKey) {
+    if (!isVisible_) return;
 
     assert(!modelKey.empty());
     
@@ -60,7 +60,9 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     
     // 環境マップテクスチャ
     if (!envMapKey.empty()) {
-        materialData_->environmentCoefficient = 1.0f;
+        if (materialData_->environmentCoefficient == 0.0f) {
+            materialData_->environmentCoefficient = 1.0f;
+        }
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
     } else {
         materialData_->environmentCoefficient = 0.0f;

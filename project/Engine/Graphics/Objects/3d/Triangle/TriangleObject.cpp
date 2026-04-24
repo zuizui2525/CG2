@@ -49,8 +49,8 @@ void TriangleObject::Update() {
     materialData_->uvtransform = uv;
 }
 
-void TriangleObject::Draw(const std::string& textureKey, const std::string& envMapKey, bool draw) {
-    if (!draw) return;
+void TriangleObject::Draw(const std::string& textureKey, const std::string& envMapKey) {
+    if (!isVisible_) return;
     // コマンドリスト
     auto commandList = EngineResource::GetEngine()->GetDxCommon()->GetCommandList();
     // パイプラインの選択
@@ -73,7 +73,9 @@ void TriangleObject::Draw(const std::string& textureKey, const std::string& envM
 
     // 環境マップテクスチャ
     if (!envMapKey.empty()) {
-        materialData_->environmentCoefficient = 1.0f;
+        if (materialData_->environmentCoefficient == 0.0f) {
+            materialData_->environmentCoefficient = 1.0f;
+        }
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
     } else {
         materialData_->environmentCoefficient = 0.0f;

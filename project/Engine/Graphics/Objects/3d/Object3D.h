@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <wrl.h>
 #include <d3d12.h>
 #include "Engine/Math/MathStructs.h"
@@ -18,23 +18,68 @@ public:
     void ImGuiControl(const std::string& name);
 
     // 共通アクセサ
-    // Getter
-    ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
-    ID3D12Resource* GetMaterialResource() const { return materialResource_.Get(); }
-    Transform& GetTransform() { return transform_; }
-    Vector3& GetScale() { return transform_.scale; }
-    Vector3& GetRotate() { return transform_.rotate; }
-    Vector3& GetPosition() { return transform_.translate; }
-    Transform& GetUVTransform() { return uvTransform_; }
-    Material* GetMaterialData() { return materialData_; }
-    TransformationMatrix* GetWvpData() { return wvpData_; }
-    int GetLightingMode() const { return materialData_ ? materialData_->enableLighting : 0; }
+    // ==========================================
+    // Getter (情報取得)
+    // ==========================================
 
-    // Setter
+    /// @brief WVP(World, View, Projection)行列の定数バッファを取得します
+    ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
+    /// @brief マテリアル(材質)の定数バッファを取得します
+    ID3D12Resource* GetMaterialResource() const { return materialResource_.Get(); }
+    
+    /// @brief 3Dトランスフォーム(位置・回転・スケール)を取得します
+    Transform& GetTransform() { return transform_; }
+    /// @brief スケール(大きさ)を取得します
+    Vector3& GetScale() { return transform_.scale; }
+    /// @brief 回転(オイラー角: ラジアン)を取得します
+    Vector3& GetRotate() { return transform_.rotate; }
+    /// @brief 座標(位置)を取得します
+    Vector3& GetPosition() { return transform_.translate; }
+    
+    /// @brief UVトランスフォーム(テクスチャのスクロールや拡縮用)を取得します
+    Transform& GetUVTransform() { return uvTransform_; }
+    /// @brief マテリアルデータ(色や光沢度などの実体)のポインタを取得します
+    Material* GetMaterialData() { return materialData_; }
+    /// @brief WVPデータ(行列情報の実体)のポインタを取得します
+    TransformationMatrix* GetWvpData() { return wvpData_; }
+    
+    /// @brief 現在のライティング設定を取得します (0:無効, 1:Lambert, 2:HalfLambert)
+    int GetLightingMode() const { return materialData_ ? materialData_->enableLighting : 0; }
+    /// @brief オブジェクトの基本色(RGBA)を取得します
+    Vector4 GetColor() const { return materialData_ ? materialData_->color : Vector4{1.0f, 1.0f, 1.0f, 1.0f}; }
+    /// @brief オブジェクトの透明度(0.0f〜1.0f)を取得します
+    float GetAlpha() const { return materialData_ ? materialData_->color.w : 1.0f; }
+    /// @brief スペキュラ(ハイライト)の鋭さを取得します
+    float GetShininess() const { return materialData_ ? materialData_->shininess : 30.0f; }
+    /// @brief 環境マップの反射係数(0.0fで反射なし, 1.0fで完全反射)を取得します
+    float GetEnvironmentCoefficient() const { return materialData_ ? materialData_->environmentCoefficient : 0.0f; }
+    /// @brief オブジェクトが現在描画される状態かどうかを取得します
+    bool GetIsVisible() const { return isVisible_; }
+
+    // ==========================================
+    // Setter (情報設定)
+    // ==========================================
+
+    /// @brief 3Dトランスフォーム(位置・回転・スケール)をまとめて設定します
     void SetTransform(Transform transform) { transform_ = transform; }
+    /// @brief スケール(大きさ)を設定します (例: Vector3(2,2,2) で2倍)
     void SetScale(Vector3 scale) { transform_.scale = scale; }
+    /// @brief 回転(オイラー角: ラジアン)を設定します
     void SetRotate(Vector3 rotate) { transform_.rotate = rotate; }
+    /// @brief 座標(位置)を設定します
     void SetPosition(Vector3 position) { transform_.translate = position; }
+    
+    /// @brief オブジェクトの基本色を設定します (R, G, B, A) 1.0fが最大値です
+    void SetColor(const Vector4& color) { if (materialData_) { materialData_->color = color; } }
+    /// @brief オブジェクトの透明度を設定します (0.0f:完全透明 〜 1.0f:不透明)
+    void SetAlpha(float alpha) { if (materialData_) { materialData_->color.w = alpha; } }
+    /// @brief スペキュラ(ハイライト)の鋭さを設定します (数値が大きいほど鋭いハイライトになります)
+    void SetShininess(float shininess) { if (materialData_) { materialData_->shininess = shininess; } }
+    /// @brief 環境マップの反射係数を設定します (0.0f:反射なし 〜 1.0f:完全反射(鏡面))
+    void SetEnvironmentCoefficient(float coef) { if (materialData_) { materialData_->environmentCoefficient = coef; } }
+    /// @brief オブジェクトの表示/非表示を切り替えます (falseで描画されなくなります)
+    void SetIsVisible(bool isVisible) { isVisible_ = isVisible; }
+    /// @brief ライティングの種類を設定します (0:無効, 1:Lambert(通常), 2:HalfLambert(暗部を明るく))
     void SetLightingMode(int lightingMode) {
         if (materialData_) {
             materialData_->enableLighting = lightingMode;
@@ -55,6 +100,8 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
+    
+    bool isVisible_ = true;
 
     // ImGuiウィンドウの開閉状態
     bool isWindowOpen_ = false;

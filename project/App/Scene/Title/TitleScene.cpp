@@ -25,14 +25,25 @@ void TitleScene::Initialize() {
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
     // 4. モデルの生成（ロード済み）
+    triangle_ = std::make_unique<TriangleObject>();
+    triangle_->Initialize();
+    triangle_->SetPosition({ -2.0f, 2.0f, 0.0f });
+
+    square_ = std::make_unique<SquareObject>();
+    square_->Initialize();
+    square_->SetPosition({ -2.0f, 0.0f, 0.0f });
+
+    cube_ = std::make_unique<CubeObject>();
+    cube_->Initialize();
+    cube_->SetScale({ 2.0f, 1.0f,1.0f });
+    cube_->SetPosition({ 2.0f, 2.0f, 0.0f });
+
     sphere_ = std::make_unique<SphereObject>();
     sphere_->Initialize();
     sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
-    sphere_->GetMaterialData()->environmentCoefficient = 1.0f;
 
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
-    bunny_->GetMaterialData()->environmentCoefficient = 1.0f;
 
     // 5. Skyboxの生成
     skybox_ = std::make_unique<Skybox>();
@@ -63,6 +74,9 @@ void TitleScene::Update() {
 
     // ライトとオブジェクトの更新
     dirLight_->Update();
+    triangle_->Update();
+    square_->Update();
+    cube_->Update();
     sphere_->Update();
     bunny_->Update();
     skybox_->Update();
@@ -83,6 +97,15 @@ void TitleScene::Update() {
 void TitleScene::Draw() {
     // Skyboxの描画（透過を含まない他のモデルより先、または後に描画）
     skybox_->Draw("forestTex");
+
+    // 三角形の描画
+    triangle_->Draw("white", "forestTex");
+
+    // 四角形の描画
+    square_->Draw("white", "forestTex");
+
+    // 立方体の描画
+    cube_->Draw("white", "forestTex");
 
     // 球体の描画
     sphere_->Draw("white", "forestTex");

@@ -163,7 +163,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
     <ClCompile Include="Engine\Base\Utils\StringUtility.cpp" />
     <ClCompile Include="Engine\Base\Utils\DumpExporter.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.cpp" />
@@ -263,7 +265,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
     <ClInclude Include="Engine\Base\Utils\StringUtility.h" />
     <ClInclude Include="Engine\Base\Utils\DumpExporter.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.h" />

@@ -3,6 +3,9 @@
 #include <memory>
 
 #include "Engine/Input/Input.h"
+#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
+#include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
+#include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 #include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
 #include "Engine/Graphics/Objects/3d/Skybox/Skybox.h"
@@ -27,6 +30,9 @@ private:
     std::shared_ptr<BaseCamera> mainCamera_;
     std::shared_ptr<DebugCamera> debugCamera_;
     std::unique_ptr<DirectionalLightObject> dirLight_;
+    std::unique_ptr<TriangleObject> triangle_;
+    std::unique_ptr<SquareObject> square_;
+    std::unique_ptr<CubeObject> cube_;
     std::unique_ptr<SphereObject> sphere_;
     std::unique_ptr<ModelObject> bunny_;
     std::unique_ptr<Skybox> skybox_;

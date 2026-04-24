@@ -61,6 +61,8 @@
     <ClCompile Include="Engine\Graphics\Texture\TextureManager.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
@@ -124,6 +126,8 @@
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />

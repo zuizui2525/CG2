@@ -6,11 +6,12 @@
 #include <d3d12.h>
 #include <string>
 #include "Engine/Graphics/Objects/3d/Object3D.h"
+#include "Engine/Math/MathStructs.h"
 
-class SphereObject : public Object3D {
+class SquareObject : public Object3D {
 public:
-    SphereObject() = default;
-    ~SphereObject() = default;
+    SquareObject() = default;
+    ~SquareObject() = default;
 
     void Initialize(int lightingMode = 2);
 
@@ -21,15 +22,12 @@ public:
     void Draw(const std::string& textureKey = "white", const std::string& envMapKey = "");
 
     // Getter
-    float GetRadius() const { return radius_; }
-    uint32_t GetSubdivision() const { return subdivision_; }
+    Vector2 GetSize() const { return size_; }
 
-    // Setter (変更があったらフラグを立てる)
-    void SetRadius(float radius) { radius_ = radius; needsUpdate_ = true; }
-    void SetSubdivision(uint32_t subdivision) { subdivision_ = subdivision; needsUpdate_ = true; }
+    // Setter
+    void SetSize(const Vector2& size) { size_ = size; needsUpdate_ = true; }
 
 private:
-    // メッシュ（頂点・インデックスバッファ）の生成
     void CreateMesh();
 
 private:
@@ -42,7 +40,6 @@ private:
     D3D12_INDEX_BUFFER_VIEW ibView_{};
 
     // パラメータ
-    uint32_t subdivision_ = 16;
-    float radius_ = 0.5f;
+    Vector2 size_ = { 1.0f, 1.0f };
     bool needsUpdate_ = false; // 再生成フラグ
 };
