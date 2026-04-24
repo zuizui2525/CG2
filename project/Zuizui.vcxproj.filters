@@ -63,6 +63,8 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Line\LineObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
@@ -128,6 +130,8 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Line\LineObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />

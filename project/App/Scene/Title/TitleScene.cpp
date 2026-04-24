@@ -25,6 +25,11 @@ void TitleScene::Initialize() {
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
     // 4. モデルの生成（ロード済み）
+    line_ = std::make_unique<LineObject>();
+    line_->Initialize();
+    line_->SetStartPoint({3.0f, 0.0f, 0.0f});
+    line_->SetEndPoint({ -3.0f, 2.0f, 0.0f });
+
     triangle_ = std::make_unique<TriangleObject>();
     triangle_->Initialize();
     triangle_->SetPosition({ -2.0f, 2.0f, 0.0f });
@@ -42,6 +47,10 @@ void TitleScene::Initialize() {
     sphere_->Initialize();
     sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
 
+    cylinder_ = std::make_unique<CylinderObject>();
+    cylinder_->Initialize();
+    cylinder_->SetPosition({ 2.0f, -2.0f, 0.0f });
+
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
 
@@ -55,7 +64,12 @@ void TitleScene::ImGuiControl() {
     // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
+    line_->ImGuiControl("line");
+    triangle_->ImGuiControl("triangle");
+    square_->ImGuiControl("sqaure");
+    cube_->ImGuiControl("cube");
     sphere_->ImGuiControl("sphere");
+    cylinder_->ImGuiControl("cylinder");
     bunny_->ImGuiControl("bunny");
 #endif
 }
@@ -74,10 +88,12 @@ void TitleScene::Update() {
 
     // ライトとオブジェクトの更新
     dirLight_->Update();
+    line_->Update();
     triangle_->Update();
     square_->Update();
     cube_->Update();
     sphere_->Update();
+    cylinder_->Update();
     bunny_->Update();
     skybox_->Update();
 
@@ -98,6 +114,9 @@ void TitleScene::Draw() {
     // Skyboxの描画（透過を含まない他のモデルより先、または後に描画）
     skybox_->Draw("forestTex");
 
+    // 線の描画
+    line_->Draw();
+
     // 三角形の描画
     triangle_->Draw("white", "forestTex");
 
@@ -109,6 +128,9 @@ void TitleScene::Draw() {
 
     // 球体の描画
     sphere_->Draw("white", "forestTex");
+
+    // 円柱の描画
+    cylinder_->Draw("white", "forestTex");
 
     // バニーの描画（第3引数に環境マップのキーを指定）
     bunny_->Draw("bunny", "white", "forestTex");
