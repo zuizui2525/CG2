@@ -139,12 +139,12 @@ void DebugScene::Update() {
 }
 
 void DebugScene::Draw() {
-    skydome_->Draw("skydome", "skydome");
-    terrain_->Draw("terrain", "terrain");
-    teapot_->Draw("teapot", "teapot");
-    bunny_->Draw("bunny", "bunny");
+    skydome_->Draw("skydome");
+    terrain_->Draw("terrain");
+    teapot_->Draw("teapot");
+    bunny_->Draw("bunny");
     sphere_->Draw("monsterBall");
-    triangle_->Draw("white");
+    triangle_->Draw();
     particle_->Draw("circle");
     sprite_->Draw("uvChecker");
 }

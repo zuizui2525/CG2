@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Engine/Math/MathStructs.h"
 #include "Engine/Math/Collision/CollisionStructs.h"
 #include "Engine/Graphics/RenderStructs.h"
@@ -42,7 +42,7 @@ public:
 	void Update();
 
 	// 描画処理
-	void Draw(const std::string& textureKey, bool draw = true);
+	void Draw(const std::string& textureKey = "white", bool draw = true);
 
 	void ImGuiControl(const std::string& name);
 

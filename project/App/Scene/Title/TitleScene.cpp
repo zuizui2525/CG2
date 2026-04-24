@@ -88,5 +88,5 @@ void TitleScene::Draw() {
     sphere_->Draw("white", "forestTex");
 
     // バニーの描画（第3引数に環境マップのキーを指定）
-    bunny_->Draw("bunny", "white", "skyboxTex");
+    bunny_->Draw("bunny", "white", "forestTex");
 }

@@ -24,6 +24,7 @@ void ResourceLoader::LoadModels() {
 	ModelManager* modelMgr = ModelResource::GetModelManager();
 	if (!modelMgr) return;
 
+	modelMgr->LoadModel("cube", "resources/obj/cube/cube.obj");
 	modelMgr->LoadModel("teapot", "resources/obj/teapot/teapot.obj");
 	modelMgr->LoadModel("bunny", "resources/obj/bunny/bunny.obj");
 	modelMgr->LoadModel("terrain", "resources/obj/terrain/terrain.obj");

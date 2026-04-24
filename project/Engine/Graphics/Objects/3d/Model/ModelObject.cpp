@@ -30,7 +30,11 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
     if (!draw) return;
 
     assert(!modelKey.empty());
-    assert(!textureKey.empty());
+    
+    std::string finalTextureKey = textureKey;
+    if (finalTextureKey.empty()) {
+        finalTextureKey = modelKey;
+    }
    
     auto modelData = sModelMgr->GetModelData(modelKey);
     assert(modelData);
@@ -52,12 +56,14 @@ void ModelObject::Draw(const std::string& modelKey, const std::string& textureKe
         commandList->SetGraphicsRootConstantBufferView(5, lightMgr->GetSpotLightGroupAddress());
     }
     // 指定されたキーでテクスチャ取得
-    commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(textureKey));
+    commandList->SetGraphicsRootDescriptorTable(6, sTexMgr->GetGpuHandle(finalTextureKey));
     
     // 環境マップテクスチャ
     if (!envMapKey.empty()) {
+        materialData_->environmentCoefficient = 1.0f;
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
     } else {
+        materialData_->environmentCoefficient = 0.0f;
         // TextureCube以外のテクスチャを渡すとエラーになるため、空のときはskyboxTexをダミーとして渡す
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle("skyboxTex")); 
     }

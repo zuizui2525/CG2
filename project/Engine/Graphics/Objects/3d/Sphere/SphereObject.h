@@ -18,7 +18,7 @@ public:
     void Update();
 
     // 描画処理
-    void Draw(const std::string& textureKey, const std::string& envMapKey = "", bool draw = true);
+    void Draw(const std::string& textureKey = "white", const std::string& envMapKey = "", bool draw = true);
 
     // Getter
     float GetRadius() const { return radius_; }

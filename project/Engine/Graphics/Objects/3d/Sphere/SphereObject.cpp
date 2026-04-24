@@ -67,8 +67,10 @@ void SphereObject::Draw(const std::string& textureKey, const std::string& envMap
     
     // 環境マップテクスチャ
     if (!envMapKey.empty()) {
+        materialData_->environmentCoefficient = 1.0f;
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle(envMapKey));
     } else {
+        materialData_->environmentCoefficient = 0.0f;
         // TextureCube以外のテクスチャを渡すとエラーになるため、空のときはskyboxTexをダミーとして渡す
         commandList->SetGraphicsRootDescriptorTable(7, sTexMgr->GetGpuHandle("skyboxTex")); 
     }
