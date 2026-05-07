@@ -8,7 +8,9 @@
 #include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Graphics/Objects/3d/Cone/ConeObject.h"
 #include "Engine/Graphics/Objects/3d/Cylinder/CylinderObject.h"
+#include "Engine/Graphics/Objects/3d/Ring/RingObject.h"
 #include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
 #include "Engine/Graphics/Objects/3d/Skybox/Skybox.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
@@ -39,7 +41,9 @@ private:
     std::unique_ptr<SquareObject> square_;
     std::unique_ptr<CubeObject> cube_;
     std::unique_ptr<SphereObject> sphere_;
+    std::unique_ptr<ConeObject> cone_;
     std::unique_ptr<CylinderObject> cylinder_;
+    std::unique_ptr<RingObject> ring_;
     std::unique_ptr<ModelObject> bunny_;
     std::unique_ptr<Skybox> skybox_;
 };

@@ -47,9 +47,17 @@ void TitleScene::Initialize() {
     sphere_->Initialize();
     sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
 
+    cone_ = std::make_unique<ConeObject>();
+    cone_->Initialize();
+    cone_->SetPosition({ 4.0f, 0.0f, 0.0f });
+
     cylinder_ = std::make_unique<CylinderObject>();
     cylinder_->Initialize();
     cylinder_->SetPosition({ 2.0f, -2.0f, 0.0f });
+
+    ring_ = std::make_unique<RingObject>();
+    ring_->Initialize();
+    ring_->SetPosition({ -2.0f, -2.0f, 0.0f });
 
     bunny_ = std::make_unique<ModelObject>();
     bunny_->Initialize();
@@ -69,7 +77,9 @@ void TitleScene::ImGuiControl() {
     square_->ImGuiControl("sqaure");
     cube_->ImGuiControl("cube");
     sphere_->ImGuiControl("sphere");
+    cone_->ImGuiControl("cone");
     cylinder_->ImGuiControl("cylinder");
+    ring_->ImGuiControl("ring");
     bunny_->ImGuiControl("bunny");
 #endif
 }
@@ -93,7 +103,9 @@ void TitleScene::Update() {
     square_->Update();
     cube_->Update();
     sphere_->Update();
+    cone_->Update();
     cylinder_->Update();
+    ring_->Update();
     bunny_->Update();
     skybox_->Update();
 
@@ -129,8 +141,14 @@ void TitleScene::Draw() {
     // 球体の描画
     sphere_->Draw("white", "forestTex");
 
+    // 円錐の描画
+    cone_->Draw("white", "forestTex");
+
     // 円柱の描画
     cylinder_->Draw("white", "forestTex");
+
+    // リングの描画
+    ring_->Draw("white", "forestTex");
 
     // バニーの描画（第3引数に環境マップのキーを指定）
     bunny_->Draw("bunny", "white", "forestTex");
