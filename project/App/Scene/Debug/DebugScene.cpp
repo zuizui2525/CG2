@@ -72,7 +72,7 @@ void DebugScene::Initialize() {
 
     sprite_ = std::make_unique<SpriteObject>();
     sprite_->Initialize();
-    sprite_->SetPosition({ 100.0f, 100.0f });
+    sprite_->SetPosition({ 0.0f, 0.0f });
     sprite_->SetSize(300.0f, 300.0f);
 }
 
