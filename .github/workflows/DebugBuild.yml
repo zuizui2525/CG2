@@ -8,7 +8,7 @@ env:
   CONFIGURATION: Debug
 jobs:
   build:
-    runs-on:  windows-latest
+    runs-on:  windows-2022
 
     steps:
       - name: Checkout
@@ -18,6 +18,6 @@ jobs:
         with:
           msbuild-architecture: x64
       - name: Build
-        run:
-          msbuild ${{env.SOLUTION_FILE_PATH}} /p:Platform=x64,Configuration=${{env.CONFIGURATION}}
+        run: |
+          msbuild ${{ env.SOLUTION_FILE_PATH }} /p:Platform=x64,Configuration=${{ env.CONFIGURATION }},PlatformToolset=v143
           
