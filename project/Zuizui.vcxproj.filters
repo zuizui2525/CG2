@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl" />
@@ -67,6 +67,8 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Line\LineObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Ring\RingObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cone\ConeObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
@@ -136,6 +138,8 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Line\LineObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Ring\RingObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cone\ConeObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />

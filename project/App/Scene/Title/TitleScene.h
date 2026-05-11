@@ -7,6 +7,8 @@
 #include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
 #include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
+#include "Engine/Graphics/Objects/3d/TriangularPyramid/TriangularPyramidObject.h"
+#include "Engine/Graphics/Objects/3d/Pyramid/PyramidObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 #include "Engine/Graphics/Objects/3d/Cone/ConeObject.h"
 #include "Engine/Graphics/Objects/3d/Cylinder/CylinderObject.h"
@@ -40,6 +42,8 @@ private:
     std::unique_ptr<TriangleObject> triangle_;
     std::unique_ptr<SquareObject> square_;
     std::unique_ptr<CubeObject> cube_;
+    std::unique_ptr<TriangularPyramidObject> triangularPyramid_;
+    std::unique_ptr<PyramidObject> pyramid_;
     std::unique_ptr<SphereObject> sphere_;
     std::unique_ptr<ConeObject> cone_;
     std::unique_ptr<CylinderObject> cylinder_;

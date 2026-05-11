@@ -40,12 +40,20 @@ void TitleScene::Initialize() {
 
     cube_ = std::make_unique<CubeObject>();
     cube_->Initialize();
-    cube_->SetScale({ 2.0f, 1.0f,1.0f });
     cube_->SetPosition({ 2.0f, 2.0f, 0.0f });
+
+    triangularPyramid_ = std::make_unique<TriangularPyramidObject>();
+    triangularPyramid_->Initialize();
+    triangularPyramid_->SetPosition({ 4.0f, -2.0f, 0.0f });
+
+    pyramid_ = std::make_unique<PyramidObject>();
+    pyramid_->Initialize();
+    pyramid_->SetPosition({ 4.0f, 2.0f, 0.0f });
 
     sphere_ = std::make_unique<SphereObject>();
     sphere_->Initialize();
     sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
+    sphere_->SetEnvironmentCoefficient(0.01f);
 
     cone_ = std::make_unique<ConeObject>();
     cone_->Initialize();
@@ -76,6 +84,8 @@ void TitleScene::ImGuiControl() {
     triangle_->ImGuiControl("triangle");
     square_->ImGuiControl("sqaure");
     cube_->ImGuiControl("cube");
+    triangularPyramid_->ImGuiControl("triangularPyramid");
+    pyramid_->ImGuiControl("pyramid");
     sphere_->ImGuiControl("sphere");
     cone_->ImGuiControl("cone");
     cylinder_->ImGuiControl("cylinder");
@@ -102,6 +112,8 @@ void TitleScene::Update() {
     triangle_->Update();
     square_->Update();
     cube_->Update();
+    triangularPyramid_->Update();
+    pyramid_->Update();
     sphere_->Update();
     cone_->Update();
     cylinder_->Update();
@@ -137,6 +149,12 @@ void TitleScene::Draw() {
 
     // 立方体の描画
     cube_->Draw("white", "forestTex");
+
+    // 三角錐の描画
+    triangularPyramid_->Draw("white", "forestTex");
+
+    // 四角錐の描画
+    pyramid_->Draw("white", "forestTex");
 
     // 球体の描画
     sphere_->Draw("white", "forestTex");
