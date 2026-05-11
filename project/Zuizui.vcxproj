@@ -184,6 +184,7 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\Objects\3d\Cone\ConeObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Line\LineObject.cpp" />
@@ -292,6 +293,7 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\3d\Cone\ConeObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Line\LineObject.h" />

@@ -53,7 +53,10 @@ void TitleScene::Initialize() {
     sphere_ = std::make_unique<SphereObject>();
     sphere_->Initialize();
     sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
-    sphere_->SetEnvironmentCoefficient(0.01f);
+
+    hemisphere_ = std::make_unique<HemisphereObject>();
+    hemisphere_->Initialize();
+    hemisphere_->SetPosition({ -4.0f, 0.0f, 0.0f });
 
     cone_ = std::make_unique<ConeObject>();
     cone_->Initialize();
@@ -87,6 +90,7 @@ void TitleScene::ImGuiControl() {
     triangularPyramid_->ImGuiControl("triangularPyramid");
     pyramid_->ImGuiControl("pyramid");
     sphere_->ImGuiControl("sphere");
+    hemisphere_->ImGuiControl("hemisphere");
     cone_->ImGuiControl("cone");
     cylinder_->ImGuiControl("cylinder");
     ring_->ImGuiControl("ring");
@@ -115,6 +119,7 @@ void TitleScene::Update() {
     triangularPyramid_->Update();
     pyramid_->Update();
     sphere_->Update();
+    hemisphere_->Update();
     cone_->Update();
     cylinder_->Update();
     ring_->Update();
@@ -158,6 +163,9 @@ void TitleScene::Draw() {
 
     // 球体の描画
     sphere_->Draw("white", "forestTex");
+
+    // 半球体の描画
+    hemisphere_->Draw("white", "forestTex");
 
     // 円錐の描画
     cone_->Draw("white", "forestTex");

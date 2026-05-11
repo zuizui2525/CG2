@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Objects/3d/TriangularPyramid/TriangularPyramidObject.h"
 #include "Engine/Graphics/Objects/3d/Pyramid/PyramidObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Graphics/Objects/3d/HemiSphere/HemiSphereObject.h"
 #include "Engine/Graphics/Objects/3d/Cone/ConeObject.h"
 #include "Engine/Graphics/Objects/3d/Cylinder/CylinderObject.h"
 #include "Engine/Graphics/Objects/3d/Ring/RingObject.h"
@@ -45,6 +46,7 @@ private:
     std::unique_ptr<TriangularPyramidObject> triangularPyramid_;
     std::unique_ptr<PyramidObject> pyramid_;
     std::unique_ptr<SphereObject> sphere_;
+    std::unique_ptr<HemisphereObject> hemisphere_;
     std::unique_ptr<ConeObject> cone_;
     std::unique_ptr<CylinderObject> cylinder_;
     std::unique_ptr<RingObject> ring_;
