@@ -1,4 +1,6 @@
 #include "EffectManager.h"
+#include "SpriteParticleObject.h"
+#include "MeshParticleObject.h"
 #include <random>
 #include <imgui.h>
 
@@ -29,45 +31,71 @@ void EffectManager::Draw() {
 }
 
 void EffectManager::RegisterEffect(const EffectSetting& setting) {
-    auto particle = std::make_unique<ParticleObject>();
-    
-    // 初期化処理
-    particle->Initialize();
-    
-    // デフォルトのEmitterによる自動発生をOFFにする
-    particle->SetEmitterMode(false);
+    std::unique_ptr<BaseParticleObject> particle;
 
-    // 設定を適用
+    if (setting.meshType == "cube") {
+        particle = std::make_unique<MeshParticleObject>();
+    } else {
+        particle = std::make_unique<SpriteParticleObject>();
+    }
+    
+    particle->Initialize();
     particle->SetSetting(setting);
+    particle->SetEmitterMode(false); // 初期状態はOFF
     
     effectMap_[setting.name] = std::move(particle);
 }
 
-void EffectManager::PlayEffect(const std::string& name, const Vector3& position) {
+void EffectManager::PlayEffect2D(const std::string& name, const Vector3& position, bool isLoop, const std::string& textureKey, const Vector3& velocityOverride) {
     auto it = effectMap_.find(name);
     if (it != effectMap_.end()) {
-        it->second->SetEmitterMode(false); // 単発再生
+        it->second->SetEmitterMode(isLoop);
 
-        const EffectSetting& setting = it->second->GetSetting();
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<uint32_t> distCount(setting.emitCountMin, setting.emitCountMax);
-        uint32_t count = distCount(gen);
+        if (!isLoop) {
+            // 単発：エミッター自体は(0,0,0)のままで、指定座標に直接パーティクルを出す
+            // (これでエミッター行列による二重適用を防ぐ)
+            it->second->SetPosition({ 0.0f, 0.0f, 0.0f });
 
-        if (count > 0) {
-            it->second->EmitAt(position, count);
+            const EffectSetting& setting = it->second->GetSetting();
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<uint32_t> distCount(setting.emitCountMin, setting.emitCountMax);
+            uint32_t count = distCount(gen);
+
+            if (count > 0) {
+                it->second->EmitAt(position, count, velocityOverride, textureKey);
+            }
+        } else {
+            // ループ：エミッター自体を移動させ、そこから出す
+            it->second->SetPosition(position);
         }
     }
 }
 
-void EffectManager::PlayEmitter(const std::string& name, const Vector3& position) {
+void EffectManager::PlayEffect3D(const std::string& name, const Vector3& position, bool isLoop, const std::string& modelKey, const std::string& textureKey, const Vector3& velocityOverride) {
     auto it = effectMap_.find(name);
     if (it != effectMap_.end()) {
-        it->second->SetEmitterMode(true); // 継続発生モード
-        it->second->SetPosition(position);
+        it->second->SetEmitterMode(isLoop);
+
+        if (!isLoop) {
+            // 単発：エミッター自体は(0,0,0)のままで、指定座標に直接パーティクルを出す
+            it->second->SetPosition({ 0.0f, 0.0f, 0.0f });
+
+            const EffectSetting& setting = it->second->GetSetting();
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<uint32_t> distCount(setting.emitCountMin, setting.emitCountMax);
+            uint32_t count = distCount(gen);
+
+            if (count > 0) {
+                it->second->EmitAt(position, count, velocityOverride, textureKey);
+            }
+        } else {
+            // ループ：エミッター自体を移動させ、そこから出す
+            it->second->SetPosition(position);
+        }
     }
 }
-
 void EffectManager::ImGuiControl(const std::string& name) {
 #ifdef _USEIMGUI
     ImGui::Begin((name + " List").c_str());
@@ -110,7 +138,6 @@ void EffectManager::ImGuiControl(const std::string& name) {
                     if (setting.isEmitter) {
                         ImGui::DragFloat(("Emit Frequency" + label).c_str(), &setting.emitFrequency, 0.1f, 0.1f, 10.0f);
                     }
-
 
                     ImGui::SeparatorText("Color");
                     ImGui::ColorEdit4(("Color Start Min" + label).c_str(), &setting.colorStartMin.x);

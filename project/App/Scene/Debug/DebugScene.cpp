@@ -39,7 +39,7 @@ void DebugScene::Initialize() {
     defaultSetting.emitCountMax = 3;
     effectMgr->RegisterEffect(defaultSetting);
     // 初期化時にエミッターとして稼働開始
-    effectMgr->PlayEmitter("Default", { 0.0f, 0.0f, 10.0f });
+    effectMgr->PlayEffect2D("Default", { 0.0f, 0.0f, 10.0f }, true);
 
     // 2. ヒットエフェクト
     EffectSetting hitSetting;
@@ -98,9 +98,33 @@ void DebugScene::Initialize() {
     fireSetting.colorStartMax = { 1.0f, 1.0f, 0.2f, 1.0f }; 
     fireSetting.colorEndMin = { 0.5f, 0.0f, 0.0f, 0.0f }; 
     fireSetting.colorEndMax = { 1.0f, 0.1f, 0.0f, 0.0f }; 
+    fireSetting.colorEndMax = { 1.0f, 0.1f, 0.0f, 0.0f }; 
     effectMgr->RegisterEffect(fireSetting);
-    // 初期化時にエミッターとして稼働開始（Defaultとは別の場所に配置）
-    effectMgr->PlayEmitter("Fire", { 5.0f, 0.0f, 0.0f });
+    // 初期化時にエミッターとして稼働開始
+    effectMgr->PlayEffect2D("Fire", { 5.0f, 0.0f, 0.0f }, true);
+
+    // 5. 爆発エフェクト (Explosion / 3D Cube)
+    EffectSetting explosionSetting;
+    explosionSetting.name = "Explosion";
+    explosionSetting.meshType = "cube"; // 3Dメッシュ使用
+    explosionSetting.isBillboard = false; // 立方体を回転させたいのでビルボードOFF
+    explosionSetting.emitCountMin = 20;
+    explosionSetting.emitCountMax = 30;
+    explosionSetting.lifeTimeMin = 0.5f;
+    explosionSetting.lifeTimeMax = 1.2f;
+    explosionSetting.velocityMin = { -15.0f, -15.0f, -15.0f }; // 全方向に飛び散る
+    explosionSetting.velocityMax = {  15.0f,  15.0f,  15.0f };
+    explosionSetting.scaleMin = { 0.2f, 0.2f, 0.2f };
+    explosionSetting.scaleMax = { 0.6f, 0.6f, 0.6f };
+    explosionSetting.scaleEndMin = { 0.0f, 0.0f, 0.0f };
+    explosionSetting.scaleEndMax = { 0.1f, 0.1f, 0.1f };
+    explosionSetting.rotationMin = { -3.14f, -3.14f, -3.14f }; // ランダム回転
+    explosionSetting.rotationMax = {  3.14f,  3.14f,  3.14f };
+    explosionSetting.colorStartMin = { 1.0f, 0.8f, 0.0f, 1.0f }; // 黄色系
+    explosionSetting.colorStartMax = { 1.0f, 1.0f, 0.5f, 1.0f };
+    explosionSetting.colorEndMin = { 0.2f, 0.0f, 0.0f, 0.0f }; // 赤黒く消える
+    explosionSetting.colorEndMax = { 0.5f, 0.1f, 0.0f, 0.0f };
+    effectMgr->RegisterEffect(explosionSetting);
 }
 
 void DebugScene::ImGuiControl() {
@@ -125,7 +149,11 @@ void DebugScene::Update() {
     }
     if (input_->Trigger(DIK_RETURN)) {
         // 剣撃エフェクトをカメラ手前で少しずらして発生させる
-        EffectManager::GetInstance()->PlayEffect("Slash", { 2.0f, 0.0f, 2.0f });
+        EffectManager::GetInstance()->PlayEffect2D("Slash", { 2.0f, 0.0f, 2.0f });
+    }
+    if (input_->Trigger(DIK_P)) {
+        // 3D爆発エフェクトを原点で発生させる
+        EffectManager::GetInstance()->PlayEffect3D("Explosion", { 0.0f, 0.0f, 0.0f });
     }
 
     // モード切り替え（TABキー）

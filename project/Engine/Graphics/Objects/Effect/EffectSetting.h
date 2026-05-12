@@ -44,6 +44,7 @@ struct EffectSetting {
     bool isBillboard;       // 常にカメラを向くか
     bool isEmitter;         // 継続して発生するか（エミッターモード）
     float emitFrequency;    // エミッターモード時の発生間隔（秒）
+    std::string meshType;   // 使用するメッシュ ("cube"など。空なら2Dスプライト)
 
     // デフォルトコンストラクタ（無難な値）
     EffectSetting() :
@@ -54,10 +55,10 @@ struct EffectSetting {
         spawnAreaMin{ 0.0f, 0.0f, 0.0f }, spawnAreaMax{ 0.0f, 0.0f, 0.0f },
         velocityMin{ 0.0f, 0.0f, 0.0f }, velocityMax{ 0.0f, 0.0f, 0.0f },
         scaleMin{ 1.0f, 1.0f, 1.0f }, scaleMax{ 1.0f, 1.0f, 1.0f },
-        scaleEndMin{ 1.0f, 1.0f, 1.0f }, scaleEndMax{ 1.0f, 1.0f, 1.0f },
+        scaleEndMin{ -1.0f, -1.0f, -1.0f }, scaleEndMax{ -1.0f, -1.0f, -1.0f },
         rotationMin{ 0.0f, 0.0f, 0.0f }, rotationMax{ 0.0f, 0.0f, 0.0f },
         colorStartMin{ 1.0f, 1.0f, 1.0f, 1.0f }, colorStartMax{ 1.0f, 1.0f, 1.0f, 1.0f },
-        colorEndMin{ 1.0f, 1.0f, 1.0f, 1.0f }, colorEndMax{ 1.0f, 1.0f, 1.0f, 1.0f },
-        isBillboard(true), isEmitter(false), emitFrequency(0.5f)
+        colorEndMin{ -1.0f, -1.0f, -1.0f, -1.0f }, colorEndMax{ -1.0f, -1.0f, -1.0f, -1.0f },
+        isBillboard(true), isEmitter(false), emitFrequency(0.5f), meshType("")
     {}
 };

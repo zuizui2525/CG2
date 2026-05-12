@@ -26,7 +26,6 @@
     <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\ParticleObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\Effect\EffectManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp" />
@@ -71,6 +70,9 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\BaseParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\MeshParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
@@ -93,7 +95,6 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\Collision\Collision.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\ParticleObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\EffectManager.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\EffectSetting.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h" />
@@ -145,6 +146,9 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\BaseParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\MeshParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />

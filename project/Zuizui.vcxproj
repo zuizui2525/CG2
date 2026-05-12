@@ -191,6 +191,9 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\Objects\3d\Ring\RingObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\BaseParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\MeshParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.cpp" />
@@ -201,7 +204,6 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\ParticleObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\Effect\EffectManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp" />
@@ -301,6 +303,9 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\3d\Ring\RingObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\BaseParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\MeshParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Manager\CameraManager.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Camera\\Base\BaseCamera.h" />
     <ClInclude Include="Engine\\Graphics\\Objects\\Light\\Manager\LightManager.h" />
@@ -310,7 +315,6 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\Collision\Collision.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\ParticleObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\EffectManager.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\EffectSetting.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h" />
