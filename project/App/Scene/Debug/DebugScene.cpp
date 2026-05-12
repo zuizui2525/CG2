@@ -125,6 +125,30 @@ void DebugScene::Initialize() {
     explosionSetting.colorEndMin = { 0.2f, 0.0f, 0.0f, 0.0f }; // 赤黒く消える
     explosionSetting.colorEndMax = { 0.5f, 0.1f, 0.0f, 0.0f };
     effectMgr->RegisterEffect(explosionSetting);
+
+    // 6. ドラゴンのブレス (DragonBreath / 3D Cube)
+    EffectSetting breathSetting;
+    breathSetting.name = "DragonBreath";
+    breathSetting.meshType = "cube";
+    breathSetting.isBillboard = false;
+    breathSetting.emitFrequency = 0.02f; // 高速連射
+    breathSetting.emitCountMin = 1;
+    breathSetting.emitCountMax = 2;
+    breathSetting.lifeTimeMin = 0.8f;
+    breathSetting.lifeTimeMax = 1.2f;
+    breathSetting.velocityMin = { -1.5f, -1.0f, 15.0f }; // 前方に勢いよく
+    breathSetting.velocityMax = {  1.5f,  1.0f, 25.0f };
+    breathSetting.scaleMin = { 0.2f, 0.2f, 0.2f };
+    breathSetting.scaleMax = { 0.4f, 0.4f, 0.4f };
+    breathSetting.scaleEndMin = { 1.5f, 1.5f, 1.5f }; // 広がりながら巨大化
+    breathSetting.scaleEndMax = { 2.5f, 2.5f, 2.5f };
+    breathSetting.rotationMin = { -3.14f, -3.14f, -3.14f };
+    breathSetting.rotationMax = {  3.14f,  3.14f,  3.14f };
+    breathSetting.colorStartMin = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白
+    breathSetting.colorStartMax = { 1.0f, 1.0f, 0.5f, 1.0f }; // 薄い黄色
+    breathSetting.colorEndMin = { 1.0f, 0.2f, 0.0f, 0.0f }; // 赤
+    breathSetting.colorEndMax = { 0.5f, 0.0f, 0.0f, 0.0f }; // 暗い赤
+    effectMgr->RegisterEffect(breathSetting);
 }
 
 void DebugScene::ImGuiControl() {
@@ -154,6 +178,15 @@ void DebugScene::Update() {
     if (input_->Trigger(DIK_P)) {
         // 3D爆発エフェクトを原点で発生させる
         EffectManager::GetInstance()->PlayEffect3D("Explosion", { 0.0f, 0.0f, 0.0f });
+    }
+
+    // ドラゴンブレスの操作 (Oキー押しっぱなしで放出)
+    if (input_->Press(DIK_O)) {
+        // エミッターとして再生
+        EffectManager::GetInstance()->PlayEffect3D("DragonBreath", { 0.0f, 0.0f, 2.0f }, true);
+    } else {
+        // 離したら停止
+        EffectManager::GetInstance()->StopEffect("DragonBreath");
     }
 
     // モード切り替え（TABキー）

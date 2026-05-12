@@ -40,6 +40,9 @@ public:
         const Vector3& velocityOverride = {0,0,0}
     );
 
+    // エミッターの停止
+    void StopEffect(const std::string& name);
+
     // 旧APIとの互換性（必要に応じて）
     void PlayEffect(const std::string& name, const Vector3& position) { PlayEffect2D(name, position, false); }
     void PlayEmitter(const std::string& name, const Vector3& position) { PlayEffect2D(name, position, true); }

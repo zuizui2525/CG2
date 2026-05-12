@@ -96,6 +96,14 @@ void EffectManager::PlayEffect3D(const std::string& name, const Vector3& positio
         }
     }
 }
+
+void EffectManager::StopEffect(const std::string& name) {
+    auto it = effectMap_.find(name);
+    if (it != effectMap_.end()) {
+        it->second->SetEmitterMode(false);
+    }
+}
+
 void EffectManager::ImGuiControl(const std::string& name) {
 #ifdef _USEIMGUI
     ImGui::Begin((name + " List").c_str());
