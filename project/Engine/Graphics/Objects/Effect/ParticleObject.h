@@ -3,6 +3,7 @@
 #include "Engine/Math/Collision/CollisionStructs.h"
 #include "Engine/Graphics/RenderStructs.h"
 #include "Engine/Base/BaseResource.h"
+#include "EffectSetting.h"
 #include <memory>
 #include <vector>
 #include <d3d12.h> 
@@ -15,7 +16,14 @@
 struct Particle {
 	Transform transform;
 	Vector3 velocity;
-	Vector4 color;
+	
+	// 時間変化用のパラメータ
+	Vector3 startScale;
+	Vector3 endScale;
+	Vector4 startColor;
+	Vector4 endColor;
+	
+	Vector4 color; // 現在の色
 	float lifeTime;
 	float currentTime;
 };
@@ -64,6 +72,18 @@ public:
 	void SetCount(uint32_t count) { emitter_.count = count; }
 	void SetFrequency(float frequency) { emitter_.frequency = frequency; }
 	void SetMaxInstance(uint32_t maxInstance);
+	void SetSetting(const EffectSetting& setting) { setting_ = setting; }
+	const EffectSetting& GetSetting() const { return setting_; }
+	EffectSetting& GetSettingRef() { return setting_; }
+
+	// 機能のショートカットセッター/ゲッター
+	void SetBillboard(bool active) { setting_.isBillboard = active; }
+	bool GetBillboard() const { return setting_.isBillboard; }
+	void SetEmitterMode(bool active) { setting_.isEmitter = active; }
+	bool GetEmitterMode() const { return setting_.isEmitter; }
+
+	// 特定の座標でワンショット発生させる
+	void EmitAt(const Vector3& position, uint32_t count);
 
 private:
 	// 内部メソッド
@@ -76,6 +96,7 @@ private:
 	// メンバ変数
 	Emitter emitter_{};
 	AcclerationField accelerationFeild_;
+	EffectSetting setting_{};
 
 	// 数値管理
 	static const UINT kNumMaxInstance = 10000;
@@ -108,10 +129,7 @@ private:
 	float alpha_ = 0.0f;
 
 	// 各種フラグ
-	bool billboardActive_ = true;
 	bool windActive_ = false;
-	bool loopActive_ = false;
-	bool emitterActive_ = true;
 
 	// ImGuiウィンドウの開閉状態
 	bool isOpen_ = false;

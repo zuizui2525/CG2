@@ -1,4 +1,4 @@
-﻿#pragma once  
+#pragma once  
 #include "Engine/Math/Matrix/Matrix.h"
 #include <string>
 
@@ -28,9 +28,9 @@ public:
     const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }  
 
 protected:  
-    Transform transform_;  
-    Matrix4x4 viewMatrix_;  
-    Matrix4x4 projectionMatrix_;  
+    Transform transform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+    Matrix4x4 viewMatrix_ = Math::MakeIdentity();  
+    Matrix4x4 projectionMatrix_ = Math::MakeIdentity();
 
     bool isWindowOpen_ = false;  
 

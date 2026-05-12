@@ -13,7 +13,7 @@
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 #include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
 #include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
-#include "Engine/Graphics/Objects/3d/Particle/ParticleObject.h"
+#include "Engine/Graphics/Objects/Effect/EffectManager.h"
 
 #ifdef _USEIMGUI
 #include "imguiManager.h"
@@ -38,17 +38,4 @@ private:
     std::shared_ptr<BaseCamera> mainCamera_;
 
     std::unique_ptr<DirectionalLightObject> dirLight_;
-    std::unique_ptr<DirectionalLightObject> dirLight2_;
-    std::unique_ptr<PointLightObject> pointLight_;
-    std::unique_ptr<PointLightObject> pointLight2_;
-    std::unique_ptr<SpotLightObject> spotLight_;
-
-    std::unique_ptr<ModelObject> skydome_;
-    std::unique_ptr<ModelObject> teapot_;
-    std::unique_ptr<ModelObject> bunny_;
-    std::unique_ptr<ModelObject> terrain_;
-    std::unique_ptr<SphereObject> sphere_;
-    std::unique_ptr<TriangleObject> triangle_;
-    std::unique_ptr<ParticleObject> particle_;
-    std::unique_ptr<SpriteObject> sprite_;
 };

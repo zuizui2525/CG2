@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <d3d12.h>
 #include <wrl.h>
 #include <string>
@@ -33,7 +33,7 @@ public:
     DirectionalLight& GetLightData() { return data_; }
 
 private:
-    DirectionalLight data_;
+    DirectionalLight data_ = { {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, 1.0f };
 
     bool isWindowOpen_ = false;
 };

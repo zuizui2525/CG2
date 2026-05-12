@@ -22,58 +22,85 @@ void DebugScene::Initialize() {
     dirLight_->Initialize();
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
-    dirLight2_ = std::make_unique<DirectionalLightObject>();
-    dirLight2_->Initialize();
-    dirLight2_->GetLightData().color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    dirLight2_->GetLightData().direction = { 1.0f, -1.0f, 0.0f };
-    lightMgr_->AddDirectionalLight(dirLight2_.get());
+    auto effectMgr = EffectManager::GetInstance();
+    effectMgr->Initialize();
 
-    pointLight_ = std::make_unique<PointLightObject>();
-    pointLight_->Initialize();
-    lightMgr_->AddPointLight(pointLight_.get());
+    // 1. 今あるパーティクル（Default）
+    EffectSetting defaultSetting;
+    defaultSetting.name = "Default";
+    defaultSetting.textureName = "circle";
+    defaultSetting.velocityMin = { -20.0f, -20.0f, -20.0f };
+    defaultSetting.velocityMax = {  20.0f,  20.0f,  20.0f };
+    defaultSetting.lifeTimeMin = 1.0f;
+    defaultSetting.lifeTimeMax = 10.0f;
+    defaultSetting.colorStartMin = { 0.0f, 0.0f, 0.0f, 1.0f };
+    defaultSetting.colorStartMax = { 1.0f, 1.0f, 1.0f, 1.0f };
+    defaultSetting.emitCountMin = 1; // 毎フレーム呼ぶので少なめ
+    defaultSetting.emitCountMax = 3;
+    effectMgr->RegisterEffect(defaultSetting);
+    // 初期化時にエミッターとして稼働開始
+    effectMgr->PlayEmitter("Default", { 0.0f, 0.0f, 10.0f });
 
-    pointLight2_ = std::make_unique<PointLightObject>();
-    pointLight2_->Initialize();
-    pointLight2_->SetPosition({ -5.0f, 2.0f, 0.0f });
-    lightMgr_->AddPointLight(pointLight2_.get());
+    // 2. ヒットエフェクト
+    EffectSetting hitSetting;
+    hitSetting.name = "Hit";
+    hitSetting.textureName = "circle";
+    hitSetting.scaleMin = { 0.05f, 1.0f, 1.0f };
+    hitSetting.scaleMax = { 0.05f, 1.0f, 1.0f };
+    hitSetting.rotationMin = { 0.0f, 0.0f, -3.141592f };
+    hitSetting.rotationMax = { 0.0f, 0.0f,  3.141592f };
+    hitSetting.velocityMin = { 0.0f, 0.0f, 0.0f };
+    hitSetting.velocityMax = { 0.0f, 0.0f, 0.0f };
+    hitSetting.lifeTimeMin = 1.0f;
+    hitSetting.lifeTimeMax = 1.0f;
+    hitSetting.emitCountMin = 8;
+    hitSetting.emitCountMax = 8;
+    effectMgr->RegisterEffect(hitSetting);
 
-    spotLight_ = std::make_unique<SpotLightObject>();
-    spotLight_->Initialize();
-    lightMgr_->AddSpotLight(spotLight_.get());
+    // 3. 剣撃エフェクト
+    EffectSetting slashSetting;
+    slashSetting.name = "Slash";
+    slashSetting.textureName = "circle";
+    slashSetting.scaleMin = { 0.05f, 0.4f, 1.0f };
+    slashSetting.scaleMax = { 0.05f, 1.5f, 1.0f };
+    slashSetting.rotationMin = { 0.0f, 0.0f, -1.0f };
+    slashSetting.rotationMax = { 0.0f, 0.0f,  1.0f };
+    slashSetting.velocityMin = { 0.0f, 0.0f, 0.0f };
+    slashSetting.velocityMax = { 0.0f, 0.0f, 0.0f };
+    slashSetting.lifeTimeMin = 1.0f;
+    slashSetting.lifeTimeMax = 1.0f;
+    slashSetting.emitCountMin = 3;
+    slashSetting.emitCountMax = 3;
+    effectMgr->RegisterEffect(slashSetting);
 
-    // 4. オブジェクトの生成
-    skydome_ = std::make_unique<ModelObject>();
-    skydome_->Initialize();
-    skydome_->SetLightingMode(0);
-
-    teapot_ = std::make_unique<ModelObject>();
-    teapot_->Initialize();
-
-    bunny_ = std::make_unique<ModelObject>();
-    bunny_->Initialize();
-    bunny_->SetPosition({ 0.0f, 2.0f, 0.0f });
-
-    terrain_ = std::make_unique<ModelObject>();
-    terrain_->Initialize();
-    terrain_->SetScale({ 2.0f, 2.0f, 2.0f });
-    terrain_->SetPosition({ 0.0f, -1.0f, 0.0f });
-
-    sphere_ = std::make_unique<SphereObject>();
-    sphere_->Initialize();
-    sphere_->SetPosition({ 2.0f, 0.0f, 0.0f });
-
-    triangle_ = std::make_unique<TriangleObject>();
-    triangle_->Initialize();
-    triangle_->SetPosition({ -2.0f, 0.0f, 0.0f });
-
-    particle_ = std::make_unique<ParticleObject>();
-    particle_->Initialize();
-    particle_->SetPosition({ 4.0f, 2.0f, 20.0f });
-
-    sprite_ = std::make_unique<SpriteObject>();
-    sprite_->Initialize();
-    sprite_->SetPosition({ 0.0f, 0.0f });
-    sprite_->SetSize(300.0f, 300.0f);
+    // 4. 炎エフェクト (Fire)
+    EffectSetting fireSetting;
+    fireSetting.name = "Fire";
+    fireSetting.textureName = "circle";
+    fireSetting.isBillboard = true;
+    fireSetting.isEmitter = true;
+    fireSetting.emitFrequency = 0.02f; // さらに密度を上げる
+    fireSetting.emitCountMin = 1;
+    fireSetting.emitCountMax = 3;
+    fireSetting.lifeTimeMin = 0.4f;
+    fireSetting.lifeTimeMax = 0.8f;
+    fireSetting.spawnAreaMin = { -0.1f, 0.0f, -0.1f }; // 発生源を狭くして中心に寄せる
+    fireSetting.spawnAreaMax = {  0.1f, 0.0f,  0.1f };
+    fireSetting.velocityMin = { -0.2f, 3.0f, -0.2f }; // 横への広がりを抑える
+    fireSetting.velocityMax = {  0.2f, 5.0f,  0.2f };
+    fireSetting.scaleMin = { 0.8f, 0.8f, 0.8f }; // 開始時は少し大きく
+    fireSetting.scaleMax = { 1.2f, 1.2f, 1.2f };
+    fireSetting.scaleEndMin = { 0.0f, 0.0f, 0.0f }; // 頂点では完全に細く
+    fireSetting.scaleEndMax = { 0.1f, 0.1f, 0.1f };
+    
+    // 黄色〜オレンジから始まり、赤くなりながら消える
+    fireSetting.colorStartMin = { 1.0f, 0.5f, 0.0f, 1.0f };
+    fireSetting.colorStartMax = { 1.0f, 1.0f, 0.2f, 1.0f }; 
+    fireSetting.colorEndMin = { 0.5f, 0.0f, 0.0f, 0.0f }; 
+    fireSetting.colorEndMax = { 1.0f, 0.1f, 0.0f, 0.0f }; 
+    effectMgr->RegisterEffect(fireSetting);
+    // 初期化時にエミッターとして稼働開始（Defaultとは別の場所に配置）
+    effectMgr->PlayEmitter("Fire", { 5.0f, 0.0f, 0.0f });
 }
 
 void DebugScene::ImGuiControl() {
@@ -81,18 +108,7 @@ void DebugScene::ImGuiControl() {
     // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
-    dirLight2_->ImGuiControl("dirLight2");
-    pointLight_->ImGuiControl("pointLight");
-    pointLight2_->ImGuiControl("pointLight2");
-    spotLight_->ImGuiControl("spotLight");
-    skydome_->ImGuiControl("skydome");
-    teapot_->ImGuiControl("teapot");
-    bunny_->ImGuiControl("bunny");
-    terrain_->ImGuiControl("terrain");
-    sphere_->ImGuiControl("sphere");
-    triangle_->ImGuiControl("triangle");
-    particle_->ImGuiControl("particle");
-    sprite_->ImGuiControl("sprite");
+    EffectManager::GetInstance()->ImGuiControl("Effects");
 #endif
 }
 
@@ -100,6 +116,16 @@ void DebugScene::Update() {
     // シーン切り替え
     if (input_->Trigger(DIK_N)) {
         SceneManager::GetInstance()->ChangeScene("Title");
+    }
+
+    // エフェクトのテスト呼び出し
+    if (input_->Trigger(DIK_SPACE)) {
+        // ヒットエフェクトをカメラ手前で発生させる
+        EffectManager::GetInstance()->PlayEffect("Hit", { -2.0f, 0.0f, 2.0f });
+    }
+    if (input_->Trigger(DIK_RETURN)) {
+        // 剣撃エフェクトをカメラ手前で少しずらして発生させる
+        EffectManager::GetInstance()->PlayEffect("Slash", { 2.0f, 0.0f, 2.0f });
     }
 
     // モード切り替え（TABキー）
@@ -111,20 +137,9 @@ void DebugScene::Update() {
     // オブジェクトの更新
     lightMgr_->Update();
     dirLight_->Update();
-    dirLight2_->Update();
-    pointLight_->Update();
-    pointLight2_->Update();
-    spotLight_->Update();
-
-    skydome_->Update();
-    terrain_->Update();
-    teapot_->Update();
-    bunny_->Update();
-    sphere_->Update();
-    triangle_->Update();
-    particle_->Update();
-    sprite_->Update();
-
+    
+    EffectManager::GetInstance()->Update();
+    
     // カメラの更新
     BaseCamera* active = cameraMgr_->GetActiveCamera();
     DebugCamera* dc = dynamic_cast<DebugCamera*>(active);
@@ -139,12 +154,5 @@ void DebugScene::Update() {
 }
 
 void DebugScene::Draw() {
-    skydome_->Draw("skydome");
-    terrain_->Draw("terrain");
-    teapot_->Draw("teapot");
-    bunny_->Draw("bunny");
-    sphere_->Draw("monsterBall");
-    triangle_->Draw();
-    particle_->Draw("circle");
-    sprite_->Draw("uvChecker");
+    EffectManager::GetInstance()->Draw();
 }

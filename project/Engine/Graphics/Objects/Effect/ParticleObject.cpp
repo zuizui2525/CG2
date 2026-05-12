@@ -1,4 +1,4 @@
-#include "Engine/Graphics/Objects/3d/Particle/ParticleObject.h"
+#include "Engine/Graphics/Objects/Effect/ParticleObject.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Math/Matrix/Matrix.h"
 #include "Engine/Zuizui.h"
@@ -141,7 +141,7 @@ void ParticleObject::Update() {
     );
 
     Matrix4x4 billBoardMatrix = Math::MakeIdentity();
-    if (billboardActive_) {
+    if (setting_.isBillboard) {
         billBoardMatrix = Math::Inverse(CameraResource::GetCameraManager()->GetViewMatrix3D());
         billBoardMatrix.m[3][0] = 0.0f;
         billBoardMatrix.m[3][1] = 0.0f;
@@ -154,13 +154,25 @@ void ParticleObject::Update() {
             continue;
         }
 
-        Matrix4x4 particleWorldMatrix = Math::MakeAffineMatrix(
-            (*particleIterator).transform.scale,
-            (*particleIterator).transform.rotate,
-            (*particleIterator).transform.translate
-        );
+        Matrix4x4 particleWorldMatrix;
+        if (setting_.isBillboard) {
+            Matrix4x4 scaleMatrix = Math::MakeScaleMatrix((*particleIterator).transform.scale);
+            Matrix4x4 rotateMatrix = Math::MakeRotateMatrix((*particleIterator).transform.rotate.x, (*particleIterator).transform.rotate.y, (*particleIterator).transform.rotate.z);
+            Matrix4x4 translateMatrix = Math::MakeTranslateMatrix((*particleIterator).transform.translate);
+            
+            // スケール -> ローカル回転 -> ビルボード（カメラ逆回転） -> 平行移動 の順で掛ける
+            particleWorldMatrix = Math::Multiply(scaleMatrix, rotateMatrix);
+            particleWorldMatrix = Math::Multiply(particleWorldMatrix, billBoardMatrix);
+            particleWorldMatrix = Math::Multiply(particleWorldMatrix, translateMatrix);
+        } else {
+            particleWorldMatrix = Math::MakeAffineMatrix(
+                (*particleIterator).transform.scale,
+                (*particleIterator).transform.rotate,
+                (*particleIterator).transform.translate
+            );
+        }
 
-        particleWorldMatrix = Math::Multiply(billBoardMatrix, particleWorldMatrix);
+        // 最後にエミッター自体のワールド行列を掛ける
         particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
 
         Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(CameraResource::GetCameraManager()->GetViewMatrix3D(), CameraResource::GetCameraManager()->GetProjectionMatrix3D()));
@@ -173,41 +185,40 @@ void ParticleObject::Update() {
 
         (*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime_;
         (*particleIterator).currentTime += kDeltaTime_;
-        alpha_ = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+        
+        // 経過割合による線形補間（Lerp）
+        float progress = (std::min)((*particleIterator).currentTime / (*particleIterator).lifeTime, 1.0f);
+        (*particleIterator).transform.scale = (*particleIterator).startScale + ((*particleIterator).endScale - (*particleIterator).startScale) * progress;
+        
+        // Vector4の演算子オーバーロードがないため要素ごとに計算
+        (*particleIterator).color.x = (*particleIterator).startColor.x + ((*particleIterator).endColor.x - (*particleIterator).startColor.x) * progress;
+        (*particleIterator).color.y = (*particleIterator).startColor.y + ((*particleIterator).endColor.y - (*particleIterator).startColor.y) * progress;
+        (*particleIterator).color.z = (*particleIterator).startColor.z + ((*particleIterator).endColor.z - (*particleIterator).startColor.z) * progress;
+        (*particleIterator).color.w = (*particleIterator).startColor.w + ((*particleIterator).endColor.w - (*particleIterator).startColor.w) * progress;
 
         if (numInstance_ < numMaxInstance_) {
             instanceData_[numInstance_].WVP = worldViewProjection;
             instanceData_[numInstance_].world = worldMatrix;
             instanceData_[numInstance_].color = (*particleIterator).color;
-            instanceData_[numInstance_].color.w = alpha_;
             ++numInstance_;
         }
         ++particleIterator;
     }
 
-    if (loopActive_ && !emitterActive_) {
-        size_t currentParticleCount = particles_.size();
-        if (currentParticleCount < numMaxInstance_) {
-            size_t neededCount = numMaxInstance_ - currentParticleCount;
-            for (size_t i = 0; i < neededCount; ++i) {
-                particles_.push_back(MakeNewParticle(randomEngine_, emitter_.transform.translate));
-            }
-        }
-    }
-
-    if (emitterActive_ && !loopActive_) {
+    // エミッターモード（自動発生）
+    if (setting_.isEmitter) {
         emitter_.frequencyTime += kDeltaTime_;
-        if (emitter_.frequency <= emitter_.frequencyTime) {
+        if (setting_.emitFrequency <= emitter_.frequencyTime) {
             size_t currentParticleCount = particles_.size();
             size_t maxEmitCount = (numMaxInstance_ > currentParticleCount) ? (numMaxInstance_ - currentParticleCount) : 0;
 
-            uint32_t emitCount = (std::min)(emitter_.count, (uint32_t)maxEmitCount);
+            uint32_t emitCount = (std::min)(setting_.emitCountMax, (uint32_t)maxEmitCount);
             if (emitCount > 0) {
                 Emitter actualEmitter = emitter_;
                 actualEmitter.count = emitCount;
                 particles_.splice(particles_.end(), Emit(actualEmitter, randomEngine_));
             }
-            emitter_.frequencyTime -= emitter_.frequency;
+            emitter_.frequencyTime -= setting_.emitFrequency;
         }
     }
 }
@@ -314,7 +325,6 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
         }
 
         ImGui::SeparatorText("Features");
-        ImGui::Checkbox(("Billboard" + label).c_str(), &billboardActive_);
         ImGui::Checkbox(("Wind (Field)" + label).c_str(), &windActive_);
 
         if (windActive_) {
@@ -324,24 +334,67 @@ void ParticleObject::ImGuiParticleControl(const std::string& name) {
             ImGui::DragFloat3(("Acceleration" + label).c_str(), &accelerationFeild_.acceleration.x, 0.1f, 0.0f, 0.0f, "%.1f");
             ImGui::Unindent();
         }
-
-        ImGui::Separator();
-        if (ImGui::Checkbox(("Loop Mode" + label).c_str(), &loopActive_)) { if (loopActive_) emitterActive_ = false; }
-        ImGui::SameLine();
-        if (ImGui::Checkbox(("Emitter Mode" + label).c_str(), &emitterActive_)) { if (emitterActive_) loopActive_ = false; }
     }
 #endif
 }
 
 Particle ParticleObject::MakeNewParticle(std::mt19937& randomEngine, Vector3 startPosition) {
     Particle particle{};
-    particle.transform.translate = startPosition;
-    particle.transform.scale = { 1.0f, 1.0f, 1.0f };
-    particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
-    particle.velocity = { distribution_(randomEngine), distribution_(randomEngine), distribution_(randomEngine) };
-    particle.color = { distColor_(randomEngine), distColor_(randomEngine), distColor_(randomEngine), 1.0f };
-    particle.lifeTime = distTime_(randomEngine);
+
+    // Position
+    std::uniform_real_distribution<float> distPosX(setting_.spawnAreaMin.x, setting_.spawnAreaMax.x);
+    std::uniform_real_distribution<float> distPosY(setting_.spawnAreaMin.y, setting_.spawnAreaMax.y);
+    std::uniform_real_distribution<float> distPosZ(setting_.spawnAreaMin.z, setting_.spawnAreaMax.z);
+    particle.transform.translate = startPosition + setting_.positionOffset + 
+                                   Vector3{ distPosX(randomEngine), distPosY(randomEngine), distPosZ(randomEngine) };
+
+    // Scale Start
+    std::uniform_real_distribution<float> distScaleX((std::min)(setting_.scaleMin.x, setting_.scaleMax.x), (std::max)(setting_.scaleMin.x, setting_.scaleMax.x));
+    std::uniform_real_distribution<float> distScaleY((std::min)(setting_.scaleMin.y, setting_.scaleMax.y), (std::max)(setting_.scaleMin.y, setting_.scaleMax.y));
+    std::uniform_real_distribution<float> distScaleZ((std::min)(setting_.scaleMin.z, setting_.scaleMax.z), (std::max)(setting_.scaleMin.z, setting_.scaleMax.z));
+    particle.startScale = { distScaleX(randomEngine), distScaleY(randomEngine), distScaleZ(randomEngine) };
+
+    // Scale End
+    std::uniform_real_distribution<float> distScaleEndX((std::min)(setting_.scaleEndMin.x, setting_.scaleEndMax.x), (std::max)(setting_.scaleEndMin.x, setting_.scaleEndMax.x));
+    std::uniform_real_distribution<float> distScaleEndY((std::min)(setting_.scaleEndMin.y, setting_.scaleEndMax.y), (std::max)(setting_.scaleEndMin.y, setting_.scaleEndMax.y));
+    std::uniform_real_distribution<float> distScaleEndZ((std::min)(setting_.scaleEndMin.z, setting_.scaleEndMax.z), (std::max)(setting_.scaleEndMin.z, setting_.scaleEndMax.z));
+    particle.endScale = { distScaleEndX(randomEngine), distScaleEndY(randomEngine), distScaleEndZ(randomEngine) };
+    
+    particle.transform.scale = particle.startScale;
+
+    // Rotate
+    std::uniform_real_distribution<float> distRotX((std::min)(setting_.rotationMin.x, setting_.rotationMax.x), (std::max)(setting_.rotationMin.x, setting_.rotationMax.x));
+    std::uniform_real_distribution<float> distRotY((std::min)(setting_.rotationMin.y, setting_.rotationMax.y), (std::max)(setting_.rotationMin.y, setting_.rotationMax.y));
+    std::uniform_real_distribution<float> distRotZ((std::min)(setting_.rotationMin.z, setting_.rotationMax.z), (std::max)(setting_.rotationMin.z, setting_.rotationMax.z));
+    particle.transform.rotate = { distRotX(randomEngine), distRotY(randomEngine), distRotZ(randomEngine) };
+
+    // Velocity
+    std::uniform_real_distribution<float> distVelX((std::min)(setting_.velocityMin.x, setting_.velocityMax.x), (std::max)(setting_.velocityMin.x, setting_.velocityMax.x));
+    std::uniform_real_distribution<float> distVelY((std::min)(setting_.velocityMin.y, setting_.velocityMax.y), (std::max)(setting_.velocityMin.y, setting_.velocityMax.y));
+    std::uniform_real_distribution<float> distVelZ((std::min)(setting_.velocityMin.z, setting_.velocityMax.z), (std::max)(setting_.velocityMin.z, setting_.velocityMax.z));
+    particle.velocity = { distVelX(randomEngine), distVelY(randomEngine), distVelZ(randomEngine) };
+
+    // Color Start
+    std::uniform_real_distribution<float> distColR((std::min)(setting_.colorStartMin.x, setting_.colorStartMax.x), (std::max)(setting_.colorStartMin.x, setting_.colorStartMax.x));
+    std::uniform_real_distribution<float> distColG((std::min)(setting_.colorStartMin.y, setting_.colorStartMax.y), (std::max)(setting_.colorStartMin.y, setting_.colorStartMax.y));
+    std::uniform_real_distribution<float> distColB((std::min)(setting_.colorStartMin.z, setting_.colorStartMax.z), (std::max)(setting_.colorStartMin.z, setting_.colorStartMax.z));
+    std::uniform_real_distribution<float> distColA((std::min)(setting_.colorStartMin.w, setting_.colorStartMax.w), (std::max)(setting_.colorStartMin.w, setting_.colorStartMax.w));
+    particle.startColor = { distColR(randomEngine), distColG(randomEngine), distColB(randomEngine), distColA(randomEngine) };
+
+    // Color End
+    std::uniform_real_distribution<float> distColEndR((std::min)(setting_.colorEndMin.x, setting_.colorEndMax.x), (std::max)(setting_.colorEndMin.x, setting_.colorEndMax.x));
+    std::uniform_real_distribution<float> distColEndG((std::min)(setting_.colorEndMin.y, setting_.colorEndMax.y), (std::max)(setting_.colorEndMin.y, setting_.colorEndMax.y));
+    std::uniform_real_distribution<float> distColEndB((std::min)(setting_.colorEndMin.z, setting_.colorEndMax.z), (std::max)(setting_.colorEndMin.z, setting_.colorEndMax.z));
+    std::uniform_real_distribution<float> distColEndA((std::min)(setting_.colorEndMin.w, setting_.colorEndMax.w), (std::max)(setting_.colorEndMin.w, setting_.colorEndMax.w));
+    particle.endColor = { distColEndR(randomEngine), distColEndG(randomEngine), distColEndB(randomEngine), distColEndA(randomEngine) };
+
+    particle.color = particle.startColor;
+
+    // LifeTime
+    std::uniform_real_distribution<float> distLife((std::min)(setting_.lifeTimeMin, setting_.lifeTimeMax), (std::max)(setting_.lifeTimeMin, setting_.lifeTimeMax));
+    particle.lifeTime = distLife(randomEngine);
     particle.currentTime = 0.0f;
+
     return particle;
 }
 
@@ -351,4 +404,14 @@ std::list<Particle> ParticleObject::Emit(const Emitter& emitter, std::mt19937& r
         particles.push_back(MakeNewParticle(randomEngine, emitter.transform.translate));
     }
     return particles;
+}
+
+void ParticleObject::EmitAt(const Vector3& position, uint32_t count) {
+    size_t currentParticleCount = particles_.size();
+    size_t maxEmitCount = (numMaxInstance_ > currentParticleCount) ? (numMaxInstance_ - currentParticleCount) : 0;
+    uint32_t emitCount = (std::min)(count, (uint32_t)maxEmitCount);
+
+    for (uint32_t i = 0; i < emitCount; ++i) {
+        particles_.push_back(MakeNewParticle(randomEngine_, position));
+    }
 }

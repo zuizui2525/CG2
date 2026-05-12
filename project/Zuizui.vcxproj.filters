@@ -26,7 +26,8 @@
     <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\ParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\EffectManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.cpp" />
@@ -92,7 +93,9 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\Collision\Collision.h" />
-    <ClInclude Include="Engine\Graphics\Objects\3d\Particle\ParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\ParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\EffectManager.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\EffectSetting.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.h" />

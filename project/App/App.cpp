@@ -2,6 +2,7 @@
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
+#include "Engine/Graphics/Objects/Effect/EffectManager.h"
 
 void App::Initialize() {
     // システム
@@ -75,6 +76,7 @@ void App::Run() {
 
 void App::Finalize() {
     SceneManager::GetInstance()->ClearCurrentScene();
+    EffectManager::GetInstance()->Finalize();
 	engine_->Finalize();
 }
 
