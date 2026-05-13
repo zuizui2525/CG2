@@ -1,8 +1,8 @@
-#include "App/App.h"
+﻿#include "App/App.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
-#include "Engine/Graphics/Objects/Effect/EffectManager.h"
+#include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
 
 void App::Initialize() {
     // システム

@@ -1,5 +1,6 @@
 #include "App/Scene/Debug/DebugScene.h"
 #include "App/Scene/Core/SceneManager.h"
+#include "Engine/Graphics/Objects/Effect/Manager/EffectFactory.h"
 
 void DebugScene::Initialize() {
     // 1. 各マネージャのポインタを取得して保持する
@@ -25,130 +26,19 @@ void DebugScene::Initialize() {
     auto effectMgr = EffectManager::GetInstance();
     effectMgr->Initialize();
 
-    // 1. 今あるパーティクル（Default）
-    EffectSetting defaultSetting;
-    defaultSetting.name = "Default";
-    defaultSetting.textureName = "circle";
-    defaultSetting.velocityMin = { -20.0f, -20.0f, -20.0f };
-    defaultSetting.velocityMax = {  20.0f,  20.0f,  20.0f };
-    defaultSetting.lifeTimeMin = 1.0f;
-    defaultSetting.lifeTimeMax = 10.0f;
-    defaultSetting.colorStartMin = { 0.0f, 0.0f, 0.0f, 1.0f };
-    defaultSetting.colorStartMax = { 1.0f, 1.0f, 1.0f, 1.0f };
-    defaultSetting.emitCountMin = 1; // 毎フレーム呼ぶので少なめ
-    defaultSetting.emitCountMax = 3;
-    effectMgr->RegisterEffect(defaultSetting);
-    // 初期化時にエミッターとして稼働開始
-    effectMgr->PlayEffect2D("Default", { 0.0f, 0.0f, 10.0f }, true);
+    // エフェクトの一括登録
+    EffectFactory::GetInstance()->RegisterAllEffects();
 
-    // 2. ヒットエフェクト
-    EffectSetting hitSetting;
-    hitSetting.name = "Hit";
-    hitSetting.textureName = "circle";
-    hitSetting.scaleMin = { 0.05f, 1.0f, 1.0f };
-    hitSetting.scaleMax = { 0.05f, 1.0f, 1.0f };
-    hitSetting.rotationMin = { 0.0f, 0.0f, -3.141592f };
-    hitSetting.rotationMax = { 0.0f, 0.0f,  3.141592f };
-    hitSetting.velocityMin = { 0.0f, 0.0f, 0.0f };
-    hitSetting.velocityMax = { 0.0f, 0.0f, 0.0f };
-    hitSetting.lifeTimeMin = 1.0f;
-    hitSetting.lifeTimeMax = 1.0f;
-    hitSetting.emitCountMin = 8;
-    hitSetting.emitCountMax = 8;
-    effectMgr->RegisterEffect(hitSetting);
+    // 初期化時にエミッターとして稼働開始するもの
+    EffectPlayParam defaultParam;
+    defaultParam.position = { 0.0f, 0.0f, 10.0f };
+    defaultParam.isLoop = true;
+    effectMgr->PlayEffect2D("Default", defaultParam);
 
-    // 3. 剣撃エフェクト
-    EffectSetting slashSetting;
-    slashSetting.name = "Slash";
-    slashSetting.textureName = "circle";
-    slashSetting.scaleMin = { 0.05f, 0.4f, 1.0f };
-    slashSetting.scaleMax = { 0.05f, 1.5f, 1.0f };
-    slashSetting.rotationMin = { 0.0f, 0.0f, -1.0f };
-    slashSetting.rotationMax = { 0.0f, 0.0f,  1.0f };
-    slashSetting.velocityMin = { 0.0f, 0.0f, 0.0f };
-    slashSetting.velocityMax = { 0.0f, 0.0f, 0.0f };
-    slashSetting.lifeTimeMin = 1.0f;
-    slashSetting.lifeTimeMax = 1.0f;
-    slashSetting.emitCountMin = 3;
-    slashSetting.emitCountMax = 3;
-    effectMgr->RegisterEffect(slashSetting);
-
-    // 4. 炎エフェクト (Fire)
-    EffectSetting fireSetting;
-    fireSetting.name = "Fire";
-    fireSetting.textureName = "circle";
-    fireSetting.isBillboard = true;
-    fireSetting.isEmitter = true;
-    fireSetting.emitFrequency = 0.02f; // さらに密度を上げる
-    fireSetting.emitCountMin = 1;
-    fireSetting.emitCountMax = 3;
-    fireSetting.lifeTimeMin = 0.4f;
-    fireSetting.lifeTimeMax = 0.8f;
-    fireSetting.spawnAreaMin = { -0.1f, 0.0f, -0.1f }; // 発生源を狭くして中心に寄せる
-    fireSetting.spawnAreaMax = {  0.1f, 0.0f,  0.1f };
-    fireSetting.velocityMin = { -0.2f, 3.0f, -0.2f }; // 横への広がりを抑える
-    fireSetting.velocityMax = {  0.2f, 5.0f,  0.2f };
-    fireSetting.scaleMin = { 0.8f, 0.8f, 0.8f }; // 開始時は少し大きく
-    fireSetting.scaleMax = { 1.2f, 1.2f, 1.2f };
-    fireSetting.scaleEndMin = { 0.0f, 0.0f, 0.0f }; // 頂点では完全に細く
-    fireSetting.scaleEndMax = { 0.1f, 0.1f, 0.1f };
-    
-    // 黄色〜オレンジから始まり、赤くなりながら消える
-    fireSetting.colorStartMin = { 1.0f, 0.5f, 0.0f, 1.0f };
-    fireSetting.colorStartMax = { 1.0f, 1.0f, 0.2f, 1.0f }; 
-    fireSetting.colorEndMin = { 0.5f, 0.0f, 0.0f, 0.0f }; 
-    fireSetting.colorEndMax = { 1.0f, 0.1f, 0.0f, 0.0f }; 
-    fireSetting.colorEndMax = { 1.0f, 0.1f, 0.0f, 0.0f }; 
-    effectMgr->RegisterEffect(fireSetting);
-    // 初期化時にエミッターとして稼働開始
-    effectMgr->PlayEffect2D("Fire", { 5.0f, 0.0f, 0.0f }, true);
-
-    // 5. 爆発エフェクト (Explosion / 3D Cube)
-    EffectSetting explosionSetting;
-    explosionSetting.name = "Explosion";
-    explosionSetting.meshType = "cube"; // 3Dメッシュ使用
-    explosionSetting.isBillboard = false; // 立方体を回転させたいのでビルボードOFF
-    explosionSetting.emitCountMin = 20;
-    explosionSetting.emitCountMax = 30;
-    explosionSetting.lifeTimeMin = 0.5f;
-    explosionSetting.lifeTimeMax = 1.2f;
-    explosionSetting.velocityMin = { -15.0f, -15.0f, -15.0f }; // 全方向に飛び散る
-    explosionSetting.velocityMax = {  15.0f,  15.0f,  15.0f };
-    explosionSetting.scaleMin = { 0.2f, 0.2f, 0.2f };
-    explosionSetting.scaleMax = { 0.6f, 0.6f, 0.6f };
-    explosionSetting.scaleEndMin = { 0.0f, 0.0f, 0.0f };
-    explosionSetting.scaleEndMax = { 0.1f, 0.1f, 0.1f };
-    explosionSetting.rotationMin = { -3.14f, -3.14f, -3.14f }; // ランダム回転
-    explosionSetting.rotationMax = {  3.14f,  3.14f,  3.14f };
-    explosionSetting.colorStartMin = { 1.0f, 0.8f, 0.0f, 1.0f }; // 黄色系
-    explosionSetting.colorStartMax = { 1.0f, 1.0f, 0.5f, 1.0f };
-    explosionSetting.colorEndMin = { 0.2f, 0.0f, 0.0f, 0.0f }; // 赤黒く消える
-    explosionSetting.colorEndMax = { 0.5f, 0.1f, 0.0f, 0.0f };
-    effectMgr->RegisterEffect(explosionSetting);
-
-    // 6. ドラゴンのブレス (DragonBreath / 3D Cube)
-    EffectSetting breathSetting;
-    breathSetting.name = "DragonBreath";
-    breathSetting.meshType = "cube";
-    breathSetting.isBillboard = false;
-    breathSetting.emitFrequency = 0.02f; // 高速連射
-    breathSetting.emitCountMin = 1;
-    breathSetting.emitCountMax = 2;
-    breathSetting.lifeTimeMin = 0.8f;
-    breathSetting.lifeTimeMax = 1.2f;
-    breathSetting.velocityMin = { -1.5f, -1.0f, 15.0f }; // 前方に勢いよく
-    breathSetting.velocityMax = {  1.5f,  1.0f, 25.0f };
-    breathSetting.scaleMin = { 0.2f, 0.2f, 0.2f };
-    breathSetting.scaleMax = { 0.4f, 0.4f, 0.4f };
-    breathSetting.scaleEndMin = { 1.5f, 1.5f, 1.5f }; // 広がりながら巨大化
-    breathSetting.scaleEndMax = { 2.5f, 2.5f, 2.5f };
-    breathSetting.rotationMin = { -3.14f, -3.14f, -3.14f };
-    breathSetting.rotationMax = {  3.14f,  3.14f,  3.14f };
-    breathSetting.colorStartMin = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白
-    breathSetting.colorStartMax = { 1.0f, 1.0f, 0.5f, 1.0f }; // 薄い黄色
-    breathSetting.colorEndMin = { 1.0f, 0.2f, 0.0f, 0.0f }; // 赤
-    breathSetting.colorEndMax = { 0.5f, 0.0f, 0.0f, 0.0f }; // 暗い赤
-    effectMgr->RegisterEffect(breathSetting);
+    EffectPlayParam fireParam;
+    fireParam.position = { 5.0f, 0.0f, 0.0f };
+    fireParam.isLoop = true;
+    effectMgr->PlayEffect2D("Fire", fireParam);
 }
 
 void DebugScene::ImGuiControl() {
@@ -169,21 +59,53 @@ void DebugScene::Update() {
     // エフェクトのテスト呼び出し
     if (input_->Trigger(DIK_SPACE)) {
         // ヒットエフェクトをカメラ手前で発生させる
-        EffectManager::GetInstance()->PlayEffect("Hit", { -2.0f, 0.0f, 2.0f });
+        EffectPlayParam hitParam;
+        hitParam.position = { -2.0f, 0.0f, 2.0f };
+        EffectManager::GetInstance()->PlayEffect2D("Hit", hitParam);
     }
     if (input_->Trigger(DIK_RETURN)) {
         // 剣撃エフェクトをカメラ手前で少しずらして発生させる
-        EffectManager::GetInstance()->PlayEffect2D("Slash", { 2.0f, 0.0f, 2.0f });
+        EffectPlayParam slashParam;
+        slashParam.position = { 2.0f, 0.0f, 2.0f };
+        // 例: スケールを大きくして回転も加えてみる
+        slashParam.scale = { 2.0f, 2.0f, 2.0f };
+        slashParam.rotation = { 0.0f, 0.0f, 0.5f };
+        EffectManager::GetInstance()->PlayEffect2D("Slash", slashParam);
     }
     if (input_->Trigger(DIK_P)) {
         // 3D爆発エフェクトを原点で発生させる
-        EffectManager::GetInstance()->PlayEffect3D("Explosion", { 0.0f, 0.0f, 0.0f });
+        EffectPlayParam expParam;
+        expParam.position = { 0.0f, 0.0f, 0.0f };
+        EffectManager::GetInstance()->PlayEffect3D("Explosion", expParam);
+    }
+
+    // --- 花火エフェクト ---
+    // [U] キー：昇る単体
+    if (input_->Trigger(DIK_U)) {
+        EffectPlayParam param;
+        param.position = { -5.0f, 0.0f, 5.0f };
+        EffectManager::GetInstance()->PlayEffect3D("FireworksAscend", param);
+    }
+    // [Y] キー：弾ける単体
+    if (input_->Trigger(DIK_Y)) {
+        EffectPlayParam param;
+        param.position = { 5.0f, 22.5f, 5.0f };
+        EffectManager::GetInstance()->PlayEffect3D("FireworksBurst", param);
+    }
+    // [I] キー：セット（昇ってから弾ける）
+    if (input_->Trigger(DIK_I)) {
+        EffectPlayParam param;
+        param.position = { 0.0f, 0.0f, 5.0f };
+        EffectManager::GetInstance()->PlayEffect3D("FireworksSet", param);
     }
 
     // ドラゴンブレスの操作 (Oキー押しっぱなしで放出)
     if (input_->Press(DIK_O)) {
         // エミッターとして再生
-        EffectManager::GetInstance()->PlayEffect3D("DragonBreath", { 0.0f, 0.0f, 2.0f }, true);
+        EffectPlayParam breathParam;
+        breathParam.position = { 0.0f, 0.0f, 2.0f };
+        breathParam.isLoop = true;
+        EffectManager::GetInstance()->PlayEffect3D("DragonBreath", breathParam);
     } else {
         // 離したら停止
         EffectManager::GetInstance()->StopEffect("DragonBreath");

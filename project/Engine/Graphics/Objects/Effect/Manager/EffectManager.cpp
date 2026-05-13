@@ -1,6 +1,6 @@
 #include "EffectManager.h"
-#include "SpriteParticleObject.h"
-#include "MeshParticleObject.h"
+#include "../Core/SpriteParticleObject.h"
+#include "../Core/MeshParticleObject.h"
 #include <random>
 #include <imgui.h>
 
@@ -46,12 +46,12 @@ void EffectManager::RegisterEffect(const EffectSetting& setting) {
     effectMap_[setting.name] = std::move(particle);
 }
 
-void EffectManager::PlayEffect2D(const std::string& name, const Vector3& position, bool isLoop, const std::string& textureKey, const Vector3& velocityOverride) {
+void EffectManager::PlayEffect2D(const std::string& name, const EffectPlayParam& param) {
     auto it = effectMap_.find(name);
     if (it != effectMap_.end()) {
-        it->second->SetEmitterMode(isLoop);
+        it->second->SetEmitterMode(param.isLoop);
 
-        if (!isLoop) {
+        if (!param.isLoop) {
             // 単発：エミッター自体は(0,0,0)のままで、指定座標に直接パーティクルを出す
             // (これでエミッター行列による二重適用を防ぐ)
             it->second->SetPosition({ 0.0f, 0.0f, 0.0f });
@@ -63,21 +63,24 @@ void EffectManager::PlayEffect2D(const std::string& name, const Vector3& positio
             uint32_t count = distCount(gen);
 
             if (count > 0) {
-                it->second->EmitAt(position, count, velocityOverride, textureKey);
+                it->second->EmitAt(count, param);
             }
         } else {
-            // ループ：エミッター自体を移動させ、そこから出す
-            it->second->SetPosition(position);
+            // ループ：エミッター自体を移動・回転・スケールさせ、そこから出す
+            Transform& transform = it->second->GetTransform();
+            transform.translate = param.position;
+            transform.rotate = param.rotation;
+            transform.scale = param.scale;
         }
     }
 }
 
-void EffectManager::PlayEffect3D(const std::string& name, const Vector3& position, bool isLoop, const std::string& modelKey, const std::string& textureKey, const Vector3& velocityOverride) {
+void EffectManager::PlayEffect3D(const std::string& name, const EffectPlayParam& param) {
     auto it = effectMap_.find(name);
     if (it != effectMap_.end()) {
-        it->second->SetEmitterMode(isLoop);
+        it->second->SetEmitterMode(param.isLoop);
 
-        if (!isLoop) {
+        if (!param.isLoop) {
             // 単発：エミッター自体は(0,0,0)のままで、指定座標に直接パーティクルを出す
             it->second->SetPosition({ 0.0f, 0.0f, 0.0f });
 
@@ -88,11 +91,14 @@ void EffectManager::PlayEffect3D(const std::string& name, const Vector3& positio
             uint32_t count = distCount(gen);
 
             if (count > 0) {
-                it->second->EmitAt(position, count, velocityOverride, textureKey);
+                it->second->EmitAt(count, param);
             }
         } else {
-            // ループ：エミッター自体を移動させ、そこから出す
-            it->second->SetPosition(position);
+            // ループ：エミッター自体を移動・回転・スケールさせ、そこから出す
+            Transform& transform = it->second->GetTransform();
+            transform.translate = param.position;
+            transform.rotate = param.rotation;
+            transform.scale = param.scale;
         }
     }
 }

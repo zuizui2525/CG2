@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl" />
@@ -26,7 +26,7 @@
     <ClCompile Include="Engine\Graphics\PSO\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Math\Collision\Collision.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\EffectManager.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\Manager\EffectManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Manager\PSOManager.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.cpp" />
     <ClCompile Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.cpp" />
@@ -70,9 +70,10 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\BaseParticleObject.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\MeshParticleObject.cpp" />
-    <ClCompile Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\Core\BaseParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\Core\MeshParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\Core\SpriteParticleObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\Effect\Manager\EffectFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\App.h" />
@@ -95,8 +96,8 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Graphics\PSO\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Math\Collision\Collision.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\EffectManager.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\EffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Manager\EffectManager.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\EffectSetting.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Manager\PSOManager.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\Preset\PSOPreset.h" />
     <ClInclude Include="Engine\\Graphics\\PSO\\DepthStencilState\DepthStencilStateBuilder.h" />
@@ -146,15 +147,38 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\BaseParticleObject.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\MeshParticleObject.h" />
-    <ClInclude Include="Engine\Graphics\Objects\Effect\SpriteParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Core\BaseParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Core\MeshParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Core\SpriteParticleObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Manager\EffectFactory.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\DefaultEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\DragonBreathEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\ExplosionEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\HitEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SlashEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SoapBubbleEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksBurstEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksFlameEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSparkleEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksAscendEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSetEffectSetting.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />
     <None Include="resources\Shader\Particle\Particle.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="Engine\Graphics\Objects\Effect\Core" />
+    <Filter Include="Engine\Graphics\Objects\Effect\Manager" />
+    <Filter Include="Engine\Graphics\Objects\Effect\Settings" />
+  </ItemGroup>
+  <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Engine\Graphics\Objects\Effect\Core" />
+    <Filter Include="Engine\Graphics\Objects\Effect\Manager" />
+    <Filter Include="Engine\Graphics\Objects\Effect\Settings" />
   </ItemGroup>
 </Project>

@@ -3,7 +3,7 @@
 #include "Engine/Math/Collision/CollisionStructs.h"
 #include "Engine/Graphics/RenderStructs.h"
 #include "Engine/Base/BaseResource.h"
-#include "EffectSetting.h"
+#include "../Settings/EffectSetting.h"
 #include <memory>
 #include <vector>
 #include <d3d12.h> 
@@ -26,6 +26,7 @@ struct Particle {
     Vector4 color; // 現在の色
     float lifeTime;
     float currentTime;
+    float trailFrequencyTimer = 0.0f; // トレイル（火の粉）発生用の内部タイマー
 };
 
 struct Emitter {
@@ -52,7 +53,7 @@ public:
     void ImGuiControl(const std::string& name);
 
     // 特定の座標でワンショット発生させる
-    void EmitAt(const Vector3& position, uint32_t count, const Vector3& velocityOverride = {0,0,0}, const std::string& textureOverride = "");
+    void EmitAt(uint32_t count, const EffectPlayParam& param);
 
     // getter/setter
     Transform& GetTransform() { return emitter_.transform; }
@@ -65,7 +66,7 @@ public:
 
 protected:
     void CreateInstanceResource();
-    Particle MakeNewParticle(std::mt19937& randomEngine, Vector3 initialPosition, const Vector3& velocityOverride = {0,0,0});
+    Particle MakeNewParticle(std::mt19937& randomEngine, const EffectPlayParam& param);
     std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine);
 
     // メンバ変数

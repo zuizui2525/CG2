@@ -9,11 +9,7 @@
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
-#include "Engine/Graphics/Objects/3d/Model/ModelObject.h"
-#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
-#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
-#include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
-#include "Engine/Graphics/Objects/Effect/EffectManager.h"
+#include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
 
 #ifdef _USEIMGUI
 #include "imguiManager.h"
