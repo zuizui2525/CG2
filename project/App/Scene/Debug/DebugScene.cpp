@@ -95,7 +95,12 @@ void DebugScene::Update() {
     // [I] キー：セット（昇ってから弾ける）
     if (input_->Trigger(DIK_I)) {
         EffectPlayParam param;
-        param.position = { 0.0f, 0.0f, 5.0f };
+        // 1. ランダムな色を作る (例: 虹色のどこか)
+        float r = static_cast<float>(rand()) / RAND_MAX;
+        float g = static_cast<float>(rand()) / RAND_MAX;
+        float b = static_cast<float>(rand()) / RAND_MAX;
+        param.colorOverride = { r, g, b, 1.0f };
+        param.position = { static_cast<float>(rand() % 100 + 1), 0.0f, 5.0f };
         EffectManager::GetInstance()->PlayEffect3D("FireworksSet", param);
     }
 

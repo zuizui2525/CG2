@@ -93,6 +93,7 @@ void BaseParticleObject::Update() {
             if (!setting_.onDeathEffectName.empty()) {
                 EffectPlayParam param;
                 param.position = it->transform.translate;
+                param.colorOverride = it->inheritColor; // 親の色を引き継ぐ
                 EffectManager::GetInstance()->PlayEffect3D(setting_.onDeathEffectName, param);
             }
             it = particles_.erase(it);
@@ -105,6 +106,7 @@ void BaseParticleObject::Update() {
             if (it->trailFrequencyTimer >= setting_.trailFrequency) {
                 EffectPlayParam param;
                 param.position = it->transform.translate;
+                param.colorOverride = it->inheritColor; // 親の色を引き継ぐ
                 EffectManager::GetInstance()->PlayEffect3D(setting_.trailEffectName, param);
                 it->trailFrequencyTimer -= setting_.trailFrequency;
             }
@@ -264,8 +266,18 @@ Particle BaseParticleObject::MakeNewParticle(std::mt19937& randomEngine, const E
     } else {
         particle.endColor = getRandVec4(setting_.colorEndMin, setting_.colorEndMax);
     }
+
+    // --- 外からの色上書きを適用 ---
+    if (param.colorOverride.w > 0.0f) {
+        particle.startColor = param.colorOverride;
+        // 終了時の色は、指定された色のアルファだけを0にしたものにする（フェードアウト維持）
+        particle.endColor = param.colorOverride;
+        particle.endColor.w = 0.0f;
+    }
+
     particle.color = particle.startColor;
 
+    particle.inheritColor = param.colorOverride; // 色を保存しておく
     particle.lifeTime = std::uniform_real_distribution<float>((std::min)(setting_.lifeTimeMin, setting_.lifeTimeMax), (std::max)(setting_.lifeTimeMin, setting_.lifeTimeMax))(randomEngine);
     particle.currentTime = 0.0f;
 

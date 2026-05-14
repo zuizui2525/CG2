@@ -27,6 +27,7 @@ struct Particle {
     float lifeTime;
     float currentTime;
     float trailFrequencyTimer = 0.0f; // トレイル（火の粉）発生用の内部タイマー
+    Vector4 inheritColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // 追加：子エフェクトに引き継ぐ色
 };
 
 struct Emitter {

@@ -10,20 +10,20 @@ public:
         
         // --- 連鎖（子パーティクル）機能 ---
         trailEffectName = "FireworksFlame"; // 移動中に落とす火の粉
-        trailFrequency = 0.05f;             // 0.05秒に1回落とす
+        trailFrequency = 0.015f;            // 間隔をさらに詰め、滑らかな線にする
         onDeathEffectName = "FireworksSparkle"; // 消滅時にパチッと光る
 
         // --- 花火を綺麗にする新機能 ---
         isSpherical = true;
         isVelocityAligned = true;
         
-        // ドカンと弾けるため大量に放出（球状に広がるので少し増やす）
-        emitCountMin = 100;
-        emitCountMax = 150;
+        // ドカンと弾けるため大量に放出
+        emitCountMin = 150;
+        emitCountMax = 200;
         
-        // 寿命を少し短くし、残る時間を調整（スッと消えるように）
-        lifeTimeMin = 0.8f;
-        lifeTimeMax = 1.3f;
+        // 寿命に1秒程度の幅を持たせ、バラバラに消えるようにする（リアリティ向上）
+        lifeTimeMin = 0.6f;
+        lifeTimeMax = 0.7f;
         
         // 球状拡散のスピードを少し抑え、破裂サイズを全体のバランスに合わせる
         velocityMin = { 10.0f, 0.0f, 0.0f };
@@ -32,9 +32,9 @@ public:
         // 重力を追加（下方向にゆっくり加速して落ちていく）
         acceleration = { 0.0f, -8.0f, 0.0f };
         
-        // パーティクルの太さをさらに細くし、主張しすぎない繊細な線にする
-        scaleMin = { 0.2f, 0.2f, 0.2f };
-        scaleMax = { 0.3f, 0.3f, 0.3f };
+        // 数を増やした分、一本一本をさらに細くし、繊細な光の集合体にする
+        scaleMin = { 0.1f, 0.1f, 0.1f };
+        scaleMax = { 0.2f, 0.2f, 0.2f };
         scaleEndMin = { 0.0f, 0.0f, 0.0f };
         scaleEndMax = { 0.0f, 0.0f, 0.0f };
         

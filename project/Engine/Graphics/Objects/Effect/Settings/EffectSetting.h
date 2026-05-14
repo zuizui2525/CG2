@@ -85,4 +85,5 @@ struct EffectPlayParam {
     std::string modelKey = "";
     std::string textureKey = "";
     Vector3 velocityOverride = { 0.0f, 0.0f, 0.0f };
+    Vector4 colorOverride = { 0.0f, 0.0f, 0.0f, 0.0f }; // 追加：上書きする色（(0,0,0,0)なら上書きなし）
 };
