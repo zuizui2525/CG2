@@ -46,7 +46,7 @@ struct AcclerationField {
 // 2D/3Dパーティクルの共通ロジックを管理する基底クラス
 class BaseParticleObject : public Base3D {
 public:
-    virtual ~BaseParticleObject() = default;
+    virtual ~BaseParticleObject();
 
     virtual void Initialize(int lightingMode = 0);
     virtual void Update();
