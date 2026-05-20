@@ -40,6 +40,8 @@ void App::Initialize() {
     // --- PostProcess の初期化 ---
     postProcess_ = std::make_unique<PostProcess>();
     postProcess_->Initialize();
+
+    SceneManager::GetInstance()->SetPostProcess(postProcess_.get());
 }
 
 void App::Run() {

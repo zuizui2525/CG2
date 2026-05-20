@@ -2,6 +2,9 @@
 #include "App/Scene/Core/IScene.h"
 #include <memory>
 
+class PostProcess;
+
+
 #include "Engine/Input/Input.h"
 #include "Engine/Graphics/Objects/3d/Line/LineObject.h"
 #include "Engine/Graphics/Objects/3d/Triangle/TriangleObject.h"
@@ -32,6 +35,8 @@ private:
     Input* input_ = nullptr;
     CameraManager* cameraMgr_ = nullptr;
     LightManager* lightMgr_ = nullptr;
+    PostProcess* postProcess_ = nullptr;
+
     
     // オブジェクト
     std::shared_ptr<BaseCamera> mainCamera_;

@@ -1,8 +1,16 @@
 #include "App/Scene/Title/TitleScene.h"
 #include "Engine/Base/BaseResource.h"
 #include "App/Scene/Core/SceneManager.h"
+#include "Engine/Graphics/PostProcess/PostProcess.h"
+
 
 void TitleScene::Initialize() {
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期モードを Grayscale に設定
+    postProcess_ = SceneManager::GetInstance()->GetPostProcess();
+    if (postProcess_) {
+        postProcess_->SetEffectMode(PostEffectMode::Grayscale);
+    }
+
     // 1. 各マネージャの取得
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();

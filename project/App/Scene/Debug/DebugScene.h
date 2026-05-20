@@ -3,6 +3,9 @@
 #include <memory>
 #include <string>
 
+class PostProcess;
+
+
 #include "Engine/Zuizui.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Input/Input.h"
@@ -28,6 +31,8 @@ private:
     Input* input_ = nullptr;
     CameraManager* cameraMgr_ = nullptr;
     LightManager* lightMgr_ = nullptr;
+    PostProcess* postProcess_ = nullptr;
+
 
     // --- ゲームオブジェクト群 ---
     std::shared_ptr<DebugCamera> debugCamera_;

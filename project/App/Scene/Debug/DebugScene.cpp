@@ -1,8 +1,16 @@
 #include "App/Scene/Debug/DebugScene.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectFactory.h"
+#include "Engine/Graphics/PostProcess/PostProcess.h"
+
 
 void DebugScene::Initialize() {
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期モードを None に設定
+    postProcess_ = SceneManager::GetInstance()->GetPostProcess();
+    if (postProcess_) {
+        postProcess_->SetEffectMode(PostEffectMode::None);
+    }
+
     // 1. 各マネージャのポインタを取得して保持する
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();

@@ -1,8 +1,11 @@
-﻿#pragma once
+#pragma once
 #include <memory>
 #include <string>
 #include "App/Scene/Core/IScene.h"
 #include "App/Scene/Core/AbstractSceneFactory.h"
+
+class PostProcess;
+
 
 /**
  * @brief シーン管理クラス（シングルトン）
@@ -17,6 +20,10 @@ public:
     void Update();
     void Draw();
     void ImGuiControl();
+
+    void SetPostProcess(PostProcess* postProcess) { postProcess_ = postProcess; }
+    PostProcess* GetPostProcess() const { return postProcess_; }
+
 
     /**
      * @brief 次のシーンを名前で予約する
@@ -51,4 +58,6 @@ private:
     std::unique_ptr<IScene> nextScene_ = nullptr;
     std::string currentSceneName_ = "None";
     std::string nextSceneName_ = "";
+
+    PostProcess* postProcess_ = nullptr;
 };
