@@ -12,12 +12,14 @@ void ResourceLoader::LoadTextures() {
 	TextureManager* texMgr = TextureResource::GetTextureManager();
 	if (!texMgr) return;
 
-	texMgr->LoadTexture("white", "resources/white.png");
-	texMgr->LoadTexture("monsterBall", "resources/monsterBall.png");
-	texMgr->LoadTexture("circle", "resources/circle.png");
-	texMgr->LoadTexture("uvChecker", "resources/uvChecker.png");
-	texMgr->LoadTexture("skyboxTex", "resources/skybox.dds");
-	texMgr->LoadTexture("forestTex", "resources/forest.dds");
+	texMgr->LoadTexture("white", "resources/Textures/white.png");
+	texMgr->LoadTexture("monsterBall", "resources/Textures/monsterBall.png");
+	texMgr->LoadTexture("circle", "resources/Textures/circle.png");
+	texMgr->LoadTexture("uvChecker", "resources/Textures/uvChecker.png");
+	texMgr->LoadTexture("skyboxTex", "resources/Textures/skybox.dds");
+	texMgr->LoadTexture("forestTex", "resources/Textures/forest.dds");
+	texMgr->LoadTexture("gradationLine", "resources/Textures/gradationLine.png");
+	texMgr->LoadTexture("slashTex", "resources/Textures/slashTex.png");
 }
 
 void ResourceLoader::LoadModels() {

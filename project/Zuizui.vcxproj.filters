@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl" />
@@ -63,9 +63,11 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\CylinderEffect\CylinderEffectObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Line\LineObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Ring\RingObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\FlatRing\FlatRingObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cone\ConeObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
@@ -140,9 +142,11 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\CylinderEffect\CylinderEffectObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Line\LineObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Ring\RingObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\FlatRing\FlatRingObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cone\ConeObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Pyramid\PyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
@@ -162,16 +166,15 @@
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksFlameEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSparkleEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksAscendEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RingAuraEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RingSlashEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\CylinderAuraEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSetEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RippleEffectSetting.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />
     <None Include="resources\Shader\Particle\Particle.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Engine\Graphics\Objects\Effect\Core" />
-    <Filter Include="Engine\Graphics\Objects\Effect\Manager" />
-    <Filter Include="Engine\Graphics\Objects\Effect\Settings" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

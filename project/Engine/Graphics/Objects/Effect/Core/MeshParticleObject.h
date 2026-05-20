@@ -8,6 +8,8 @@ public:
 
 private:
     void CreateCubeMesh();
+    void CreateFlatRingMesh();
+    void CreateCylinderMesh();
 
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
     Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;

@@ -27,6 +27,9 @@ public:
     // 3Dエフェクト再生
     void PlayEffect3D(const std::string& name, const EffectPlayParam& param);
 
+    // 登録済みのエフェクトオブジェクトを取得する
+    BaseParticleObject* GetEffect(const std::string& name);
+
     // エミッターの停止
     void StopEffect(const std::string& name);
 

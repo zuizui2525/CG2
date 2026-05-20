@@ -88,15 +88,37 @@ void BaseParticleObject::Update() {
     }
 
     for (auto it = particles_.begin(); it != particles_.end(); ) {
-        if (it->currentTime >= it->lifeTime) {
+        // 寿命判定、または地面到達（killAtY）判定
+        bool isDead = (it->currentTime >= it->lifeTime);
+        if (setting_.killAtY > -900.0f && it->transform.translate.y <= setting_.killAtY) {
+            isDead = true;
+        }
+
+        if (isDead) {
             // 消滅する瞬間に onDeathEffectName が設定されていれば発生させる
             if (!setting_.onDeathEffectName.empty()) {
                 EffectPlayParam param;
                 param.position = it->transform.translate;
                 param.colorOverride = it->inheritColor; // 親の色を引き継ぐ
-                EffectManager::GetInstance()->PlayEffect3D(setting_.onDeathEffectName, param);
+
+                // カンマ区切りで複数のエフェクトを発生させる
+                std::string names = setting_.onDeathEffectName;
+                size_t pos = 0;
+                while ((pos = names.find(",")) != std::string::npos) {
+                    std::string token = names.substr(0, pos);
+                    EffectManager::GetInstance()->PlayEffect3D(token, param);
+                    names.erase(0, pos + 1);
+                }
+                EffectManager::GetInstance()->PlayEffect3D(names, param);
             }
             it = particles_.erase(it);
+            continue;
+        }
+
+        // 遅延処理：設定されたディレイ時間を過ぎるまで更新・描画をスキップする
+        if (it->currentTime < setting_.delay) {
+            it->currentTime += kDeltaTime_;
+            it++;
             continue;
         }
 
@@ -122,8 +144,8 @@ void BaseParticleObject::Update() {
                 currentRotate.y = std::atan2(dir.x, dir.z);
                 currentRotate.x = std::asin(-dir.y);
                 currentRotate.z = 0.0f;
-                // 進行方向（Z軸）をスピードに比例して引き伸ばす（長さ調整用の係数 0.15f）
-                currentScale.z = speed * 0.15f; 
+                // 進行方向（Z軸）をスピードに比例して引き伸ばす
+                currentScale.z = speed * setting_.velocityAlignmentScale; 
                 // Y軸・X軸は細くする
                 currentScale.x *= 0.2f;
                 currentScale.y *= 0.2f;
@@ -152,17 +174,40 @@ void BaseParticleObject::Update() {
         it->velocity.y += setting_.acceleration.y * kDeltaTime_;
         it->velocity.z += setting_.acceleration.z * kDeltaTime_;
 
-        // 速度を座標に加算
+        // 速度・回転速度を座標に加算
         it->transform.translate += it->velocity * kDeltaTime_;
+        it->transform.rotate += it->rotationVelocity * kDeltaTime_;
         it->currentTime += kDeltaTime_;
 
         float progress = (std::min)(it->currentTime / it->lifeTime, 1.0f);
-        it->transform.scale = it->startScale + (it->endScale - it->startScale) * progress;
+        
+        float scaleProgress = progress;
+        if (setting_.useEaseInScale) scaleProgress = progress * progress;
+        else if (setting_.useEaseOutScale) scaleProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
+
+        float alphaProgress = progress;
+        if (setting_.useEaseInAlpha) alphaProgress = progress * progress;
+        else if (setting_.useEaseOutAlpha) alphaProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
+
+        it->transform.scale = it->startScale + (it->endScale - it->startScale) * scaleProgress;
+        
+        // Y軸にサイン波を適用する場合 (0 -> 1 -> 0)
+        if (setting_.useSineScaleY) {
+            float sineProgress = std::sin(progress * 3.14159265f);
+            it->transform.scale.y = it->startScale.y + (it->endScale.y - it->startScale.y) * sineProgress;
+        }
+
+        // XZ軸にサイン波を適用する場合 (0 -> 1 -> 0)
+        if (setting_.useSineScaleXZ) {
+            float sineProgress = std::sin(progress * 3.14159265f);
+            it->transform.scale.x = it->startScale.x + (it->endScale.x - it->startScale.x) * sineProgress;
+            it->transform.scale.z = it->startScale.z + (it->endScale.z - it->startScale.z) * sineProgress;
+        }
         
         it->color.x = it->startColor.x + (it->endColor.x - it->startColor.x) * progress;
         it->color.y = it->startColor.y + (it->endColor.y - it->startColor.y) * progress;
         it->color.z = it->startColor.z + (it->endColor.z - it->startColor.z) * progress;
-        it->color.w = it->startColor.w + (it->endColor.w - it->startColor.w) * progress;
+        it->color.w = it->startColor.w + (it->endColor.w - it->startColor.w) * alphaProgress;
 
         if (numInstance_ < kNumMaxInstance) {
             instanceData_[numInstance_].world = particleWorldMatrix;
@@ -204,6 +249,9 @@ Particle BaseParticleObject::MakeNewParticle(std::mt19937& randomEngine, const E
     };
 
     particle.startScale = getRandVec3(setting_.scaleMin, setting_.scaleMax);
+    if (setting_.isUniformScaleXZ) {
+        particle.startScale.z = particle.startScale.x;
+    }
     particle.startScale.x *= param.scale.x;
     particle.startScale.y *= param.scale.y;
     particle.startScale.z *= param.scale.z;
@@ -213,6 +261,9 @@ Particle BaseParticleObject::MakeNewParticle(std::mt19937& randomEngine, const E
         particle.endScale = particle.startScale;
     } else {
         particle.endScale = getRandVec3(setting_.scaleEndMin, setting_.scaleEndMax);
+        if (setting_.isUniformScaleXZ) {
+            particle.endScale.z = particle.endScale.x;
+        }
         particle.endScale.x *= param.scale.x;
         particle.endScale.y *= param.scale.y;
         particle.endScale.z *= param.scale.z;
@@ -223,6 +274,8 @@ Particle BaseParticleObject::MakeNewParticle(std::mt19937& randomEngine, const E
     particle.transform.rotate.x += param.rotation.x;
     particle.transform.rotate.y += param.rotation.y;
     particle.transform.rotate.z += param.rotation.z;
+    
+    particle.rotationVelocity = getRandVec3(setting_.rotationVelocityMin, setting_.rotationVelocityMax);
     
     Vector3 baseVel;
     if (setting_.isSpherical) {

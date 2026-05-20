@@ -127,7 +127,9 @@ PSOPreset PSOPreset::CreateParticlePreset(
     // ■ Sampler
     D3D12_SAMPLER_DESC sampler{};
     sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-    sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // RingなどのためにV方向をクランプ
+    sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     rs.AddSampler(sampler, 0);
 
     // RootSignatureをビルド
@@ -157,7 +159,7 @@ PSOPreset PSOPreset::CreateParticlePreset(
     // 4. Rasterizer State
     // --------------------------------------------------------
     RasterizerStateBuilder rsb;
-    rsb.SetCullMode(CullMode::Back); // 裏面を表示しない
+    rsb.SetCullMode(CullMode::None); // 両面を表示する（エフェクト用なので）
     preset.rasterizerDesc = rsb.Build();
 
 

@@ -33,14 +33,14 @@ void EffectManager::Draw() {
 void EffectManager::RegisterEffect(const EffectSetting& setting) {
     std::unique_ptr<BaseParticleObject> particle;
 
-    if (setting.meshType == "cube") {
+    if (setting.meshType == "cube" || setting.meshType == "flat_ring" || setting.meshType == "cylinder") {
         particle = std::make_unique<MeshParticleObject>();
     } else {
         particle = std::make_unique<SpriteParticleObject>();
     }
     
-    particle->Initialize();
     particle->SetSetting(setting);
+    particle->Initialize();
     particle->SetEmitterMode(false); // 初期状態はOFF
     
     effectMap_[setting.name] = std::move(particle);
@@ -101,6 +101,14 @@ void EffectManager::PlayEffect3D(const std::string& name, const EffectPlayParam&
             transform.scale = param.scale;
         }
     }
+}
+
+BaseParticleObject* EffectManager::GetEffect(const std::string& name) {
+    auto it = effectMap_.find(name);
+    if (it != effectMap_.end()) {
+        return it->second.get();
+    }
+    return nullptr;
 }
 
 void EffectManager::StopEffect(const std::string& name) {

@@ -10,6 +10,10 @@
 #include "../Settings/FireworksFlameEffectSetting.h"
 #include "../Settings/FireworksAscendEffectSetting.h"
 #include "../Settings/FireworksSetEffectSetting.h"
+#include "../Settings/RingAuraEffectSetting.h"
+#include "../Settings/RingSlashEffectSetting.h"
+#include "../Settings/CylinderAuraEffectSetting.h"
+#include "../Settings/RippleEffectSetting.h"
 
 EffectFactory* EffectFactory::GetInstance() {
     static EffectFactory instance;
@@ -31,4 +35,13 @@ void EffectFactory::RegisterAllEffects() {
     effectMgr->RegisterEffect(FireworksFlameEffectSetting());
     effectMgr->RegisterEffect(FireworksAscendEffectSetting());
     effectMgr->RegisterEffect(FireworksSetEffectSetting());
+    effectMgr->RegisterEffect(RingAuraEffectSetting());
+    effectMgr->RegisterEffect(RingSlashEffectSetting());
+    effectMgr->RegisterEffect(CylinderAuraEffectSetting());
+    effectMgr->RegisterEffect(RippleRingEffectSetting());
+    effectMgr->RegisterEffect(RippleSplashEffectSetting());
+    effectMgr->RegisterEffect(RippleSplashParticlesEffectSetting());
+    effectMgr->RegisterEffect(DropletTrailEffectSetting());
+    effectMgr->RegisterEffect(SmallRippleEffectSetting());
+    effectMgr->RegisterEffect(WaterDropEffectSetting());
 }

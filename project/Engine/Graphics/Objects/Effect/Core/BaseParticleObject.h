@@ -16,6 +16,7 @@
 struct Particle {
     Transform transform;
     Vector3 velocity;
+    Vector3 rotationVelocity;
     
     // 時間変化用のパラメータ
     Vector3 startScale;

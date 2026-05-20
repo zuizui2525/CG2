@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -186,9 +186,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\CylinderEffect\CylinderEffectObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Line\LineObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Ring\RingObject.cpp" />
+    <ClCompile Include="Engine\Graphics\Objects\3d\FlatRing\FlatRingObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\Effect\Core\BaseParticleObject.cpp" />
@@ -299,9 +301,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\3d\TriangularPyramid\TriangularPyramidObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Hemisphere\HemisphereObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\CylinderEffect\CylinderEffectObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cylinder\CylinderObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Line\LineObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Ring\RingObject.h" />
+    <ClInclude Include="Engine\Graphics\Objects\3d\FlatRing\FlatRingObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Core\BaseParticleObject.h" />
@@ -316,7 +320,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksFlameEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSetEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksSparkleEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RingAuraEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RingSlashEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\CylinderAuraEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\HitEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\RippleEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SlashEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Core\SpriteParticleObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SoapBubbleEffectSetting.h" />

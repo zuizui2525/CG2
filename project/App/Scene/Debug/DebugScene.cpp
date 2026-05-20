@@ -116,6 +116,46 @@ void DebugScene::Update() {
         EffectManager::GetInstance()->StopEffect("DragonBreath");
     }
 
+    // KキーでRingエフェクトの発生
+    if (input_->Trigger(DIK_K)) {
+        EffectPlayParam ringParam;
+        ringParam.position = { 0.0f, 0.0f, 0.0f };
+        EffectManager::GetInstance()->PlayEffect3D("RingAura", ringParam);
+    }
+
+    // Lキーで斬撃（RingSlash）エフェクトの発生
+    if (input_->Trigger(DIK_L)) {
+        EffectPlayParam slashParam;
+        slashParam.position = { 0.0f, 2.0f, 0.0f }; // 少し高めの位置
+        EffectManager::GetInstance()->PlayEffect3D("RingSlash", slashParam);
+    }
+
+    // Jキーで円柱（CylinderAura）エフェクトの発生
+    if (input_->Trigger(DIK_J)) {
+        EffectPlayParam cylParam;
+        cylParam.position = { 0.0f, 0.0f, 0.0f };
+        EffectManager::GetInstance()->PlayEffect3D("CylinderAura", cylParam);
+    }
+
+    // Hキーで雨（水滴落下）エフェクトの切り替え
+    if (input_->Trigger(DIK_H)) {
+        auto effectMgr = EffectManager::GetInstance();
+        auto effect = effectMgr->GetEffect("WaterDrop");
+        
+        if (effect) {
+            auto& setting = effect->GetSettingRef();
+            bool isRaining = !setting.isEmitter; // トグル
+            setting.isEmitter = isRaining;
+
+            if (isRaining) {
+                EffectPlayParam dropParam;
+                dropParam.position = { 0.0f, 0.0f, 0.0f }; 
+                dropParam.isLoop = true;
+                effectMgr->PlayEffect3D("WaterDrop", dropParam);
+            }
+        }
+    }
+
     // モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
