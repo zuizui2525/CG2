@@ -1,0 +1,101 @@
+#include "App/Scene/Game/GameScene.h"
+#include "Engine/Base/BaseResource.h"
+#include "App/Scene/Core/SceneManager.h"
+#include "Engine/Graphics/PostProcess/PostProcess.h"
+
+/**
+ * @brief ゲーム本編シーンの初期化処理
+ * カメラ、ライト、Cubeオブジェクトの生成と初期パラメータ設定を行います。
+ */
+void GameScene::Initialize() {
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期モードを None に設定
+    postProcess_ = SceneManager::GetInstance()->GetPostProcess();
+    if (postProcess_) {
+        postProcess_->SetEffectMode(PostEffectMode::None);
+    }
+
+    // 1. 各マネージャへのポインタをリソース管理者から取得
+    cameraMgr_ = CameraResource::GetCameraManager();
+    lightMgr_ = LightResource::GetLightManager();
+    input_ = InputResource::GetInput();
+
+    // 2. メインカメラの生成とマネージャへの登録
+    mainCamera_ = std::make_shared<BaseCamera>();
+    mainCamera_->Initialize();
+    cameraMgr_->AddCamera(kMainCameraName, mainCamera_);
+
+    // 3. デバッグカメラの生成とマネージャへの登録
+    debugCamera_ = std::make_shared<DebugCamera>();
+    debugCamera_->Initialize();
+    cameraMgr_->AddCamera(kDebugCameraName, debugCamera_);
+
+    // アプリ起動直後はメインカメラをアクティブ状態に設定する
+    cameraMgr_->SetActiveCamera(kMainCameraName);
+
+    // 4. 平行光源の生成、初期化、マネージャへの追加
+    dirLight_ = std::make_unique<DirectionalLightObject>();
+    dirLight_->Initialize();
+    lightMgr_->AddDirectionalLight(dirLight_.get());
+
+    // 5. 描画テスト用 3D Cube の生成と初期座標、サイズの設定
+    cube_ = std::make_unique<CubeObject>();
+    cube_->Initialize();
+    cube_->SetPosition(kCubeInitialPosition);
+    cube_->SetSize(kCubeInitialScale);
+}
+
+/**
+ * @brief ImGuiによるデバッグ表示処理
+ */
+void GameScene::ImGuiControl() {
+#ifdef _USEIMGUI
+    // カメラ切り替え等のマネージャパラメータを表示
+    cameraMgr_->ImGuiControl();
+
+    // 平行光源パラメータの調整用ImGuiコントロール
+    static const char* kLightImGuiLabel = "GameScene DirLight";
+    dirLight_->ImGuiControl(kLightImGuiLabel);
+
+    // Cubeのパラメータ調整用ImGuiコントロール
+    static const char* kCubeImGuiLabel = "GameScene Cube";
+    cube_->ImGuiControl(kCubeImGuiLabel);
+#endif
+}
+
+/**
+ * @brief 毎フレーム更新処理（キー入力によるカメラ切り替え、オブジェクトの座標・パラメータ更新）
+ */
+void GameScene::Update() {
+    // TABキーによりメインカメラとデバッグカメラを切り替える
+    static constexpr int kCameraToggleKey = DIK_TAB; // カメラ切り替え用キー定数
+    if (input_->Trigger(kCameraToggleKey)) {
+        bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
+        cameraMgr_->SetActiveCamera(isCurrentlyDebug ? kMainCameraName : kDebugCameraName);
+    }
+
+    // ライトパラメータとCubeの行列更新
+    dirLight_->Update();
+    cube_->Update();
+
+    // 現在アクティブなカメラを判定し、それぞれのカメラ種別に応じた更新処理を呼ぶ
+    BaseCamera* activeCamera = cameraMgr_->GetActiveCamera();
+    DebugCamera* debugCamPtr = dynamic_cast<DebugCamera*>(activeCamera);
+
+    if (debugCamPtr) {
+        // デバッグカメラ有効化とキー操作による移動更新
+        debugCamPtr->SetActive(true);
+        debugCamPtr->Update(input_);
+    } else {
+        // 通常のメインカメラの更新処理
+        debugCamera_->SetActive(false);
+        activeCamera->Update();
+    }
+}
+
+/**
+ * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
+ */
+void GameScene::Draw() {
+    // 3D Cubeの描画（指定のホワイトテクスチャを使用し、環境マップは指定しない）
+    cube_->Draw(kCubeTextureKey, kEmptyEnvMapKey);
+}

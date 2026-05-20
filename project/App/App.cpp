@@ -66,11 +66,27 @@ void App::Run() {
     if (ImGui::RadioButton("Sepia", &modeVal, 4)) { postProcess_->SetEffectMode(PostEffectMode::Sepia); }
     ImGui::Separator();
 
+    // マジックストリング回避のためのローカル定数定義
+    static const std::string kDebugSceneName = "Debug";
+    static const std::string kTitleSceneName = "Title";
+    static const std::string kGameSceneName = "Game";
+    static const std::string kClearSceneName = "Clear";
+    static const std::string kGameOverSceneName = "GameOver";
+
     if (ImGui::Button("Reset DebugScene")) {
-        SceneManager::GetInstance()->ChangeScene("Debug");
+        SceneManager::GetInstance()->ChangeScene(kDebugSceneName);
     }
     if (ImGui::Button("Reset TitleScene")) {
-        SceneManager::GetInstance()->ChangeScene("Title");
+        SceneManager::GetInstance()->ChangeScene(kTitleSceneName);
+    }
+    if (ImGui::Button("Reset GameScene")) {
+        SceneManager::GetInstance()->ChangeScene(kGameSceneName);
+    }
+    if (ImGui::Button("Reset ClearScene")) {
+        SceneManager::GetInstance()->ChangeScene(kClearSceneName);
+    }
+    if (ImGui::Button("Reset GameOverScene")) {
+        SceneManager::GetInstance()->ChangeScene(kGameOverSceneName);
     }
     ImGui::End();
 
