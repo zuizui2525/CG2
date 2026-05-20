@@ -1,4 +1,4 @@
-﻿#include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Base/Utils/DxUtils.h"
 #include <cassert>
 
 namespace DxUtils {
@@ -93,6 +93,50 @@ namespace DxUtils {
         D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
         handleGPU.ptr += static_cast<size_t>(descriptorSize) * index;
         return handleGPU;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(
+        ID3D12Device* device,
+        uint32_t width,
+        uint32_t height,
+        DXGI_FORMAT format,
+        const Vector4& clearColor) {
+
+        // 生成するResourceの設定
+        D3D12_RESOURCE_DESC resourceDesc{};
+        resourceDesc.Width = width;
+        resourceDesc.Height = height;
+        resourceDesc.MipLevels = 1;
+        resourceDesc.DepthOrArraySize = 1;
+        resourceDesc.Format = format;
+        resourceDesc.SampleDesc.Count = 1;
+        resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+        // 利用するheapの設定
+        D3D12_HEAP_PROPERTIES heapProperties{};
+        heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+        // クリア最適化用のクリア値の設定
+        D3D12_CLEAR_VALUE clearValue{};
+        clearValue.Format = format;
+        clearValue.Color[0] = clearColor.x;
+        clearValue.Color[1] = clearColor.y;
+        clearValue.Color[2] = clearColor.z;
+        clearValue.Color[3] = clearColor.w;
+
+        // Resourceの生成
+        Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+        HRESULT hr = device->CreateCommittedResource(
+            &heapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &resourceDesc,
+            D3D12_RESOURCE_STATE_RENDER_TARGET,
+            &clearValue,
+            IID_PPV_ARGS(&resource));
+
+        assert(SUCCEEDED(hr));
+        return resource;
     }
 
 } // namespace DxUtils

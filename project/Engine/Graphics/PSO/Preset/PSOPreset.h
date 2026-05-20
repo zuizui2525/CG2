@@ -34,6 +34,27 @@ public:
         IDxcCompiler3* dxcCompiler,
         IDxcIncludeHandler* includeHandler);
 
+    // CopyImage（全画面三角形転送）用のプリセット作成関数
+    static PSOPreset CreateCopyImagePreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
+    // Grayscale（全画面グレースケール）用のプリセット作成関数
+    static PSOPreset CreateGrayscalePreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
+    // Sepia（全画面セピア）用のプリセット作成関数
+    static PSOPreset CreateSepiaPreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
     // メンバ変数
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 

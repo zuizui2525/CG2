@@ -28,9 +28,6 @@ void DxCommon::BeginFrame() {
 	commandList_->ResourceBarrier(1, &barrier);
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex_], false, &dsvHandle);
-	commandList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
-	commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex_], clearColor, 0, nullptr);
 }
 
 void DxCommon::EndFrame() {
@@ -256,7 +253,7 @@ void DxCommon::CreateSwapChain(HWND hwnd, int32_t width, int32_t height) {
 }
 
 void DxCommon::CreateRenderTargets() {
-	rtvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	rtvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRtvCount, false);
 	srvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
 	HRESULT hr = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResources_[0]));
@@ -270,14 +267,17 @@ void DxCommon::CreateRenderTargets() {
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	UINT descriptorSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	rtvHandles_[0] = rtvStartHandle;
+	for (UINT i = 0; i < kMaxRtvCount; ++i) {
+		rtvHandles_[i].ptr = rtvStartHandle.ptr + i * descriptorSize;
+	}
+
 	device_->CreateRenderTargetView(
 		swapChainResources_[0].Get(),
 		&rtvDesc,
 		rtvHandles_[0]);
 
-	rtvHandles_[1].ptr = rtvHandles_[0].ptr + device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	device_->CreateRenderTargetView(
 		swapChainResources_[1].Get(),
 		&rtvDesc,

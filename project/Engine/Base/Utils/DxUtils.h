@@ -4,6 +4,7 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <cstdint>
+#include "Engine/Math/MathStructs.h"
 
 namespace DxUtils {
     // バッファリソースを作成する関数
@@ -15,6 +16,14 @@ namespace DxUtils {
 
     // DepthStencilTextureの生成
     Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+
+    // RenderTexture用テクスチャリソースの生成
+    Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(
+        ID3D12Device* device,
+        uint32_t width,
+        uint32_t height,
+        DXGI_FORMAT format,
+        const Vector4& clearColor);
 
     // ディスクリプタヒープの先頭から指定したインデックスのCPUディスクリプタハンドルを取得する
     D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);

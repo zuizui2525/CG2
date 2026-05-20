@@ -5,6 +5,10 @@
     <FxCompile Include="resources\Shader\Object3d\Object3d.VS.hlsl" />
     <FxCompile Include="resources\Shader\Particle\Particle.PS.hlsl" />
     <FxCompile Include="resources\Shader\Particle\Particle.VS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\CopyImage.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\Fullscreen.VS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\Grayscale.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\Sepia.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App\App.cpp" />
@@ -59,6 +63,8 @@
     <ClCompile Include="Engine\Graphics\Objects\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Graphics\Texture\Texture.cpp" />
     <ClCompile Include="Engine\Graphics\Texture\TextureManager.cpp" />
+    <ClCompile Include="Engine\Graphics\Texture\RenderTexture.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\PostProcess.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
@@ -136,6 +142,8 @@
     <ClInclude Include="Engine\Graphics\Objects\3d\Model\ModelManager.h" />
     <ClInclude Include="Engine\Graphics\Texture\Texture.h" />
     <ClInclude Include="Engine\Graphics\Texture\TextureManager.h" />
+    <ClInclude Include="Engine\Graphics\Texture\RenderTexture.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\PostProcess.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />
@@ -175,6 +183,7 @@
   <ItemGroup>
     <None Include="resources\Shader\Object3d\Object3d.hlsli" />
     <None Include="resources\Shader\Particle\Particle.hlsli" />
+    <None Include="resources\Shader\Fullscreen\Fullscreen.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

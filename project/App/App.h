@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <memory>
 #include <vector>
 #include "Engine/Zuizui.h"
@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
 #include "Engine/Base/BaseResource.h"
 #include "App/Scene/Core/AbstractSceneFactory.h"
+#include "Engine/Graphics/PostProcess/PostProcess.h"
 
 class App {
 public:
@@ -29,5 +30,8 @@ private:
     std::unique_ptr<TextureManager> texMgr_;
     std::unique_ptr<ModelManager> modelMgr_;
     std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+
+    // ポストプロセス管理
+    std::unique_ptr<PostProcess> postProcess_;
 };
 
