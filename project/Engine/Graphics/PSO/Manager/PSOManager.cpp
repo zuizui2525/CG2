@@ -1,5 +1,8 @@
 #include "Engine/Graphics/PSO/Manager/PSOManager.h"
+#include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/StringUtility.h"
 #include <cassert>
+#include <format>
 
 PSOManager::PSOManager(ID3D12Device* device)
     : device_(device) {
@@ -112,6 +115,8 @@ void PSOManager::RegisterPreset(const std::string& name, const PSOPreset& preset
     if (FAILED(hr)) {
         assert(false && "Failed to create GraphicsPipelineState. Check Output Window for D3D12 Errors.");
     }
+
+    Log::Write(std::format(L" ├─ 【PSO生成完了】 プリセット名:「{}」 のグラフィックスパイプラインおよびルートシグネチャを生成しました。", ConvertString(name)));
 }
 
 HRESULT PSOManager::UpdateBlendMode(const std::string& name, BlendMode mode) {
@@ -153,6 +158,7 @@ HRESULT PSOManager::UpdateBlendMode(const std::string& name, BlendMode mode) {
         // 成功したら差し替え
         data.pso = newPso;
         data.originalPreset.blendDesc = newBlendDesc; // プリセット情報も更新しておく
+        Log::Write(std::format(L" ├─ 【PSOブレンド更新】 プリセット:「{}」 のブレンドモードを「{}」に変更しました。", ConvertString(name), (int)mode));
         return S_OK;
     }
 

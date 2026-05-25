@@ -1,32 +1,35 @@
-﻿#include "Engine/Base/WindowApp/WindowApp.h"
+#include "Engine/Base/WindowApp/WindowApp.h"
+#include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/StringUtility.h"
 #include "imgui_impl_win32.h"
 #include <cassert>
+#include <format>
 #pragma comment(lib, "winmm.lib")
-
+ 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+ 
 WindowApp::WindowApp() {}
 WindowApp::~WindowApp() {
     if (hwnd_) {
         CloseWindow(hwnd_);
     }
 }
-
+ 
 bool WindowApp::Initialize(const wchar_t* title, int32_t width, int32_t height) {
     timeBeginPeriod(1);
     wrc_ = { 0, 0, width, height };
-
+ 
     wc_.lpfnWndProc = WindowProc;
     wc_.lpszClassName = L"MyWindowClass";
     wc_.hInstance = GetModuleHandle(nullptr);
     wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
+ 
     RegisterClass(&wc_);
-
+ 
     UINT windowStyle = WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX;
-
+ 
     AdjustWindowRect(&wrc_, windowStyle, false);
-
+ 
     hwnd_ = CreateWindow(
         wc_.lpszClassName,
         title,
@@ -40,8 +43,11 @@ bool WindowApp::Initialize(const wchar_t* title, int32_t width, int32_t height) 
         wc_.hInstance,
         nullptr
     );
-
+ 
     assert(hwnd_ != nullptr);
+    if (hwnd_ != nullptr) {
+        Log::Write(std::format(L" ├─ 【ウィンドウ生成成功】 タイトル:「{}」 | 解像度: {} x {}", title, width, height));
+    }
     return hwnd_ != nullptr;
 }
 

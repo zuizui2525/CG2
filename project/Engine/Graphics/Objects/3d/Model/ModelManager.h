@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -10,7 +10,7 @@ class TextureManager;
 class ModelManager {
 public:
     ModelManager() = default;
-    ~ModelManager() = default;
+    ~ModelManager();
 
     void Initialize();
     void LoadModel(const std::string& name, const std::string& filename);

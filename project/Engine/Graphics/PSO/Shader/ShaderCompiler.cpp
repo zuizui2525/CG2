@@ -1,8 +1,9 @@
-﻿#include "Engine/Graphics/PSO/Shader/ShaderCompiler.h"
+#include "Engine/Graphics/PSO/Shader/ShaderCompiler.h"
 #include "Engine/Base/Log/Log.h"
 #include "Engine/Base/Utils/StringUtility.h"
 #include <cassert>
 #include <format>
+#include <chrono>
 
 Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::Compile(
 	std::ostream& os,
@@ -12,20 +13,19 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::Compile(
 	IDxcCompiler3* dxcCompiler,
 	IDxcIncludeHandler* includeHandler) {
 
-	Log logger;
+	Log::Write(std::format(L" ├─ 【シェーダーコンパイル開始】 ファイル:「{}」 | プロファイル: 「{}」", filePath, profile));
+	auto startTime = std::chrono::steady_clock::now();
 
 	// 1.hlslファイルを読む
-	logger.Write(os, ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
-
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	assert(SUCCEEDED(hr));
-
+ 
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
-
+ 
 	// 2.Compileする
 	LPCWSTR arguments[] = {
 		filePath.c_str(),
@@ -35,7 +35,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::Compile(
 		L"-Od",
 		L"-Zpr",
 	};
-
+ 
 	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
 	hr = dxcCompiler->Compile(
 		&shaderSourceBuffer,
@@ -45,21 +45,26 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::Compile(
 		IID_PPV_ARGS(&shaderResult)
 	);
 	assert(SUCCEEDED(hr));
-
+ 
 	// 3.警告・エラーが出ていないか確認する
 	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		logger.Write(os, shaderError->GetStringPointer());
+		std::string errStr = shaderError->GetStringPointer();
+		Log::Write(os, std::format(" │   ├─ [★警告/エラー] {}", errStr));
+		Log::Write(os, std::string("Shader Compile Warning/Error: ") + errStr);
 		assert(false);
 	}
-
+ 
 	// 4.Compile結果を受け取って返す
 	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
+ 
+	auto endTime = std::chrono::steady_clock::now();
+	float elapsed = std::chrono::duration<float>(endTime - startTime).count();
 
-	logger.Write(os, ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
+	Log::Write(std::format(L" └─ 【シェーダーコンパイル完了】 所要時間: {:.4f}秒", elapsed));
 
 	return shaderBlob;
 }

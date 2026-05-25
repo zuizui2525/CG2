@@ -1,6 +1,9 @@
-﻿#include "Engine/Audio/Audio.h"
+#include "Engine/Audio/Audio.h"
 #include "Engine/Base/Utils/StringUtility.h"
+#include "Engine/Base/Log/Log.h"
 #include <iostream>
+#include <chrono>
+#include <format>
 #pragma comment(lib, "Mfplat.lib")
 #pragma comment(lib, "mfreadwrite.lib")
 #pragma comment(lib, "mfuuid.lib")
@@ -20,6 +23,8 @@ void Audio::Initialize() {
 
     hr = xAudio2_->CreateMasteringVoice(&masterVoice_);
     assert(SUCCEEDED(hr));
+
+    Log::Write(L" ├─ 【音声システム初期化完了】 XAudio2 および Media Foundation の初期化に成功しました。");
 }
 
 void Audio::Finalize() {
@@ -31,9 +36,14 @@ void Audio::Finalize() {
 
     MFShutdown();
     CoUninitialize();
+
+    Log::Write(L" ├─ 【音声システム終了処理完了】 音声リソースのクリーンアップが完了しました。");
 }
 
 SoundData Audio::LoadSound(const std::string& filePath) {
+    Log::Write(std::format(L" ├─ 【音声ロード開始】 ファイル:「{}」", ConvertString(filePath)));
+    auto startTime = std::chrono::steady_clock::now();
+
     // UTF-8 → UTF-16変換
     std::wstring wFilePath = ConvertString(filePath);
 
@@ -95,6 +105,19 @@ SoundData Audio::LoadSound(const std::string& filePath) {
         sample.Reset();
     }
 
+    auto endTime = std::chrono::steady_clock::now();
+    float elapsed = std::chrono::duration<float>(endTime - startTime).count();
+
+    // 0.1秒以上かかった場合は「低速ロード」マークをつける
+    static constexpr float kSlowLoadThreshold = 0.1f;
+    std::wstring slowLoadWarning = L"";
+    if (elapsed >= kSlowLoadThreshold) {
+        slowLoadWarning = L"[★低速ロード] ";
+    }
+
+    Log::Write(std::format(L" ├─ 【音声ロード完了】 {}:「{}」 | チャンネル数: {} | サンプリングレート: {}Hz | ビット数: {} | 所要時間: {:.4f}秒",
+        slowLoadWarning, ConvertString(filePath), channels, samplesPerSec, bitsPerSample, elapsed));
+
     return soundData;
 }
 
@@ -116,16 +139,23 @@ void Audio::PlaySoundW(SoundData& soundData, float volume, bool loop) {
     hr = soundData.sourceVoice->SubmitSourceBuffer(&buffer);
     assert(SUCCEEDED(hr));
     soundData.sourceVoice->Start(0);
+
+    Log::Write(std::format(L" ├─ 【音声再生開始】 音声バッファをサブミットしました。ループ設定: {} | 音量: {:.2f}", loop, volume));
 }
 
 void Audio::StopSound(SoundData& soundData) {
     if (soundData.sourceVoice) {
         soundData.sourceVoice->Stop();
         soundData.sourceVoice->FlushSourceBuffers();
+        Log::Write(L" ├─ 【音声再生停止】 音声の再生を強制終了しました。");
     }
 }
 
 void Audio::Unload(SoundData& soundData) {
+    if (soundData.wfex) {
+        Log::Write(std::format(L" ├─ 【音声リソース解放開始】 チャンネル数: {} | サンプリングレート: {}Hz の音声データを解放します。",
+            soundData.wfex->nChannels, soundData.wfex->nSamplesPerSec));
+    }
     if (soundData.sourceVoice) {
         soundData.sourceVoice->DestroyVoice();
         soundData.sourceVoice = nullptr;
@@ -133,4 +163,5 @@ void Audio::Unload(SoundData& soundData) {
     delete soundData.wfex;
     soundData.wfex = nullptr;
     soundData.audioData.clear();
+    Log::Write(L" └─ 【音声リソース解放完了】 音声バッファメモリおよび再生用ボイスの破棄が完了しました。");
 }

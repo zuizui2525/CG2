@@ -1,9 +1,12 @@
-﻿#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
 #include "Engine/Math/Matrix/Matrix.h"
+#include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/StringUtility.h"
+#include <format>
 
 void CameraManager::Initialize() {
     // Engine
@@ -24,6 +27,8 @@ void CameraManager::Initialize() {
     resource_ = DxUtils::CreateBufferResource(engine->GetDevice(), sizeof(CameraForGPU));
     // 常時マッピングしておく
     resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
+
+    Log::Write(L" ├─ 【カメラ用バッファ初期化】 GPU転送用カメラ定数バッファの確保・マッピングに成功しました。");
 }
 
 void CameraManager::Update() {
@@ -69,23 +74,32 @@ void CameraManager::ImGuiControl() {
 }
 
 void CameraManager::Clear() {
+    if (!cameras_.empty()) {
+        Log::Write(L" ├─ 【カメラシステムクリア】 登録されていたすべてのカメラリソースを破棄しました。");
+    }
     cameras_.clear();
     activeCamera_ = nullptr;
 }
 
 void CameraManager::AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera) {
     cameras_[name] = camera;
-
+ 
+    auto pos = camera->GetPosition();
+    Log::Write(std::format(L" ├─ 【カメラ登録成功】 名前:「{}」 | 初期座標: ({:.2f}, {:.2f}, {:.2f})", 
+        ConvertString(name), pos.x, pos.y, pos.z));
+ 
     // 最初の1つ目が登録されたら、自動的にそれをアクティブにする
     if (!activeCamera_) {
         activeCamera_ = camera.get();
+        Log::Write(std::format(L" ├─ 【アクティブカメラ設定】 「{}」カメラを起動用カメラに設定しました。", ConvertString(name)));
     }
 }
-
+ 
 void CameraManager::SetActiveCamera(const std::string& name) {
     // 指定された名前のカメラがマップに存在するか確認
     auto it = cameras_.find(name);
     if (it != cameras_.end()) {
         activeCamera_ = it->second.get();
+        Log::Write(std::format(L" ├─ 【アクティブカメラ切替】 「{}」カメラがアクティブになりました。", ConvertString(name)));
     }
 }

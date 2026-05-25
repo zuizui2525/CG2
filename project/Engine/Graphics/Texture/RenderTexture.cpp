@@ -1,6 +1,8 @@
 #include "Engine/Graphics/Texture/RenderTexture.h"
 #include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Base/Log/Log.h"
 #include <cassert>
+#include <format>
 
 void RenderTexture::Initialize(
     ID3D12Device* device,
@@ -40,6 +42,8 @@ void RenderTexture::Initialize(
     srvDesc.Texture2D.MipLevels = 1;
 
     device->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
+
+    Log::Write(std::format(L" ├─ 【リソース生成完了】 レンダーテクスチャ (幅: {}, 高さ: {}, フォーマット: {}) の生成に成功しました。", width_, height_, (int)format_));
 }
 
 void RenderTexture::Recreate(const Vector4& newClearColor) {
@@ -66,6 +70,8 @@ void RenderTexture::Recreate(const Vector4& newClearColor) {
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = 1;
     device_->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
+
+    Log::Write(std::format(L" ├─ 【リソース再生成完了】 新しいクリアカラー ({:.2f}, {:.2f}, {:.2f}, {:.2f}) でレンダーテクスチャを再作成しました。", clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w));
 }
 
 

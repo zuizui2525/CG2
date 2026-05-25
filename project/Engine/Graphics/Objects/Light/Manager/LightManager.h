@@ -1,9 +1,12 @@
-﻿#pragma once
+#pragma once
 #include <vector>
 #include <memory>
 #include "Engine/Graphics/Objects/Light/Directional/DirectionalLight.h"
 #include "Engine/Graphics/Objects/Light/Point/PointLight.h"
 #include "Engine/Graphics/Objects/Light/Spot/SpotLight.h"
+
+#include "Engine/Base/Log/Log.h"
+#include <format>
 
 class LightManager {
 public:
@@ -12,9 +15,24 @@ public:
     void Clear();
 
     // ライトの追加窓口
-    void AddDirectionalLight(DirectionalLightObject* light) { directionalLights_.push_back(light); }
-    void AddPointLight(PointLightObject* light) { pointLights_.push_back(light); }
-    void AddSpotLight(SpotLightObject* light) { spotLights_.push_back(light); }
+    void AddDirectionalLight(DirectionalLightObject* light) { 
+        directionalLights_.push_back(light); 
+        auto& d = light->GetLightData();
+        Log::Write(std::format(L" ├─ 【平行光源登録】 方向: ({:.2f}, {:.2f}, {:.2f}) | カラー: ({:.2f}, {:.2f}, {:.2f}) | 輝度: {:.2f}",
+            d.direction.x, d.direction.y, d.direction.z, d.color.x, d.color.y, d.color.z, d.intensity));
+    }
+    void AddPointLight(PointLightObject* light) { 
+        pointLights_.push_back(light); 
+        auto& d = light->GetLightData();
+        Log::Write(std::format(L" ├─ 【点光源登録】 座標: ({:.2f}, {:.2f}, {:.2f}) | カラー: ({:.2f}, {:.2f}, {:.2f}) | 輝度: {:.2f} | 半径: {:.2f}",
+            d.position.x, d.position.y, d.position.z, d.color.x, d.color.y, d.color.z, d.intensity, d.radius));
+    }
+    void AddSpotLight(SpotLightObject* light) { 
+        spotLights_.push_back(light); 
+        auto& d = light->GetLightData();
+        Log::Write(std::format(L" ├─ 【スポットライト登録】 座標: ({:.2f}, {:.2f}, {:.2f}) | 方向: ({:.2f}, {:.2f}, {:.2f}) | カラー: ({:.2f}, {:.2f}, {:.2f}) | 輝度: {:.2f} | 射程: {:.2f}",
+            d.position.x, d.position.y, d.position.z, d.direction.x, d.direction.y, d.direction.z, d.color.x, d.color.y, d.color.z, d.intensity, d.distance));
+    }
 
     // GPUアドレス取得（ModelObjectのDrawで使用）
     D3D12_GPU_VIRTUAL_ADDRESS GetDirectionalLightGroupAddress() const {

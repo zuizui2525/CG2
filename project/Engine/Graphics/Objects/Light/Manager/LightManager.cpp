@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
@@ -17,6 +17,8 @@ void LightManager::Initialize() {
     // スポットライトグループのバッファ作成
     spotLightResource_ = DxUtils::CreateBufferResource(device, sizeof(SpotLightGroup));
     spotLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData_));
+
+    Log::Write(L" ├─ 【ライト用バッファ初期化】 平行光源・点光源・スポットライト用バッファの作成・マッピングが完了しました。");
 }
 
 void LightManager::Update() {
@@ -40,6 +42,9 @@ void LightManager::Update() {
 }
 
 void LightManager::Clear() {
+    if (!directionalLights_.empty() || !pointLights_.empty() || !spotLights_.empty()) {
+        Log::Write(L" ├─ 【ライトシステムクリア】 登録されていたすべての光源リソースを破棄しました。");
+    }
     directionalLights_.clear();
     pointLights_.clear();
     spotLights_.clear();

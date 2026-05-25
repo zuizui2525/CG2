@@ -1,8 +1,11 @@
 #include "EffectManager.h"
 #include "../Core/SpriteParticleObject.h"
 #include "../Core/MeshParticleObject.h"
+#include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/StringUtility.h"
 #include <random>
 #include <imgui.h>
+#include <format>
 
 EffectManager* EffectManager::GetInstance() {
     static EffectManager instance;
@@ -11,10 +14,16 @@ EffectManager* EffectManager::GetInstance() {
 
 void EffectManager::Initialize() {
     effectMap_.clear();
+    Log::Write(L" ├─ 【エフェクトシステム初期化】 エフェクトマネージャの初期化を完了しました。");
 }
 
 void EffectManager::Finalize() {
+    Log::Write(L" ├─ 【エフェクトシステム終了処理開始】 登録されているすべてのエフェクトを解放します。");
+    for (auto& pair : effectMap_) {
+        Log::Write(std::format(L" │   ├─ 【エフェクト解放完了】 名前:「{}」をメモリから解放しました。", ConvertString(pair.first)));
+    }
     effectMap_.clear();
+    Log::Write(L" └─ 【エフェクトシステム終了処理完了】 すべてのエフェクトリソースの破棄が完了しました。");
 }
 
 void EffectManager::Update() {
@@ -44,6 +53,9 @@ void EffectManager::RegisterEffect(const EffectSetting& setting) {
     particle->SetEmitterMode(false); // 初期状態はOFF
     
     effectMap_[setting.name] = std::move(particle);
+
+    Log::Write(std::format(L" ├─ 【エフェクト登録完了】 名前:「{}」 | メッシュタイプ:「{}」 | テクスチャ:「{}」", 
+        ConvertString(setting.name), ConvertString(setting.meshType), ConvertString(setting.textureName)));
 }
 
 void EffectManager::PlayEffect2D(const std::string& name, const EffectPlayParam& param) {

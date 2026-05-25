@@ -3,7 +3,9 @@
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
+#include "Engine/Base/Log/Log.h"
 #include <cassert>
+#include <format>
 
 namespace {
     // マジックナンバー排除のためのクリアカラー定数
@@ -137,4 +139,16 @@ void PostProcess::SetEffectMode(PostEffectMode mode) {
     if (oldColor.x != newColor.x || oldColor.y != newColor.y || oldColor.z != newColor.z) {
         renderTexture_->Recreate(newColor);
     }
+
+    // エフェクトモード名を日本語に変換
+    std::wstring modeName = L"不明";
+    switch (mode) {
+        case PostEffectMode::None:      modeName = L"なし (通常ブルー背景)"; break;
+        case PostEffectMode::Red:       modeName = L"デバッグレッド"; break;
+        case PostEffectMode::Black:     modeName = L"デバッグブラック"; break;
+        case PostEffectMode::Grayscale: modeName = L"グレースケール"; break;
+        case PostEffectMode::Sepia:     modeName = L"セピア"; break;
+    }
+
+    Log::Write(std::format(L" ├─ 【ポストエフェクト変更】 エフェクトモードが「{}」に変更されました。", modeName));
 }

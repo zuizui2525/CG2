@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -7,7 +7,7 @@
 class TextureManager {
 public:
     TextureManager() = default;
-    ~TextureManager() = default;
+    ~TextureManager();
 
     // 初期化
     void Initialize();

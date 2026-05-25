@@ -1,9 +1,13 @@
 #include "Engine/Base/DxCommon/DxCommon.h"
 #include "Engine/Base/Utils/DxUtils.h"
+#include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/StringUtility.h"
 #include <iostream>
 #include <thread>
+#include <format>
 
 void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
+	Log::Write(L" ├─ [DirectX12 初期化開始]");
 	InitializeViewport(width, height);
 	InitializeScissorRect(width, height);
 	EnableDebugLayer();
@@ -15,6 +19,7 @@ void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
 	CreateDepthStencil(width, height);
 	CreateFence();
 	CreateDXC();
+	Log::Write(L" ├─ [DirectX12 初期化完了]");
 }
 
 void DxCommon::BeginFrame() {
@@ -158,7 +163,7 @@ void DxCommon::CreateAdapter() {
 		hr = useAdapter_->GetDesc3(&adapterDesc);
 		assert(SUCCEEDED(hr));
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
-			std::wcout << L"Use Adapter: " << adapterDesc.Description << std::endl;
+			Log::Write(std::format(L" │   ├─ 【使用グラフィックス(GPU)】 {}", adapterDesc.Description));
 			break;
 		}
 	}
@@ -183,12 +188,12 @@ void DxCommon::CreateDevice() {
 			featureLevels[i],
 			IID_PPV_ARGS(device_.GetAddressOf()));
 		if (SUCCEEDED(hr)) {
-			std::wcout << L"FeatureLevel : " << featureLevelStrings[i] << L"\n";
+			Log::Write(std::format(L" │   ├─ 【機能レベル(FeatureLevel)】 {}", ConvertString(featureLevelStrings[i])));
 			break;
 		}
 	}
 	assert(device_ != nullptr);
-	std::wcout << L"Complete create D3D12Device!!!\n";
+	Log::Write(L" │   ├─ 【デバイス生成】 ID3D12Device の作成に成功しました。");
 
 #ifdef _DEBUG
 	if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(infoQueue_.GetAddressOf())))) {

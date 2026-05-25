@@ -1,6 +1,7 @@
-﻿#include "Engine/Input/Input.h"
+#include "Engine/Input/Input.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Base/Log/Log.h"
 #include <cassert>
 #include <cstring>
 #pragma comment(lib, "dinput8.lib")
@@ -19,11 +20,13 @@ Input::~Input() {
 }
 
 void Input::Initialize() {
+    Log::Write(L" ├─ 【入力システム初期化開始】 DirectInput8 によるデバイス構築を開始します。");
+
     // 1. EngineResourceから必要な情報を取得
     auto engine = EngineResource::GetEngine();
     assert(engine != nullptr);
 
-    // 2. DirectInput8Create (ComPtrの扱いを修正)
+    // 2. DirectInput8Create (ComPtr of 扱いを修正)
     HRESULT hr = DirectInput8Create(
         engine->GetWindow()->GetInstance(),
         DIRECTINPUT_VERSION,
@@ -45,6 +48,8 @@ void Input::Initialize() {
         DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
     assert(SUCCEEDED(hr));
 
+    Log::Write(L" │   ├─ キーボードデバイスの生成および設定に成功しました。");
+
     // 4. マウスデバイスの作成
     hr = directInput_->CreateDevice(GUID_SysMouse, mouse_.GetAddressOf(), NULL);
     assert(SUCCEEDED(hr));
@@ -56,6 +61,8 @@ void Input::Initialize() {
         engine->GetWindow()->GetHWND(),
         DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
     assert(SUCCEEDED(hr));
+
+    Log::Write(L" └─ 【入力システム初期化完了】 マウスデバイスの生成および設定に成功しました。");
 }
 
 void Input::Update() {
