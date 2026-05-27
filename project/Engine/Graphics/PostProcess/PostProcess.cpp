@@ -3,6 +3,7 @@
 #include "Engine/Graphics/PostProcess/GrayscalePass.h"
 #include "Engine/Graphics/PostProcess/SepiaPass.h"
 #include "Engine/Graphics/PostProcess/VignettePass.h"
+#include "Engine/Graphics/PostProcess/BoxFilterPass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -21,6 +22,7 @@ namespace {
     constexpr size_t kPassIndexGrayscale = 1;
     constexpr size_t kPassIndexSepia = 2;
     constexpr size_t kPassIndexVignette = 3;
+    constexpr size_t kPassIndexBoxFilter = 4;
 }
 
 void PostProcess::Initialize() {
@@ -84,6 +86,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<GrayscalePass>());  // 1: Grayscale
     passes_.push_back(std::make_unique<SepiaPass>());      // 2: Sepia
     passes_.push_back(std::make_unique<VignettePass>());   // 3: Vignette
+    passes_.push_back(std::make_unique<BoxFilterPass>());  // 4: BoxFilter
 
     for (auto& pass : passes_) {
         pass->Initialize(engine->GetDevice());
@@ -192,10 +195,42 @@ void PostProcess::SetClearColorMode(PostClearColorMode mode) {
 }
 
 void PostProcess::ImGuiControl() {
-    // 全パスのImGuiコントロールを順次呼び出す
-    for (auto& pass : passes_) {
-        pass->ImGuiControl();
+#ifdef _USEIMGUI
+    ImGui::Begin("PostEffect");
+    
+    if (ImGui::TreeNode("Select")) {
+        bool boxActive = IsBoxFilterActive();
+        if (ImGui::Checkbox("BoxFilter", &boxActive)) {
+            SetBoxFilterActive(boxActive);
+        }
+        
+        bool grayActive = IsGrayscaleActive();
+        if (ImGui::Checkbox("Grayscale", &grayActive)) {
+            SetGrayscaleActive(grayActive);
+        }
+        
+        bool sepiaActive = IsSepiaActive();
+        if (ImGui::Checkbox("Sepia", &sepiaActive)) {
+            SetSepiaActive(sepiaActive);
+        }
+        
+        bool vignetteActive = IsVignetteActive();
+        if (ImGui::Checkbox("Vignette", &vignetteActive)) {
+            SetVignetteActive(vignetteActive);
+        }
+        
+        ImGui::TreePop();
     }
+
+    // 各アクティブなパスの固有パラメータのImGuiコントロールを順次呼び出す
+    for (auto& pass : passes_) {
+        if (pass->IsActive()) {
+            pass->ImGuiControl();
+        }
+    }
+    
+    ImGui::End();
+#endif
 }
 
 // ==========================================
@@ -230,6 +265,16 @@ void PostProcess::SetVignetteActive(bool active) {
 
 bool PostProcess::IsVignetteActive() const {
     return (passes_.size() > kPassIndexVignette) ? passes_[kPassIndexVignette]->IsActive() : false;
+}
+
+void PostProcess::SetBoxFilterActive(bool active) {
+    if (passes_.size() > kPassIndexBoxFilter) {
+        passes_[kPassIndexBoxFilter]->SetActive(active);
+    }
+}
+
+bool PostProcess::IsBoxFilterActive() const {
+    return (passes_.size() > kPassIndexBoxFilter) ? passes_[kPassIndexBoxFilter]->IsActive() : false;
 }
 
 void PostProcess::ClearEffects() {
@@ -280,4 +325,23 @@ float PostProcess::GetVignetteExponent() const {
         }
     }
     return 0.0f;
+}
+
+void PostProcess::SetBoxFilterKernelRadius(int32_t radius) {
+    if (passes_.size() > kPassIndexBoxFilter) {
+        auto boxFilter = dynamic_cast<BoxFilterPass*>(passes_[kPassIndexBoxFilter].get());
+        if (boxFilter) {
+            boxFilter->SetKernelRadius(radius);
+        }
+    }
+}
+
+int32_t PostProcess::GetBoxFilterKernelRadius() const {
+    if (passes_.size() > kPassIndexBoxFilter) {
+        auto boxFilter = dynamic_cast<BoxFilterPass*>(passes_[kPassIndexBoxFilter].get());
+        if (boxFilter) {
+            return boxFilter->GetKernelRadius();
+        }
+    }
+    return 1;
 }

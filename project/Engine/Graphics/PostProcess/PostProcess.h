@@ -65,6 +65,9 @@ public:
     void SetVignetteActive(bool active);
     bool IsVignetteActive() const;
 
+    void SetBoxFilterActive(bool active);
+    bool IsBoxFilterActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -76,6 +79,10 @@ public:
 
     void SetVignetteExponent(float exponent);
     float GetVignetteExponent() const;
+
+    // BoxFilterパラメータのアクセサ
+    void SetBoxFilterKernelRadius(int32_t radius);
+    int32_t GetBoxFilterKernelRadius() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;

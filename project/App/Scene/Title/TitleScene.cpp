@@ -103,6 +103,11 @@ void TitleScene::ImGuiControl() {
     cylinder_->ImGuiControl("cylinder");
     ring_->ImGuiControl("ring");
     bunny_->ImGuiControl("bunny");
+
+    // ポストプロセスのパラメータ調整用ImGuiコントロール
+    if (postProcess_) {
+        postProcess_->ImGuiControl();
+    }
 #endif
 }
 

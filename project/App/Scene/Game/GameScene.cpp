@@ -56,6 +56,11 @@ void GameScene::ImGuiControl() {
     // Cubeのパラメータ調整用ImGuiコントロール
     static const char* kCubeImGuiLabel = "GameScene Cube";
     cube_->ImGuiControl(kCubeImGuiLabel);
+
+    // ポストプロセスのパラメータ調整用ImGuiコントロール
+    if (postProcess_) {
+        postProcess_->ImGuiControl();
+    }
 #endif
 }
 

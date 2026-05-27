@@ -1,4 +1,4 @@
-#include "Engine/Graphics/PostProcess/VignettePass.h"
+#include "Engine/Graphics/PostProcess/BoxFilterPass.h"
 #include "Engine/Graphics/PSO/RootSignature/RootSignatureBuilder.h"
 #include "Engine/Graphics/PSO/BlendState/BlendStateBuilder.h"
 #include "Engine/Graphics/PSO/RasterizerState/RasterizerStateBuilder.h"
@@ -12,52 +12,53 @@
 #endif
 
 namespace {
-    // マジックナンバー排除用の定数
-    const float kDefaultVignetteScale = 16.0f;
-    const float kDefaultVignetteExponent = 0.8f;
+    // マジックナンバー排除のための定数定義
+    constexpr int32_t kDefaultKernelRadius = 1; // デフォルトは 3x3 (k=1)
+    constexpr int32_t kMinKernelRadius = 1;
+    constexpr int32_t kMaxKernelRadius = 5;     // 5x5 (k=2) やそれ以上の上限
     constexpr UINT kRootParamIndexSRV = 0;
     constexpr UINT kRootParamIndexCBV = 1;
 }
 
-void VignettePass::Initialize(ID3D12Device* device) {
+void BoxFilterPass::Initialize(ID3D12Device* device) {
     Zuizui* engine = Zuizui::GetInstance();
     DxCommon* dxCommon = engine->GetDxCommon();
 
     // 1. 定数バッファの作成と初期化
-    vignetteResource_ = DxUtils::CreateBufferResource(device, sizeof(VignetteParams));
-    assert(vignetteResource_ != nullptr && "Failed to create vignetteResource_ in VignettePass!");
+    paramsResource_ = DxUtils::CreateBufferResource(device, sizeof(BoxFilterParams));
+    assert(paramsResource_ != nullptr && "Failed to create paramsResource in BoxFilterPass!");
 
-    HRESULT hr = vignetteResource_->Map(0, nullptr, reinterpret_cast<void**>(&vignetteData_));
-    assert(SUCCEEDED(hr) && vignetteData_ != nullptr && "Failed to map vignetteResource_ in VignettePass!");
+    HRESULT hr = paramsResource_->Map(0, nullptr, reinterpret_cast<void**>(&paramsData_));
+    assert(SUCCEEDED(hr) && paramsData_ != nullptr && "Failed to map paramsResource in BoxFilterPass!");
 
-    vignetteData_->scale = kDefaultVignetteScale;
-    vignetteData_->exponent = kDefaultVignetteExponent;
+    paramsData_->kernelRadius = kDefaultKernelRadius;
 
-    // 2. RootSignature
+    // 2. RootSignature (SRV: t0, CBV: b0, Sampler: s0)
     RootSignatureBuilder rs;
-    rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL); // t0 (PS)
-    rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL); // b0 (PS)
+    rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL); // t0
+    rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL); // b0
 
+    // スライドの通り、端のサンプリングは CLAMP (端の値がそのまま続く) に設定します
     D3D12_SAMPLER_DESC sampler{};
     sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
     sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     rs.AddSampler(sampler, 0);
 
     rootSignature_ = rs.Build(device);
-    assert(rootSignature_ && "VignettePass RootSignature creation failed!");
+    assert(rootSignature_ && "BoxFilterPass RootSignature creation failed!");
 
-    // 3. Shader Compile
+    // 3. シェーダーコンパイル
     bool vsResult = shaderProgram_.CompileVS(
         L"resources/Shader/Fullscreen/Fullscreen.VS.hlsl",
         dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler()
     );
-    assert(vsResult && "VignettePass VS Compile Failed!");
+    assert(vsResult && "BoxFilterPass VS Compile Failed!");
 
     bool psResult = shaderProgram_.CompilePS(
-        L"resources/Shader/Fullscreen/Vignette.PS.hlsl",
+        L"resources/Shader/Fullscreen/BoxFilter.PS.hlsl",
         dxCommon->GetDxcUtils(), dxCommon->GetDxcCompiler(), dxCommon->GetIncludeHandler()
     );
-    assert(psResult && "VignettePass PS Compile Failed!");
+    assert(psResult && "BoxFilterPass PS Compile Failed!");
 
     // 4. Pipeline State (PSO)
     D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
@@ -87,14 +88,14 @@ void VignettePass::Initialize(ID3D12Device* device) {
     desc.SampleDesc.Count = 1;
 
     hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipelineState_));
-    assert(SUCCEEDED(hr) && "Failed to create VignettePass GraphicsPipelineState!");
+    assert(SUCCEEDED(hr) && "Failed to create BoxFilterPass GraphicsPipelineState!");
 }
 
-void VignettePass::Draw(ID3D12GraphicsCommandList* commandList, D3D12_GPU_DESCRIPTOR_HANDLE inputSRV) {
+void BoxFilterPass::Draw(ID3D12GraphicsCommandList* commandList, D3D12_GPU_DESCRIPTOR_HANDLE inputSRV) {
     commandList->SetPipelineState(pipelineState_.Get());
     commandList->SetGraphicsRootSignature(rootSignature_.Get());
     commandList->SetGraphicsRootDescriptorTable(kRootParamIndexSRV, inputSRV);
-    commandList->SetGraphicsRootConstantBufferView(kRootParamIndexCBV, vignetteResource_->GetGPUVirtualAddress());
+    commandList->SetGraphicsRootConstantBufferView(kRootParamIndexCBV, paramsResource_->GetGPUVirtualAddress());
 
     constexpr UINT kVertexCount = 3;
     constexpr UINT kInstanceCount = 1;
@@ -103,11 +104,11 @@ void VignettePass::Draw(ID3D12GraphicsCommandList* commandList, D3D12_GPU_DESCRI
     commandList->DrawInstanced(kVertexCount, kInstanceCount, kStartVertexLocation, kStartInstanceLocation);
 }
 
-void VignettePass::ImGuiControl() {
+void BoxFilterPass::ImGuiControl() {
 #ifdef _USEIMGUI
-    if (ImGui::TreeNode("Vignette")) {
-        ImGui::DragFloat("Scale", &vignetteData_->scale, 0.1f, 0.0f, 100.0f, "%.1f");
-        ImGui::DragFloat("Exponent", &vignetteData_->exponent, 0.01f, 0.0f, 10.0f, "%.2f");
+    // スライド 3/3 のようにツリー展開して調整可能にします
+    if (ImGui::TreeNode("BoxFilter")) {
+        ImGui::SliderInt("k", &paramsData_->kernelRadius, kMinKernelRadius, kMaxKernelRadius);
         ImGui::TreePop();
     }
 #endif
