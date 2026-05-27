@@ -259,6 +259,10 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\Texture\TextureManager.cpp" />
     <ClCompile Include="Engine\Graphics\Texture\RenderTexture.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\PostProcess.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\CopyImagePass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\GrayscalePass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\SepiaPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\VignettePass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -304,6 +308,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\Fullscreen\Sepia.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Fullscreen\Vignette.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -405,6 +414,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Texture\TextureManager.h" />
     <ClInclude Include="Engine\Graphics\Texture\RenderTexture.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\PostProcess.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\IPostProcessPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\CopyImagePass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\GrayscalePass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\SepiaPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\VignettePass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />

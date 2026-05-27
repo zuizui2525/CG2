@@ -5,10 +5,10 @@
 
 
 void TitleScene::Initialize() {
-    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期モードを Grayscale に設定
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期状態でグレースケールを有効にする
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
     if (postProcess_) {
-        postProcess_->SetEffectMode(PostEffectMode::Grayscale);
+        postProcess_->SetGrayscaleActive(true);
     }
 
     // 1. 各マネージャの取得

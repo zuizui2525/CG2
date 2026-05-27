@@ -34,41 +34,6 @@ HRESULT PSOManager::Initialize(
     // 登録処理
     RegisterPreset("Skybox", skyboxPreset);
 
-    // CopyImage用プリセット作成
-    PSOPreset copyImagePreset = PSOPreset::CreateCopyImagePreset(
-        device_, dxcUtils, dxcCompiler, includeHandler);
-
-    // 登録処理
-    RegisterPreset("CopyImage", copyImagePreset);
-
-    // Grayscale用プリセット作成
-    PSOPreset grayscalePreset = PSOPreset::CreateGrayscalePreset(
-        device_, dxcUtils, dxcCompiler, includeHandler);
-
-    // 登録処理
-    RegisterPreset("Grayscale", grayscalePreset);
-
-    // Sepia用プリセット作成
-    PSOPreset sepiaPreset = PSOPreset::CreateSepiaPreset(
-        device_, dxcUtils, dxcCompiler, includeHandler);
-
-    // 登録処理
-    RegisterPreset("Sepia", sepiaPreset);
-
-    // Vignette用プリセット作成
-    PSOPreset vignettePreset = PSOPreset::CreateVignettePreset(
-        device_, dxcUtils, dxcCompiler, includeHandler);
-
-    // 登録処理
-    RegisterPreset("Vignette", vignettePreset);
-
-    // PostProcess用プリセット作成
-    PSOPreset postProcessPreset = PSOPreset::CreatePostProcessPreset(
-        device_, dxcUtils, dxcCompiler, includeHandler);
-
-    // 登録処理
-    RegisterPreset("PostProcess", postProcessPreset);
-
     return S_OK;
 }
 

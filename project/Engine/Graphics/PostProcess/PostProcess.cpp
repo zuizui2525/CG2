@@ -1,16 +1,14 @@
 #include "Engine/Graphics/PostProcess/PostProcess.h"
-#include "Engine/Graphics/PSO/Manager/PSOManager.h"
+#include "Engine/Graphics/PostProcess/CopyImagePass.h"
+#include "Engine/Graphics/PostProcess/GrayscalePass.h"
+#include "Engine/Graphics/PostProcess/SepiaPass.h"
+#include "Engine/Graphics/PostProcess/VignettePass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
 #include "Engine/Base/Log/Log.h"
-#include "Engine/Base/Utils/DxUtils.h"
 #include <cassert>
 #include <format>
-
-#ifdef _USEIMGUI
-#include <imgui.h>
-#endif
 
 namespace {
     // マジックナンバー排除のためのクリアカラー定数
@@ -18,19 +16,11 @@ namespace {
     const Vector4 kClearColorRed = { 1.0f, 0.0f, 0.0f, 1.0f };
     const Vector4 kClearColorBlack = { 0.1f, 0.1f, 0.1f, 1.0f };
 
-    // Vignetteのデフォルト値
-    const float kDefaultVignetteScale = 16.0f;
-    const float kDefaultVignetteExponent = 0.8f;
-
-    // ルートパラメータインデックス
-    constexpr UINT kRootParamIndexSRV = 0;
-    constexpr UINT kRootParamIndexPostProcessCBV = 1;
-
-    // 描画用の頂点数およびインスタンス数
-    constexpr UINT kVertexCount = 3;
-    constexpr UINT kInstanceCount = 1;
-    constexpr UINT kStartVertexLocation = 0;
-    constexpr UINT kStartInstanceLocation = 0;
+    // 各パスのインデックス定義
+    constexpr size_t kPassIndexCopy = 0;
+    constexpr size_t kPassIndexGrayscale = 1;
+    constexpr size_t kPassIndexSepia = 2;
+    constexpr size_t kPassIndexVignette = 3;
 }
 
 void PostProcess::Initialize() {
@@ -38,24 +28,34 @@ void PostProcess::Initialize() {
     assert(engine != nullptr);
 
     renderTexture_ = std::make_unique<RenderTexture>();
+    renderTextureTemp_ = std::make_unique<RenderTexture>();
 
     // 初期化時のクリアカラー（デフォルトは青）
     const Vector4 kClearColor = kClearColorBlue;
 
-    // RTVは拡張したヒープのインデックス2を使用
+    // RTVは拡張したヒープのインデックス2および3を使用
     constexpr UINT kRtvIndex = 2;
+    constexpr UINT kRtvIndexTemp = 3;
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = engine->GetDxCommon()->GetRtvHandle(kRtvIndex);
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleTemp = engine->GetDxCommon()->GetRtvHandle(kRtvIndexTemp);
 
-    // SRVヒープの末尾（インデックス127）を静的に割り当て
+    // SRVヒープの末尾（インデックス127および126）を静的に割り当て
     ID3D12DescriptorHeap* srvHeap = engine->GetDxCommon()->GetSrvHeap();
     D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU = srvHeap->GetCPUDescriptorHandleForHeapStart();
     D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU = srvHeap->GetGPUDescriptorHandleForHeapStart();
+    D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPUTemp = srvHeap->GetCPUDescriptorHandleForHeapStart();
+    D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPUTemp = srvHeap->GetGPUDescriptorHandleForHeapStart();
+    
     UINT srvDescriptorSize = engine->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     constexpr UINT kReservedSrvIndex = 127;
+    constexpr UINT kReservedSrvIndexTemp = 126;
     srvHandleCPU.ptr += kReservedSrvIndex * srvDescriptorSize;
     srvHandleGPU.ptr += kReservedSrvIndex * srvDescriptorSize;
+    srvHandleCPUTemp.ptr += kReservedSrvIndexTemp * srvDescriptorSize;
+    srvHandleGPUTemp.ptr += kReservedSrvIndexTemp * srvDescriptorSize;
 
+    // メインのレンダーテクスチャ初期化
     renderTexture_->Initialize(
         engine->GetDevice(),
         WindowApp::kClientWidth,
@@ -67,19 +67,27 @@ void PostProcess::Initialize() {
         srvHandleGPU
     );
 
-    // 統合ポストプロセス用定数バッファ作成
-    postProcessResource_ = DxUtils::CreateBufferResource(engine->GetDevice(), sizeof(PostProcessParams));
-    assert(postProcessResource_ != nullptr && "Failed to create postProcessResource_");
+    // ピンポン用中間テクスチャ初期化
+    renderTextureTemp_->Initialize(
+        engine->GetDevice(),
+        WindowApp::kClientWidth,
+        WindowApp::kClientHeight,
+        DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+        kClearColor,
+        rtvHandleTemp,
+        srvHandleCPUTemp,
+        srvHandleGPUTemp
+    );
 
-    HRESULT hr = postProcessResource_->Map(0, nullptr, reinterpret_cast<void**>(&postProcessData_));
-    assert(SUCCEEDED(hr) && postProcessData_ != nullptr && "Failed to map postProcessResource_");
+    // 各個別パスの登録と初期化
+    passes_.push_back(std::make_unique<CopyImagePass>());  // 0: Copy
+    passes_.push_back(std::make_unique<GrayscalePass>());  // 1: Grayscale
+    passes_.push_back(std::make_unique<SepiaPass>());      // 2: Sepia
+    passes_.push_back(std::make_unique<VignettePass>());   // 3: Vignette
 
-    // デフォルト値設定 (全てのエフェクトは最初はOFF)
-    postProcessData_->enableGrayscale = 0;
-    postProcessData_->enableSepia = 0;
-    postProcessData_->enableVignette = 0;
-    postProcessData_->vignetteScale = kDefaultVignetteScale;
-    postProcessData_->vignetteExponent = kDefaultVignetteExponent;
+    for (auto& pass : passes_) {
+        pass->Initialize(engine->GetDevice());
+    }
 }
 
 void PostProcess::PreDraw() {
@@ -90,6 +98,7 @@ void PostProcess::PreDraw() {
     ID3D12GraphicsCommandList* commandList = engine->GetDxCommon()->GetCommandList();
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = engine->GetDxCommon()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
+    // メインのレンダーテクスチャを描画ターゲットに設定してクリア
     renderTexture_->PreDraw(commandList, dsvHandle);
 }
 
@@ -106,32 +115,55 @@ void PostProcess::Draw() {
     Zuizui* engine = EngineResource::GetEngine();
     assert(engine != nullptr);
     assert(renderTexture_ != nullptr);
+    assert(renderTextureTemp_ != nullptr);
 
     ID3D12GraphicsCommandList* commandList = engine->GetDxCommon()->GetCommandList();
-    PSOManager* psoManager = engine->GetPSOManager();
-    assert(psoManager != nullptr);
 
     // スワップチェーンの現在のバックバッファRTVを取得
     UINT backBufferIndex = engine->GetDxCommon()->GetBackBufferIndex();
     D3D12_CPU_DESCRIPTOR_HANDLE swapchainRtv = engine->GetDxCommon()->GetRtvHandle(backBufferIndex);
 
-    // レンダーターゲットをスワップチェーンのバックバッファに切り替え
-    commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
+    // アクティブなパスを収集（CopyImagePassは除く）
+    std::vector<IPostProcessPass*> activePasses;
+    for (size_t i = 1; i < passes_.size(); ++i) {
+        if (passes_[i]->IsActive()) {
+            activePasses.push_back(passes_[i].get());
+        }
+    }
 
-    // 統合された PostProcess PSO を使用
-    const char* psoName = "PostProcess";
+    // レンダーターゲット遷移用の深度ステンシルハンドル
+    D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = engine->GetDxCommon()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
-    commandList->SetPipelineState(psoManager->GetPSO(psoName));
-    commandList->SetGraphicsRootSignature(psoManager->GetRootSignature(psoName));
+    if (activePasses.empty()) {
+        // アクティブなエフェクトパスがない場合は、メインテクスチャからスワップチェーンへ等倍コピーを描画
+        commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
+        passes_[kPassIndexCopy]->Draw(commandList, renderTexture_->GetSrvGpuHandle());
+    } else {
+        // ピンポンバッファのポインタ切り替えによるチェイン描画
+        RenderTexture* currentInput = renderTexture_.get();
+        RenderTexture* currentOutput = renderTextureTemp_.get();
 
-    // ルートパラメータにレンダーテクスチャの SRV (GPUハンドルのディスクリプタテーブル) を設定
-    commandList->SetGraphicsRootDescriptorTable(kRootParamIndexSRV, renderTexture_->GetSrvGpuHandle());
+        for (size_t i = 0; i < activePasses.size(); ++i) {
+            bool isLast = (i == activePasses.size() - 1);
 
-    // 定数バッファをセット (RootParameter Index 1)
-    commandList->SetGraphicsRootConstantBufferView(kRootParamIndexPostProcessCBV, postProcessResource_->GetGPUVirtualAddress());
+            if (isLast) {
+                // 最後のパスは結果を直接スワップチェーン（画面）に描画
+                commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
+                activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
+            } else {
+                // 中間パスは、一時バッファに出力
+                currentOutput->PreDraw(commandList, dsvHandle);
+                
+                activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
+                
+                currentOutput->PostDraw(commandList);
 
-    // 頂点バッファなしで3頂点描画（全画面三角形）
-    commandList->DrawInstanced(kVertexCount, kInstanceCount, kStartVertexLocation, kStartInstanceLocation);
+                // ピンポン切り替え
+                currentInput = currentOutput;
+                currentOutput = (currentInput == renderTextureTemp_.get()) ? renderTexture_.get() : renderTextureTemp_.get();
+            }
+        }
+    }
 }
 
 void PostProcess::SetClearColorMode(PostClearColorMode mode) {
@@ -155,76 +187,97 @@ void PostProcess::SetClearColorMode(PostClearColorMode mode) {
 
     if (oldColor.x != newColor.x || oldColor.y != newColor.y || oldColor.z != newColor.z) {
         renderTexture_->Recreate(newColor);
+        renderTextureTemp_->Recreate(newColor); // 中間テクスチャも再生成して色を一致させる
     }
-}
-
-void PostProcess::SetEffectMode(PostEffectMode mode) {
-    if (currentMode_ == mode) return;
-    currentMode_ = mode;
-
-    // 互換モードに基づいてクリアカラーとエフェクトを切り替える
-    switch (mode) {
-        case PostEffectMode::None:
-            SetClearColorMode(PostClearColorMode::Blue);
-            SetGrayscaleActive(false);
-            SetSepiaActive(false);
-            SetVignetteActive(false);
-            break;
-        case PostEffectMode::Red:
-            SetClearColorMode(PostClearColorMode::Red);
-            SetGrayscaleActive(false);
-            SetSepiaActive(false);
-            SetVignetteActive(false);
-            break;
-        case PostEffectMode::Black:
-            SetClearColorMode(PostClearColorMode::Black);
-            SetGrayscaleActive(false);
-            SetSepiaActive(false);
-            SetVignetteActive(false);
-            break;
-        case PostEffectMode::Grayscale:
-            SetGrayscaleActive(true);
-            SetSepiaActive(false);
-            SetVignetteActive(false);
-            break;
-        case PostEffectMode::Sepia:
-            SetGrayscaleActive(false);
-            SetSepiaActive(true);
-            SetVignetteActive(false);
-            break;
-        case PostEffectMode::Vignette:
-            SetGrayscaleActive(false);
-            SetSepiaActive(false);
-            SetVignetteActive(true);
-            break;
-    }
-
-    // 日本語ログ出力
-    std::wstring modeName = L"不明";
-    switch (mode) {
-        case PostEffectMode::None:      modeName = L"なし (通常ブルー背景)"; break;
-        case PostEffectMode::Red:       modeName = L"デバッグレッド"; break;
-        case PostEffectMode::Black:     modeName = L"デバッグブラック"; break;
-        case PostEffectMode::Grayscale: modeName = L"グレースケール"; break;
-        case PostEffectMode::Sepia:     modeName = L"セピア"; break;
-        case PostEffectMode::Vignette:  modeName = L"ビネット"; break;
-    }
-
-    Log::Write(std::format(L" ├─ 【ポストエフェクト変更】 エフェクトモードが「{}」に変更されました。", modeName));
 }
 
 void PostProcess::ImGuiControl() {
-#ifdef _USEIMGUI
-    ImGui::Begin("Settings");
-    ImGui::Checkbox("Vignette Settings", &isVignetteWindowOpen_);
-    ImGui::End();
-
-    if (isVignetteWindowOpen_) {
-        if (ImGui::Begin("Vignette Control", &isVignetteWindowOpen_)) {
-            ImGui::DragFloat("Scale", &postProcessData_->vignetteScale, 0.1f, 0.0f, 100.0f, "%.1f");
-            ImGui::DragFloat("Exponent", &postProcessData_->vignetteExponent, 0.01f, 0.0f, 10.0f, "%.2f");
-        }
-        ImGui::End();
+    // 全パスのImGuiコントロールを順次呼び出す
+    for (auto& pass : passes_) {
+        pass->ImGuiControl();
     }
-#endif
+}
+
+// ==========================================
+// 各個別パスのアクティブ状態制御アクセサ
+// ==========================================
+
+void PostProcess::SetGrayscaleActive(bool active) {
+    if (passes_.size() > kPassIndexGrayscale) {
+        passes_[kPassIndexGrayscale]->SetActive(active);
+    }
+}
+
+bool PostProcess::IsGrayscaleActive() const {
+    return (passes_.size() > kPassIndexGrayscale) ? passes_[kPassIndexGrayscale]->IsActive() : false;
+}
+
+void PostProcess::SetSepiaActive(bool active) {
+    if (passes_.size() > kPassIndexSepia) {
+        passes_[kPassIndexSepia]->SetActive(active);
+    }
+}
+
+bool PostProcess::IsSepiaActive() const {
+    return (passes_.size() > kPassIndexSepia) ? passes_[kPassIndexSepia]->IsActive() : false;
+}
+
+void PostProcess::SetVignetteActive(bool active) {
+    if (passes_.size() > kPassIndexVignette) {
+        passes_[kPassIndexVignette]->SetActive(active);
+    }
+}
+
+bool PostProcess::IsVignetteActive() const {
+    return (passes_.size() > kPassIndexVignette) ? passes_[kPassIndexVignette]->IsActive() : false;
+}
+
+void PostProcess::ClearEffects() {
+    for (auto& pass : passes_) {
+        if (pass) {
+            pass->SetActive(false);
+        }
+    }
+}
+
+// ==========================================
+// ビネットパラメータアクセサの転送
+// ==========================================
+
+void PostProcess::SetVignetteScale(float scale) {
+    if (passes_.size() > kPassIndexVignette) {
+        auto vignette = dynamic_cast<VignettePass*>(passes_[kPassIndexVignette].get());
+        if (vignette) {
+            vignette->SetScale(scale);
+        }
+    }
+}
+
+float PostProcess::GetVignetteScale() const {
+    if (passes_.size() > kPassIndexVignette) {
+        auto vignette = dynamic_cast<VignettePass*>(passes_[kPassIndexVignette].get());
+        if (vignette) {
+            return vignette->GetScale();
+        }
+    }
+    return 0.0f;
+}
+
+void PostProcess::SetVignetteExponent(float exponent) {
+    if (passes_.size() > kPassIndexVignette) {
+        auto vignette = dynamic_cast<VignettePass*>(passes_[kPassIndexVignette].get());
+        if (vignette) {
+            vignette->SetExponent(exponent);
+        }
+    }
+}
+
+float PostProcess::GetVignetteExponent() const {
+    if (passes_.size() > kPassIndexVignette) {
+        auto vignette = dynamic_cast<VignettePass*>(passes_[kPassIndexVignette].get());
+        if (vignette) {
+            return vignette->GetExponent();
+        }
+    }
+    return 0.0f;
 }

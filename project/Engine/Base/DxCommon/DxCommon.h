@@ -82,7 +82,7 @@ private:
 	UINT backBufferIndex_;
 	UINT backBufferCount_ = 2;
 	// CreateRenderTargets();
-	static constexpr UINT kMaxRtvCount = 3;
+	static constexpr UINT kMaxRtvCount = 4;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[kMaxRtvCount];

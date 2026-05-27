@@ -2,6 +2,7 @@
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
+#include "Engine/Graphics/PostProcess/PostProcess.h"
 #include "Engine/Base/Log/Log.h"
 #include "Engine/Base/Utils/StringUtility.h"
 #include <format>
@@ -38,6 +39,12 @@ void SceneManager::Update() {
             // ライトとカメラのリセット
             CameraResource::GetCameraManager()->Clear();
             LightResource::GetLightManager()->Clear();
+
+            // ポストプロセスのエフェクトおよびクリアカラーのリセット（シーン遷移時の自動解除）
+            if (postProcess_) {
+                postProcess_->ClearEffects();
+                postProcess_->SetClearColorMode(PostClearColorMode::Blue);
+            }
 
             // 古いシーンを破棄して新しいシーンへ
             currentScene_ = std::move(nextScene_);

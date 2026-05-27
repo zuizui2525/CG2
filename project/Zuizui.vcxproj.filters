@@ -9,6 +9,7 @@
     <FxCompile Include="resources\Shader\Fullscreen\Fullscreen.VS.hlsl" />
     <FxCompile Include="resources\Shader\Fullscreen\Grayscale.PS.hlsl" />
     <FxCompile Include="resources\Shader\Fullscreen\Sepia.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\Vignette.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App\App.cpp" />
@@ -68,6 +69,10 @@
     <ClCompile Include="Engine\Graphics\Texture\TextureManager.cpp" />
     <ClCompile Include="Engine\Graphics\Texture\RenderTexture.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\PostProcess.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\CopyImagePass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\GrayscalePass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\SepiaPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\VignettePass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
@@ -150,6 +155,11 @@
     <ClInclude Include="Engine\Graphics\Texture\TextureManager.h" />
     <ClInclude Include="Engine\Graphics\Texture\RenderTexture.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\PostProcess.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\IPostProcessPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\CopyImagePass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\GrayscalePass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\SepiaPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\VignettePass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />
