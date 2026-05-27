@@ -25,6 +25,7 @@ void RenderTexture::Initialize(
 
     // 1. テクスチャリソースの作成（初期状態は D3D12_RESOURCE_STATE_RENDER_TARGET）
     resource_ = DxUtils::CreateRenderTextureResource(device_, width_, height_, format_, clearColor_);
+    assert(resource_ != nullptr && "Failed to create render texture resource in Initialize.");
     currentState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
     // 2. RTV（RenderTargetView）の作成
@@ -55,6 +56,7 @@ void RenderTexture::Recreate(const Vector4& newClearColor) {
 
     // 新しいクリアカラーでテクスチャリソースを再作成
     resource_ = DxUtils::CreateRenderTextureResource(device_, width_, height_, format_, clearColor_);
+    assert(resource_ != nullptr && "Failed to recreate render texture resource.");
     currentState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
     // RTVの再作成（同じディスクリプタハンドルに上書き）
