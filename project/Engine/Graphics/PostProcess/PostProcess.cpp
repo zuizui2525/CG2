@@ -183,19 +183,16 @@ void PostProcess::SetEffectMode(PostEffectMode mode) {
             SetVignetteActive(false);
             break;
         case PostEffectMode::Grayscale:
-            SetClearColorMode(PostClearColorMode::Black);
             SetGrayscaleActive(true);
             SetSepiaActive(false);
             SetVignetteActive(false);
             break;
         case PostEffectMode::Sepia:
-            SetClearColorMode(PostClearColorMode::Black);
             SetGrayscaleActive(false);
             SetSepiaActive(true);
             SetVignetteActive(false);
             break;
         case PostEffectMode::Vignette:
-            SetClearColorMode(PostClearColorMode::Black);
             SetGrayscaleActive(false);
             SetSepiaActive(false);
             SetVignetteActive(true);
