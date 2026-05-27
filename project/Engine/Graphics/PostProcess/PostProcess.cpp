@@ -66,7 +66,8 @@ void PostProcess::Initialize() {
         kClearColor,
         rtvHandle,
         srvHandleCPU,
-        srvHandleGPU
+        srvHandleGPU,
+        L"PostProcessMain"
     );
 
     // ピンポン用中間テクスチャ初期化
@@ -78,7 +79,8 @@ void PostProcess::Initialize() {
         kClearColor,
         rtvHandleTemp,
         srvHandleCPUTemp,
-        srvHandleGPUTemp
+        srvHandleGPUTemp,
+        L"PostProcessTemp"
     );
 
     // 各個別パスの登録と初期化
@@ -91,6 +93,7 @@ void PostProcess::Initialize() {
     for (auto& pass : passes_) {
         pass->Initialize(engine->GetDevice());
     }
+    Log::Write(L" ├─ 【ポストプロセス初期化完了】 レンダーテクスチャおよび各種エフェクトパスの準備が整いました。");
 }
 
 void PostProcess::PreDraw() {
@@ -188,6 +191,11 @@ void PostProcess::SetClearColorMode(PostClearColorMode mode) {
 
     clearColorMode_ = mode;
 
+    const wchar_t* modeStr = L"Blue (Default)";
+    if (mode == PostClearColorMode::Red) modeStr = L"Red (Debug)";
+    else if (mode == PostClearColorMode::Black) modeStr = L"Black (Debug)";
+    Log::Write(std::format(L" ├─ 【クリアカラー変更】 背景のクリアカラーモードを「{}」に変更しました。", modeStr));
+
     if (oldColor.x != newColor.x || oldColor.y != newColor.y || oldColor.z != newColor.z) {
         renderTexture_->Recreate(newColor);
         renderTextureTemp_->Recreate(newColor); // 中間テクスチャも再生成して色を一致させる
@@ -219,6 +227,20 @@ void PostProcess::ImGuiControl() {
             SetVignetteActive(vignetteActive);
         }
         
+        ImGui::Separator();
+        ImGui::Text("ClearColor Mode:");
+        PostClearColorMode clearMode = GetClearColorMode();
+        int colorVal = static_cast<int>(clearMode);
+        if (ImGui::RadioButton("Blue (Default)", &colorVal, 0)) {
+            SetClearColorMode(PostClearColorMode::Blue);
+        }
+        if (ImGui::RadioButton("Red (Debug)", &colorVal, 1)) {
+            SetClearColorMode(PostClearColorMode::Red);
+        }
+        if (ImGui::RadioButton("Black (Debug)", &colorVal, 2)) {
+            SetClearColorMode(PostClearColorMode::Black);
+        }
+
         ImGui::TreePop();
     }
 
@@ -239,7 +261,10 @@ void PostProcess::ImGuiControl() {
 
 void PostProcess::SetGrayscaleActive(bool active) {
     if (passes_.size() > kPassIndexGrayscale) {
-        passes_[kPassIndexGrayscale]->SetActive(active);
+        if (passes_[kPassIndexGrayscale]->IsActive() != active) {
+            passes_[kPassIndexGrayscale]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 グレースケール を {} にしました。", active ? L"有効" : L"無効"));
+        }
     }
 }
 
@@ -249,7 +274,10 @@ bool PostProcess::IsGrayscaleActive() const {
 
 void PostProcess::SetSepiaActive(bool active) {
     if (passes_.size() > kPassIndexSepia) {
-        passes_[kPassIndexSepia]->SetActive(active);
+        if (passes_[kPassIndexSepia]->IsActive() != active) {
+            passes_[kPassIndexSepia]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 セピア を {} にしました。", active ? L"有効" : L"無効"));
+        }
     }
 }
 
@@ -259,7 +287,10 @@ bool PostProcess::IsSepiaActive() const {
 
 void PostProcess::SetVignetteActive(bool active) {
     if (passes_.size() > kPassIndexVignette) {
-        passes_[kPassIndexVignette]->SetActive(active);
+        if (passes_[kPassIndexVignette]->IsActive() != active) {
+            passes_[kPassIndexVignette]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 ビネット を {} にしました。", active ? L"有効" : L"無効"));
+        }
     }
 }
 
@@ -269,7 +300,10 @@ bool PostProcess::IsVignetteActive() const {
 
 void PostProcess::SetBoxFilterActive(bool active) {
     if (passes_.size() > kPassIndexBoxFilter) {
-        passes_[kPassIndexBoxFilter]->SetActive(active);
+        if (passes_[kPassIndexBoxFilter]->IsActive() != active) {
+            passes_[kPassIndexBoxFilter]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 ボックスフィルタ（ぼかし） を {} にしました。", active ? L"有効" : L"無効"));
+        }
     }
 }
 
@@ -278,10 +312,15 @@ bool PostProcess::IsBoxFilterActive() const {
 }
 
 void PostProcess::ClearEffects() {
+    bool hasActive = false;
     for (auto& pass : passes_) {
-        if (pass) {
+        if (pass && pass->IsActive()) {
             pass->SetActive(false);
+            hasActive = true;
         }
+    }
+    if (hasActive) {
+        Log::Write(L" ├─ 【ポストエフェクトクリア】 すべてのポストエフェクトを無効化しました。");
     }
 }
 

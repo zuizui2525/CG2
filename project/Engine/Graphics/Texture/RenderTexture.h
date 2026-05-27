@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <wrl.h>
+#include <string>
 #include "Engine/Math/MathStructs.h"
 
 class RenderTexture {
@@ -18,7 +19,8 @@ public:
         const Vector4& clearColor,
         D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
         D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU,
-        D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU);
+        D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU,
+        const std::wstring& name);
 
     // 描画前処理（状態をRENDER_TARGETに遷移し、レンダーターゲットの設定およびクリア）
     void PreDraw(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle);
@@ -46,6 +48,7 @@ private:
     uint32_t height_ = 0;
     DXGI_FORMAT format_ = DXGI_FORMAT_UNKNOWN;
     Vector4 clearColor_{ 0.0f, 0.0f, 0.0f, 1.0f };
+    std::wstring name_;
 
     D3D12_RESOURCE_STATES currentState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 };

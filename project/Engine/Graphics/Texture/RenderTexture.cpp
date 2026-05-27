@@ -12,7 +12,8 @@ void RenderTexture::Initialize(
     const Vector4& clearColor,
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle,
     D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU,
-    D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU) {
+    D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU,
+    const std::wstring& name) {
 
     device_ = device;
     width_ = width;
@@ -22,6 +23,7 @@ void RenderTexture::Initialize(
     rtvHandleCPU_ = rtvHandle;
     srvHandleCPU_ = srvHandleCPU;
     srvHandleGPU_ = srvHandleGPU;
+    name_ = name;
 
     // 1. テクスチャリソースの作成（初期状態は D3D12_RESOURCE_STATE_RENDER_TARGET）
     resource_ = DxUtils::CreateRenderTextureResource(device_, width_, height_, format_, clearColor_);
@@ -44,7 +46,7 @@ void RenderTexture::Initialize(
 
     device->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
 
-    Log::Write(std::format(L" ├─ 【リソース生成完了】 レンダーテクスチャ (幅: {}, 高さ: {}, フォーマット: {}) の生成に成功しました。", width_, height_, (int)format_));
+    Log::Write(std::format(L" ├─ 【リソース生成完了 : {}】 レンダーテクスチャ (幅: {}, 高さ: {}, フォーマット: {}) の生成に成功しました。", name_, width_, height_, (int)format_));
 }
 
 void RenderTexture::Recreate(const Vector4& newClearColor) {
@@ -73,7 +75,7 @@ void RenderTexture::Recreate(const Vector4& newClearColor) {
     srvDesc.Texture2D.MipLevels = 1;
     device_->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
 
-    Log::Write(std::format(L" ├─ 【リソース再生成完了】 新しいクリアカラー ({:.2f}, {:.2f}, {:.2f}, {:.2f}) でレンダーテクスチャを再作成しました。", clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w));
+    Log::Write(std::format(L" ├─ 【リソース再生成完了 : {}】 新しいクリアカラー ({:.2f}, {:.2f}, {:.2f}, {:.2f}) でレンダーテクスチャを再作成しました。", name_, clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w));
 }
 
 
