@@ -5,10 +5,13 @@
 
 
 void DebugScene::Initialize() {
-    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期モードを None に設定
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、初期状態に設定
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
     if (postProcess_) {
-        postProcess_->SetEffectMode(PostEffectMode::None);
+        postProcess_->SetClearColorMode(PostClearColorMode::Blue);
+        postProcess_->SetGrayscaleActive(false);
+        postProcess_->SetSepiaActive(false);
+        postProcess_->SetVignetteActive(false);
     }
 
     // 1. 各マネージャのポインタを取得して保持する
@@ -55,6 +58,9 @@ void DebugScene::ImGuiControl() {
     cameraMgr_->ImGuiControl();
     dirLight_->ImGuiControl("dirLight");
     EffectManager::GetInstance()->ImGuiControl("Effects");
+    if (postProcess_) {
+        postProcess_->ImGuiControl();
+    }
 #endif
 }
 

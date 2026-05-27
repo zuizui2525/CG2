@@ -53,17 +53,31 @@ void App::Run() {
     ImGui::Begin("Scene Manager");
     ImGui::Text("Current Scene: %s", SceneManager::GetInstance()->GetCurrentSceneName().c_str());
 
-    // ポストプロセス 5モード統合切り替えラジオボタン
-    PostEffectMode currentMode = postProcess_->GetEffectMode();
-    int modeVal = static_cast<int>(currentMode);
-    
+    // ----------------------------------------------------
+    // 背景のクリアカラー設定とポストエフェクトの重ね掛け
+    // ----------------------------------------------------
     ImGui::Separator();
-    ImGui::Text("PostEffect Mode:");
-    if (ImGui::RadioButton("None (Default Blue)", &modeVal, 0)) { postProcess_->SetEffectMode(PostEffectMode::None); }
-    if (ImGui::RadioButton("Red (Debug)", &modeVal, 1)) { postProcess_->SetEffectMode(PostEffectMode::Red); }
-    if (ImGui::RadioButton("Black (Debug)", &modeVal, 2)) { postProcess_->SetEffectMode(PostEffectMode::Black); }
-    if (ImGui::RadioButton("Grayscale", &modeVal, 3)) { postProcess_->SetEffectMode(PostEffectMode::Grayscale); }
-    if (ImGui::RadioButton("Sepia", &modeVal, 4)) { postProcess_->SetEffectMode(PostEffectMode::Sepia); }
+    ImGui::Text("Background ClearColor:");
+    PostClearColorMode clearMode = postProcess_->GetClearColorMode();
+    int colorVal = static_cast<int>(clearMode);
+    if (ImGui::RadioButton("Blue (Default)", &colorVal, 0)) { postProcess_->SetClearColorMode(PostClearColorMode::Blue); }
+    if (ImGui::RadioButton("Red (Debug)", &colorVal, 1)) { postProcess_->SetClearColorMode(PostClearColorMode::Red); }
+    if (ImGui::RadioButton("Black (Debug)", &colorVal, 2)) { postProcess_->SetClearColorMode(PostClearColorMode::Black); }
+
+    ImGui::Separator();
+    ImGui::Text("PostEffects (Stackable):");
+    bool grayActive = postProcess_->IsGrayscaleActive();
+    if (ImGui::Checkbox("Grayscale", &grayActive)) {
+        postProcess_->SetGrayscaleActive(grayActive);
+    }
+    bool sepiaActive = postProcess_->IsSepiaActive();
+    if (ImGui::Checkbox("Sepia", &sepiaActive)) {
+        postProcess_->SetSepiaActive(sepiaActive);
+    }
+    bool vignetteActive = postProcess_->IsVignetteActive();
+    if (ImGui::Checkbox("Vignette", &vignetteActive)) {
+        postProcess_->SetVignetteActive(vignetteActive);
+    }
     ImGui::Separator();
 
     // マジックストリング回避のためのローカル定数定義

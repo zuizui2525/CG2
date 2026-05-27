@@ -55,6 +55,20 @@ HRESULT PSOManager::Initialize(
     // 登録処理
     RegisterPreset("Sepia", sepiaPreset);
 
+    // Vignette用プリセット作成
+    PSOPreset vignettePreset = PSOPreset::CreateVignettePreset(
+        device_, dxcUtils, dxcCompiler, includeHandler);
+
+    // 登録処理
+    RegisterPreset("Vignette", vignettePreset);
+
+    // PostProcess用プリセット作成
+    PSOPreset postProcessPreset = PSOPreset::CreatePostProcessPreset(
+        device_, dxcUtils, dxcCompiler, includeHandler);
+
+    // 登録処理
+    RegisterPreset("PostProcess", postProcessPreset);
+
     return S_OK;
 }
 

@@ -4,8 +4,13 @@
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
 #include "Engine/Base/Log/Log.h"
+#include "Engine/Base/Utils/DxUtils.h"
 #include <cassert>
 #include <format>
+
+#ifdef _USEIMGUI
+#include <imgui.h>
+#endif
 
 namespace {
     // マジックナンバー排除のためのクリアカラー定数
@@ -13,8 +18,13 @@ namespace {
     const Vector4 kClearColorRed = { 1.0f, 0.0f, 0.0f, 1.0f };
     const Vector4 kClearColorBlack = { 0.1f, 0.1f, 0.1f, 1.0f };
 
+    // Vignetteのデフォルト値
+    const float kDefaultVignetteScale = 16.0f;
+    const float kDefaultVignetteExponent = 0.8f;
+
     // ルートパラメータインデックス
     constexpr UINT kRootParamIndexSRV = 0;
+    constexpr UINT kRootParamIndexPostProcessCBV = 1;
 
     // 描画用の頂点数およびインスタンス数
     constexpr UINT kVertexCount = 3;
@@ -56,6 +66,20 @@ void PostProcess::Initialize() {
         srvHandleCPU,
         srvHandleGPU
     );
+
+    // 統合ポストプロセス用定数バッファ作成
+    postProcessResource_ = DxUtils::CreateBufferResource(engine->GetDevice(), sizeof(PostProcessParams));
+    assert(postProcessResource_ != nullptr && "Failed to create postProcessResource_");
+
+    HRESULT hr = postProcessResource_->Map(0, nullptr, reinterpret_cast<void**>(&postProcessData_));
+    assert(SUCCEEDED(hr) && postProcessData_ != nullptr && "Failed to map postProcessResource_");
+
+    // デフォルト値設定 (全てのエフェクトは最初はOFF)
+    postProcessData_->enableGrayscale = 0;
+    postProcessData_->enableSepia = 0;
+    postProcessData_->enableVignette = 0;
+    postProcessData_->vignetteScale = kDefaultVignetteScale;
+    postProcessData_->vignetteExponent = kDefaultVignetteExponent;
 }
 
 void PostProcess::PreDraw() {
@@ -94,13 +118,8 @@ void PostProcess::Draw() {
     // レンダーターゲットをスワップチェーンのバックバッファに切り替え
     commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
 
-    // 現在のモードに応じた PSO を決定
-    const char* psoName = "CopyImage";
-    if (currentMode_ == PostEffectMode::Grayscale) {
-        psoName = "Grayscale";
-    } else if (currentMode_ == PostEffectMode::Sepia) {
-        psoName = "Sepia";
-    }
+    // 統合された PostProcess PSO を使用
+    const char* psoName = "PostProcess";
 
     commandList->SetPipelineState(psoManager->GetPSO(psoName));
     commandList->SetGraphicsRootSignature(psoManager->GetRootSignature(psoName));
@@ -108,39 +127,82 @@ void PostProcess::Draw() {
     // ルートパラメータにレンダーテクスチャの SRV (GPUハンドルのディスクリプタテーブル) を設定
     commandList->SetGraphicsRootDescriptorTable(kRootParamIndexSRV, renderTexture_->GetSrvGpuHandle());
 
+    // 定数バッファをセット (RootParameter Index 1)
+    commandList->SetGraphicsRootConstantBufferView(kRootParamIndexPostProcessCBV, postProcessResource_->GetGPUVirtualAddress());
+
     // 頂点バッファなしで3頂点描画（全画面三角形）
     commandList->DrawInstanced(kVertexCount, kInstanceCount, kStartVertexLocation, kStartInstanceLocation);
 }
 
-namespace {
-    // ヘルパー関数：モードに対応したクリアカラーを返す
-    Vector4 GetClearColorForMode(PostEffectMode mode) {
-        switch (mode) {
-            case PostEffectMode::None:      return kClearColorBlue;
-            case PostEffectMode::Red:       return kClearColorRed;
-            case PostEffectMode::Black:
-            case PostEffectMode::Grayscale:
-            case PostEffectMode::Sepia:
-            default:                        return kClearColorBlack;
-        }
+void PostProcess::SetClearColorMode(PostClearColorMode mode) {
+    if (clearColorMode_ == mode) return;
+
+    Vector4 oldColor = kClearColorBlue;
+    switch (clearColorMode_) {
+        case PostClearColorMode::Blue:  oldColor = kClearColorBlue; break;
+        case PostClearColorMode::Red:   oldColor = kClearColorRed; break;
+        case PostClearColorMode::Black: oldColor = kClearColorBlack; break;
+    }
+
+    Vector4 newColor = kClearColorBlue;
+    switch (mode) {
+        case PostClearColorMode::Blue:  newColor = kClearColorBlue; break;
+        case PostClearColorMode::Red:   newColor = kClearColorRed; break;
+        case PostClearColorMode::Black: newColor = kClearColorBlack; break;
+    }
+
+    clearColorMode_ = mode;
+
+    if (oldColor.x != newColor.x || oldColor.y != newColor.y || oldColor.z != newColor.z) {
+        renderTexture_->Recreate(newColor);
     }
 }
 
 void PostProcess::SetEffectMode(PostEffectMode mode) {
     if (currentMode_ == mode) return;
-
-    // 背景色（クリアカラー）の変更チェック
-    const Vector4 oldColor = GetClearColorForMode(currentMode_);
-    const Vector4 newColor = GetClearColorForMode(mode);
-
     currentMode_ = mode;
 
-    // 背景色が変わる場合のみ安全にRecreate
-    if (oldColor.x != newColor.x || oldColor.y != newColor.y || oldColor.z != newColor.z) {
-        renderTexture_->Recreate(newColor);
+    // 互換モードに基づいてクリアカラーとエフェクトを切り替える
+    switch (mode) {
+        case PostEffectMode::None:
+            SetClearColorMode(PostClearColorMode::Blue);
+            SetGrayscaleActive(false);
+            SetSepiaActive(false);
+            SetVignetteActive(false);
+            break;
+        case PostEffectMode::Red:
+            SetClearColorMode(PostClearColorMode::Red);
+            SetGrayscaleActive(false);
+            SetSepiaActive(false);
+            SetVignetteActive(false);
+            break;
+        case PostEffectMode::Black:
+            SetClearColorMode(PostClearColorMode::Black);
+            SetGrayscaleActive(false);
+            SetSepiaActive(false);
+            SetVignetteActive(false);
+            break;
+        case PostEffectMode::Grayscale:
+            SetClearColorMode(PostClearColorMode::Black);
+            SetGrayscaleActive(true);
+            SetSepiaActive(false);
+            SetVignetteActive(false);
+            break;
+        case PostEffectMode::Sepia:
+            SetClearColorMode(PostClearColorMode::Black);
+            SetGrayscaleActive(false);
+            SetSepiaActive(true);
+            SetVignetteActive(false);
+            break;
+        case PostEffectMode::Vignette:
+            SetClearColorMode(PostClearColorMode::Black);
+            SetGrayscaleActive(false);
+            SetSepiaActive(false);
+            SetVignetteActive(true);
+            break;
     }
 
-    // エフェクトモード名を日本語に変換
+    // 日本語ログ出力
     std::wstring modeName = L"不明";
     switch (mode) {
         case PostEffectMode::None:      modeName = L"なし (通常ブルー背景)"; break;
@@ -148,7 +210,24 @@ void PostProcess::SetEffectMode(PostEffectMode mode) {
         case PostEffectMode::Black:     modeName = L"デバッグブラック"; break;
         case PostEffectMode::Grayscale: modeName = L"グレースケール"; break;
         case PostEffectMode::Sepia:     modeName = L"セピア"; break;
+        case PostEffectMode::Vignette:  modeName = L"ビネット"; break;
     }
 
     Log::Write(std::format(L" ├─ 【ポストエフェクト変更】 エフェクトモードが「{}」に変更されました。", modeName));
+}
+
+void PostProcess::ImGuiControl() {
+#ifdef _USEIMGUI
+    ImGui::Begin("Settings");
+    ImGui::Checkbox("Vignette Settings", &isVignetteWindowOpen_);
+    ImGui::End();
+
+    if (isVignetteWindowOpen_) {
+        if (ImGui::Begin("Vignette Control", &isVignetteWindowOpen_)) {
+            ImGui::DragFloat("Scale", &postProcessData_->vignetteScale, 0.1f, 0.0f, 100.0f, "%.1f");
+            ImGui::DragFloat("Exponent", &postProcessData_->vignetteExponent, 0.01f, 0.0f, 10.0f, "%.2f");
+        }
+        ImGui::End();
+    }
+#endif
 }

@@ -422,3 +422,122 @@ PSOPreset PSOPreset::CreateSepiaPreset(
 
     return preset;
 }
+
+PSOPreset PSOPreset::CreateVignettePreset(
+    ID3D12Device* device,
+    IDxcUtils* dxcUtils,
+    IDxcCompiler3* dxcCompiler,
+    IDxcIncludeHandler* includeHandler) {
+
+    PSOPreset preset;
+
+    // 1. RootSignature
+    RootSignatureBuilder rs;
+    // レンダーテクスチャ (t0, PS)
+    rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+    // Vignette用定数バッファ (b0, PS)
+    rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+
+    // 静的サンプラー (s0)
+    D3D12_SAMPLER_DESC sampler{};
+    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+    rs.AddSampler(sampler, 0);
+
+    preset.rootSignature = rs.Build(device);
+    assert(preset.rootSignature && "Vignette RootSignature creation failed!");
+
+    // 2. Input Layout (頂点バッファを入力しないため空)
+    preset.inputLayoutDesc.pInputElementDescs = nullptr;
+    preset.inputLayoutDesc.NumElements = 0;
+
+    // 3. Blend State
+    BlendStateBuilder blendBuilder;
+    blendBuilder.SetBlendMode(kBlendModeNone);
+    preset.blendDesc = blendBuilder.Build();
+
+    // 4. Rasterizer State (カリングなし)
+    RasterizerStateBuilder rsb;
+    rsb.SetCullMode(CullMode::None);
+    preset.rasterizerDesc = rsb.Build();
+
+    // 5. Depth Stencil State (全画面描画のためデプス判定・書き込みは無効)
+    DepthStencilStateBuilder dsb;
+    dsb.SetDepthEnable(false);
+    preset.depthStencilDesc = dsb.GetDesc();
+
+    // 6. Shader
+    bool vsResult = preset.shaderProgram.CompileVS(
+        L"resources/Shader/Fullscreen/Fullscreen.VS.hlsl",
+        dxcUtils, dxcCompiler, includeHandler
+    );
+    assert(vsResult && "Vignette VS Compile Failed!");
+
+    bool psResult = preset.shaderProgram.CompilePS(
+        L"resources/Shader/Fullscreen/Vignette.PS.hlsl",
+        dxcUtils, dxcCompiler, includeHandler
+    );
+    assert(psResult && "Vignette PS Compile Failed!");
+
+    return preset;
+}
+
+PSOPreset PSOPreset::CreatePostProcessPreset(
+    ID3D12Device* device,
+    IDxcUtils* dxcUtils,
+    IDxcCompiler3* dxcCompiler,
+    IDxcIncludeHandler* includeHandler) {
+
+    PSOPreset preset;
+
+    // 1. RootSignature
+    RootSignatureBuilder rs;
+    // レンダーテクスチャ (t0, PS)
+    rs.AddSRV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+    // ポストプロセスパラメータ定数バッファ (b0, PS)
+    rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+
+    // 静的サンプラー (s0)
+    D3D12_SAMPLER_DESC sampler{};
+    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+    rs.AddSampler(sampler, 0);
+
+    preset.rootSignature = rs.Build(device);
+    assert(preset.rootSignature && "PostProcess RootSignature creation failed!");
+
+    // 2. Input Layout (頂点バッファを入力しないため空)
+    preset.inputLayoutDesc.pInputElementDescs = nullptr;
+    preset.inputLayoutDesc.NumElements = 0;
+
+    // 3. Blend State
+    BlendStateBuilder blendBuilder;
+    blendBuilder.SetBlendMode(kBlendModeNone);
+    preset.blendDesc = blendBuilder.Build();
+
+    // 4. Rasterizer State (カリングなし)
+    RasterizerStateBuilder rsb;
+    rsb.SetCullMode(CullMode::None);
+    preset.rasterizerDesc = rsb.Build();
+
+    // 5. Depth Stencil State (全画面描画のためデプス判定・書き込みは無効)
+    DepthStencilStateBuilder dsb;
+    dsb.SetDepthEnable(false);
+    preset.depthStencilDesc = dsb.GetDesc();
+
+    // 6. Shader
+    bool vsResult = preset.shaderProgram.CompileVS(
+        L"resources/Shader/Fullscreen/Fullscreen.VS.hlsl",
+        dxcUtils, dxcCompiler, includeHandler
+    );
+    assert(vsResult && "PostProcess VS Compile Failed!");
+
+    bool psResult = preset.shaderProgram.CompilePS(
+        L"resources/Shader/Fullscreen/PostProcess.PS.hlsl",
+        dxcUtils, dxcCompiler, includeHandler
+    );
+    assert(psResult && "PostProcess PS Compile Failed!");
+
+    return preset;
+}
+

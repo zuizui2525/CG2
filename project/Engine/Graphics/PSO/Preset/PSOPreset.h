@@ -55,6 +55,20 @@ public:
         IDxcCompiler3* dxcCompiler,
         IDxcIncludeHandler* includeHandler);
 
+    // Vignette（全画面ビネット）用のプリセット作成関数
+    static PSOPreset CreateVignettePreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
+    // PostProcess（全画面重ね掛けポストプロセス）用のプリセット作成関数
+    static PSOPreset CreatePostProcessPreset(
+        ID3D12Device* device,
+        IDxcUtils* dxcUtils,
+        IDxcCompiler3* dxcCompiler,
+        IDxcIncludeHandler* includeHandler);
+
     // メンバ変数
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 
