@@ -264,6 +264,8 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\PostProcess\SepiaPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\VignettePass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\BoxFilterPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurXPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurYPass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -421,6 +423,8 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\PostProcess\SepiaPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\VignettePass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\BoxFilterPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurXPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurYPass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />

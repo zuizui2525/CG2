@@ -1,5 +1,7 @@
 #include "Engine/Graphics/PostProcess/PostProcess.h"
 #include "Engine/Graphics/PostProcess/CopyImagePass.h"
+#include "Engine/Graphics/PostProcess/GaussianBlurXPass.h"
+#include "Engine/Graphics/PostProcess/GaussianBlurYPass.h"
 #include "Engine/Graphics/PostProcess/GrayscalePass.h"
 #include "Engine/Graphics/PostProcess/SepiaPass.h"
 #include "Engine/Graphics/PostProcess/VignettePass.h"
@@ -23,6 +25,8 @@ namespace {
     constexpr size_t kPassIndexSepia = 2;
     constexpr size_t kPassIndexVignette = 3;
     constexpr size_t kPassIndexBoxFilter = 4;
+    constexpr size_t kPassIndexGaussianBlurX = 5;
+    constexpr size_t kPassIndexGaussianBlurY = 6;
 }
 
 void PostProcess::Initialize() {
@@ -89,6 +93,8 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<SepiaPass>());      // 2: Sepia
     passes_.push_back(std::make_unique<VignettePass>());   // 3: Vignette
     passes_.push_back(std::make_unique<BoxFilterPass>());  // 4: BoxFilter
+    passes_.push_back(std::make_unique<GaussianBlurXPass>()); // 5: GaussianBlurX
+    passes_.push_back(std::make_unique<GaussianBlurYPass>()); // 6: GaussianBlurY
 
     for (auto& pass : passes_) {
         pass->Initialize(engine->GetDevice());
@@ -227,6 +233,11 @@ void PostProcess::ImGuiControl() {
             SetVignetteActive(vignetteActive);
         }
         
+        bool gaussActive = IsGaussianBlurActive();
+        if (ImGui::Checkbox("GaussianFilter", &gaussActive)) {
+            SetGaussianBlurActive(gaussActive);
+        }
+        
         ImGui::Separator();
         ImGui::Text("ClearColor Mode:");
         PostClearColorMode clearMode = GetClearColorMode();
@@ -242,6 +253,31 @@ void PostProcess::ImGuiControl() {
         }
 
         ImGui::TreePop();
+    }
+
+    // GaussianFilter の個別パラメータ調整コントロール
+    if (IsGaussianBlurActive()) {
+        if (ImGui::TreeNode("GaussianFilter")) {
+            int32_t radius = GetGaussianBlurKernelRadius();
+            float sigma = GetGaussianBlurSigma();
+            bool isChanged = false;
+            
+            // k (半径): 1 = 3x3, 2 = 5x5, 3 = 7x7, 4 = 9x9, 5 = 11x11... 20 = 41x41
+            if (ImGui::SliderInt("k", &radius, 1, 20)) {
+                isChanged = true;
+            }
+            
+            // Sigma: 0.1 から 50.0
+            if (ImGui::DragFloat("Sigma", &sigma, 0.05f, 0.1f, 50.0f, "%.3f")) {
+                isChanged = true;
+            }
+            
+            if (isChanged) {
+                SetGaussianBlurParams(radius, sigma);
+            }
+            
+            ImGui::TreePop();
+        }
     }
 
     // 各アクティブなパスの固有パラメータのImGuiコントロールを順次呼び出す
@@ -383,4 +419,50 @@ int32_t PostProcess::GetBoxFilterKernelRadius() const {
         }
     }
     return 1;
+}
+
+void PostProcess::SetGaussianBlurActive(bool active) {
+    if (passes_.size() > kPassIndexGaussianBlurY) {
+        bool current = passes_[kPassIndexGaussianBlurX]->IsActive();
+        if (current != active) {
+            passes_[kPassIndexGaussianBlurX]->SetActive(active);
+            passes_[kPassIndexGaussianBlurY]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 ガウシアンフィルタ（ぼかし） を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsGaussianBlurActive() const {
+    return (passes_.size() > kPassIndexGaussianBlurX) ? passes_[kPassIndexGaussianBlurX]->IsActive() : false;
+}
+
+void PostProcess::SetGaussianBlurParams(int32_t radius, float sigma) {
+    if (passes_.size() > kPassIndexGaussianBlurY) {
+        auto blurX = dynamic_cast<GaussianBlurXPass*>(passes_[kPassIndexGaussianBlurX].get());
+        auto blurY = dynamic_cast<GaussianBlurYPass*>(passes_[kPassIndexGaussianBlurY].get());
+        if (blurX && blurY) {
+            blurX->SetParams(radius, sigma);
+            blurY->SetParams(radius, sigma);
+        }
+    }
+}
+
+int32_t PostProcess::GetGaussianBlurKernelRadius() const {
+    if (passes_.size() > kPassIndexGaussianBlurX) {
+        auto blurX = dynamic_cast<GaussianBlurXPass*>(passes_[kPassIndexGaussianBlurX].get());
+        if (blurX) {
+            return blurX->GetKernelRadius();
+        }
+    }
+    return 1;
+}
+
+float PostProcess::GetGaussianBlurSigma() const {
+    if (passes_.size() > kPassIndexGaussianBlurX) {
+        auto blurX = dynamic_cast<GaussianBlurXPass*>(passes_[kPassIndexGaussianBlurX].get());
+        if (blurX) {
+            return blurX->GetSigma();
+        }
+    }
+    return 2.0f;
 }

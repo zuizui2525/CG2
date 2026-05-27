@@ -68,6 +68,9 @@ public:
     void SetBoxFilterActive(bool active);
     bool IsBoxFilterActive() const;
 
+    void SetGaussianBlurActive(bool active);
+    bool IsGaussianBlurActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -83,6 +86,11 @@ public:
     // BoxFilterパラメータのアクセサ
     void SetBoxFilterKernelRadius(int32_t radius);
     int32_t GetBoxFilterKernelRadius() const;
+
+    // GaussianFilterパラメータのアクセサ
+    void SetGaussianBlurParams(int32_t radius, float sigma);
+    int32_t GetGaussianBlurKernelRadius() const;
+    float GetGaussianBlurSigma() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;
