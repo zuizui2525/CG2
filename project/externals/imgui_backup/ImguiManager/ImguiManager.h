@@ -10,8 +10,7 @@ public:
     void Initialize(HWND hwnd, ID3D12Device* device, int backBufferCount,
         DXGI_FORMAT rtvFormat,
         ID3D12DescriptorHeap* rtvHeap,
-        ID3D12DescriptorHeap* srvHeap,
-        ID3D12CommandQueue* commandQueue);
+        ID3D12DescriptorHeap* srvHeap);
 
     void Begin();   // フレーム開始（NewFrame系）
     void End();     // フレーム終了（Render + Draw）

@@ -26,7 +26,7 @@ void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t
 
 #ifdef _USEIMGUI
     imGui = std::make_unique<ImguiManager>();
-    imGui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap());
+    imGui->Initialize(window->GetHWND(), dxCommon->GetDevice(), dxCommon->GetBackBufferCount(), dxCommon->GetRtvFormat(), dxCommon->GetRtvHeap(), dxCommon->GetSrvHeap(), dxCommon->GetCommandQueue());
     Log::Write(L" ├─ 【ImGuiマネージャ初期化完了】 デバッグ用GUIの準備が整いました。");
 #endif
 

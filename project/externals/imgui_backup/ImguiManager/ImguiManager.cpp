@@ -2,29 +2,20 @@
 #include "ImguiManager.h"
 
 void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCount,
-    DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* srvHeap,
-    ID3D12CommandQueue* commandQueue) {
+    DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* srvHeap) {
     if (initialized_) return;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
     ImGui_ImplWin32_Init(hwnd);
-
-    ImGui_ImplDX12_InitInfo initInfo = {};
-    initInfo.Device = device;
-    initInfo.CommandQueue = commandQueue;
-    initInfo.NumFramesInFlight = backBufferCount;
-    initInfo.RTVFormat = rtvFormat;
-    initInfo.SrvDescriptorHeap = srvHeap;
-    initInfo.LegacySingleSrvCpuDescriptor = srvHeap->GetCPUDescriptorHandleForHeapStart();
-    initInfo.LegacySingleSrvGpuDescriptor = srvHeap->GetGPUDescriptorHandleForHeapStart();
-
-    ImGui_ImplDX12_Init(&initInfo);
+    ImGui_ImplDX12_Init(device,
+        backBufferCount,
+        rtvFormat,
+        rtvHeap,
+        srvHeap->GetCPUDescriptorHandleForHeapStart(),
+        srvHeap->GetGPUDescriptorHandleForHeapStart());
 
     initialized_ = true;
 }
