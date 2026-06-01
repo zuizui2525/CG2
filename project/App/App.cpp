@@ -49,6 +49,8 @@ void App::Run() {
 #ifdef _USEIMGUI
     engine_->ImGuiBegin();
 
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
     // 全シーン共通のデバッグメニュー
     ImGui::Begin("Scene Manager");
     ImGui::Text("Current Scene: %s", SceneManager::GetInstance()->GetCurrentSceneName().c_str());
