@@ -93,6 +93,9 @@ void App::Run() {
         ImGui::PopStyleVar();
     }
 
+    // Console ウィンドウの描画
+    Log::DrawConsoleWindow();
+
     // 全シーン共通のデバッグメニュー
     ImGui::Begin("Scene Manager");
     ImGui::Text("Current Scene: %s", SceneManager::GetInstance()->GetCurrentSceneName().c_str());

@@ -1,10 +1,75 @@
 #ifdef _USEIMGUI
 #include "ImguiManager.h"
+#include <cassert>
+#include <cstdint>
+
+namespace {
+    // ImGui用のSRVスペース管理（インデックス100から20個確保：競合防止）
+    static constexpr UINT kImGuiSrvStartIndex = 100;
+    static constexpr UINT kImGuiSrvCount = 20;
+
+    // 使用状況をビットマスクで管理（0:空き, 1:使用中）
+    static uint32_t s_srvUsedMask = 0;
+    static ID3D12DescriptorHeap* s_srvHeap = nullptr;
+    static ID3D12Device* s_device = nullptr;
+
+    // ディスクリプタの確保コールバック
+    void ImGui_SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_desc_handle) {
+        (void)info;
+        assert(s_srvHeap != nullptr);
+        assert(s_device != nullptr);
+
+        int freeIndex = -1;
+        for (int i = 0; i < static_cast<int>(kImGuiSrvCount); ++i) {
+            if ((s_srvUsedMask & (1 << i)) == 0) {
+                freeIndex = i;
+                s_srvUsedMask |= (1 << i); // 使用中にマーク
+                break;
+            }
+        }
+
+        assert(freeIndex != -1 && "ImGui SRV descriptor heap is full!");
+
+        UINT descriptorSize = s_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        UINT srvIndex = kImGuiSrvStartIndex + freeIndex;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = s_srvHeap->GetCPUDescriptorHandleForHeapStart();
+        cpuHandle.ptr += srvIndex * descriptorSize;
+        *out_cpu_desc_handle = cpuHandle;
+
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = s_srvHeap->GetGPUDescriptorHandleForHeapStart();
+        gpuHandle.ptr += srvIndex * descriptorSize;
+        *out_gpu_desc_handle = gpuHandle;
+    }
+
+    // ディスクリプタの解放コールバック
+    void ImGui_SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_desc_handle) {
+        (void)info;
+        (void)cpu_desc_handle;
+        assert(s_srvHeap != nullptr);
+        assert(s_device != nullptr);
+
+        UINT descriptorSize = s_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuStart = s_srvHeap->GetGPUDescriptorHandleForHeapStart();
+        
+        SIZE_T offset = gpu_desc_handle.ptr - gpuStart.ptr;
+        UINT srvIndex = static_cast<UINT>(offset / descriptorSize);
+
+        if (srvIndex >= kImGuiSrvStartIndex && srvIndex < kImGuiSrvStartIndex + kImGuiSrvCount) {
+            UINT indexInPool = srvIndex - kImGuiSrvStartIndex;
+            s_srvUsedMask &= ~(1 << indexInPool); // 空きにリセット
+        }
+    }
+}
 
 void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCount,
     DXGI_FORMAT rtvFormat, ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* srvHeap,
     ID3D12CommandQueue* commandQueue) {
     if (initialized_) return;
+
+    // 静的変数のセットアップ
+    s_srvHeap = srvHeap;
+    s_device = device;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -12,6 +77,23 @@ void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCou
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    // --- 日本語フォント（Windows標準）のフォールバックロード ---
+    // マジックナンバーを排除したフォントサイズ定数定義
+    static constexpr float kFontSize = 14.5f; 
+    ImFont* font = nullptr;
+    const char* fontPaths[] = {
+        "C:\\Windows\\Fonts\\YuGothM.ttc", // 1. 游ゴシック（極めて美麗なモダンゴシック）
+        "C:\\Windows\\Fonts\\meiryo.ttc",  // 2. メイリオ（視認性に優れた定番フォント）
+        "C:\\Windows\\Fonts\\msgothic.ttc" // 3. ＭＳ ゴシック（100%確実に存在するセーフティフォールバック）
+    };
+
+    for (const char* path : fontPaths) {
+        font = io.Fonts->AddFontFromFileTTF(path, kFontSize, nullptr, io.Fonts->GetGlyphRangesJapanese());
+        if (font) {
+            break; // 正常に読み込めたらループを抜ける
+        }
+    }
 
     ImGui_ImplWin32_Init(hwnd);
 
@@ -21,8 +103,10 @@ void ImguiManager::Initialize(HWND hwnd, ID3D12Device* device, int backBufferCou
     initInfo.NumFramesInFlight = backBufferCount;
     initInfo.RTVFormat = rtvFormat;
     initInfo.SrvDescriptorHeap = srvHeap;
-    initInfo.LegacySingleSrvCpuDescriptor = srvHeap->GetCPUDescriptorHandleForHeapStart();
-    initInfo.LegacySingleSrvGpuDescriptor = srvHeap->GetGPUDescriptorHandleForHeapStart();
+    
+    // ★修正: 1.92以降の新しいアロケータコールバックを登録
+    initInfo.SrvDescriptorAllocFn = ImGui_SrvDescriptorAlloc;
+    initInfo.SrvDescriptorFreeFn = ImGui_SrvDescriptorFree;
 
     ImGui_ImplDX12_Init(&initInfo);
 

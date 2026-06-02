@@ -1,11 +1,17 @@
 #include "Engine/Base/Log/Log.h"
 #include "Engine/Base/Utils/StringUtility.h"
 
+#include "imgui.h"
+
 // 静的メンバ変数の実体定義
 std::ofstream Log::logStream_;
 std::string Log::logFileName_;
 bool Log::isInitialized_ = false;
 std::chrono::steady_clock::time_point Log::startTime_;
+
+std::vector<std::string> Log::logMessages_;
+bool Log::showConsole_ = true;
+size_t Log::lastLogSize_ = 0;
 
 void Log::Initialize() {
     if (isInitialized_) return;
@@ -85,6 +91,12 @@ void Log::Write(const std::string& message) {
     std::string timeStr = std::format("[time|{:02d}h:{:02d}m:{:02d}.{:03d}s] ", h, m, s, ms);
     std::string fullMessage = timeStr + cleanMessage;
 
+    // バッファへの蓄積（リングバッファ処理）
+    if (logMessages_.size() >= kMaxLogLines) {
+        logMessages_.erase(logMessages_.begin());
+    }
+    logMessages_.push_back(fullMessage);
+
     if (logStream_.is_open()) {
         logStream_ << fullMessage << std::endl;
     }
@@ -109,5 +121,57 @@ void Log::Write(const std::wstring& message) {
 
 void Log::Write(std::ostream& os, const std::wstring& message) {
     Write(os, ConvertString(message));
+}
+
+const std::vector<std::string>& Log::GetLogMessages() {
+    return logMessages_;
+}
+
+void Log::ClearLog() {
+    logMessages_.clear();
+}
+
+void Log::DrawConsoleWindow() {
+#ifdef _USEIMGUI
+    if (!showConsole_) return;
+
+    if (ImGui::Begin("Console", &showConsole_)) {
+        if (ImGui::Button("Clear")) {
+            ClearLog();
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("Max lines: %zu", kMaxLogLines);
+        ImGui::Separator();
+
+        // スクロール可能な子ウィンドウ
+        ImGui::BeginChild("LogRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+        
+        for (const auto& log : logMessages_) {
+            // ログの種類に応じた色分け
+            ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // デフォルト白
+            
+            if (log.find("error") != std::string::npos || log.find("failed") != std::string::npos || log.find("Error") != std::string::npos) {
+                color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // エラー：マイルドレッド
+            } else if (log.find("warning") != std::string::npos || log.find("Warning") != std::string::npos) {
+                color = ImVec4(1.0f, 0.8f, 0.2f, 1.0f); // 警告：マイルドイエロー
+            } else if (log.find("【") != std::string::npos || log.find("起動") != std::string::npos || log.find("完了") != std::string::npos) {
+                color = ImVec4(0.4f, 1.0f, 0.4f, 1.0f); // システム：マイルドグリーン
+            }
+
+            ImGui::PushStyleColor(ImGuiCol_Text, color);
+            ImGui::TextUnformatted(log.c_str());
+            ImGui::PopStyleColor();
+        }
+
+        // 新規ログ追加時に自動で最下部へスクロール
+        if (logMessages_.size() > lastLogSize_) {
+            ImGui::SetScrollHereY(1.0f);
+            lastLogSize_ = logMessages_.size();
+        }
+        
+        ImGui::EndChild();
+    }
+    ImGui::End();
+#endif
 }
 
