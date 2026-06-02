@@ -117,11 +117,13 @@ void TitleScene::Update() {
         SceneManager::GetInstance()->ChangeScene("Debug");
     }
 
+#ifdef _USEIMGUI
     // モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
         cameraMgr_->SetActiveCamera(isCurrentlyDebug ? "Main" : "Debug");
     }
+#endif
 
     // ライトとオブジェクトの更新
     dirLight_->Update();

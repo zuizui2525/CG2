@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
+#include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include <algorithm>
 #include "imgui.h"
 #include "Engine/Base/BaseResource.h"
@@ -11,6 +11,7 @@ void DebugCamera::Initialize() {
 }
 
 void DebugCamera::Update(Input* input) {
+#ifdef _USEIMGUI
     if (!hwnd_ || !isActive_) return;
 
     // --- 1. カーソル制御と中央固定 ---
@@ -60,6 +61,9 @@ void DebugCamera::Update(Input* input) {
     }
 
     BaseCamera::Update();
+#else
+    (void)input;
+#endif
 }
 
 void DebugCamera::SetCursorVisible(bool isVisible) {

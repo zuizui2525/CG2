@@ -71,12 +71,14 @@ void GameOverScene::ImGuiControl() {
  * @brief 毎フレーム更新処理（キー入力によるカメラ切り替え、オブジェクトの座標・パラメータ更新）
  */
 void GameOverScene::Update() {
+#ifdef _USEIMGUI
     // TABキーによりメインカメラとデバッグカメラを切り替える
     static constexpr int kCameraToggleKey = DIK_TAB; // カメラ切り替え用キー定数
     if (input_->Trigger(kCameraToggleKey)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
         cameraMgr_->SetActiveCamera(isCurrentlyDebug ? kMainCameraName : kDebugCameraName);
     }
+#endif
 
     // ライトパラメータとCubeの行列更新
     dirLight_->Update();

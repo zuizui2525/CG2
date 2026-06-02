@@ -168,11 +168,13 @@ void DebugScene::Update() {
         }
     }
 
+#ifdef _USEIMGUI
     // モード切り替え（TABキー）
     if (input_->Trigger(DIK_TAB)) {
         bool isCurrentlyDebug = (cameraMgr_->GetActiveCamera() == debugCamera_.get());
         cameraMgr_->SetActiveCamera(isCurrentlyDebug ? "Main" : "Debug");
     }
+#endif
 
     // オブジェクトの更新
     lightMgr_->Update();
