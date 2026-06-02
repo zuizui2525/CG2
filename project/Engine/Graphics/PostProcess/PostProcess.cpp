@@ -96,10 +96,10 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<GaussianBlurXPass>()); // 5: GaussianBlurX
     passes_.push_back(std::make_unique<GaussianBlurYPass>()); // 6: GaussianBlurY
 
+    // 全パスの初期化
     for (auto& pass : passes_) {
         pass->Initialize(engine->GetDevice());
     }
-    Log::Write(L" ├─ 【ポストプロセス初期化完了】 レンダーテクスチャおよび各種エフェクトパスの準備が整いました。");
 }
 
 void PostProcess::PreDraw() {
@@ -123,17 +123,28 @@ void PostProcess::PostDraw() {
     renderTexture_->PostDraw(commandList);
 }
 
-void PostProcess::Draw() {
+D3D12_GPU_DESCRIPTOR_HANDLE PostProcess::GetFinalSrvGpuHandle() const {
+    std::vector<IPostProcessPass*> activePasses;
+    for (size_t i = 1; i < passes_.size(); ++i) {
+        if (passes_[i]->IsActive()) {
+            activePasses.push_back(passes_[i].get());
+        }
+    }
+    if (activePasses.empty()) {
+        // エフェクトがない場合はそのままメインのレンダーテクスチャSRVを返す
+        return renderTexture_->GetSrvGpuHandle();
+    }
+    // エフェクトがある場合、最終結果は常に `renderTextureTemp_` に格納されます
+    return renderTextureTemp_->GetSrvGpuHandle();
+}
+
+void PostProcess::ProcessEffects() {
     Zuizui* engine = EngineResource::GetEngine();
     assert(engine != nullptr);
     assert(renderTexture_ != nullptr);
     assert(renderTextureTemp_ != nullptr);
 
     ID3D12GraphicsCommandList* commandList = engine->GetDxCommon()->GetCommandList();
-
-    // スワップチェーンの現在のバックバッファRTVを取得
-    UINT backBufferIndex = engine->GetDxCommon()->GetBackBufferIndex();
-    D3D12_CPU_DESCRIPTOR_HANDLE swapchainRtv = engine->GetDxCommon()->GetRtvHandle(backBufferIndex);
 
     // アクティブなパスを収集（CopyImagePassは除く）
     std::vector<IPostProcessPass*> activePasses;
@@ -143,39 +154,62 @@ void PostProcess::Draw() {
         }
     }
 
+    if (activePasses.empty()) {
+        return; // エフェクトがないなら何もしない
+    }
+
     // レンダーターゲット遷移用の深度ステンシルハンドル
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = engine->GetDxCommon()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
-    if (activePasses.empty()) {
-        // アクティブなエフェクトパスがない場合は、メインテクスチャからスワップチェーンへ等倍コピーを描画
-        commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
-        passes_[kPassIndexCopy]->Draw(commandList, renderTexture_->GetSrvGpuHandle());
-    } else {
-        // ピンポンバッファのポインタ切り替えによるチェイン描画
-        RenderTexture* currentInput = renderTexture_.get();
-        RenderTexture* currentOutput = renderTextureTemp_.get();
+    // ピンポンバッファのポインタ切り替えによるチェイン描画
+    RenderTexture* currentInput = renderTexture_.get();
+    RenderTexture* currentOutput = renderTextureTemp_.get();
 
-        for (size_t i = 0; i < activePasses.size(); ++i) {
-            bool isLast = (i == activePasses.size() - 1);
+    for (size_t i = 0; i < activePasses.size(); ++i) {
+        // すべてテクスチャに出力する
+        currentOutput->PreDraw(commandList, dsvHandle);
+        activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
+        currentOutput->PostDraw(commandList);
 
-            if (isLast) {
-                // 最後のパスは結果を直接スワップチェーン（画面）に描画
-                commandList->OMSetRenderTargets(1, &swapchainRtv, FALSE, nullptr);
-                activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
-            } else {
-                // 中間パスは、一時バッファに出力
-                currentOutput->PreDraw(commandList, dsvHandle);
-                
-                activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
-                
-                currentOutput->PostDraw(commandList);
-
-                // ピンポン切り替え
-                currentInput = currentOutput;
-                currentOutput = (currentInput == renderTextureTemp_.get()) ? renderTexture_.get() : renderTextureTemp_.get();
-            }
-        }
+        // 次のパスに向けてインプットとアウトプットを反転
+        currentInput = currentOutput;
+        currentOutput = (currentInput == renderTextureTemp_.get()) ? renderTexture_.get() : renderTextureTemp_.get();
     }
+
+    // もし最終結果が `renderTexture_` に戻ってしまっていた場合、
+    // `renderTextureTemp_` にコピーして、常に `renderTextureTemp_` が最終結果のSRVになるように確定させます。
+    if (currentInput == renderTexture_.get()) {
+        renderTextureTemp_->PreDraw(commandList, dsvHandle);
+        passes_[kPassIndexCopy]->Draw(commandList, renderTexture_->GetSrvGpuHandle());
+        renderTextureTemp_->PostDraw(commandList);
+    }
+}
+
+void PostProcess::Draw(D3D12_CPU_DESCRIPTOR_HANDLE targetRtv) {
+    Zuizui* engine = EngineResource::GetEngine();
+    assert(engine != nullptr);
+
+    ID3D12GraphicsCommandList* commandList = engine->GetDxCommon()->GetCommandList();
+
+    // エフェクトをすべて処理し、レンダーテクスチャに確定させる
+    ProcessEffects();
+
+    // 確定したテクスチャのSRVハンドルを取得
+    D3D12_GPU_DESCRIPTOR_HANDLE finalSrv = GetFinalSrvGpuHandle();
+
+    // 指定されたレンダーターゲット（スワップチェーン等）にコピー描画する
+    commandList->OMSetRenderTargets(1, &targetRtv, FALSE, nullptr);
+    passes_[kPassIndexCopy]->Draw(commandList, finalSrv);
+}
+
+void PostProcess::Draw() {
+    Zuizui* engine = EngineResource::GetEngine();
+    assert(engine != nullptr);
+
+    // スワップチェーンの現在のバックバッファRTVを取得して描画
+    UINT backBufferIndex = engine->GetDxCommon()->GetBackBufferIndex();
+    D3D12_CPU_DESCRIPTOR_HANDLE swapchainRtv = engine->GetDxCommon()->GetRtvHandle(backBufferIndex);
+    Draw(swapchainRtv);
 }
 
 void PostProcess::SetClearColorMode(PostClearColorMode mode) {

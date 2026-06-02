@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/PSO/BlendState/BlendStateBuilder.h"
+#include "Engine/Graphics/PSO/BlendState/BlendStateBuilder.h"
 
 BlendStateBuilder::BlendStateBuilder() {
     // デフォルト（ブレンドなし）
@@ -39,9 +39,9 @@ void BlendStateBuilder::SetBlendMode(BlendMode mode) {
         rt0.SrcBlend = D3D12_BLEND_SRC_ALPHA;
         rt0.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 
-        // ★追加: アルファ値の計算設定 (これを忘れると 0x0 エラーになる)
-        rt0.SrcBlendAlpha = D3D12_BLEND_ONE;
-        rt0.DestBlendAlpha = D3D12_BLEND_ZERO;
+        // ★修正: レンダーターゲットのアルファ値を維持（上書きしない）
+        rt0.SrcBlendAlpha = D3D12_BLEND_ZERO;
+        rt0.DestBlendAlpha = D3D12_BLEND_ONE;
         rt0.BlendOpAlpha = D3D12_BLEND_OP_ADD;
         break;
 
@@ -51,9 +51,9 @@ void BlendStateBuilder::SetBlendMode(BlendMode mode) {
         rt0.SrcBlend = D3D12_BLEND_SRC_ALPHA;
         rt0.DestBlend = D3D12_BLEND_ONE;
 
-        // ★追加
-        rt0.SrcBlendAlpha = D3D12_BLEND_ONE;
-        rt0.DestBlendAlpha = D3D12_BLEND_ZERO;
+        // ★修正: レンダーターゲットのアルファ値を維持（上書きしない）
+        rt0.SrcBlendAlpha = D3D12_BLEND_ZERO;
+        rt0.DestBlendAlpha = D3D12_BLEND_ONE;
         rt0.BlendOpAlpha = D3D12_BLEND_OP_ADD;
         break;
 
@@ -63,9 +63,9 @@ void BlendStateBuilder::SetBlendMode(BlendMode mode) {
         rt0.SrcBlend = D3D12_BLEND_SRC_ALPHA;
         rt0.DestBlend = D3D12_BLEND_ONE;
 
-        // ★追加
-        rt0.SrcBlendAlpha = D3D12_BLEND_ONE;
-        rt0.DestBlendAlpha = D3D12_BLEND_ZERO;
+        // ★修正: レンダーターゲットのアルファ値を維持（上書きしない）
+        rt0.SrcBlendAlpha = D3D12_BLEND_ZERO;
+        rt0.DestBlendAlpha = D3D12_BLEND_ONE;
         rt0.BlendOpAlpha = D3D12_BLEND_OP_ADD;
         break;
 
@@ -75,9 +75,9 @@ void BlendStateBuilder::SetBlendMode(BlendMode mode) {
         rt0.SrcBlend = D3D12_BLEND_ZERO;
         rt0.DestBlend = D3D12_BLEND_SRC_COLOR;
 
-        // ★追加
-        rt0.SrcBlendAlpha = D3D12_BLEND_ONE;
-        rt0.DestBlendAlpha = D3D12_BLEND_ZERO;
+        // ★修正: レンダーターゲットのアルファ値を維持（上書きしない）
+        rt0.SrcBlendAlpha = D3D12_BLEND_ZERO;
+        rt0.DestBlendAlpha = D3D12_BLEND_ONE;
         rt0.BlendOpAlpha = D3D12_BLEND_OP_ADD;
         break;
 
@@ -87,9 +87,9 @@ void BlendStateBuilder::SetBlendMode(BlendMode mode) {
         rt0.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;
         rt0.DestBlend = D3D12_BLEND_ONE;
 
-        // ★追加
-        rt0.SrcBlendAlpha = D3D12_BLEND_ONE;
-        rt0.DestBlendAlpha = D3D12_BLEND_ZERO;
+        // ★修正: レンダーターゲットのアルファ値を維持（上書きしない）
+        rt0.SrcBlendAlpha = D3D12_BLEND_ZERO;
+        rt0.DestBlendAlpha = D3D12_BLEND_ONE;
         rt0.BlendOpAlpha = D3D12_BLEND_OP_ADD;
         break;
     }

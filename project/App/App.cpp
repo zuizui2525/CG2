@@ -45,17 +45,57 @@ void App::Initialize() {
 }
 
 void App::Run() {
+    bool isGameViewVisible = false;
+
     // --- ImGui ---
 #ifdef _USEIMGUI
     engine_->ImGuiBegin();
 
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
+    // Game View ウィンドウ (UnityのGameビューのようにImGui内にゲーム画面を描画)
+    static bool showGameView = true;
+    if (showGameView) {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        if (ImGui::Begin("Game View", &showGameView)) {
+            isGameViewVisible = true;
+            
+            // ウィンドウサイズを取得し、アスペクト比を維持したサイズを計算
+            ImVec2 contentSize = ImGui::GetContentRegionAvail();
+            
+            // アスペクト比（16:9）を維持（マジックナンバーを避けるための定数定義）
+            const float kAspectWidth = 16.0f;
+            const float kAspectHeight = 9.0f;
+            const float kAspectRatio = kAspectWidth / kAspectHeight;
+            
+            float width = contentSize.x;
+            float height = contentSize.x / kAspectRatio;
+            
+            if (height > contentSize.y) {
+                height = contentSize.y;
+                width = contentSize.y * kAspectRatio;
+            }
+            
+            // 中央揃え用のパディング計算
+            ImVec2 cursorPadding = ImVec2(
+                (contentSize.x - width) * 0.5f,
+                (contentSize.y - height) * 0.5f
+            );
+            ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + cursorPadding.x, ImGui::GetCursorPosY() + cursorPadding.y));
+            
+            // ポストプロセスの最終結果テクスチャを描画
+            D3D12_GPU_DESCRIPTOR_HANDLE finalSrv = postProcess_->GetFinalSrvGpuHandle();
+            ImTextureID texID = (ImTextureID)finalSrv.ptr;
+            
+            ImGui::Image(texID, ImVec2(width, height));
+        }
+        ImGui::End();
+        ImGui::PopStyleVar();
+    }
+
     // 全シーン共通のデバッグメニュー
     ImGui::Begin("Scene Manager");
     ImGui::Text("Current Scene: %s", SceneManager::GetInstance()->GetCurrentSceneName().c_str());
-
-
 
     // マジックストリング回避のためのローカル定数定義
     static const std::string kDebugSceneName = "Debug";
@@ -103,8 +143,14 @@ void App::Run() {
 
     postProcess_->PostDraw();
 
-    // 2. スワップチェーンへのコピー＆転送パス
-    postProcess_->Draw();
+    // 2. エフェクト適用およびスワップチェーンへのコピー処理
+    if (isGameViewVisible) {
+        // Game Viewが表示されている場合、エフェクト適用のみを行い、スワップチェーンへのコピーは不要
+        postProcess_->ProcessEffects();
+    } else {
+        // Game Viewが表示されていない場合、通常どおりエフェクト適用＆スワップチェーン全体への描画コピーを行う
+        postProcess_->Draw();
+    }
 
     engine_->EndFrame();
 }

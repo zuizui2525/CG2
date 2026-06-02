@@ -36,7 +36,22 @@ public:
     void PostDraw();
 
     /// <summary>
-    /// スワップチェーン（最終画面）への全画面コピー描画（マルチパスのピンポン実行）
+    /// エフェクトをすべて処理し、最終結果をレンダーテクスチャ内に確定する
+    /// </summary>
+    void ProcessEffects();
+
+    /// <summary>
+    /// 現在保持している最終結果テクスチャのSRVハンドルを返す（軽量ゲッター）
+    /// </summary>
+    D3D12_GPU_DESCRIPTOR_HANDLE GetFinalSrvGpuHandle() const;
+
+    /// <summary>
+    /// 指定されたレンダーターゲットに最終結果を描画コピーする
+    /// </summary>
+    void Draw(D3D12_CPU_DESCRIPTOR_HANDLE targetRtv);
+
+    /// <summary>
+    /// スワップチェーン（最終画面）への全画面コピー描画
     /// </summary>
     void Draw();
 
