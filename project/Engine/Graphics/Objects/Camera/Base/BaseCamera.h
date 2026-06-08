@@ -26,6 +26,7 @@ public:
     // 行列取得  
     const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }  
     const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }  
+    void UpdateProjection(float aspect);
 
 protected:  
     Transform transform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };

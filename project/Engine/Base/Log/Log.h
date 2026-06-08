@@ -29,6 +29,9 @@ public:
     // ImGui用描画関数
     static void DrawConsoleWindow();
 
+    // コンソール表示フラグのポインタ取得
+    static bool* GetShowConsolePtr();
+
 private:
     static void Initialize();
 

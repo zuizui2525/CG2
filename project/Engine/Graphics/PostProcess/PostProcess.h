@@ -90,6 +90,7 @@ public:
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
     void ClearEffects();
+    void Resize(uint32_t width, uint32_t height);
 
     // ビネットパラメータのアクセサ（後方互換または直接コントロール用）
     void SetVignetteScale(float scale);

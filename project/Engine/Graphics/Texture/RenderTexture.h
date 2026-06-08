@@ -30,6 +30,7 @@ public:
 
     // 指定された新しいクリアカラーでリソースを再作成する
     void Recreate(const Vector4& newClearColor);
+    void Resize(uint32_t width, uint32_t height);
 
     // ゲッター
     ID3D12Resource* GetResource() const { return resource_.Get(); }

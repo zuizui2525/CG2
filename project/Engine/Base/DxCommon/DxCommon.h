@@ -25,6 +25,7 @@ public:
 	void DrawImGui();
 	void FrameStart();
 	void FrameEnd(int targetFps);
+	void ResizeSwapChain(int32_t width, int32_t height);
 public:
 	// --- 基本系 ---
 	ID3D12Device* GetDevice() const { return device_.Get(); }

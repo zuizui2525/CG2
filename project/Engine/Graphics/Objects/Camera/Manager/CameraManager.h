@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -35,6 +35,7 @@ public:
 
     // GPUアドレス取得
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return resource_->GetGPUVirtualAddress(); }
+    void UpdateAllProjection(float aspect);
 
 private:
     std::map<std::string, std::shared_ptr<BaseCamera>> cameras_;

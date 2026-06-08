@@ -120,3 +120,11 @@ void RenderTexture::PostDraw(ID3D12GraphicsCommandList* commandList) {
         currentState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     }
 }
+
+void RenderTexture::Resize(uint32_t width, uint32_t height) {
+    if (width_ == width && height_ == height) return;
+    width_ = width;
+    height_ = height;
+    Recreate(clearColor_);
+}
+

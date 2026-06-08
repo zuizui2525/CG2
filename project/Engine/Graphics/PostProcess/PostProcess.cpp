@@ -199,6 +199,32 @@ void PostProcess::Draw(D3D12_CPU_DESCRIPTOR_HANDLE targetRtv) {
 
     // 指定されたレンダーターゲット（スワップチェーン等）にコピー描画する
     commandList->OMSetRenderTargets(1, &targetRtv, FALSE, nullptr);
+
+    // ウィンドウの現在のクライアント領域サイズに合わせてビューポートを動的に更新（アスペクト比崩れ・ずれ防止）
+    HWND hwnd = engine->GetWindow()->GetHWND();
+    RECT clientRect{};
+    GetClientRect(hwnd, &clientRect);
+    
+    float width = static_cast<float>(clientRect.right - clientRect.left);
+    float height = static_cast<float>(clientRect.bottom - clientRect.top);
+    
+    D3D12_VIEWPORT vp{};
+    vp.Width = width;
+    vp.Height = height;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    
+    D3D12_RECT sr{};
+    sr.left = 0;
+    sr.right = static_cast<LONG>(width);
+    sr.top = 0;
+    sr.bottom = static_cast<LONG>(height);
+    
+    commandList->RSSetViewports(1, &vp);
+    commandList->RSSetScissorRects(1, &sr);
+
     passes_[kPassIndexCopy]->Draw(commandList, finalSrv);
 }
 
@@ -500,3 +526,13 @@ float PostProcess::GetGaussianBlurSigma() const {
     }
     return 2.0f;
 }
+
+void PostProcess::Resize(uint32_t width, uint32_t height) {
+    if (renderTexture_) {
+        renderTexture_->Resize(width, height);
+    }
+    if (renderTextureTemp_) {
+        renderTextureTemp_->Resize(width, height);
+    }
+}
+

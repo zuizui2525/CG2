@@ -103,3 +103,12 @@ void CameraManager::SetActiveCamera(const std::string& name) {
         Log::Write(std::format(L" ├─ 【アクティブカメラ切替】 「{}」カメラがアクティブになりました。", ConvertString(name)));
     }
 }
+
+void CameraManager::UpdateAllProjection(float aspect) {
+    for (auto& [name, camera] : cameras_) {
+        if (camera) {
+            camera->UpdateProjection(aspect);
+        }
+    }
+}
+

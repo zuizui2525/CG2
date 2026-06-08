@@ -175,3 +175,7 @@ void Log::DrawConsoleWindow() {
 #endif
 }
 
+bool* Log::GetShowConsolePtr() {
+    return &showConsole_;
+}
+

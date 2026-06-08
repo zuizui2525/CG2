@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/Camera/Base/BaseCamera.h"
+#include "Engine/Graphics/Objects/Camera/Base/BaseCamera.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
 #include "ImGuiManager.h"
 
@@ -42,3 +42,9 @@ void BaseCamera::ImGuiControl(const std::string& name) {
     }
 #endif
 }
+
+void BaseCamera::UpdateProjection(float aspect) {
+    aspectRatio_ = aspect;
+    projectionMatrix_ = Math::MakePerspectiveFovMatrix(fov_, aspectRatio_, nearZ_, farZ_);
+}
+

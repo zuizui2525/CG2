@@ -299,7 +299,9 @@ void DxCommon::CreateRenderTargets() {
 
 void DxCommon::CreateDepthStencil(int32_t width, int32_t height) {
 	depthStencilResource_ = DxUtils::CreateDepthStencilTextureResource(device_.Get(), width, height);
-	dsvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	if (!dsvDescriptorHeap_) {
+		dsvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	}
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
@@ -330,3 +332,75 @@ void DxCommon::CreateDXC() {
 	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
 }
+
+void DxCommon::ResizeSwapChain(int32_t width, int32_t height) {
+	if (width <= 0 || height <= 0) return;
+
+	// 1. GPUの実行完了を待機 (安全なバッファ解放のため)
+	static uint64_t fenceValue = 0;
+	fenceValue++;
+	commandQueue_->Signal(fence_.Get(), fenceValue);
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (fenceEvent != nullptr) {
+		if (fence_->GetCompletedValue() < fenceValue) {
+			fence_->SetEventOnCompletion(fenceValue, fenceEvent);
+			WaitForSingleObject(fenceEvent, INFINITE);
+		}
+		CloseHandle(fenceEvent);
+	}
+
+	// 2. コマンドリストが開いている場合、一度クローズする
+	// (ResizeBuffers実行時にコマンドリストがオープンだと失敗することがあるため)
+	HRESULT hr = commandList_->Close();
+	bool wasOpen = SUCCEEDED(hr);
+
+	// 3. スワップチェーンバッファと深度ステンシルの参照をクリア
+	for (UINT i = 0; i < backBufferCount_; ++i) {
+		swapChainResources_[i].Reset();
+	}
+	depthStencilResource_.Reset();
+
+	// 4. バッファをリサイズ
+	hr = swapChain_->ResizeBuffers(
+		backBufferCount_,
+		width,
+		height,
+		DXGI_FORMAT_R8G8B8A8_UNORM, // スワップチェーンフォーマット
+		0
+	);
+	assert(SUCCEEDED(hr));
+
+	// 5. RTVの再生成
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+	rtvDesc.Format = rtvFormat_;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	UINT descriptorSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	for (UINT i = 0; i < backBufferCount_; ++i) {
+		rtvHandles_[i].ptr = rtvStartHandle.ptr + i * descriptorSize;
+		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&swapChainResources_[i]));
+		assert(SUCCEEDED(hr));
+
+		device_->CreateRenderTargetView(
+			swapChainResources_[i].Get(),
+			&rtvDesc,
+			rtvHandles_[i]
+		);
+	}
+
+	// 6. 深度ステンシル（DSV）の再生成
+	CreateDepthStencil(width, height);
+
+	// 7. デフォルトのビューポート・シザー矩形の再初期化
+	InitializeViewport(width, height);
+	InitializeScissorRect(width, height);
+
+	// 8. コマンドリストを元のオープン状態に戻す
+	if (wasOpen) {
+		commandAllocator_->Reset();
+		commandList_->Reset(commandAllocator_.Get(), nullptr);
+	}
+}
+
