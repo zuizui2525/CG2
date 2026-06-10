@@ -219,13 +219,8 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
     }
     frameCounter_ = 0;
 
-    // 起動からの経過時間を取得
-    float timestamp = 0.0f;
-    auto now = std::chrono::steady_clock::now();
-    // LogクラスからstartTime_を取得できないため、一時的にシステム時間等の基準で記録するか、
-    // あるいはGetTickCount64()などをベースにする。ここでは再現性の高いミリ秒カウントを使用。
-    static auto startAppTime = std::chrono::steady_clock::now();
-    timestamp = std::chrono::duration<float>(now - startAppTime).count();
+    // 起動からの経過時間をLogクラスと同期して取得
+    float timestamp = Log::GetElapsedTime();
 
     FrameRecord newRecord;
     
@@ -376,13 +371,20 @@ D3D12_GPU_DESCRIPTOR_HANDLE ReplaySystem::GetReplaySrvGpuHandle() const {
     if (records_.empty()) return {};
 
     // 通常動作中（一時停止していない）は、最後に一時停止した時点のフレーム（キャッシュ）を返す
-    if (!isPaused_ && lastPausedGpuHandle_.ptr != 0) {
+    if (!isPaused_) {
+        if (lastPausedGpuHandle_.ptr == 0) {
+            // 起動後まだ一度も一時停止していない場合は、その時点の最新フレームで固定する
+            lastPausedGpuHandle_ = records_.back().srvGpuHandle;
+        }
         return lastPausedGpuHandle_;
     }
 
-    int32_t numRecords = static_cast<int32_t>(records_.size());
-    int32_t targetIdx = static_cast<int32_t>(seekProgress_ * (numRecords - 1));
-    targetIdx = std::clamp(targetIdx, 0, numRecords - 1);
+    int32_t startIdx = 0;
+    int32_t activeCount = GetEffectiveRecordCount(&startIdx);
+    if (activeCount == 0) return {};
+
+    int32_t targetIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
+    targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
     return records_[targetIdx].srvGpuHandle;
 }
 
@@ -410,9 +412,12 @@ float ReplaySystem::GetReplayMaxTimestamp() const {
     if (!isPaused_ || records_.empty()) {
         return -1.0f; // 無制限
     }
-    int32_t numRecords = static_cast<int32_t>(records_.size());
-    int32_t targetIdx = static_cast<int32_t>(seekProgress_ * (numRecords - 1));
-    targetIdx = std::clamp(targetIdx, 0, numRecords - 1);
+    int32_t startIdx = 0;
+    int32_t activeCount = GetEffectiveRecordCount(&startIdx);
+    if (activeCount == 0) return -1.0f;
+
+    int32_t targetIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
+    targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
     return records_[targetIdx].timestamp;
 }
 
@@ -452,5 +457,60 @@ void ReplaySystem::UpdateReplayPlay(float deltaTime) {
         isReplayPlaying_ = false; // 自動停止
     }
     needsCopy_ = true;
+}
+
+void ReplaySystem::SeekToTimestamp(float timestamp) {
+    if (records_.empty()) return;
+
+    // 1. ゲーム全体を強制的に一時停止（ポーズ）状態にする
+    SetPause(true);
+
+    // 2. 指定されたタイムスタンプに最も近い記録フレーム（時間差最小）を線形探索
+    size_t targetIdx = 0;
+    float minDiff = 10000.0f;
+    for (size_t i = 0; i < records_.size(); ++i) {
+        float diff = std::abs(timestamp - records_[i].timestamp);
+        if (diff < minDiff) {
+            minDiff = diff;
+            targetIdx = i;
+        }
+    }
+
+    // 3. 探索したインデックスからシーク位置の比率 (0.0f 〜 1.0f) を算出
+    int32_t numRecords = static_cast<int32_t>(records_.size());
+    if (numRecords > 1) {
+        seekProgress_ = static_cast<float>(targetIdx) / static_cast<float>(numRecords - 1);
+    } else {
+        seekProgress_ = 1.0f;
+    }
+
+    // 4. リプレイの自動送り再生は解除し、表示の更新フラグを立てる
+    isReplayPlaying_ = false;
+    needsCopy_ = true;
+}
+
+int32_t ReplaySystem::GetEffectiveRecordCount(int32_t* outStartIdx) const {
+    if (records_.empty()) {
+        if (outStartIdx) *outStartIdx = 0;
+        return 0;
+    }
+    float currentTimestamp = records_.back().timestamp;
+    constexpr float kMaxReplayTimeRange = 60.0f; // 最大60秒前までに制限
+
+    int32_t startIdx = 0;
+    for (size_t i = 0; i < records_.size(); ++i) {
+        if (currentTimestamp - records_[i].timestamp <= kMaxReplayTimeRange) {
+            startIdx = static_cast<int32_t>(i);
+            break;
+        }
+    }
+
+    if (outStartIdx) *outStartIdx = startIdx;
+    return static_cast<int32_t>(records_.size()) - startIdx;
+}
+
+float ReplaySystem::GetLatestRecordTimestamp() const {
+    if (records_.empty()) return -1.0f;
+    return records_.back().timestamp;
 }
 #endif

@@ -438,6 +438,7 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Debug\PerformanceMonitorWindow.h" />
     <ClInclude Include="Engine\Debug\SceneManagerWindow.h" />
     <ClInclude Include="Engine\Debug\ReplaySystem.h" />
+    <ClInclude Include="Engine\Debug\PopAnimation.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

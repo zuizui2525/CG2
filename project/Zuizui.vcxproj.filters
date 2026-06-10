@@ -199,6 +199,9 @@
     <ClInclude Include="Engine\Debug\ReplaySystem.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Debug\PopAnimation.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Square\SquareObject.h" />
     <ClInclude Include="Engine\Graphics\Objects\3d\Cube\CubeObject.h" />

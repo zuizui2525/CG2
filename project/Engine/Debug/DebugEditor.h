@@ -2,6 +2,7 @@
 #pragma once
 #include <memory>
 #include <windows.h>
+#include "Engine/Debug/PopAnimation.h"
 
 struct ID3D12GraphicsCommandList;
 
@@ -34,11 +35,15 @@ private:
     // 各ウィンドウの表示・非表示フラグ
     bool showGameView_ = true;
     bool showPerfMonitor_ = true;
+    bool showReplayView_ = true;
     bool isGameViewVisible_ = false;
 
     // ウィンドウ状態管理のメンバ変数
     bool isFullscreen_ = false;
     WINDOWPLACEMENT wpPrev_ = { sizeof(WINDOWPLACEMENT) };
     AspectType currentAspect_ = AspectType::Aspect16_9_Low;
+
+    PopAnimation replayPopAnim_;
+    bool wasReplayPlaying_ = false;
 };
 #endif

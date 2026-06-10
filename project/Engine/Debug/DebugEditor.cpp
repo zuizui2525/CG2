@@ -11,9 +11,11 @@
 DebugEditor::DebugEditor()
     : showGameView_(true),
       showPerfMonitor_(true),
+      showReplayView_(true),
       isGameViewVisible_(false),
       isFullscreen_(false),
-      currentAspect_(AspectType::Aspect16_9_Low) {
+      currentAspect_(AspectType::Aspect16_9_Low),
+      wasReplayPlaying_(false) {
     wpPrev_.length = sizeof(wpPrev_);
 }
 
@@ -56,9 +58,9 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
     // Scene Manager
     sceneManagerWindow_->Draw();
 
-    // Replay View (常時表示)
-    if (true) {
-        if (ImGui::Begin("Replay View")) {
+    // Replay View (表示フラグ showReplayView_ に連動)
+    if (showReplayView_) {
+        if (ImGui::Begin("Replay View", &showReplayView_)) {
             bool isPaused = ReplaySystem::GetInstance()->IsPaused();
 
             if (!isPaused) {
@@ -75,9 +77,18 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
             int32_t recordCount = ReplaySystem::GetInstance()->GetRecordCount();
             float progress = ReplaySystem::GetInstance()->GetSeekPos();
             
-            // 記録フレームに対応する秒数を計算 (5fps想定)
-            float maxSeconds = static_cast<float>(recordCount) / 5.0f;
-            float secondsAgo = (1.0f - progress) * maxSeconds;
+            int32_t startIdx = 0;
+            int32_t activeCount = ReplaySystem::GetInstance()->GetEffectiveRecordCount(&startIdx);
+
+            float secondsAgo = 0.0f;
+            if (activeCount > 0) {
+                // 現在のシーク位置に対応するインデックスを計算
+                int32_t targetIdx = startIdx + static_cast<int32_t>(progress * (activeCount - 1));
+                targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
+                
+                // 実際のタイムスタンプ差分から、正確な経過秒数を取得（FPSハードコードを完全排除）
+                secondsAgo = ReplaySystem::GetInstance()->GetReplayTimeOffset(targetIdx);
+            }
 
             char sliderLabel[64];
             if (recordCount == 0) {
@@ -96,7 +107,7 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
                         ReplaySystem::GetInstance()->SetReplayPlaying(false);
                     }
                 } else {
-                    if (ImGui::Button("Play  >")) {
+                    if (ImGui::Button("Play ▶")) {
                         // シークバーが最後まで達している場合は、最初から再生するために 0 に戻す
                         if (progress >= 1.0f) {
                             ReplaySystem::GetInstance()->SetSeekPos(0.0f);
@@ -111,6 +122,11 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             if (ImGui::SliderFloat("##Seek", &progress, 0.0f, 1.0f, sliderLabel)) {
                 ReplaySystem::GetInstance()->SetSeekPos(progress);
+            }
+
+            // 画像のタップクリック判定を有効化するため、ここで操作制限（Disabled）を解除
+            if (!isPaused) {
+                ImGui::EndDisabled();
             }
 
             ImGui::Separator();
@@ -132,13 +148,75 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
                     drawWidth = contentHeight * kDefaultAspect;
                 }
 
+                ImVec2 imgPosMin = ImGui::GetCursorScreenPos();
                 ImGui::Image((ImTextureID)srvGpu.ptr, ImVec2(drawWidth, drawHeight));
+
+                // 中央座標の計算
+                ImVec2 center = ImVec2(imgPosMin.x + drawWidth * 0.5f, imgPosMin.y + drawHeight * 0.5f);
+
+                // リプレイ再生状態の監視とトリガー
+                bool currentReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
+                if (currentReplayPlaying != wasReplayPlaying_) {
+                    if (isPaused) {
+                        replayPopAnim_.Trigger(currentReplayPlaying ? PopAnimation::Type::Play : PopAnimation::Type::Pause);
+                    }
+                    wasReplayPlaying_ = currentReplayPlaying;
+                }
+
+                // アニメーションの更新と描画
+                replayPopAnim_.Update(ImGui::GetIO().DeltaTime);
+                replayPopAnim_.Draw(ImGui::GetWindowDrawList(), center);
+
+                // 画像領域のタップ（左クリック）で再生/一時停止をトグル
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+                    if (isPaused) {
+                        // 一時停止中はリプレイの自動再生/一時停止をトグル
+                        bool isReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
+                        if (!isReplayPlaying) {
+                            // シーク位置が最後まで達している場合は、最初から再生するため0に戻す
+                            if (progress >= 1.0f) {
+                                ReplaySystem::GetInstance()->SetSeekPos(0.0f);
+                            }
+                        }
+                        ReplaySystem::GetInstance()->SetReplayPlaying(!isReplayPlaying);
+                    } else {
+                        // 通常動作中はゲームを一時停止にする
+                        ReplaySystem::GetInstance()->SetPause(true);
+                    }
+                }
+
+                // ゲーム実行中（未ポーズ）で、かつリプレイ映像が静止している場合のみ、中央に▶マークを常時表示（クリックによる自動一時停止ガイド）
+                if (!ReplaySystem::GetInstance()->IsReplayPlaying() && !isPaused) {
+                    ImVec2 rectMin = ImGui::GetItemRectMin();
+                    ImVec2 rectMax = ImGui::GetItemRectMax();
+
+                    // 1. 半透明グレーのオーバーレイ（透明度を下げて視認性を向上：120 ➡ 80）
+                    constexpr ImU32 kOverlayColor = IM_COL32(20, 20, 20, 80);
+                    ImGui::GetWindowDrawList()->AddRectFilled(rectMin, rectMax, kOverlayColor);
+
+                    // 中央座標
+                    ImVec2 center = ImVec2((rectMin.x + rectMax.x) * 0.5f, (rectMin.y + rectMax.y) * 0.5f);
+
+                    // 2. YouTube風の円形背景（透明度を下げてゲーム画面に馴染むように：160 ➡ 110）
+                    constexpr float kCircleRadius = 40.0f;
+                    constexpr ImU32 kCircleColor = IM_COL32(0, 0, 0, 110);
+                    constexpr int32_t kCircleSegments = 36;
+                    ImGui::GetWindowDrawList()->AddCircleFilled(center, kCircleRadius, kCircleColor, kCircleSegments);
+
+                    // 3. 白い再生三角形（▶）の描画（透明度を下げて落ち着いた半透明白に：240 ➡ 170）
+                    // 視覚的重心ズレ（右向き三角形特有の右寄りの偏り）を補正するため、X軸補正を -1.5f に変更し完全なセンタリングを行います。
+                    constexpr float kTriangleSize = 30.0f;
+                    constexpr float kH = kTriangleSize * 0.866f;
+                    constexpr float kXOffset = -1.5f; 
+                    constexpr float kYOffset = -1.0f;
+                    ImVec2 p1(center.x - kH * 0.333f + kXOffset, center.y - kTriangleSize * 0.5f + kYOffset);
+                    ImVec2 p2(center.x - kH * 0.333f + kXOffset, center.y + kTriangleSize * 0.5f + kYOffset);
+                    ImVec2 p3(center.x + kH * 0.667f + kXOffset, center.y + kYOffset);
+                    constexpr ImU32 kTriangleColor = IM_COL32(255, 255, 255, 170);
+                    ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, kTriangleColor);
+                }
             } else {
                 ImGui::Text("No replay data buffered yet.");
-            }
-
-            if (!isPaused) {
-                ImGui::EndDisabled();
             }
         }
         ImGui::End();
@@ -161,6 +239,7 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             ImGui::MenuItem("Game View", nullptr, &showGameView_);
             ImGui::MenuItem("Console", nullptr, Log::GetShowConsolePtr());
             ImGui::MenuItem("Performance Monitor", nullptr, &showPerfMonitor_);
+            ImGui::MenuItem("Replay View", nullptr, &showReplayView_);
             ImGui::EndMenu();
         }
         
@@ -285,7 +364,7 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
         ImGui::SameLine(centerPos);
 
         if (ReplaySystem::GetInstance()->IsPaused()) {
-            if (ImGui::Button("Play  >")) {
+            if (ImGui::Button("Play ▶")) {
                 ReplaySystem::GetInstance()->SetPause(false);
             }
         } else {

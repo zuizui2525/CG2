@@ -33,6 +33,9 @@ public:
 
     // 現在シークされているフレームの情報を取得
     D3D12_GPU_DESCRIPTOR_HANDLE GetReplaySrvGpuHandle() const;
+    void SeekToTimestamp(float timestamp);
+    int32_t GetEffectiveRecordCount(int32_t* outStartIdx = nullptr) const;
+    float GetLatestRecordTimestamp() const;
     float GetReplayFps(int32_t targetIdx) const;
     float GetReplayMemory(int32_t targetIdx) const;
     float GetReplayTimeOffset(int32_t targetIdx) const; // 現在から何秒前か
@@ -87,7 +90,7 @@ private:
     static constexpr int32_t kShrinkHeight = 360; // 縮小録画時の高さ
 
 
-    D3D12_GPU_DESCRIPTOR_HANDLE lastPausedGpuHandle_{}; // ポーズ解除した瞬間の静止表示用SRVハンドル
+    mutable D3D12_GPU_DESCRIPTOR_HANDLE lastPausedGpuHandle_{}; // ポーズ解除した瞬間の静止表示用SRVハンドル
 
 
     int32_t frameCounter_ = 0;

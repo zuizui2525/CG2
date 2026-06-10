@@ -35,10 +35,15 @@ void PerformanceMonitorWindow::Draw(bool* show) {
     bool isPaused = ReplaySystem::GetInstance()->IsPaused();
     if (isPaused) {
         // --- リプレイ・一時停止中の描画 ---
-        int32_t recordCount = ReplaySystem::GetInstance()->GetRecordCount();
+        int32_t startIdx = 0;
+        int32_t activeCount = ReplaySystem::GetInstance()->GetEffectiveRecordCount(&startIdx);
         float progress = ReplaySystem::GetInstance()->GetSeekPos();
-        int32_t targetIdx = static_cast<int32_t>(progress * (recordCount - 1));
-        targetIdx = std::clamp(targetIdx, 0, recordCount - 1);
+        
+        int32_t targetIdx = 0;
+        if (activeCount > 0) {
+            targetIdx = startIdx + static_cast<int32_t>(progress * (activeCount - 1));
+            targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
+        }
 
         // 過去120フレームのデータをReplaySystemから取得
         ReplaySystem::GetInstance()->GetReplayHistory(targetIdx, fpsHistoryLocal, memHistoryLocal, kHistorySize);

@@ -29,8 +29,15 @@ public:
     // ImGui用描画関数
     static void DrawConsoleWindow(float maxTimestamp = -1.0f);
 
+    // 起動からの経過時間を秒単位で取得
+    static float GetElapsedTime();
+
+    // ゲーム内稼働タイマーの更新
+    static void Update(float deltaTime);
+
     // コンソール表示フラグのポインタ取得
     static bool* GetShowConsolePtr();
+
 
 private:
     static void Initialize();
@@ -39,6 +46,7 @@ private:
     static std::string logFileName_;   // ログファイル名
     static bool isInitialized_;         // 初期化フラグ
     static std::chrono::steady_clock::time_point startTime_; // 起動時の基準時間
+    static float activeElapsedTime_;                          // ポーズ中進まない経過時間
 
     static std::vector<std::string> logMessages_; // 蓄積されたログ
     static std::vector<float> logTimestamps_;     // 各ログの追加タイムスタンプ（秒）

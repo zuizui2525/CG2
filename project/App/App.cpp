@@ -5,6 +5,7 @@
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
+#include "Engine/Base/Log/Log.h"
 #include <psapi.h> // メモリ取得用（追加）
 
 #pragma comment(lib, "psapi.lib") // 追加
@@ -134,6 +135,7 @@ void App::Run() {
     lightMgr_->Update();
     
     if (!isPaused) {
+        Log::Update(deltaTime);
         SceneManager::GetInstance()->Update();
     }
 
