@@ -3,6 +3,7 @@
 #include "Engine/Debug/GameViewWindow.h"
 #include "Engine/Debug/PerformanceMonitorWindow.h"
 #include "Engine/Debug/SceneManagerWindow.h"
+#include "Engine/Debug/ReplaySystem.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/Log/Log.h"
 #include "externals/imgui/imgui.h"
@@ -24,9 +25,12 @@ void DebugEditor::Initialize() {
     sceneManagerWindow_ = std::make_unique<SceneManagerWindow>();
 }
 
-void DebugEditor::Draw() {
+void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
+    // リプレイ自動送り再生の更新
+    ReplaySystem::GetInstance()->UpdateReplayPlay(ImGui::GetIO().DeltaTime);
+
     HWND hwnd = Zuizui::GetInstance()->GetWindow()->GetHWND();
-    
+
     // メインメニューバーの描画
     DrawMenuBar(hwnd);
 
@@ -40,8 +44,9 @@ void DebugEditor::Draw() {
         isGameViewVisible_ = false;
     }
 
-    // Console
-    Log::DrawConsoleWindow();
+    // Console (リプレイ中はタイムスタンプの上限を渡す)
+    float maxTimestamp = ReplaySystem::GetInstance()->GetReplayMaxTimestamp();
+    Log::DrawConsoleWindow(maxTimestamp);
 
     // Performance Monitor
     if (showPerfMonitor_) {
@@ -50,6 +55,94 @@ void DebugEditor::Draw() {
 
     // Scene Manager
     sceneManagerWindow_->Draw();
+
+    // Replay View (常時表示)
+    if (true) {
+        if (ImGui::Begin("Replay View")) {
+            bool isPaused = ReplaySystem::GetInstance()->IsPaused();
+
+            if (!isPaused) {
+                // 通常再生中は操作不可として警告を表示し、全体をグレーアウト
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "Replay is only available while PAUSED.");
+                ImGui::Text("Click 'Pause ||' at the top main menu bar.");
+                ImGui::Separator();
+            }
+
+            if (!isPaused) {
+                ImGui::BeginDisabled();
+            }
+
+            int32_t recordCount = ReplaySystem::GetInstance()->GetRecordCount();
+            float progress = ReplaySystem::GetInstance()->GetSeekPos();
+            
+            // 記録フレームに対応する秒数を計算 (5fps想定)
+            float maxSeconds = static_cast<float>(recordCount) / 5.0f;
+            float secondsAgo = (1.0f - progress) * maxSeconds;
+
+            char sliderLabel[64];
+            if (recordCount == 0) {
+                sprintf_s(sliderLabel, "No Replay Data");
+            } else if (secondsAgo <= 0.0f) {
+                sprintf_s(sliderLabel, "Current (0.0s ago)");
+            } else {
+                sprintf_s(sliderLabel, "-%.1fs ago", secondsAgo);
+            }
+
+            // シークバーの左に Play / Pause ボタンを配置
+            if (recordCount > 0 && isPaused) {
+                bool isReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
+                if (isReplayPlaying) {
+                    if (ImGui::Button("Pause ||")) {
+                        ReplaySystem::GetInstance()->SetReplayPlaying(false);
+                    }
+                } else {
+                    if (ImGui::Button("Play  >")) {
+                        // シークバーが最後まで達している場合は、最初から再生するために 0 に戻す
+                        if (progress >= 1.0f) {
+                            ReplaySystem::GetInstance()->SetSeekPos(0.0f);
+                        }
+                        ReplaySystem::GetInstance()->SetReplayPlaying(true);
+                    }
+                }
+                ImGui::SameLine();
+            }
+
+            // シークバーの描画 (残りの横幅いっぱいにフィットさせる)
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            if (ImGui::SliderFloat("##Seek", &progress, 0.0f, 1.0f, sliderLabel)) {
+                ReplaySystem::GetInstance()->SetSeekPos(progress);
+            }
+
+            ImGui::Separator();
+
+            // リプレイ画像
+            if (recordCount > 0) {
+                D3D12_GPU_DESCRIPTOR_HANDLE srvGpu = ReplaySystem::GetInstance()->GetReplaySrvGpuHandle();
+                
+                // アスペクト比を保って描画領域にフィットさせる (デフォルト16:9)
+                float contentWidth = ImGui::GetContentRegionAvail().x;
+                float contentHeight = ImGui::GetContentRegionAvail().y;
+                
+                constexpr float kDefaultAspect = 16.0f / 9.0f;
+                float drawWidth = contentWidth;
+                float drawHeight = contentWidth / kDefaultAspect;
+
+                if (drawHeight > contentHeight) {
+                    drawHeight = contentHeight;
+                    drawWidth = contentHeight * kDefaultAspect;
+                }
+
+                ImGui::Image((ImTextureID)srvGpu.ptr, ImVec2(drawWidth, drawHeight));
+            } else {
+                ImGui::Text("No replay data buffered yet.");
+            }
+
+            if (!isPaused) {
+                ImGui::EndDisabled();
+            }
+        }
+        ImGui::End();
+    }
 }
 
 void DebugEditor::DrawMenuBar(HWND hwnd) {
@@ -184,6 +277,23 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             
             ImGui::EndMenu();
         }
+
+        // 画面中央付近に再生/一時停止ボタンを配置 (マジックナンバー排除)
+        float menuBarWidth = ImGui::GetWindowWidth();
+        constexpr float kPlayPauseBtnWidth = 70.0f;
+        float centerPos = (menuBarWidth - kPlayPauseBtnWidth) * 0.5f;
+        ImGui::SameLine(centerPos);
+
+        if (ReplaySystem::GetInstance()->IsPaused()) {
+            if (ImGui::Button("Play  >")) {
+                ReplaySystem::GetInstance()->SetPause(false);
+            }
+        } else {
+            if (ImGui::Button("Pause ||")) {
+                ReplaySystem::GetInstance()->SetPause(true);
+            }
+        }
+
         ImGui::EndMainMenuBar();
     }
 }

@@ -27,7 +27,7 @@ public:
     static void ClearLog();
 
     // ImGui用描画関数
-    static void DrawConsoleWindow();
+    static void DrawConsoleWindow(float maxTimestamp = -1.0f);
 
     // コンソール表示フラグのポインタ取得
     static bool* GetShowConsolePtr();
@@ -41,6 +41,7 @@ private:
     static std::chrono::steady_clock::time_point startTime_; // 起動時の基準時間
 
     static std::vector<std::string> logMessages_; // 蓄積されたログ
+    static std::vector<float> logTimestamps_;     // 各ログの追加タイムスタンプ（秒）
     static constexpr size_t kMaxLogLines = 500;   // 最大保持行数
 
     static bool showConsole_;                     // コンソールウィンドウの表示フラグ

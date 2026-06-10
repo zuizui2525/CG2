@@ -1,5 +1,6 @@
 #ifdef _USEIMGUI
 #include "Engine/Debug/PerformanceMonitorWindow.h"
+#include "Engine/Debug/ReplaySystem.h"
 #include "externals/imgui/imgui.h"
 #include <windows.h>
 #include <psapi.h>
@@ -17,78 +18,131 @@ void PerformanceMonitorWindow::Draw(bool* show) {
         return;
     }
 
-    // 前回のフレームからの実際の経過時間を高精度測定（ジッターを拾うため）
-    auto currentFrameTime = std::chrono::steady_clock::now();
-    float realDeltaTime = std::chrono::duration<float>(currentFrameTime - lastFrameTime_).count();
-    lastFrameTime_ = currentFrameTime;
+    // パフォーマンス履歴描画用のローカル配列
+    float fpsHistoryLocal[kHistorySize] = {};
+    float memHistoryLocal[kHistorySize] = {};
+    float midpointFpsHistoryLocal[kHistorySize] = {};
+    int drawOffset = 0;
 
-    // 極端な値を防ぐクランプ（最小: 10000 FPS, 最大: 1 FPS）
-    if (realDeltaTime < 0.0001f) { realDeltaTime = 0.0001f; }
-    if (realDeltaTime > 1.0f) { realDeltaTime = 1.0f; }
+    float displayFps = 0.0f;
+    float displayMs = 0.0f;
+    float displayMem = 0.0f;
 
-    float currentFps = 1.0f / realDeltaTime;
-    float currentMs = realDeltaTime * 1000.0f;
+    float minFpsVal = -1.0f;
+    float maxFpsVal = -1.0f;
+    float midpointFpsVal = 0.0f;
 
-    // プロセスの物理メモリ使用量（MB）を取得
-    float currentMem = 0.0f;
-    PROCESS_MEMORY_COUNTERS pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        currentMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
-    }
+    bool isPaused = ReplaySystem::GetInstance()->IsPaused();
+    if (isPaused) {
+        // --- リプレイ・一時停止中の描画 ---
+        int32_t recordCount = ReplaySystem::GetInstance()->GetRecordCount();
+        float progress = ReplaySystem::GetInstance()->GetSeekPos();
+        int32_t targetIdx = static_cast<int32_t>(progress * (recordCount - 1));
+        targetIdx = std::clamp(targetIdx, 0, recordCount - 1);
 
-    fpsHistory_[historyOffset_] = currentFps;
-    memHistory_[historyOffset_] = currentMem;
+        // 過去120フレームのデータをReplaySystemから取得
+        ReplaySystem::GetInstance()->GetReplayHistory(targetIdx, fpsHistoryLocal, memHistoryLocal, kHistorySize);
+        drawOffset = 0; // すでにソート済みの履歴が返るのでオフセットは0固定
 
-    // 実行中の最高・最低FPSの記録（起動後60フレーム以降に記録開始）
-    frameCount_++;
-    if (frameCount_ > 60) {
-        if (minObservedFps_ < 0.0f || currentFps < minObservedFps_) {
-            minObservedFps_ = currentFps;
+        displayFps = ReplaySystem::GetInstance()->GetReplayFps(targetIdx);
+        displayMs = (displayFps > 0.0f) ? (1000.0f / displayFps) : 0.0f;
+        displayMem = ReplaySystem::GetInstance()->GetReplayMemory(targetIdx);
+
+        // この120フレーム履歴から最高/最低/中央値を算出
+        for (int i = 0; i < kHistorySize; ++i) {
+            float val = fpsHistoryLocal[i];
+            if (val > 0.0f) {
+                if (minFpsVal < 0.0f || val < minFpsVal) minFpsVal = val;
+                if (maxFpsVal < 0.0f || val > maxFpsVal) maxFpsVal = val;
+            }
         }
-        if (maxObservedFps_ < 0.0f || currentFps > maxObservedFps_) {
-            maxObservedFps_ = currentFps;
+        midpointFpsVal = (minFpsVal >= 0.0f && maxFpsVal >= 0.0f) ? (minFpsVal + maxFpsVal) * 0.5f : displayFps;
+        for (int i = 0; i < kHistorySize; ++i) {
+            midpointFpsHistoryLocal[i] = midpointFpsVal;
         }
-    }
+    } else {
+        // --- 通常稼働時の更新・描画 ---
+        auto currentFrameTime = std::chrono::steady_clock::now();
+        float realDeltaTime = std::chrono::duration<float>(currentFrameTime - lastFrameTime_).count();
+        lastFrameTime_ = currentFrameTime;
 
-    // 最高FPSと最低FPSの中央値を算出（黄色の線として描画）
-    float midpointFps = currentFps;
-    if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
-        midpointFps = (maxObservedFps_ + minObservedFps_) * 0.5f;
-    }
-    int lastWriteIdx = (historyOffset_ + kHistorySize - 1) % kHistorySize;
-    midpointFpsHistory_[lastWriteIdx] = midpointFps;
+        if (realDeltaTime < 0.0001f) { realDeltaTime = 0.0001f; }
+        if (realDeltaTime > 1.0f) { realDeltaTime = 1.0f; }
 
-    historyOffset_ = (historyOffset_ + 1) % kHistorySize;
+        float currentFps = 1.0f / realDeltaTime;
+        float currentMs = realDeltaTime * 1000.0f;
+
+        float currentMem = 0.0f;
+        PROCESS_MEMORY_COUNTERS pmc;
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+            currentMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
+        }
+
+        fpsHistory_[historyOffset_] = currentFps;
+        memHistory_[historyOffset_] = currentMem;
+
+        frameCount_++;
+        if (frameCount_ > 60) {
+            if (minObservedFps_ < 0.0f || currentFps < minObservedFps_) {
+                minObservedFps_ = currentFps;
+            }
+            if (maxObservedFps_ < 0.0f || currentFps > maxObservedFps_) {
+                maxObservedFps_ = currentFps;
+            }
+        }
+
+        float midpointFps = currentFps;
+        if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
+            midpointFps = (maxObservedFps_ + minObservedFps_) * 0.5f;
+        }
+        int lastWriteIdx = (historyOffset_ + kHistorySize - 1) % kHistorySize;
+        midpointFpsHistory_[lastWriteIdx] = midpointFps;
+
+        historyOffset_ = (historyOffset_ + 1) % kHistorySize;
+
+        // ローカル配列へコピーして描画に使用
+        std::copy(std::begin(fpsHistory_), std::end(fpsHistory_), std::begin(fpsHistoryLocal));
+        std::copy(std::begin(memHistory_), std::end(memHistory_), std::begin(memHistoryLocal));
+        std::copy(std::begin(midpointFpsHistory_), std::end(midpointFpsHistory_), std::begin(midpointFpsHistoryLocal));
+        drawOffset = historyOffset_;
+
+        displayFps = currentFps;
+        displayMs = currentMs;
+        displayMem = currentMem;
+        minFpsVal = minObservedFps_;
+        maxFpsVal = maxObservedFps_;
+        midpointFpsVal = midpointFps;
+    }
 
     // テキスト表示（最高・最低・中央値の数値をカラーで文字表記）
-    ImGui::Text("FPS: %.1f", currentFps);
-    if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
+    ImGui::Text("FPS: %.1f", displayFps);
+    if (minFpsVal >= 0.0f && maxFpsVal >= 0.0f) {
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), " (Min: %.1f)", minObservedFps_);
+        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), " (Min: %.1f)", minFpsVal);
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), " Max: %.1f", maxObservedFps_);
+        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), " Max: %.1f", maxFpsVal);
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), " Mid: %.1f", midpointFps);
+        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), " Mid: %.1f", midpointFpsVal);
     }
 
-    ImGui::Text("Latency: %.2f ms", currentMs);
-    ImGui::Text("Memory: %.1f MB", currentMem);
+    ImGui::Text("Latency: %.2f ms", displayMs);
+    ImGui::Text("Memory: %.1f MB", displayMem);
 
     ImGui::Separator();
     
     // グラフの縦軸スケール上限を決定
     float maxFps = kDefaultMaxFps;
     for (int i = 0; i < kHistorySize; ++i) {
-        if (fpsHistory_[i] > maxFps) {
-            maxFps = fpsHistory_[i];
+        if (fpsHistoryLocal[i] > maxFps) {
+            maxFps = fpsHistoryLocal[i];
         }
     }
     float graphMaxFps = maxFps;
 
     float maxMem = kDefaultMaxMem;
     for (int i = 0; i < kHistorySize; ++i) {
-        if (memHistory_[i] > maxMem) {
-            maxMem = memHistory_[i];
+        if (memHistoryLocal[i] > maxMem) {
+            maxMem = memHistoryLocal[i];
         }
     }
     float graphMaxMem = maxMem + 50.0f; // 50MBの余白
@@ -122,21 +176,21 @@ void PerformanceMonitorWindow::Draw(bool* show) {
     // 1) 現在のFPS (緑) - 背景フレームあり
     ImGui::SetCursorScreenPos(plotPos);
     ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.0f, 1.0f, 0.2f, 1.0f));
-    ImGui::PlotLines("##CurrentFPS", fpsHistory_, kHistorySize, historyOffset_, nullptr, 0.0f, graphMaxFps, kGraphSize);
+    ImGui::PlotLines("##CurrentFPS", fpsHistoryLocal, kHistorySize, drawOffset, nullptr, 0.0f, graphMaxFps, kGraphSize);
     ImGui::PopStyleColor();
 
     // 2) 中央値FPS (黄) - 背景フレームを透明にして重ねて描画
     ImGui::SetCursorScreenPos(plotPos);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 0.8f, 0.0f, 1.0f));
-    ImGui::PlotLines("##MidpointFPS", midpointFpsHistory_, kHistorySize, historyOffset_, nullptr, 0.0f, graphMaxFps, kGraphSize);
+    ImGui::PlotLines("##MidpointFPS", midpointFpsHistoryLocal, kHistorySize, drawOffset, nullptr, 0.0f, graphMaxFps, kGraphSize);
     ImGui::PopStyleColor(2);
 
     // 3) メモリ (水色) - 背景フレームを透明にして重ねて描画
     ImGui::SetCursorScreenPos(plotPos);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
-    ImGui::PlotLines("##MemGraph", memHistory_, kHistorySize, historyOffset_, nullptr, 0.0f, graphMaxMem, kGraphSize);
+    ImGui::PlotLines("##MemGraph", memHistoryLocal, kHistorySize, drawOffset, nullptr, 0.0f, graphMaxMem, kGraphSize);
     ImGui::PopStyleColor(2);
 
     // グラフ本体のホバー判定と矩形情報を取得
@@ -180,9 +234,9 @@ void PerformanceMonitorWindow::Draw(bool* show) {
     }
 
     // 4) 最高・最低FPSの補助線をグラフエリア内に描画
-    if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
-        float yMinLine = GetValueYPos(minObservedFps_, graphMaxFps);
-        float yMaxLine = GetValueYPos(maxObservedFps_, graphMaxFps);
+    if (minFpsVal >= 0.0f && maxFpsVal >= 0.0f) {
+        float yMinLine = GetValueYPos(minFpsVal, graphMaxFps);
+        float yMaxLine = GetValueYPos(maxFpsVal, graphMaxFps);
 
         // 薄い赤（最低）と薄い緑（最高）の横線を引く
         ImU32 minColor = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 0.3f, 0.3f, 0.35f));
@@ -198,9 +252,9 @@ void PerformanceMonitorWindow::Draw(bool* show) {
 
     // 5) 折れ線の右終端（最新値）のすぐ右側に識別名を描画（色はそれぞれの線と同色）
     // クリッピングを回避するため、Dummyの右端スペース（rectMax.x）の範囲内に描画する
-    float yCurrent = GetValueYPos(currentFps, graphMaxFps);
-    float yMidpoint = GetValueYPos(midpointFps, graphMaxFps);
-    float yMemory = GetValueYPos(currentMem, graphMaxMem);
+    float yCurrent = GetValueYPos(displayFps, graphMaxFps);
+    float yMidpoint = GetValueYPos(midpointFpsVal, graphMaxFps);
+    float yMemory = GetValueYPos(displayMem, graphMaxMem);
 
     // 近接時の衝突回避
     if (std::abs(yCurrent - yMidpoint) < 12.0f) {
@@ -231,11 +285,11 @@ void PerformanceMonitorWindow::Draw(bool* show) {
         if (hoveredDataIdx < 0) { hoveredDataIdx = 0; }
         if (hoveredDataIdx >= kHistorySize) { hoveredDataIdx = kHistorySize - 1; }
 
-        int actualIdx = (historyOffset_ + hoveredDataIdx) % kHistorySize;
+        int actualIdx = (drawOffset + hoveredDataIdx) % kHistorySize;
 
-        float hoverFps = fpsHistory_[actualIdx];
-        float hoverMidFps = midpointFpsHistory_[actualIdx];
-        float hoverMem = memHistory_[actualIdx];
+        float hoverFps = fpsHistoryLocal[actualIdx];
+        float hoverMidFps = midpointFpsHistoryLocal[actualIdx];
+        float hoverMem = memHistoryLocal[actualIdx];
 
         ImGui::BeginTooltip();
         int framesAgo = kHistorySize - 1 - hoveredDataIdx;

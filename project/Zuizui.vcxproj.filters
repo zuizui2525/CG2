@@ -89,6 +89,9 @@
     <ClCompile Include="Engine\Debug\SceneManagerWindow.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Debug\ReplaySystem.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Graphics\Objects\3d\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Square\SquareObject.cpp" />
     <ClCompile Include="Engine\Graphics\Objects\3d\Cube\CubeObject.cpp" />
@@ -191,6 +194,9 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Debug\SceneManagerWindow.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Debug\ReplaySystem.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphics\Objects\3d\Skybox\Skybox.h" />

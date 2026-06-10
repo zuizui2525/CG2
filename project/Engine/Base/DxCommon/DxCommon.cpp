@@ -23,6 +23,7 @@ void DxCommon::Initialize(HWND hwnd, int32_t width, int32_t height) {
 }
 
 void DxCommon::BeginFrame() {
+	isResizedThisFrame_ = false;
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -46,13 +47,20 @@ void DxCommon::BeginFrame() {
 void DxCommon::EndFrame() {
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
 
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = swapChainResources_[backBufferIndex].Get();
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	commandList_->ResourceBarrier(1, &barrier);
+	if (backBufferIndex >= backBufferCount_ || !swapChainResources_[backBufferIndex]) {
+		return;
+	}
+
+	if (!isResizedThisFrame_) {
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = swapChainResources_[backBufferIndex].Get();
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		commandList_->ResourceBarrier(1, &barrier);
+	}
+
 
 	HRESULT hr = commandList_->Close();
 	assert(SUCCEEDED(hr));
@@ -267,7 +275,8 @@ void DxCommon::CreateSwapChain(HWND hwnd, int32_t width, int32_t height) {
 
 void DxCommon::CreateRenderTargets() {
 	rtvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRtvCount, false);
-	srvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeap_ = DxUtils::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 2200, true);
+
 
 	HRESULT hr = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResources_[0]));
 	assert(SUCCEEDED(hr));
@@ -402,5 +411,8 @@ void DxCommon::ResizeSwapChain(int32_t width, int32_t height) {
 		commandAllocator_->Reset();
 		commandList_->Reset(commandAllocator_.Get(), nullptr);
 	}
+
+	isResizedThisFrame_ = true;
 }
+
 

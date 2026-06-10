@@ -105,4 +105,6 @@ private:
 	D3D12_VIEWPORT viewport_{};
 	// scissorRect
 	D3D12_RECT scissorRect_{};
+	// 同フレーム内リサイズフラグ
+	bool isResizedThisFrame_ = false;
 };

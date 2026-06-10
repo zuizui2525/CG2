@@ -10,6 +10,7 @@ bool Log::isInitialized_ = false;
 std::chrono::steady_clock::time_point Log::startTime_;
 
 std::vector<std::string> Log::logMessages_;
+std::vector<float> Log::logTimestamps_;
 bool Log::showConsole_ = true;
 size_t Log::lastLogSize_ = 0;
 
@@ -94,8 +95,12 @@ void Log::Write(const std::string& message) {
     // バッファへの蓄積（リングバッファ処理）
     if (logMessages_.size() >= kMaxLogLines) {
         logMessages_.erase(logMessages_.begin());
+        if (!logTimestamps_.empty()) {
+            logTimestamps_.erase(logTimestamps_.begin());
+        }
     }
     logMessages_.push_back(fullMessage);
+    logTimestamps_.push_back(static_cast<float>(elapsedMs) / 1000.0f);
 
     if (logStream_.is_open()) {
         logStream_ << fullMessage << std::endl;
@@ -129,9 +134,10 @@ const std::vector<std::string>& Log::GetLogMessages() {
 
 void Log::ClearLog() {
     logMessages_.clear();
+    logTimestamps_.clear();
 }
 
-void Log::DrawConsoleWindow() {
+void Log::DrawConsoleWindow(float maxTimestamp) {
 #ifdef _USEIMGUI
     if (!showConsole_) return;
 
@@ -146,7 +152,15 @@ void Log::DrawConsoleWindow() {
         // スクロール可能な子ウィンドウ
         ImGui::BeginChild("LogRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
         
-        for (const auto& log : logMessages_) {
+        for (size_t i = 0; i < logMessages_.size(); ++i) {
+            // maxTimestamp が指定されている場合、それより未来のログは描画しない
+            if (maxTimestamp >= 0.0f && i < logTimestamps_.size()) {
+                if (logTimestamps_[i] > maxTimestamp) {
+                    continue;
+                }
+            }
+
+            const auto& log = logMessages_[i];
             // ログの種類に応じた色分け
             ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // デフォルト白
             
@@ -163,8 +177,8 @@ void Log::DrawConsoleWindow() {
             ImGui::PopStyleColor();
         }
 
-        // 新規ログ追加時に自動で最下部へスクロール
-        if (logMessages_.size() > lastLogSize_) {
+        // 新規ログ追加時に自動で最下部へスクロール（リプレイ中でない場合のみ）
+        if (maxTimestamp < 0.0f && logMessages_.size() > lastLogSize_) {
             ImGui::SetScrollHereY(1.0f);
             lastLogSize_ = logMessages_.size();
         }

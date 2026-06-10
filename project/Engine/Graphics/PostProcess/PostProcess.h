@@ -46,6 +46,11 @@ public:
     D3D12_GPU_DESCRIPTOR_HANDLE GetFinalSrvGpuHandle() const;
 
     /// <summary>
+    /// 現在保持している最終結果テクスチャのリソースを返す
+    /// </summary>
+    ID3D12Resource* GetFinalResource() const;
+
+    /// <summary>
     /// 指定されたレンダーターゲットに最終結果を描画コピーする
     /// </summary>
     void Draw(D3D12_CPU_DESCRIPTOR_HANDLE targetRtv);

@@ -3,6 +3,8 @@
 #include <memory>
 #include <windows.h>
 
+struct ID3D12GraphicsCommandList;
+
 enum class AspectType {
     Aspect16_9_Low,
     Aspect16_9_High,
@@ -16,7 +18,7 @@ public:
     ~DebugEditor();
 
     void Initialize();
-    void Draw();
+    void Draw(ID3D12GraphicsCommandList* commandList);
 
     // GameViewWindow が表示されているかどうかを取得（App.cppのバッチング制御用）
     bool IsGameViewVisible() const { return isGameViewVisible_; }

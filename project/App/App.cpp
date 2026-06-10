@@ -1,5 +1,6 @@
 #include "App/App.h"
 #include "Engine/Debug/DebugEditor.h"
+#include "Engine/Debug/ReplaySystem.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
@@ -55,6 +56,10 @@ void App::Initialize() {
 }
 
 void App::Run() {
+#ifdef _USEIMGUI
+    ReplaySystem::GetInstance()->ClearGarbage();
+#endif
+
     // 現在のウィンドウの実際のクライアント領域サイズを取得し、サイズ変更を検知
     HWND hwnd = engine_->GetWindow()->GetHWND();
     RECT clientRect{};
@@ -78,11 +83,37 @@ void App::Run() {
         float aspect = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
         cameraMgr_->UpdateAllProjection(aspect);
 
+#ifdef _USEIMGUI
+        // 4. リプレイシステムのリサイズ通知
+        ReplaySystem::GetInstance()->OnResize(currentWidth, currentHeight);
+#endif
+
         lastWidth = currentWidth;
         lastHeight = currentHeight;
     }
 
+    // FPSおよび物理メモリの計測
+    float currentMem = 0.0f;
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        currentMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
+    }
+
+    static auto lastTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+    lastTime = currentTime;
+    
+    if (deltaTime < 0.0001f) { deltaTime = 0.0001f; }
+    if (deltaTime > 1.0f) { deltaTime = 1.0f; }
+    float currentFps = 1.0f / deltaTime;
+
     bool isGameViewVisible = false;
+    bool isPaused = false;
+
+#ifdef _USEIMGUI
+    isPaused = ReplaySystem::GetInstance()->IsPaused();
+#endif
 
     // --- ImGui ---
 #ifdef _USEIMGUI
@@ -101,8 +132,11 @@ void App::Run() {
     input_->Update();
     cameraMgr_->Update();
     lightMgr_->Update();
+    
+    if (!isPaused) {
+        SceneManager::GetInstance()->Update();
+    }
 
-    SceneManager::GetInstance()->Update();
 
     // --- 描画 ---
     engine_->BeginFrame();
@@ -122,6 +156,20 @@ void App::Run() {
         // Game Viewが表示されていない場合、通常どおりエフェクト適用＆スワップチェーン全体への描画コピーを行う
         postProcess_->Draw();
     }
+
+#ifdef _USEIMGUI
+    // 一時停止中でない場合のみリプレイバッファを記録
+    if (!isPaused) {
+        ReplaySystem::GetInstance()->RecordFrame(
+            engine_->GetDxCommon()->GetCommandList(),
+            postProcess_->GetFinalResource(),
+            postProcess_->GetFinalSrvGpuHandle(),
+            currentFps,
+            currentMem
+        );
+    }
+
+#endif
 
     engine_->EndFrame();
 }

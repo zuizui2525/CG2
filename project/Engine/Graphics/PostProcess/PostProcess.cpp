@@ -138,6 +138,19 @@ D3D12_GPU_DESCRIPTOR_HANDLE PostProcess::GetFinalSrvGpuHandle() const {
     return renderTextureTemp_->GetSrvGpuHandle();
 }
 
+ID3D12Resource* PostProcess::GetFinalResource() const {
+    std::vector<IPostProcessPass*> activePasses;
+    for (size_t i = 1; i < passes_.size(); ++i) {
+        if (passes_[i]->IsActive()) {
+            activePasses.push_back(passes_[i].get());
+        }
+    }
+    if (activePasses.empty()) {
+        return renderTexture_->GetResource();
+    }
+    return renderTextureTemp_->GetResource();
+}
+
 void PostProcess::ProcessEffects() {
     Zuizui* engine = EngineResource::GetEngine();
     assert(engine != nullptr);
