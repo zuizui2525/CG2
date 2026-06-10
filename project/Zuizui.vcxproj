@@ -267,6 +267,10 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurXPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurYPass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
+    <ClCompile Include="Engine\Debug\DebugEditor.cpp" />
+    <ClCompile Include="Engine\Debug\GameViewWindow.cpp" />
+    <ClCompile Include="Engine\Debug\PerformanceMonitorWindow.cpp" />
+    <ClCompile Include="Engine\Debug\SceneManagerWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl">
@@ -428,6 +432,10 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />
+    <ClInclude Include="Engine\Debug\DebugEditor.h" />
+    <ClInclude Include="Engine\Debug\GameViewWindow.h" />
+    <ClInclude Include="Engine\Debug\PerformanceMonitorWindow.h" />
+    <ClInclude Include="Engine\Debug\SceneManagerWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

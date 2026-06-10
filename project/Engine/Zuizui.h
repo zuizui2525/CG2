@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -6,6 +6,8 @@
 #include "Engine/Base/WindowApp/WindowApp.h"
 #include "Engine/Graphics/PSO/Manager/PSOManager.h"
 #include "Engine/Base/Log/Log.h"
+
+class DebugEditor;
 
 class Zuizui {
 public:
@@ -29,6 +31,9 @@ public:
     DxCommon* GetDxCommon() { return dxCommon.get(); }
     PSOManager* GetPSOManager() { return psoManager.get(); }
     WindowApp* GetWindow() { return window.get(); }
+#ifdef _USEIMGUI
+    DebugEditor* GetDebugEditor() { return debugEditor.get(); }
+#endif
 
 private:
     Zuizui() = default;
@@ -41,5 +46,6 @@ private:
 
 #ifdef _USEIMGUI
     std::unique_ptr<class ImguiManager> imGui;
+    std::unique_ptr<class DebugEditor> debugEditor;
 #endif
 };
