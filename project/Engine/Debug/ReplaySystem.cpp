@@ -48,6 +48,7 @@ void ReplaySystem::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srvHea
     isPaused_ = false;
     needsCopy_ = false;
     seekProgress_ = 1.0f;
+    playSpeed_ = 1.0f;
     frameCounter_ = 0;
     records_.clear();
     lastPausedGpuHandle_ = {};
@@ -444,12 +445,18 @@ void ReplaySystem::GetReplayHistory(int32_t targetIdx, float* outFpsHistory, flo
 }
 
 void ReplaySystem::UpdateReplayPlay(float deltaTime) {
-    if (!isReplayPlaying_ || records_.empty() || records_.size() <= 1) {
+    if (!isReplayPlaying_ || records_.empty()) {
         return;
     }
 
-    // 30fps想定でシークを進める（1秒間に30フレーム分）
-    float speed = (30.0f / static_cast<float>(records_.size() - 1)) * deltaTime;
+    int32_t startIdx = 0;
+    int32_t activeCount = GetEffectiveRecordCount(&startIdx);
+    if (activeCount <= 1) {
+        return;
+    }
+
+    // 30fps想定でシークを進める（1秒間に30フレーム分、かつ再生速度倍率をかける）
+    float speed = (30.0f / static_cast<float>(activeCount - 1)) * deltaTime * playSpeed_;
     seekProgress_ += speed;
 
     if (seekProgress_ >= 1.0f) {

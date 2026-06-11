@@ -116,6 +116,37 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
                     }
                 }
                 ImGui::SameLine();
+
+                // 再生速度選択UI (Combo)
+                float currentSpeed = ReplaySystem::GetInstance()->GetPlaySpeed();
+                const char* previewLabel = "1.0x";
+                
+                constexpr float kSpeeds[] = { 0.25f, 0.5f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f };
+                constexpr const char* kSpeedLabels[] = { "0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x", "8.0x" };
+                constexpr int32_t kSpeedCount = static_cast<int32_t>(std::size(kSpeeds));
+
+                for (int32_t i = 0; i < kSpeedCount; ++i) {
+                    if (std::abs(currentSpeed - kSpeeds[i]) < 0.01f) {
+                        previewLabel = kSpeedLabels[i];
+                        break;
+                    }
+                }
+
+                // コンボボックスの横幅を固定 (80ピクセル)
+                ImGui::SetNextItemWidth(80.0f);
+                if (ImGui::BeginCombo("##Speed", previewLabel)) {
+                    for (int32_t i = 0; i < kSpeedCount; ++i) {
+                        const bool isSelected = (std::abs(currentSpeed - kSpeeds[i]) < 0.01f);
+                        if (ImGui::Selectable(kSpeedLabels[i], isSelected)) {
+                            ReplaySystem::GetInstance()->SetPlaySpeed(kSpeeds[i]);
+                        }
+                        if (isSelected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::SameLine();
             }
 
             // シークバーの描画 (残りの横幅いっぱいにフィットさせる)

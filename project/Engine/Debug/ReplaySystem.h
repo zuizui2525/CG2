@@ -26,6 +26,8 @@ public:
     float GetSeekPos() const { return seekProgress_; }
     bool IsReplayPlaying() const { return isReplayPlaying_; }
     void SetReplayPlaying(bool play) { isReplayPlaying_ = play; }
+    void SetPlaySpeed(float speed) { playSpeed_ = speed; }
+    float GetPlaySpeed() const { return playSpeed_; }
     void UpdateReplayPlay(float deltaTime);
 
     // リサイズ時のテクスチャプール再構成
@@ -77,6 +79,7 @@ private:
     bool isReplayPlaying_ = false; // リプレイの自動送り再生中フラグ
     bool needsCopy_ = false; // 表示更新が必要になったフラグ
     float seekProgress_ = 1.0f; // 0.0f 〜 1.0f
+    float playSpeed_ = 1.0f; // 再生速度倍率（0.5f, 2.0f など）
 
     // 記録バッファ (60fpsで5秒分 = 300フレーム)
     std::vector<FrameRecord> records_;
