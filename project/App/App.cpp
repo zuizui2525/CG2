@@ -47,7 +47,7 @@ void App::Initialize() {
 
     sceneFactory_ = std::make_unique<SceneFactory>();
     SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
-    SceneManager::GetInstance()->ChangeScene("Debug");
+    SceneManager::GetInstance()->ChangeScene("Title");
 
     // --- PostProcess の初期化 ---
     postProcess_ = std::make_unique<PostProcess>();

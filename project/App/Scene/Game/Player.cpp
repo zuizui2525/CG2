@@ -4,13 +4,16 @@
 
 Player::Player() {
     cube_ = std::make_unique<CubeObject>();
+    bulletEffectName_ = kBulletEffectName;
 }
 
 void Player::Initialize() {
     cube_->Initialize();
     cube_->SetPosition(kInitialPosition);
     cube_->SetSize(kPlayerScale);
+    cube_->SetColor(kPlayerColor); // プレイヤーを青くする
     ClearBullets();
+    InitializeHpBar(); // 体力と体力バーの初期化
 }
 
 void Player::Update() {
@@ -48,14 +51,18 @@ void Player::UpdateInput(Input* input) {
     if (input->Trigger(kShotKey)) {
         // プレイヤーの少し前方から弾を発射する
         Vector3 bulletPos = pos + Vector3{ 0.0f, 0.0f, 1.0f };
-        bullets_.push_back(std::make_unique<Bullet>(bulletPos, kBulletVelocity));
+        bullets_.push_back(std::make_unique<Bullet>(bulletPos, kBulletVelocity, kBulletEffectName));
     }
 
     // 弾の更新
     UpdateBullets();
+
+    // 体力バーの追従更新
+    UpdateHpBar(pos);
 }
 
 void Player::Draw() {
     cube_->Draw(kTextureKey, kEnvMapKey);
     DrawBullets();
+    DrawHpBar(); // 体力バーの描画
 }

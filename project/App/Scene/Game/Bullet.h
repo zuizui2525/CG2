@@ -9,7 +9,7 @@
  */
 class Bullet {
 public:
-    Bullet(const Vector3& position, const Vector3& velocity);
+    Bullet(const Vector3& position, const Vector3& velocity, const std::string& effectName = "Fire");
     ~Bullet() = default;
 
     void Initialize();
@@ -37,4 +37,5 @@ private:
     Vector3 velocity_;
     bool isActive_ = true;
     int lifeTimer_ = 0;
+    std::string effectName_ = "Fire";
 };

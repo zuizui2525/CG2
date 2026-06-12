@@ -368,6 +368,8 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\DragonBreathEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\ExplosionEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\YellowFireEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\PurpleFireEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksAscendEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksBurstEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireworksFlameEffectSetting.h" />

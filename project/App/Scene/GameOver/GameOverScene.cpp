@@ -79,6 +79,10 @@ void GameOverScene::Update() {
         cameraMgr_->SetActiveCamera(isCurrentlyDebug ? kMainCameraName : kDebugCameraName);
     }
 #endif
+    // シーン切り替え
+    if (input_->Trigger(DIK_SPACE)) {
+        SceneManager::GetInstance()->ChangeScene("Title");
+    }
 
     // ライトパラメータとCubeの行列更新
     dirLight_->Update();

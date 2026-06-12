@@ -3,6 +3,7 @@
 
 Enemy::Enemy() {
     cube_ = std::make_unique<CubeObject>();
+    bulletEffectName_ = kBulletEffectName;
     
     // 乱数シードの設定
     std::random_device seed_gen;
@@ -13,7 +14,9 @@ void Enemy::Initialize() {
     cube_->Initialize();
     cube_->SetPosition(kInitialPosition);
     cube_->SetSize(kEnemyScale);
+    cube_->SetColor(kEnemyColor); // 敵を赤くする
     ClearBullets();
+    InitializeHpBar(); // 体力と体力バーの初期化
 
     // タイマーおよび方向の初期設定
     std::uniform_int_distribution<int> distMove(kMinMoveTime, kMaxMoveTime);
@@ -63,14 +66,18 @@ void Enemy::Update() {
 
         // 敵の少し手前から弾を発射する
         Vector3 bulletPos = pos + Vector3{ 0.0f, 0.0f, -1.0f };
-        bullets_.push_back(std::make_unique<Bullet>(bulletPos, kBulletVelocity));
+        bullets_.push_back(std::make_unique<Bullet>(bulletPos, kBulletVelocity, kBulletEffectName));
     }
 
     // 弾の更新
     UpdateBullets();
+
+    // 体力バーの追従更新
+    UpdateHpBar(pos);
 }
 
 void Enemy::Draw() {
     cube_->Draw(kTextureKey, kEnvMapKey);
     DrawBullets();
+    DrawHpBar(); // 体力バーの描画
 }

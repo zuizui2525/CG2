@@ -3,6 +3,8 @@
 #include "../Settings/HitEffectSetting.h"
 #include "../Settings/SlashEffectSetting.h"
 #include "../Settings/FireEffectSetting.h"
+#include "../Settings/YellowFireEffectSetting.h"
+#include "../Settings/PurpleFireEffectSetting.h"
 #include "../Settings/ExplosionEffectSetting.h"
 #include "../Settings/DragonBreathEffectSetting.h"
 #include "../Settings/FireworksBurstEffectSetting.h"
@@ -28,6 +30,8 @@ void EffectFactory::RegisterAllEffects() {
     effectMgr->RegisterEffect(HitEffectSetting());
     effectMgr->RegisterEffect(SlashEffectSetting());
     effectMgr->RegisterEffect(FireEffectSetting());
+    effectMgr->RegisterEffect(YellowFireEffectSetting());
+    effectMgr->RegisterEffect(PurpleFireEffectSetting());
     effectMgr->RegisterEffect(ExplosionEffectSetting());
     effectMgr->RegisterEffect(DragonBreathEffectSetting());
     effectMgr->RegisterEffect(FireworksBurstEffectSetting());

@@ -32,6 +32,8 @@ private:
     static inline const int kMaxMoveTime = 180;                             // 移動方向転換の最大フレーム
     static inline const int kMinShotTime = 60;                              // 射撃間隔の最小フレーム
     static inline const int kMaxShotTime = 150;                             // 射撃間隔の最大フレーム
+    static inline const Vector4 kEnemyColor = { 1.0f, 0.1f, 0.1f, 1.0f };    // 敵のカラー（赤）
+    static inline const std::string kBulletEffectName = "PurpleFire";       // 弾エフェクト名（紫の炎）
 
 private:
     std::unique_ptr<CubeObject> cube_;

@@ -113,8 +113,8 @@ void TitleScene::ImGuiControl() {
 
 void TitleScene::Update() {
     // シーン切り替え
-    if (input_->Trigger(DIK_N)) {
-        SceneManager::GetInstance()->ChangeScene("Debug");
+    if (input_->Trigger(DIK_SPACE)) {
+        SceneManager::GetInstance()->ChangeScene("Game");
     }
 
 #ifdef _USEIMGUI

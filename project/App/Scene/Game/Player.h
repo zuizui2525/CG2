@@ -32,6 +32,8 @@ private:
     static inline const int kMoveLeftKey = DIK_A;                           // 左移動キー
     static inline const int kMoveRightKey = DIK_D;                          // 右移動キー
     static inline const int kShotKey = DIK_SPACE;                           // 射撃キー
+    static inline const Vector4 kPlayerColor = { 0.0f, 0.3f, 1.0f, 1.0f };  // プレイヤーカラー（青）
+    static inline const std::string kBulletEffectName = "YellowFire";       // 弾エフェクト名（黄色い炎）
 
 private:
     std::unique_ptr<CubeObject> cube_;

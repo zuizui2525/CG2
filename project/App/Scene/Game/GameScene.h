@@ -51,5 +51,13 @@ private:
 
     // AABB衝突判定関数
     bool IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const Vector3& pos2, const Vector3& size2) const;
+
+    // シェイク機能用変数と定数
+    int shakeTimer_ = 0;
+    static inline const Vector3 kDefaultCameraPos = { 0.0f, 4.0f, -20.0f }; // メインカメラの基準位置
+    static inline const int kShakeDuration = 15;                             // シェイクフレーム数
+    static inline const float kShakeIntensity = 0.2f;                        // シェイクの強さ
+    static inline const std::string kPlayerBulletHitEffectName = "YellowFire"; // プレイヤー弾ヒット時のエフェクト名（黄色炎）
+    static inline const std::string kEnemyBulletHitEffectName = "PurpleFire"; // 敵弾ヒット時のエフェクト名（紫色炎）
 };
 

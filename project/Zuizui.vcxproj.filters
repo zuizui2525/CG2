@@ -231,6 +231,8 @@
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\DragonBreathEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\ExplosionEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\FireEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\YellowFireEffectSetting.h" />
+    <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\PurpleFireEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\HitEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SlashEffectSetting.h" />
     <ClInclude Include="Engine\Graphics\Objects\Effect\Settings\SoapBubbleEffectSetting.h" />
