@@ -7,10 +7,11 @@ class PostProcess;
 
 // エンジンコンポーネントのインクルード
 #include "Engine/Input/Input.h"
-#include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
+#include "App/Scene/Game/Player.h"
+#include "App/Scene/Game/Enemy.h"
 
 /**
  * @brief ゲーム本編を管理するシーンクラス
@@ -31,12 +32,8 @@ private:
     // マジックナンバーを排除するための定数宣言
     static inline const std::string kMainCameraName = "Main";       // メインカメラの登録・選択用キー
     static inline const std::string kDebugCameraName = "Debug";     // デバッグカメラの登録・選択用キー
-    static inline const std::string kCubeTextureKey = "white";      // キューブの描画に使用する白テクスチャのキー
-    static inline const std::string kEmptyEnvMapKey = "";           // 環境マップなしを指定する空文字列
-
-    // オブジェクトの初期トランスフォーム用定数
-    static inline const Vector3 kCubeInitialPosition = { 0.0f, 0.0f, 0.0f }; // キューブの初期位置 (原点)
-    static inline const Vector3 kCubeInitialScale = { 1.0f, 1.0f, 1.0f };    // キューブの初期サイズ
+    static inline const std::string kClearSceneName = "Clear";       // クリアシーンへの遷移用キー
+    static inline const std::string kGameOverSceneName = "GameOver"; // ゲームオーバーシーンへの遷移用キー
 
 private:
     // エンジンの各種マネージャへの生ポインタ（所有権は持たない）
@@ -49,5 +46,10 @@ private:
     std::shared_ptr<BaseCamera> mainCamera_;        // メインカメラ
     std::shared_ptr<DebugCamera> debugCamera_;      // デバッグ確認用フリーカメラ
     std::unique_ptr<DirectionalLightObject> dirLight_; // 平行光源
-    std::unique_ptr<CubeObject> cube_;              // 描画用の3D立方体モデル
+    std::unique_ptr<Player> player_;                // プレイヤーオブジェクト
+    std::unique_ptr<Enemy> enemy_;                  // 敵オブジェクト
+
+    // AABB衝突判定関数
+    bool IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const Vector3& pos2, const Vector3& size2) const;
 };
+

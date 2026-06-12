@@ -171,6 +171,7 @@ void PostProcess::ProcessEffects() {
     }
 
     if (activePasses.empty()) {
+        renderTextureTemp_->PostDraw(commandList);
         return; // エフェクトがないなら何もしない
     }
 
