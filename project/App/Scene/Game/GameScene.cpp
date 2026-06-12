@@ -10,6 +10,9 @@
 void GameScene::Initialize() {
     // 0. ポストプロセスのポインタを取得してメンバ変数に保持
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
+    if (postProcess_) {
+        postProcess_->SetUnderwaterActive(true);
+    }
 
     // 1. 各マネージャへのポインタをリソース管理者から取得
     cameraMgr_ = CameraResource::GetCameraManager();
@@ -76,6 +79,22 @@ void GameScene::Update() {
         cameraMgr_->SetActiveCamera(isCurrentlyDebug ? kMainCameraName : kDebugCameraName);
     }
 #endif
+
+    // playerの移動
+    if (input_->Press(DIK_W)) {
+		cube_->SetPosition(cube_->GetPosition() + Vector3{ 0.0f, 0.0f, 0.1f });
+    }
+    if (input_->Press(DIK_S)) {
+        cube_->SetPosition(cube_->GetPosition() + Vector3{ 0.0f, 0.0f, -0.1f });
+    }
+    if (input_->Press(DIK_A)) {
+        cube_->SetPosition(cube_->GetPosition() + Vector3{ -0.1f, 0.0f, 0.0f });
+    }
+    if (input_->Press(DIK_D)) {
+        cube_->SetPosition(cube_->GetPosition() + Vector3{ 0.1f, 0.0f, 0.0f });
+    }
+
+
 
     // ライトパラメータとCubeの行列更新
     dirLight_->Update();

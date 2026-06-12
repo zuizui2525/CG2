@@ -76,6 +76,7 @@
     <ClCompile Include="Engine\Graphics\PostProcess\BoxFilterPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurXPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurYPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\UnderwaterPass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Debug\DebugEditor.cpp">
       <Filter>Engine</Filter>
@@ -181,6 +182,7 @@
     <ClInclude Include="Engine\Graphics\PostProcess\BoxFilterPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurXPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurYPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\UnderwaterPass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />

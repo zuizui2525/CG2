@@ -6,6 +6,7 @@
 #include "Engine/Graphics/PostProcess/SepiaPass.h"
 #include "Engine/Graphics/PostProcess/VignettePass.h"
 #include "Engine/Graphics/PostProcess/BoxFilterPass.h"
+#include "Engine/Graphics/PostProcess/UnderwaterPass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -27,6 +28,7 @@ namespace {
     constexpr size_t kPassIndexBoxFilter = 4;
     constexpr size_t kPassIndexGaussianBlurX = 5;
     constexpr size_t kPassIndexGaussianBlurY = 6;
+    constexpr size_t kPassIndexUnderwater = 7;
 }
 
 void PostProcess::Initialize() {
@@ -95,6 +97,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<BoxFilterPass>());  // 4: BoxFilter
     passes_.push_back(std::make_unique<GaussianBlurXPass>()); // 5: GaussianBlurX
     passes_.push_back(std::make_unique<GaussianBlurYPass>()); // 6: GaussianBlurY
+    passes_.push_back(std::make_unique<UnderwaterPass>()); // 7: Underwater
 
     // 全パスの初期化
     for (auto& pass : passes_) {
@@ -309,6 +312,11 @@ void PostProcess::ImGuiControl() {
         bool gaussActive = IsGaussianBlurActive();
         if (ImGui::Checkbox("GaussianFilter", &gaussActive)) {
             SetGaussianBlurActive(gaussActive);
+        }
+
+        bool underwaterActive = IsUnderwaterActive();
+        if (ImGui::Checkbox("Underwater", &underwaterActive)) {
+            SetUnderwaterActive(underwaterActive);
         }
         
         ImGui::Separator();
@@ -547,5 +555,18 @@ void PostProcess::Resize(uint32_t width, uint32_t height) {
     if (renderTextureTemp_) {
         renderTextureTemp_->Resize(width, height);
     }
+}
+
+void PostProcess::SetUnderwaterActive(bool active) {
+    if (passes_.size() > kPassIndexUnderwater) {
+        if (passes_[kPassIndexUnderwater]->IsActive() != active) {
+            passes_[kPassIndexUnderwater]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 水中エフェクト を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsUnderwaterActive() const {
+    return (passes_.size() > kPassIndexUnderwater) ? passes_[kPassIndexUnderwater]->IsActive() : false;
 }
 

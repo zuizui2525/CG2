@@ -91,6 +91,9 @@ public:
     void SetGaussianBlurActive(bool active);
     bool IsGaussianBlurActive() const;
 
+    void SetUnderwaterActive(bool active);
+    bool IsUnderwaterActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
