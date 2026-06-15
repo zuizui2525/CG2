@@ -180,6 +180,11 @@ void DxCommon::CreateAdapter() {
 		assert(SUCCEEDED(hr));
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			Log::Write(std::format(L" │   ├─ 【使用グラフィックス(GPU)】 {}", adapterDesc.Description));
+			
+			// 専用ビデオメモリ(VRAM)容量をギガバイト単位で出力
+			constexpr float kBytesToGB = 1024.0f * 1024.0f * 1024.0f;
+			float vramGB = static_cast<float>(adapterDesc.DedicatedVideoMemory) / kBytesToGB;
+			Log::Write(std::format(L" │   ├─ 【専用ビデオメモリ(VRAM)】 {:.2f} GB", vramGB));
 			break;
 		}
 	}
@@ -237,11 +242,17 @@ void DxCommon::CreateCommandObject() {
 	HRESULT hr = device_->CreateCommandQueue(
 		&commandQueueDesc,
 		IID_PPV_ARGS(commandQueue_.GetAddressOf()));
+	if (FAILED(hr)) {
+		Log::Write(std::format(L" │   ├─ [エラー] コマンドキューの生成に失敗しました: {}", GetErrorMessage(hr)));
+	}
 	assert(SUCCEEDED(hr));
 
 	hr = device_->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		IID_PPV_ARGS(commandAllocator_.GetAddressOf()));
+	if (FAILED(hr)) {
+		Log::Write(std::format(L" │   ├─ [エラー] コマンドアロケータの生成に失敗しました: {}", GetErrorMessage(hr)));
+	}
 	assert(SUCCEEDED(hr));
 
 	hr = device_->CreateCommandList(
@@ -250,6 +261,9 @@ void DxCommon::CreateCommandObject() {
 		commandAllocator_.Get(),
 		nullptr,
 		IID_PPV_ARGS(commandList_.GetAddressOf()));
+	if (FAILED(hr)) {
+		Log::Write(std::format(L" │   ├─ [エラー] コマンドリストの生成に失敗しました: {}", GetErrorMessage(hr)));
+	}
 	assert(SUCCEEDED(hr));
 }
 
@@ -270,6 +284,9 @@ void DxCommon::CreateSwapChain(HWND hwnd, int32_t width, int32_t height) {
 		nullptr,
 		nullptr,
 		reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
+	if (FAILED(hr)) {
+		Log::Write(std::format(L" │   ├─ [エラー] スワップチェーンの生成に失敗しました: {}", GetErrorMessage(hr)));
+	}
 	assert(SUCCEEDED(hr));
 }
 
@@ -345,6 +362,9 @@ void DxCommon::CreateDXC() {
 void DxCommon::ResizeSwapChain(int32_t width, int32_t height) {
 	if (width <= 0 || height <= 0) return;
 
+	Log::Write(std::format(L" ├─ [リサイズ開始] スワップチェーンをリサイズします。 旧: {} x {} -> 新: {} x {}", 
+		static_cast<int32_t>(viewport_.Width), static_cast<int32_t>(viewport_.Height), width, height));
+
 	// 1. GPUの実行完了を待機 (安全なバッファ解放のため)
 	static uint64_t fenceValue = 0;
 	fenceValue++;
@@ -413,6 +433,7 @@ void DxCommon::ResizeSwapChain(int32_t width, int32_t height) {
 	}
 
 	isResizedThisFrame_ = true;
+	Log::Write(L" ├─ [リサイズ完了] スワップチェーンのリサイズ処理が完了しました。");
 }
 
 

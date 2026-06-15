@@ -29,8 +29,12 @@ public:
     // ImGui用描画関数
     static void DrawConsoleWindow(float maxTimestamp = -1.0f);
 
+    // システム環境情報の出力
+    static void LogSystemInfo();
+
     // 起動からの経過時間を秒単位で取得
     static float GetElapsedTime();
+
 
     // ゲーム内稼働タイマーの更新
     static void Update(float deltaTime);

@@ -109,6 +109,19 @@ void App::Run() {
     if (deltaTime > 1.0f) { deltaTime = 1.0f; }
     float currentFps = 1.0f / deltaTime;
 
+    // 高負荷（スパイク）警告ログの出力処理（マジックナンバー排除）
+    static float spikeWarningCooldown = 0.0f;
+    if (spikeWarningCooldown > 0.0f) {
+        spikeWarningCooldown -= deltaTime;
+    }
+    constexpr float kSpikeFpsThreshold = 30.0f;
+    constexpr float kSpikeWarningCooldownMax = 5.0f; // クールタイムは5秒間
+
+    if (currentFps < kSpikeFpsThreshold && spikeWarningCooldown <= 0.0f) {
+        Log::Write(std::format("[警告] ★高負荷スパイク検知: FPSが一時的に低下しました ({:.1f} FPS) | 物理メモリ使用量: {:.2f} MB | フレーム時間: {:.4f} 秒", currentFps, currentMem, deltaTime));
+        spikeWarningCooldown = kSpikeWarningCooldownMax;
+    }
+
     bool isGameViewVisible = false;
     bool isPaused = false;
 
@@ -134,6 +147,7 @@ void App::Run() {
     cameraMgr_->Update();
     lightMgr_->Update();
     
+
     if (!isPaused) {
         Log::Update(deltaTime);
         SceneManager::GetInstance()->Update();

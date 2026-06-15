@@ -11,3 +11,8 @@ std::wstring ConvertString(const std::string& str);
  * @brief wstring -> string(UTF-8)変換
  */
 std::string ConvertString(const std::wstring& str);
+
+/**
+ * @brief HRESULTからフォーマットされたエラーメッセージ文字列を取得
+ */
+std::wstring GetErrorMessage(HRESULT hr);

@@ -2,10 +2,82 @@
 #include "Engine/Zuizui.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Base/Log/Log.h"
+#include "App/Scene/Core/SceneManager.h"
+#ifdef _USEIMGUI
+#include "Engine/Debug/ReplaySystem.h"
+#endif
 #include <cassert>
 #include <cstring>
+#include <format>
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
+
+namespace {
+    std::string GetKeyName(BYTE dikCode) {
+        switch (dikCode) {
+            case DIK_SPACE: return "SPACE";
+            case DIK_RETURN: return "ENTER";
+            case DIK_ESCAPE: return "ESCAPE";
+            case DIK_UP: return "UP";
+            case DIK_DOWN: return "DOWN";
+            case DIK_LEFT: return "LEFT";
+            case DIK_RIGHT: return "RIGHT";
+            case DIK_A: return "A";
+            case DIK_B: return "B";
+            case DIK_C: return "C";
+            case DIK_D: return "D";
+            case DIK_E: return "E";
+            case DIK_F: return "F";
+            case DIK_G: return "G";
+            case DIK_H: return "H";
+            case DIK_I: return "I";
+            case DIK_J: return "J";
+            case DIK_K: return "K";
+            case DIK_L: return "L";
+            case DIK_M: return "M";
+            case DIK_N: return "N";
+            case DIK_O: return "O";
+            case DIK_P: return "P";
+            case DIK_Q: return "Q";
+            case DIK_R: return "R";
+            case DIK_S: return "S";
+            case DIK_T: return "T";
+            case DIK_U: return "U";
+            case DIK_V: return "V";
+            case DIK_W: return "W";
+            case DIK_X: return "X";
+            case DIK_Y: return "Y";
+            case DIK_Z: return "Z";
+            case DIK_0: return "0";
+            case DIK_1: return "1";
+            case DIK_2: return "2";
+            case DIK_3: return "3";
+            case DIK_4: return "4";
+            case DIK_5: return "5";
+            case DIK_6: return "6";
+            case DIK_7: return "7";
+            case DIK_8: return "8";
+            case DIK_9: return "9";
+            case DIK_LSHIFT: return "LSHIFT";
+            case DIK_RSHIFT: return "RSHIFT";
+            case DIK_LCONTROL: return "LCONTROL";
+            case DIK_RCONTROL: return "RCONTROL";
+            case DIK_LMENU: return "LALT";
+            case DIK_RMENU: return "RALT";
+            case DIK_TAB: return "TAB";
+            default: return std::format("DIK_{}", static_cast<int>(dikCode));
+        }
+    }
+
+    std::string GetMouseButtonName(int buttonIndex) {
+        switch (buttonIndex) {
+            case 0: return "左マウスボタン";
+            case 1: return "右マウスボタン";
+            case 2: return "中マウスボタン";
+            default: return std::format("マウスボタン{}", buttonIndex);
+        }
+    }
+}
 
 Input::Input() {
     memset(key_, 0, sizeof(key_));
@@ -79,6 +151,25 @@ void Input::Update() {
         mouse_->Acquire();
         // マウスの状態を取得
         mouse_->GetDeviceState(sizeof(mouseState_), &mouseState_);
+    }
+
+    // キーボードの入力状態変化（エッジトリガー）を検知してログ出力
+    for (int i = 0; i < 256; ++i) {
+        if ((key_[i] & 0x80) && !(preKey_[i] & 0x80)) {
+            Log::Write(std::format("[入力] {}キーが押されました", GetKeyName(i)));
+        } else if (!(key_[i] & 0x80) && (preKey_[i] & 0x80)) {
+            Log::Write(std::format("[入力] {}キーが離されました", GetKeyName(i)));
+        }
+    }
+
+    // マウスボタンの入力状態変化（エッジトリガー）を検知してログ出力
+    constexpr int kMaxMouseButtons = 8;
+    for (int i = 0; i < kMaxMouseButtons; ++i) {
+        if ((mouseState_.rgbButtons[i] & 0x80) && !(preMouseState_.rgbButtons[i] & 0x80)) {
+            Log::Write(std::format("[入力] {}が押されました", GetMouseButtonName(i)));
+        } else if (!(mouseState_.rgbButtons[i] & 0x80) && (preMouseState_.rgbButtons[i] & 0x80)) {
+            Log::Write(std::format("[入力] {}が離されました", GetMouseButtonName(i)));
+        }
     }
 }
 

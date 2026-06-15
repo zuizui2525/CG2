@@ -11,6 +11,7 @@ Zuizui* Zuizui::GetInstance() {
 }
 
 void Zuizui::Initialize(const wchar_t* title, const int32_t width, const int32_t height) {
+    Log::LogSystemInfo();
     Log::Write(L"========================================= [エンジン起動開始] =========================================");
 
     window = std::make_unique<WindowApp>();

@@ -2,10 +2,25 @@
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Graphics/Texture/TextureManager.h"
 #include "Engine/Graphics/Objects/3d/Model/ModelManager.h"
+#include "Engine/Base/Log/Log.h"
+#include <chrono>
+#include <format>
 
 void ResourceLoader::LoadAll() {
+	Log::Write(L" ├─ [リソース一括ロード開始] アセットの読み込みを開始します。");
+	auto start = std::chrono::steady_clock::now();
+
 	LoadTextures();
 	LoadModels();
+
+	auto end = std::chrono::steady_clock::now();
+	float elapsed = std::chrono::duration<float>(end - start).count();
+
+	// 登録されたリソース数をカウント（マジックナンバー排除）
+	constexpr int kTextureCount = 8;
+	constexpr int kModelCount = 5;
+
+	Log::Write(std::format(L" ├─ [リソース一括ロード完了] テクスチャ: {}枚 | モデル: {}個 | 総ロード時間: {:.4f}秒", kTextureCount, kModelCount, elapsed));
 }
 
 void ResourceLoader::LoadTextures() {

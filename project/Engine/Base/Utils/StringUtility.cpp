@@ -1,4 +1,5 @@
-﻿#include "Engine/Base/Utils/StringUtility.h"
+#include "Engine/Base/Utils/StringUtility.h"
+#include <format>
 
 std::wstring ConvertString(const std::string& str) {
 	if (str.empty()) {
@@ -26,4 +27,30 @@ std::string ConvertString(const std::wstring& str) {
 	std::string result(sizeNeeded, 0);
 	WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), sizeNeeded, NULL, NULL);
 	return result;
+}
+
+std::wstring GetErrorMessage(HRESULT hr) {
+	LPWSTR messageBuffer = nullptr;
+	size_t size = FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		hr,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPWSTR>(&messageBuffer),
+		0,
+		NULL
+	);
+
+	std::wstring message;
+	if (size > 0 && messageBuffer != nullptr) {
+		message = messageBuffer;
+		while (!message.empty() && (message.back() == L'\n' || message.back() == L'\r')) {
+			message.pop_back();
+		}
+		LocalFree(messageBuffer);
+	} else {
+		message = L"Unknown Error";
+	}
+
+	return std::format(L"HRESULT: 0x{:08X} - {}", static_cast<uint32_t>(hr), message);
 }
