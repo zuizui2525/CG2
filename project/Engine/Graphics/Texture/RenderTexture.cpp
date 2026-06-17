@@ -79,7 +79,7 @@ void RenderTexture::Recreate(const Vector4& newClearColor) {
 }
 
 
-void RenderTexture::PreDraw(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle) {
+void RenderTexture::PreDraw(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, bool clearDepth) {
     // 描画ターゲットとするために RENDER_TARGET 状態にバリア遷移
     if (currentState_ != D3D12_RESOURCE_STATE_RENDER_TARGET) {
         D3D12_RESOURCE_BARRIER barrier{};
@@ -100,10 +100,12 @@ void RenderTexture::PreDraw(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DE
     float clearColorRGBA[4] = { clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w };
     commandList->ClearRenderTargetView(rtvHandleCPU_, clearColorRGBA, 0, nullptr);
 
-    // 深度バッファのクリア（マジックナンバーの排除ルールを適用）
-    const float kClearDepthValue = 1.0f;
-    const uint8_t kClearStencilValue = 0;
-    commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, kClearDepthValue, kClearStencilValue, 0, nullptr);
+    if (clearDepth) {
+        // 深度バッファのクリア（マジックナンバーの排除ルールを適用）
+        const float kClearDepthValue = 1.0f;
+        const uint8_t kClearStencilValue = 0;
+        commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, kClearDepthValue, kClearStencilValue, 0, nullptr);
+    }
 }
 
 void RenderTexture::PostDraw(ID3D12GraphicsCommandList* commandList) {

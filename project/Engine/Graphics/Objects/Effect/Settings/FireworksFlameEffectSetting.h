@@ -7,6 +7,7 @@ public:
         name = "FireworksFlame";
         meshType = "cube";
         isBillboard = false;
+        maxParticles = 10000;
         
         // 軌跡として残る炎（数個）
         emitCountMin = 1;

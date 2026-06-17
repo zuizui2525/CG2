@@ -270,6 +270,7 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurXPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurYPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\UnderwaterPass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\DepthOutlinePass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Debug\DebugEditor.cpp" />
     <ClCompile Include="Engine\Debug\GameViewWindow.cpp" />
@@ -325,6 +326,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\Fullscreen\Vignette.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Fullscreen\DepthOutline.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -441,6 +447,7 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurXPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurYPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\UnderwaterPass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\DepthOutlinePass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />

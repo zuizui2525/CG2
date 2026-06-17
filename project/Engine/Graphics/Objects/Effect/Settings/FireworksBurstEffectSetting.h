@@ -7,6 +7,7 @@ public:
         name = "FireworksBurst";
         meshType = "cube";
         isBillboard = false;
+        maxParticles = 10000;
         
         // --- 連鎖（子パーティクル）機能 ---
         trailEffectName = "FireworksFlame"; // 移動中に落とす火の粉

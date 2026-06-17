@@ -7,6 +7,7 @@ public:
         name = "FireworksSparkle";
         meshType = "cube";
         isBillboard = false;
+        maxParticles = 2000;
         
         // パチッと小さく弾ける
         emitCountMin = 3;

@@ -63,6 +63,9 @@ void BaseParticleObject::Initialize(int lightingMode) {
         mySrvIndex_ = sNextIndex++;
     }
     
+    numMaxInstance_ = setting_.maxParticles;
+    particles_.reserve(numMaxInstance_);
+
     CreateInstanceResource();
 }
 
@@ -71,7 +74,7 @@ void BaseParticleObject::CreateInstanceResource() {
     ID3D12DescriptorHeap* srvHeap = sEngine->GetDxCommon()->GetSrvHeap();
     UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-    size_t bufferSize = sizeof(ParticleForGPU) * kNumMaxInstance;
+    size_t bufferSize = sizeof(ParticleForGPU) * numMaxInstance_;
     instanceResource_ = DxUtils::CreateBufferResource(device, bufferSize);
     instanceResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceData_));
 
@@ -84,7 +87,7 @@ void BaseParticleObject::CreateInstanceResource() {
     instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     instancingSrvDesc.Buffer.FirstElement = 0;
     instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-    instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+    instancingSrvDesc.Buffer.NumElements = numMaxInstance_;
     instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
     device->CreateShaderResourceView(instanceResource_.Get(), &instancingSrvDesc, instanceSrvHandleCPU_);
@@ -97,8 +100,15 @@ void BaseParticleObject::Update() {
     if (setting_.isEmitter) {
         emitter_.frequencyTime += kDeltaTime_;
         if (setting_.emitFrequency <= emitter_.frequencyTime) {
-            std::list<Particle> newParticles = Emit(emitter_, randomEngine_);
-            particles_.splice(particles_.end(), newParticles);
+            std::vector<Particle> newParticles = Emit(emitter_, randomEngine_);
+            size_t currentSize = particles_.size();
+            if (currentSize < numMaxInstance_) {
+                size_t space = numMaxInstance_ - currentSize;
+                if (newParticles.size() > space) {
+                    newParticles.resize(space);
+                }
+                particles_.insert(particles_.end(), std::make_move_iterator(newParticles.begin()), std::make_move_iterator(newParticles.end()));
+            }
             emitter_.frequencyTime -= setting_.emitFrequency; // 以前の引き算方式に戻す
         }
     }
@@ -114,10 +124,12 @@ void BaseParticleObject::Update() {
         billBoardMatrix.m[3][2] = 0.0f;
     }
 
-    for (auto it = particles_.begin(); it != particles_.end(); ) {
+    for (size_t i = 0; i < particles_.size(); ) {
+        auto& p = particles_[i];
+
         // 寿命判定、または地面到達（killAtY）判定
-        bool isDead = (it->currentTime >= it->lifeTime);
-        if (setting_.killAtY > -900.0f && it->transform.translate.y <= setting_.killAtY) {
+        bool isDead = (p.currentTime >= p.lifeTime);
+        if (setting_.killAtY > -900.0f && p.transform.translate.y <= setting_.killAtY) {
             isDead = true;
         }
 
@@ -125,8 +137,8 @@ void BaseParticleObject::Update() {
             // 消滅する瞬間に onDeathEffectName が設定されていれば発生させる
             if (!setting_.onDeathEffectName.empty()) {
                 EffectPlayParam param;
-                param.position = it->transform.translate;
-                param.colorOverride = it->inheritColor; // 親の色を引き継ぐ
+                param.position = p.transform.translate;
+                param.colorOverride = p.inheritColor; // 親の色を引き継ぐ
 
                 // カンマ区切りで複数のエフェクトを発生させる
                 std::string names = setting_.onDeathEffectName;
@@ -138,36 +150,41 @@ void BaseParticleObject::Update() {
                 }
                 EffectManager::GetInstance()->PlayEffect3D(names, param);
             }
-            it = particles_.erase(it);
-            continue;
+            
+            // ベクトルの高速削除（末尾の要素と入れ替えて pop_back）
+            if (i != particles_.size() - 1) {
+                particles_[i] = std::move(particles_.back());
+            }
+            particles_.pop_back();
+            continue; // インデックスは進めずに次の要素を処理
         }
 
         // 遅延処理：設定されたディレイ時間を過ぎるまで更新・描画をスキップする
-        if (it->currentTime < setting_.delay) {
-            it->currentTime += kDeltaTime_;
-            it++;
+        if (p.currentTime < setting_.delay) {
+            p.currentTime += kDeltaTime_;
+            i++;
             continue;
         }
 
         // トレイル（移動中の連鎖エフェクト）の発生処理
         if (!setting_.trailEffectName.empty()) {
-            it->trailFrequencyTimer += kDeltaTime_;
-            if (it->trailFrequencyTimer >= setting_.trailFrequency) {
+            p.trailFrequencyTimer += kDeltaTime_;
+            if (p.trailFrequencyTimer >= setting_.trailFrequency) {
                 EffectPlayParam param;
-                param.position = it->transform.translate;
-                param.colorOverride = it->inheritColor; // 親の色を引き継ぐ
+                param.position = p.transform.translate;
+                param.colorOverride = p.inheritColor; // 親の色を引き継ぐ
                 EffectManager::GetInstance()->PlayEffect3D(setting_.trailEffectName, param);
-                it->trailFrequencyTimer -= setting_.trailFrequency;
+                p.trailFrequencyTimer -= setting_.trailFrequency;
             }
         }
 
-        Vector3 currentScale = it->transform.scale;
-        Vector3 currentRotate = it->transform.rotate;
+        Vector3 currentScale = p.transform.scale;
+        Vector3 currentRotate = p.transform.rotate;
 
         if (setting_.isVelocityAligned) {
-            float speed = std::sqrt(it->velocity.x * it->velocity.x + it->velocity.y * it->velocity.y + it->velocity.z * it->velocity.z);
+            float speed = std::sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y + p.velocity.z * p.velocity.z);
             if (speed > 0.001f) {
-                Vector3 dir = { it->velocity.x / speed, it->velocity.y / speed, it->velocity.z / speed };
+                Vector3 dir = { p.velocity.x / speed, p.velocity.y / speed, p.velocity.z / speed };
                 currentRotate.y = std::atan2(dir.x, dir.z);
                 currentRotate.x = std::asin(-dir.y);
                 currentRotate.z = 0.0f;
@@ -183,13 +200,13 @@ void BaseParticleObject::Update() {
         if (setting_.isBillboard) {
             Matrix4x4 scaleMatrix = Math::MakeScaleMatrix(currentScale);
             Matrix4x4 rotateMatrix = Math::MakeRotateMatrix(currentRotate.x, currentRotate.y, currentRotate.z);
-            Matrix4x4 translateMatrix = Math::MakeTranslateMatrix(it->transform.translate);
+            Matrix4x4 translateMatrix = Math::MakeTranslateMatrix(p.transform.translate);
             
             particleWorldMatrix = Math::Multiply(scaleMatrix, rotateMatrix);
             particleWorldMatrix = Math::Multiply(particleWorldMatrix, billBoardMatrix);
             particleWorldMatrix = Math::Multiply(particleWorldMatrix, translateMatrix);
         } else {
-            particleWorldMatrix = Math::MakeAffineMatrix(currentScale, currentRotate, it->transform.translate);
+            particleWorldMatrix = Math::MakeAffineMatrix(currentScale, currentRotate, p.transform.translate);
         }
 
         particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
@@ -197,16 +214,16 @@ void BaseParticleObject::Update() {
         Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(cameraMgr->GetViewMatrix3D(), cameraMgr->GetProjectionMatrix3D()));
 
         // 加速度（重力など）を速度に加算
-        it->velocity.x += setting_.acceleration.x * kDeltaTime_;
-        it->velocity.y += setting_.acceleration.y * kDeltaTime_;
-        it->velocity.z += setting_.acceleration.z * kDeltaTime_;
+        p.velocity.x += setting_.acceleration.x * kDeltaTime_;
+        p.velocity.y += setting_.acceleration.y * kDeltaTime_;
+        p.velocity.z += setting_.acceleration.z * kDeltaTime_;
 
         // 速度・回転速度を座標に加算
-        it->transform.translate += it->velocity * kDeltaTime_;
-        it->transform.rotate += it->rotationVelocity * kDeltaTime_;
-        it->currentTime += kDeltaTime_;
+        p.transform.translate += p.velocity * kDeltaTime_;
+        p.transform.rotate += p.rotationVelocity * kDeltaTime_;
+        p.currentTime += kDeltaTime_;
 
-        float progress = (std::min)(it->currentTime / it->lifeTime, 1.0f);
+        float progress = (std::min)(p.currentTime / p.lifeTime, 1.0f);
         
         float scaleProgress = progress;
         if (setting_.useEaseInScale) scaleProgress = progress * progress;
@@ -216,33 +233,33 @@ void BaseParticleObject::Update() {
         if (setting_.useEaseInAlpha) alphaProgress = progress * progress;
         else if (setting_.useEaseOutAlpha) alphaProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
 
-        it->transform.scale = it->startScale + (it->endScale - it->startScale) * scaleProgress;
+        p.transform.scale = p.startScale + (p.endScale - p.startScale) * scaleProgress;
         
         // Y軸にサイン波を適用する場合 (0 -> 1 -> 0)
         if (setting_.useSineScaleY) {
             float sineProgress = std::sin(progress * 3.14159265f);
-            it->transform.scale.y = it->startScale.y + (it->endScale.y - it->startScale.y) * sineProgress;
+            p.transform.scale.y = p.startScale.y + (p.endScale.y - p.startScale.y) * sineProgress;
         }
 
         // XZ軸にサイン波を適用する場合 (0 -> 1 -> 0)
         if (setting_.useSineScaleXZ) {
             float sineProgress = std::sin(progress * 3.14159265f);
-            it->transform.scale.x = it->startScale.x + (it->endScale.x - it->startScale.x) * sineProgress;
-            it->transform.scale.z = it->startScale.z + (it->endScale.z - it->startScale.z) * sineProgress;
+            p.transform.scale.x = p.startScale.x + (p.endScale.x - p.startScale.x) * sineProgress;
+            p.transform.scale.z = p.startScale.z + (p.endScale.z - p.startScale.z) * sineProgress;
         }
         
-        it->color.x = it->startColor.x + (it->endColor.x - it->startColor.x) * progress;
-        it->color.y = it->startColor.y + (it->endColor.y - it->startColor.y) * progress;
-        it->color.z = it->startColor.z + (it->endColor.z - it->startColor.z) * progress;
-        it->color.w = it->startColor.w + (it->endColor.w - it->startColor.w) * alphaProgress;
+        p.color.x = p.startColor.x + (p.endColor.x - p.startColor.x) * progress;
+        p.color.y = p.startColor.y + (p.endColor.y - p.startColor.y) * progress;
+        p.color.z = p.startColor.z + (p.endColor.z - p.startColor.z) * progress;
+        p.color.w = p.startColor.w + (p.endColor.w - p.startColor.w) * alphaProgress;
 
-        if (numInstance_ < kNumMaxInstance) {
+        if (numInstance_ < numMaxInstance_) {
             instanceData_[numInstance_].world = particleWorldMatrix;
             instanceData_[numInstance_].WVP = worldViewProjection;
-            instanceData_[numInstance_].color = it->color;
+            instanceData_[numInstance_].color = p.color;
             numInstance_++;
         }
-        it++;
+        i++;
     }
 }
 
@@ -251,7 +268,7 @@ void BaseParticleObject::EmitAt(uint32_t count, const EffectPlayParam& param) {
         setting_.textureName = param.textureKey;
     }
     for (uint32_t i = 0; i < count; ++i) {
-        if (particles_.size() < kNumMaxInstance) {
+        if (particles_.size() < numMaxInstance_) {
             particles_.push_back(MakeNewParticle(randomEngine_, param));
         }
     }
@@ -364,13 +381,14 @@ Particle BaseParticleObject::MakeNewParticle(std::mt19937& randomEngine, const E
     return particle;
 }
 
-std::list<Particle> BaseParticleObject::Emit(const Emitter& emitter, std::mt19937& randomEngine) {
-    std::list<Particle> particles;
+std::vector<Particle> BaseParticleObject::Emit(const Emitter& emitter, std::mt19937& randomEngine) {
+    std::vector<Particle> particles;
     EffectPlayParam param;
     param.position = emitter.transform.translate;
     param.rotation = emitter.transform.rotate;
     param.scale = emitter.transform.scale;
     uint32_t count = std::uniform_int_distribution<uint32_t>(setting_.emitCountMin, setting_.emitCountMax)(randomEngine);
+    particles.reserve(count);
     for (uint32_t i = 0; i < count; ++i) {
         particles.push_back(MakeNewParticle(randomEngine, param));
     }

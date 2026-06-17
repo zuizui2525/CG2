@@ -7,6 +7,7 @@
 #include "Engine/Graphics/PostProcess/VignettePass.h"
 #include "Engine/Graphics/PostProcess/BoxFilterPass.h"
 #include "Engine/Graphics/PostProcess/UnderwaterPass.h"
+#include "Engine/Graphics/PostProcess/DepthOutlinePass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -29,6 +30,7 @@ namespace {
     constexpr size_t kPassIndexGaussianBlurX = 5;
     constexpr size_t kPassIndexGaussianBlurY = 6;
     constexpr size_t kPassIndexUnderwater = 7;
+    constexpr size_t kPassIndexDepthOutline = 8;
 }
 
 void PostProcess::Initialize() {
@@ -98,6 +100,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<GaussianBlurXPass>()); // 5: GaussianBlurX
     passes_.push_back(std::make_unique<GaussianBlurYPass>()); // 6: GaussianBlurY
     passes_.push_back(std::make_unique<UnderwaterPass>()); // 7: Underwater
+    passes_.push_back(std::make_unique<DepthOutlinePass>()); // 8: DepthOutline
 
     // 全パスの初期化
     for (auto& pass : passes_) {
@@ -183,8 +186,8 @@ void PostProcess::ProcessEffects() {
     RenderTexture* currentOutput = renderTextureTemp_.get();
 
     for (size_t i = 0; i < activePasses.size(); ++i) {
-        // すべてテクスチャに出力する
-        currentOutput->PreDraw(commandList, dsvHandle);
+        // すべてテクスチャに出力する（深度バッファのクリアは行わない）
+        currentOutput->PreDraw(commandList, dsvHandle, false);
         activePasses[i]->Draw(commandList, currentInput->GetSrvGpuHandle());
         currentOutput->PostDraw(commandList);
 
@@ -318,6 +321,11 @@ void PostProcess::ImGuiControl() {
         bool underwaterActive = IsUnderwaterActive();
         if (ImGui::Checkbox("Underwater", &underwaterActive)) {
             SetUnderwaterActive(underwaterActive);
+        }
+        
+        bool depthOutlineActive = IsDepthOutlineActive();
+        if (ImGui::Checkbox("DepthOutline", &depthOutlineActive)) {
+            SetDepthOutlineActive(depthOutlineActive);
         }
         
         ImGui::Separator();
@@ -569,5 +577,70 @@ void PostProcess::SetUnderwaterActive(bool active) {
 
 bool PostProcess::IsUnderwaterActive() const {
     return (passes_.size() > kPassIndexUnderwater) ? passes_[kPassIndexUnderwater]->IsActive() : false;
+}
+
+void PostProcess::SetDepthOutlineActive(bool active) {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        if (passes_[kPassIndexDepthOutline]->IsActive() != active) {
+            passes_[kPassIndexDepthOutline]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 深度アウトライン を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsDepthOutlineActive() const {
+    return (passes_.size() > kPassIndexDepthOutline) ? passes_[kPassIndexDepthOutline]->IsActive() : false;
+}
+
+void PostProcess::SetDepthOutlineParams(float width, float threshold, float scale, const Vector3& color) {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        auto depthOutline = dynamic_cast<DepthOutlinePass*>(passes_[kPassIndexDepthOutline].get());
+        if (depthOutline) {
+            depthOutline->SetEdgeWidth(width);
+            depthOutline->SetThreshold(threshold);
+            depthOutline->SetScale(scale);
+            depthOutline->SetEdgeColor(color);
+        }
+    }
+}
+
+float PostProcess::GetDepthOutlineEdgeWidth() const {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        auto depthOutline = dynamic_cast<DepthOutlinePass*>(passes_[kPassIndexDepthOutline].get());
+        if (depthOutline) {
+            return depthOutline->GetEdgeWidth();
+        }
+    }
+    return 1.0f;
+}
+
+float PostProcess::GetDepthOutlineThreshold() const {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        auto depthOutline = dynamic_cast<DepthOutlinePass*>(passes_[kPassIndexDepthOutline].get());
+        if (depthOutline) {
+            return depthOutline->GetThreshold();
+        }
+    }
+    return 0.1f;
+}
+
+float PostProcess::GetDepthOutlineScale() const {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        auto depthOutline = dynamic_cast<DepthOutlinePass*>(passes_[kPassIndexDepthOutline].get());
+        if (depthOutline) {
+            return depthOutline->GetScale();
+        }
+    }
+    return 6.0f;
+}
+
+Vector3 PostProcess::GetDepthOutlineEdgeColor() const {
+    if (passes_.size() > kPassIndexDepthOutline) {
+        auto depthOutline = dynamic_cast<DepthOutlinePass*>(passes_[kPassIndexDepthOutline].get());
+        if (depthOutline) {
+            return depthOutline->GetEdgeColor();
+        }
+    }
+    return Vector3{0.0f, 0.0f, 0.0f};
 }
 

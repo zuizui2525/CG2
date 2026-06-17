@@ -94,6 +94,9 @@ public:
     void SetUnderwaterActive(bool active);
     bool IsUnderwaterActive() const;
 
+    void SetDepthOutlineActive(bool active);
+    bool IsDepthOutlineActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -115,6 +118,13 @@ public:
     void SetGaussianBlurParams(int32_t radius, float sigma);
     int32_t GetGaussianBlurKernelRadius() const;
     float GetGaussianBlurSigma() const;
+
+    // DepthOutlineパラメータのアクセサ
+    void SetDepthOutlineParams(float width, float threshold, float scale, const Vector3& color);
+    float GetDepthOutlineEdgeWidth() const;
+    float GetDepthOutlineThreshold() const;
+    float GetDepthOutlineScale() const;
+    Vector3 GetDepthOutlineEdgeColor() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;

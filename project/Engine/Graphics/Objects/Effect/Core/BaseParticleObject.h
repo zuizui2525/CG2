@@ -69,7 +69,7 @@ public:
 protected:
     void CreateInstanceResource();
     Particle MakeNewParticle(std::mt19937& randomEngine, const EffectPlayParam& param);
-    std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine);
+    std::vector<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine);
 
     // メンバ変数
     Emitter emitter_{};
@@ -77,7 +77,6 @@ protected:
     EffectSetting setting_{};
 
     // 数値管理
-    static const UINT kNumMaxInstance = 10000;
     UINT numMaxInstance_ = 1000;
     uint32_t numInstance_ = 0;
 
@@ -94,7 +93,7 @@ protected:
     D3D12_GPU_DESCRIPTOR_HANDLE instanceSrvHandleGPU_{};
 
     // パーティクル・ランダム
-    std::list<Particle> particles_;
+    std::vector<Particle> particles_;
     std::random_device seedGenerator_;
     std::mt19937 randomEngine_;
     const float kDeltaTime_ = 1.0f / 60.0f;

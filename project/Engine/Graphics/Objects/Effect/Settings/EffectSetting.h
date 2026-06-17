@@ -11,6 +11,9 @@ struct EffectSetting {
     uint32_t emitCountMin;
     uint32_t emitCountMax;
 
+    // 最大パーティクル数 (メモリ確保の上限)
+    uint32_t maxParticles;
+
     // 寿命 (秒)
     float lifeTimeMin;
     float lifeTimeMax;
@@ -80,6 +83,7 @@ struct EffectSetting {
     EffectSetting() :
         name("Default"), textureName("white"),
         emitCountMin(1), emitCountMax(1),
+        maxParticles(1000),
         lifeTimeMin(1.0f), lifeTimeMax(1.0f), delay(0.0f), killAtY(-999.0f),
         positionOffset{ 0.0f, 0.0f, 0.0f }, 
         spawnAreaMin{ 0.0f, 0.0f, 0.0f }, spawnAreaMax{ 0.0f, 0.0f, 0.0f },
