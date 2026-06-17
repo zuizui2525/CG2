@@ -11,6 +11,7 @@
     <FxCompile Include="resources\Shader\Fullscreen\Sepia.PS.hlsl" />
     <FxCompile Include="resources\Shader\Fullscreen\Vignette.PS.hlsl" />
     <FxCompile Include="resources\Shader\Fullscreen\DepthOutline.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Fullscreen\RadialBlur.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App\App.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="Engine\Graphics\PostProcess\GaussianBlurYPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\UnderwaterPass.cpp" />
     <ClCompile Include="Engine\Graphics\PostProcess\DepthOutlinePass.cpp" />
+    <ClCompile Include="Engine\Graphics\PostProcess\RadialBlurPass.cpp" />
     <ClCompile Include="Engine\Zuizui.cpp" />
     <ClCompile Include="Engine\Debug\DebugEditor.cpp">
       <Filter>Engine</Filter>
@@ -193,6 +195,7 @@
     <ClInclude Include="Engine\Graphics\PostProcess\GaussianBlurYPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\UnderwaterPass.h" />
     <ClInclude Include="Engine\Graphics\PostProcess\DepthOutlinePass.h" />
+    <ClInclude Include="Engine\Graphics\PostProcess\RadialBlurPass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
     <ClInclude Include="Engine\Zuizui.h" />

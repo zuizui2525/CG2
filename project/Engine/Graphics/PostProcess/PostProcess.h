@@ -97,6 +97,9 @@ public:
     void SetDepthOutlineActive(bool active);
     bool IsDepthOutlineActive() const;
 
+    void SetRadialBlurActive(bool active);
+    bool IsRadialBlurActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -125,6 +128,11 @@ public:
     float GetDepthOutlineThreshold() const;
     float GetDepthOutlineScale() const;
     Vector3 GetDepthOutlineEdgeColor() const;
+
+    // RadialBlurパラメータのアクセサ
+    void SetRadialBlurParams(const Vector2& center, float blurWidth);
+    Vector2 GetRadialBlurCenter() const;
+    float GetRadialBlurWidth() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;

@@ -7,8 +7,11 @@
  * カメラ、ライト、Cubeオブジェクトの生成と初期パラメータ設定を行います。
  */
 void ClearScene::Initialize() {
-    // 0. ポストプロセスのポインタを取得してメンバ変数に保持
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、ラジアルブラーをONにする
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
+    if (postProcess_) {
+        postProcess_->SetRadialBlurActive(true);
+    }
 
     // 1. 各マネージャへのポインタをリソース管理者から取得
     cameraMgr_ = CameraResource::GetCameraManager();

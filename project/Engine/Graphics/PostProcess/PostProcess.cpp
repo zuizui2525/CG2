@@ -8,6 +8,7 @@
 #include "Engine/Graphics/PostProcess/BoxFilterPass.h"
 #include "Engine/Graphics/PostProcess/UnderwaterPass.h"
 #include "Engine/Graphics/PostProcess/DepthOutlinePass.h"
+#include "Engine/Graphics/PostProcess/RadialBlurPass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -31,6 +32,7 @@ namespace {
     constexpr size_t kPassIndexGaussianBlurY = 6;
     constexpr size_t kPassIndexUnderwater = 7;
     constexpr size_t kPassIndexDepthOutline = 8;
+    constexpr size_t kPassIndexRadialBlur = 9;
 }
 
 void PostProcess::Initialize() {
@@ -101,6 +103,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<GaussianBlurYPass>()); // 6: GaussianBlurY
     passes_.push_back(std::make_unique<UnderwaterPass>()); // 7: Underwater
     passes_.push_back(std::make_unique<DepthOutlinePass>()); // 8: DepthOutline
+    passes_.push_back(std::make_unique<RadialBlurPass>());  // 9: RadialBlur
 
     // 全パスの初期化
     for (auto& pass : passes_) {
@@ -326,6 +329,11 @@ void PostProcess::ImGuiControl() {
         bool depthOutlineActive = IsDepthOutlineActive();
         if (ImGui::Checkbox("DepthOutline", &depthOutlineActive)) {
             SetDepthOutlineActive(depthOutlineActive);
+        }
+
+        bool radialBlurActive = IsRadialBlurActive();
+        if (ImGui::Checkbox("RadialBlur", &radialBlurActive)) {
+            SetRadialBlurActive(radialBlurActive);
         }
         
         ImGui::Separator();
@@ -642,5 +650,47 @@ Vector3 PostProcess::GetDepthOutlineEdgeColor() const {
         }
     }
     return Vector3{0.0f, 0.0f, 0.0f};
+}
+
+void PostProcess::SetRadialBlurActive(bool active) {
+    if (passes_.size() > kPassIndexRadialBlur) {
+        if (passes_[kPassIndexRadialBlur]->IsActive() != active) {
+            passes_[kPassIndexRadialBlur]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 ラジアルブラー を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsRadialBlurActive() const {
+    return (passes_.size() > kPassIndexRadialBlur) ? passes_[kPassIndexRadialBlur]->IsActive() : false;
+}
+
+void PostProcess::SetRadialBlurParams(const Vector2& center, float blurWidth) {
+    if (passes_.size() > kPassIndexRadialBlur) {
+        auto radialBlur = dynamic_cast<RadialBlurPass*>(passes_[kPassIndexRadialBlur].get());
+        if (radialBlur) {
+            radialBlur->SetParams(center, blurWidth);
+        }
+    }
+}
+
+Vector2 PostProcess::GetRadialBlurCenter() const {
+    if (passes_.size() > kPassIndexRadialBlur) {
+        auto radialBlur = dynamic_cast<RadialBlurPass*>(passes_[kPassIndexRadialBlur].get());
+        if (radialBlur) {
+            return radialBlur->GetCenter();
+        }
+    }
+    return Vector2{0.5f, 0.5f};
+}
+
+float PostProcess::GetRadialBlurWidth() const {
+    if (passes_.size() > kPassIndexRadialBlur) {
+        auto radialBlur = dynamic_cast<RadialBlurPass*>(passes_[kPassIndexRadialBlur].get());
+        if (radialBlur) {
+            return radialBlur->GetBlurWidth();
+        }
+    }
+    return 0.0f;
 }
 
