@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Engine/Graphics/Objects/Camera/Base/BaseCamera.h"
 #include "Engine/Input/Input.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -11,8 +11,7 @@ public:
     void Update(Input* input);
     void Update() override {}
 
-    // ImGuiでのガイド表示
-    void ImGuiControl(const std::string& name);
+
 
     // カーソル表示・非表示を外部から強制的に変える（カメラ切り替え時用）
     void SetCursorVisible(bool isVisible);

@@ -4,23 +4,13 @@
 #include "Engine/Math/MathStructs.h"
 #include "Engine/Graphics/RenderStructs.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Debug/IGameObject.h"
 
 class Zuizui;
 
-class Object3D : public Base3D {
+class Object3D : public Base3D, public IGameObject {
 public:
-    Object3D() = default;
-    virtual ~Object3D() = default;
-
-    void Initialize(int lightingMode);
-
-    // ImGui
-    void ImGuiControl(const std::string& name);
-
-    // 共通アクセサ
-    // ==========================================
-    // Getter (情報取得)
-    // ==========================================
+    virtual void Initialize(int lightingMode = 1);
 
     /// @brief WVP(World, View, Projection)行列の定数バッファを取得します
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }
@@ -54,7 +44,7 @@ public:
     /// @brief 環境マップの反射係数(0.0fで反射なし, 1.0fで完全反射)を取得します
     float GetEnvironmentCoefficient() const { return materialData_ ? materialData_->environmentCoefficient : 0.0f; }
     /// @brief オブジェクトが現在描画される状態かどうかを取得します
-    bool GetIsVisible() const { return isVisible_; }
+    bool GetIsVisible() const { return IsVisible(); }
 
     // ==========================================
     // Setter (情報設定)
@@ -78,13 +68,15 @@ public:
     /// @brief 環境マップの反射係数を設定します (0.0f:反射なし 〜 1.0f:完全反射(鏡面))
     void SetEnvironmentCoefficient(float coef) { if (materialData_) { materialData_->environmentCoefficient = coef; } }
     /// @brief オブジェクトの表示/非表示を切り替えます (falseで描画されなくなります)
-    void SetIsVisible(bool isVisible) { isVisible_ = isVisible; }
+    void SetIsVisible(bool isVisible) { SetVisible(isVisible); }
     /// @brief ライティングの種類を設定します (0:無効, 1:Lambert(通常), 2:HalfLambert(暗部を明るく))
     void SetLightingMode(int lightingMode) {
         if (materialData_) {
             materialData_->enableLighting = lightingMode;
         }
     }
+
+    void DrawInspector() override;
 
 protected:
     // ImGui
@@ -100,9 +92,4 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
-    
-    bool isVisible_ = true;
-
-    // ImGuiウィンドウの開閉状態
-    bool isWindowOpen_ = false;
 };

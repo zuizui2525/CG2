@@ -88,21 +88,7 @@ void TitleScene::Initialize() {
 
 void TitleScene::ImGuiControl() {
 #ifdef _USEIMGUI
-    // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
-    dirLight_->ImGuiControl("dirLight");
-    line_->ImGuiControl("line");
-    triangle_->ImGuiControl("triangle");
-    square_->ImGuiControl("sqaure");
-    cube_->ImGuiControl("cube");
-    triangularPyramid_->ImGuiControl("triangularPyramid");
-    pyramid_->ImGuiControl("pyramid");
-    sphere_->ImGuiControl("sphere");
-    hemisphere_->ImGuiControl("hemisphere");
-    cone_->ImGuiControl("cone");
-    cylinder_->ImGuiControl("cylinder");
-    ring_->ImGuiControl("ring");
-    bunny_->ImGuiControl("bunny");
 
     // ポストプロセスのパラメータ調整用ImGuiコントロール
     if (postProcess_) {

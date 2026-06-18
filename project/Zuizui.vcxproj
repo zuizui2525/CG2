@@ -278,6 +278,8 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClCompile Include="Engine\Debug\PerformanceMonitorWindow.cpp" />
     <ClCompile Include="Engine\Debug\SceneManagerWindow.cpp" />
     <ClCompile Include="Engine\Debug\ReplaySystem.cpp" />
+    <ClCompile Include="Engine\Debug\IGameObject.cpp" />
+    <ClCompile Include="Engine\Debug\SceneHierarchy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\Object3d\Object3d.PS.hlsl">
@@ -464,6 +466,8 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
     <ClInclude Include="Engine\Debug\SceneManagerWindow.h" />
     <ClInclude Include="Engine\Debug\ReplaySystem.h" />
     <ClInclude Include="Engine\Debug\PopAnimation.h" />
+    <ClInclude Include="Engine\Debug\IGameObject.h" />
+    <ClInclude Include="Engine\Debug\SceneHierarchy.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

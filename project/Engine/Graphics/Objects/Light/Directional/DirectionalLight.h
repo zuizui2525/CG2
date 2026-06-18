@@ -3,6 +3,7 @@
 #include <wrl.h>
 #include <string>
 #include "Engine/Math/MathStructs.h"
+#include "Engine/Debug/IGameObject.h"
 
 static const int kMaxDirectionalLights = 2;
 
@@ -18,8 +19,10 @@ struct DirectionalLightGroup {
     float padding[3];                               // アライメント調整
 };
 
-class DirectionalLightObject {
+class DirectionalLightObject : public IGameObject {
 public:
+    virtual ~DirectionalLightObject();
+
     // 初期化
     void Initialize();
 
@@ -27,13 +30,11 @@ public:
     void Update();
 
     // ImGui操作
-    void ImGuiControl(const std::string& name);
+    void DrawInspector() override;
 
     // 実体の参照を返す
     DirectionalLight& GetLightData() { return data_; }
 
 private:
     DirectionalLight data_ = { {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, 1.0f };
-
-    bool isWindowOpen_ = false;
 };

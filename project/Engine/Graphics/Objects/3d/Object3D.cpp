@@ -3,6 +3,30 @@
 #include "Engine/Math/Matrix/Matrix.h"
 #include "Engine/Zuizui.h"
 #include <stdexcept>
+#include <typeinfo>
+
+namespace {
+    const std::string kClassPrefix = "class ";
+    const std::string kStructPrefix = "struct ";
+    const std::string kObjectSuffix = "Object";
+
+    std::string GetDefaultNameFromType(const std::type_info& typeInfo) {
+        std::string rawName = typeInfo.name();
+        
+        if (rawName.rfind(kClassPrefix, 0) == 0) {
+            rawName = rawName.substr(kClassPrefix.length());
+        } else if (rawName.rfind(kStructPrefix, 0) == 0) {
+            rawName = rawName.substr(kStructPrefix.length());
+        }
+        
+        if (rawName.length() > kObjectSuffix.length() && 
+            rawName.compare(rawName.length() - kObjectSuffix.length(), kObjectSuffix.length(), kObjectSuffix) == 0) {
+            rawName = rawName.substr(0, rawName.length() - kObjectSuffix.length());
+        }
+        
+        return rawName;
+    }
+}
 
 void Object3D::Initialize(int lightingMode) {
     // WVPリソース作成
@@ -28,25 +52,10 @@ void Object3D::Initialize(int lightingMode) {
     transform_.scale = { 1,1,1 };
     transform_.rotate = { 0,0,0 };
     uvTransform_ = { {1,1,1}, {0,0,0}, {0,0,0} };
+
+    // ヒエラルキー自動登録
+    InitializeGameObject(GetDefaultNameFromType(typeid(*this)));
 }
-
-void Object3D::ImGuiControl(const std::string& name) {
-#ifdef _USEIMGUI
-    ImGui::Begin("Object List");
-    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
-    ImGui::End();
-    
-    if (isWindowOpen_) {
-        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
-            ImGuiSRTControl(name);
-            ImGuiLightingControl(name);
-
-        }
-        ImGui::End();
-    }
-#endif
-}
-
 void Object3D::ImGuiSRTControl(const std::string& name) {
 #ifdef _USEIMGUI
     std::string label = "##" + name;
@@ -72,5 +81,12 @@ void Object3D::ImGuiLightingControl(const std::string& name) {
         ImGui::RadioButton(("HalfLambert" + label).c_str(), (int*)&materialData_->enableLighting, 2);
         ImGui::DragFloat(("Env Coefficient" + label).c_str(), &materialData_->environmentCoefficient, 0.01f, 0.0f, 10.0f);
     }
+#endif
+}
+
+void Object3D::DrawInspector() {
+#ifdef _USEIMGUI
+    ImGuiSRTControl(name_);
+    ImGuiLightingControl(name_);
 #endif
 }

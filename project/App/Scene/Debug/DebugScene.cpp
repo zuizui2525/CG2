@@ -52,9 +52,7 @@ void DebugScene::Initialize() {
 
 void DebugScene::ImGuiControl() {
 #ifdef _USEIMGUI
-    // シーン内のオブジェクトのデバッグ表示
     cameraMgr_->ImGuiControl();
-    dirLight_->ImGuiControl("dirLight");
     EffectManager::GetInstance()->ImGuiControl("Effects");
     if (postProcess_) {
         postProcess_->ImGuiControl();

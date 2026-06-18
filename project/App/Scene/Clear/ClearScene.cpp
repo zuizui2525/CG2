@@ -50,14 +50,7 @@ void ClearScene::ImGuiControl() {
 #ifdef _USEIMGUI
     // カメラ切り替え等のマネージャパラメータを表示
     cameraMgr_->ImGuiControl();
-
-    // 平行光源パラメータの調整用ImGuiコントロール
-    static const char* kLightImGuiLabel = "ClearScene DirLight";
-    dirLight_->ImGuiControl(kLightImGuiLabel);
-
-    // Cubeのパラメータ調整用ImGuiコントロール
-    static const char* kCubeImGuiLabel = "ClearScene Cube";
-    cube_->ImGuiControl(kCubeImGuiLabel);
+    // ポストプロセスのパラメータ調整用ImGuiコントロール
 
     // ポストプロセスのパラメータ調整用ImGuiコントロール
     if (postProcess_) {

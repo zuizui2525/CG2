@@ -62,9 +62,6 @@ void CameraManager::ImGuiControl() {
             SetActiveCamera(name);
         }
 
-        // 3. 設定ウィンドウを開くチェックボックスは少し右にずらすか、名前の横に置く
-        ImGui::SameLine(ImGui::GetWindowWidth() - 100); // 右側に寄せる
-        camera->ImGuiControl(name); // BaseCamera側のチェックボックス
 
         ImGui::Separator(); // カメラごとに区切り線を入れると見やすい
     }

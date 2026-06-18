@@ -11,7 +11,12 @@ void BaseCamera::Initialize() {
         static_cast<float>(WindowApp::kClientWidth) / static_cast<float>(WindowApp::kClientHeight),
         0.1f, 1000.0f
     );
+
+    // ヒエラルキー自動登録
+    InitializeGameObject("Camera");
 }
+
+BaseCamera::~BaseCamera() = default;
 
 void BaseCamera::Update() {
     if (useTarget_) {
@@ -23,28 +28,18 @@ void BaseCamera::Update() {
         viewMatrix_ = Math::Inverse(cameraMatrix);
     }
 }
-
-void BaseCamera::ImGuiControl(const std::string& name) {
-#ifdef _USEIMGUI
-    // List側のチェックボックス
-    ImGui::Checkbox(("Edit##" + name).c_str(), &isWindowOpen_);
-
-    if (isWindowOpen_) {
-        // ウィンドウ表示
-        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
-            std::string tag = "##" + name;
-            if (ImGui::CollapsingHeader(("Transform" + tag).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::DragFloat3(("Pos" + tag).c_str(), &transform_.translate.x, 0.1f, 0, 0, "%.1f");
-                ImGui::DragFloat3(("Rot" + tag).c_str(), &transform_.rotate.x, 0.1f, 0, 0, "%.1f");
-            }
-        }
-        ImGui::End(); // 一旦閉じる（派生クラス側で追記できるようにするため）
-    }
-#endif
-}
-
 void BaseCamera::UpdateProjection(float aspect) {
     aspectRatio_ = aspect;
     projectionMatrix_ = Math::MakePerspectiveFovMatrix(fov_, aspectRatio_, nearZ_, farZ_);
+}
+
+void BaseCamera::DrawInspector() {
+#ifdef _USEIMGUI
+    std::string tag = "##" + name_;
+    if (ImGui::CollapsingHeader(("Transform" + tag).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat3(("Pos" + tag).c_str(), &transform_.translate.x, 0.1f, 0, 0, "%.1f");
+        ImGui::DragFloat3(("Rot" + tag).c_str(), &transform_.rotate.x, 0.1f, 0, 0, "%.1f");
+    }
+#endif
 }
 

@@ -64,10 +64,7 @@ void GameScene::ImGuiControl() {
 #ifdef _USEIMGUI
     // カメラ切り替え等のマネージャパラメータを表示
     cameraMgr_->ImGuiControl();
-
-    // 平行光源パラメータの調整用ImGuiコントロール
-    static const char* kLightImGuiLabel = "GameScene DirLight";
-    dirLight_->ImGuiControl(kLightImGuiLabel);
+    // ポストプロセスのパラメータ調整用ImGuiコントロール
 
     // ポストプロセスのパラメータ調整用ImGuiコントロール
     if (postProcess_) {

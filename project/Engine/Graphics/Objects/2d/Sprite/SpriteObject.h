@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cassert>
@@ -8,8 +8,9 @@
 #include "Engine/Math/MathStructs.h"
 #include "Engine/Graphics/RenderStructs.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Debug/IGameObject.h"
 
-class SpriteObject : Base2D{
+class SpriteObject : Base2D, public IGameObject {
 public:
     // コンストラクタから引数を削除
     SpriteObject() = default;
@@ -23,7 +24,7 @@ public:
     // 描画処理
     void Draw(const std::string& textureKey, bool draw = true);
 
-    void ImGuiControl(const std::string& name);
+    void DrawInspector() override;
 
     // Getter
     Transform& GetTransform() { return transform_; }
@@ -66,7 +67,4 @@ private:
 
     float width_ = 100.0f;  // デフォルト幅
     float height_ = 100.0f; // デフォルト高さ
-
-    // ImGuiウィンドウの開閉状態
-    bool isWindowOpen_ = false;
 };

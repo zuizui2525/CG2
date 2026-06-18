@@ -1,4 +1,4 @@
-﻿#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Texture/TextureManager.h"
@@ -56,6 +56,9 @@ void SpriteObject::Initialize(int lightingMode) {
     uint32_t* idx;
     indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&idx));
     idx[0] = 0; idx[1] = 1; idx[2] = 2; idx[3] = 1; idx[4] = 3; idx[5] = 2;
+
+    // ヒエラルキー自動登録
+    InitializeGameObject("Sprite");
 }
 
 void SpriteObject::Update() {
@@ -71,7 +74,7 @@ void SpriteObject::Update() {
 }
 
 void SpriteObject::Draw(const std::string& textureKey, bool draw) {
-    if (!draw) return;
+    if (!draw || !isVisible_) return;
 
     sEngine->GetDxCommon()->GetCommandList()->SetGraphicsRootSignature(sEngine->GetPSOManager()->GetRootSignature("Object3D"));
     sEngine->GetDxCommon()->GetCommandList()->SetPipelineState(sEngine->GetPSOManager()->GetPSO("Object3D"));
@@ -85,46 +88,35 @@ void SpriteObject::Draw(const std::string& textureKey, bool draw) {
 
     sEngine->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
-
-void SpriteObject::ImGuiControl(const std::string& name) {
+void SpriteObject::DrawInspector() {
 #ifdef _USEIMGUI
-    ImGui::Begin("Sprite List");
-    ImGui::Checkbox((name + " Settings").c_str(), &isWindowOpen_);
-    ImGui::End();
+    std::string label = "##" + name_;
 
-    if (isWindowOpen_) {
-        if (ImGui::Begin((name + " Control").c_str(), &isWindowOpen_)) {
-
-            std::string label = "##" + name;
-
-            // --- Sprite特有の設定 (サイズ) ---
-            if (ImGui::CollapsingHeader(("Sprite Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                float size[2] = { width_, height_ };
-                if (ImGui::DragFloat2(("Size" + label).c_str(), size, 1.0f, 0.0f, 0.0f, "%.1f")) {
-                    SetSize(size[0], size[1]);
-                }
-            }
-
-            // --- 共通のSRT設定 ---
-            if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
-                ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f, 0.0f, 0.0f, "%.1f");
-                ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 1.0f, 0.0f, 0.0f, "%.1f");
-            }
-
-            // --- カラー設定 ---
-            if (ImGui::CollapsingHeader(("Color" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
-            }
-
-            // --- UV設定 (Sprite特有) ---
-            if (ImGui::CollapsingHeader(("UV Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::DragFloat2(("uvScale" + label).c_str(), &uvTransform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
-                ImGui::DragFloat(("uvRotate" + label).c_str(), &uvTransform_.rotate.z, 0.01f, 0.0f, 0.0f, "%.1f");
-                ImGui::DragFloat2(("uvTranslate" + label).c_str(), &uvTransform_.translate.x, 0.01f, 0.0f, 0.0f, "%.1f");
-            }
+    // --- Sprite特有の設定 (サイズ) ---
+    if (ImGui::CollapsingHeader(("Sprite Settings" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        float size[2] = { width_, height_ };
+        if (ImGui::DragFloat2(("Size" + label).c_str(), size, 1.0f, 0.0f, 0.0f, "%.1f")) {
+            SetSize(size[0], size[1]);
         }
-        ImGui::End();
+    }
+
+    // --- 共通のSRT設定 ---
+    if (ImGui::CollapsingHeader(("Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat3(("Scale" + label).c_str(), &transform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("Rotate" + label).c_str(), &transform_.rotate.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat3(("Translate" + label).c_str(), &transform_.translate.x, 1.0f, 0.0f, 0.0f, "%.1f");
+    }
+
+    // --- カラー設定 ---
+    if (ImGui::CollapsingHeader(("Color" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::ColorEdit4(("Color" + label).c_str(), &materialData_->color.x, ImGuiColorEditFlags_AlphaBar);
+    }
+
+    // --- UV設定 (Sprite特有) ---
+    if (ImGui::CollapsingHeader(("UV Transform" + label).c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat2(("uvScale" + label).c_str(), &uvTransform_.scale.x, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat(("uvRotate" + label).c_str(), &uvTransform_.rotate.z, 0.01f, 0.0f, 0.0f, "%.1f");
+        ImGui::DragFloat2(("uvTranslate" + label).c_str(), &uvTransform_.translate.x, 0.01f, 0.0f, 0.0f, "%.1f");
     }
 #endif
 }

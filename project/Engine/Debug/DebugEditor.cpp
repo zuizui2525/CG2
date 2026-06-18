@@ -4,6 +4,8 @@
 #include "Engine/Debug/PerformanceMonitorWindow.h"
 #include "Engine/Debug/SceneManagerWindow.h"
 #include "Engine/Debug/ReplaySystem.h"
+#include "Engine/Debug/SceneHierarchy.h"
+#include "Engine/Debug/IGameObject.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/Log/Log.h"
 #include "externals/imgui/imgui.h"
@@ -57,6 +59,51 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
 
     // Scene Manager
     sceneManagerWindow_->Draw();
+
+    // Hierarchy (左側)
+    if (ImGui::Begin("Hierarchy")) {
+        const auto& objects = SceneHierarchy::GetInstance()->GetObjects();
+        IGameObject* selected = SceneHierarchy::GetInstance()->GetSelected();
+
+        for (auto* obj : objects) {
+            // 表示フラグ用のチェックボックス
+            bool isVisible = obj->IsVisible();
+            std::string chkLabel = "##visible_" + obj->GetName();
+            if (ImGui::Checkbox(chkLabel.c_str(), &isVisible)) {
+                obj->SetVisible(isVisible);
+            }
+            ImGui::SameLine();
+
+            // 選択状態
+            bool isSelected = (obj == selected);
+            if (ImGui::Selectable(obj->GetName().c_str(), isSelected)) {
+                SceneHierarchy::GetInstance()->SetSelected(obj);
+            }
+        }
+    }
+    ImGui::End();
+
+    // Inspector (右側)
+    if (ImGui::Begin("Inspector")) {
+        IGameObject* selected = SceneHierarchy::GetInstance()->GetSelected();
+        if (selected) {
+            // 名前の編集
+            constexpr int kNameBufferSize = 128;
+            char nameBuf[kNameBufferSize];
+            strcpy_s(nameBuf, selected->GetName().c_str());
+            if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                selected->SetName(nameBuf);
+            }
+
+            ImGui::Separator();
+
+            // 各種オブジェクト固有のインスペクター描画
+            selected->DrawInspector();
+        } else {
+            ImGui::Text("No object selected.");
+        }
+    }
+    ImGui::End();
 
     // Replay View (表示フラグ showReplayView_ に連動)
     if (showReplayView_) {

@@ -1,14 +1,15 @@
 #pragma once  
 #include "Engine/Math/Matrix/Matrix.h"
+#include "Engine/Debug/IGameObject.h"
 #include <string>
 
-class BaseCamera {  
+class BaseCamera : public IGameObject {  
 public:  
-    virtual ~BaseCamera() = default;  
+    virtual ~BaseCamera();  
 
     virtual void Initialize();  
     virtual void Update();  
-    virtual void ImGuiControl(const std::string& name);
+    void DrawInspector() override;
 
     // 座標・回転の操作  
     void SetPosition(const Vector3& pos) { transform_.translate = pos; }  
@@ -32,8 +33,6 @@ protected:
     Transform transform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
     Matrix4x4 viewMatrix_ = Math::MakeIdentity();  
     Matrix4x4 projectionMatrix_ = Math::MakeIdentity();
-
-    bool isWindowOpen_ = false;  
 
     float fov_ = 0.45f;  
     float aspectRatio_ = 16.0f / 9.0f;  
