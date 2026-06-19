@@ -1,0 +1,162 @@
+# ZuizuiEngine 仕様・機能まとめ
+
+このドキュメントは、DirectX 12ベースの自作C++ゲームエンジン「ZuizuiEngine」の機能仕様をまとめたものです。他のAIがこのエンジン向けのコード（ゲームロジック、シーン、描画オブジェクトの制御など）を記述・生成する際の参照用として使用してください。
+
+---
+
+## 1. エンジン基本情報
+- **開発言語**: C++
+- **グラフィックスAPI**: DirectX 12
+- **ウィンドウ管理**: Win32 API (`WindowApp`)
+- **外部ライブラリ**: ImGui (デバッグ機能用), DirectInput (入力), XAudio2 & Media Foundation (オーディオ)
+- **エントリーポイント**: `Zuizui` クラス（シングルトン）がエンジンコアの初期化・更新・描画・終了を管理します。
+  - インスタンス取得: `Zuizui::GetInstance()`
+
+---
+
+## 2. シーン管理システム (Scene Management)
+ゲームは複数の「シーン」で構成され、`SceneManager` が遷移を制御します。
+
+### 主要クラス・インターフェース
+- **`IScene`**: すべてのシーンの基底クラス。
+  ```cpp
+  class IScene {
+  public:
+      virtual ~IScene() = default;
+      virtual void Initialize() = 0;
+      virtual void Update() = 0;
+      virtual void Draw() = 0;
+  };
+  ```
+- **`SceneManager`**: シーンの切り替えや更新・描画ループを実行。
+  - インスタンス取得: `SceneManager::GetInstance()`
+  - シーン切り替え: `ChangeScene(const std::string& sceneName)`
+- **`SceneFactory`**: シーン名（文字列）からシーンインスタンスを生成するファクトリ。
+  - 対応する標準シーン名: `"TITLE"`, `"GAME"`, `"CLEAR"`, `"GAMEOVER"`, `"DEBUG"`
+
+---
+
+## 3. グラフィックス機能 (Graphics)
+
+### 3D描画オブジェクト (`Object3D` / `ModelObject`)
+- **プリミティブ（基本図形）描画**:
+  以下の形状を描画するためのオブジェクトクラスが個別に用意されています。
+  - 立方体 (`Cube`)
+  - 球体 (`Sphere`)
+  - 円錐 (`Cone`)
+  - 円柱 (`Cylinder`)
+  - 円柱エフェクト (`CylinderEffect`)
+  - フラットリング (`FlatRing`)
+  - 半球 (`Hemisphere`)
+  - 線画 (`Line`)
+  - 四角錐 (`Pyramid`)
+  - リング (`Ring`)
+  - スカイボックス (`Skybox`)
+  - 四角形 (`Square`)
+  - 三角形 (`Triangle`)
+  - 三角錐 (`TriangularPyramid`)
+- **3Dモデルロード (`ModelLoader`)**:
+  - `ModelLoader::LoadObjFile(const std::string& filename)` を用いて `.obj` ファイルおよび付随するマテリアル `.mtl` ファイルをロード可能。
+  - `ModelManager` がロード済みのモデルをキャッシュ管理。
+- **モデル描画オブジェクト (`ModelObject`)**:
+  - `Initialize(const std::string& modelName)` で初期化し、`Draw()` で描画。
+
+### 2Dスプライト描画 (`SpriteObject`)
+- テクスチャを描画する2Dオブジェクト。
+  - `Initialize(int lightingMode = 0)` で初期化。
+  - `SetSize(float width, float height)` で表示サイズを設定。
+  - `Draw(const std::string& textureKey, bool draw = true)` で描画。
+  - `transform_` メンバー（Scale, Rotate, Translate）による制御。
+  - `uvTransform_` メンバーにより、テクスチャのUVスクロールや回転、拡縮に対応。
+  - ImGuiでのインスペクタ表示（`DrawInspector()`）に対応。
+
+### カメラシステム
+- **`BaseCamera`**: カメラの基底クラス。
+  - 位置設定: `SetPosition(const Vector3& pos)` / 取得: `GetPosition()`
+  - 回転設定: `SetRotation(const Vector3& rot)` / 取得: `GetRotation()`
+  - 注視点指定: `SetTarget(const Vector3& target)` (注視点を使用しない場合は `DisableTarget()`)
+  - 射影行列: 透視投影 (Perspective) および 2D用の正射影 (Orthographic) の両方に対応。
+- **`DebugCamera`**: デバッグ用のフリーカメラ。
+- **`CameraManager`**: シーン内のカメラを管理。
+
+### ライトシステム
+- **`LightManager`**: ライト全体を管理。
+- **`DirectionalLight`**: 平行光源。
+- **`PointLight`**: 点光源。
+- **`SpotLight`**: スポットライト。
+
+### パーティクルシステム
+- **`BaseParticleObject`** を基底とし、以下をサポート。
+  - `MeshParticleObject`: 3Dモデルを放出するパーティクル。
+  - `SpriteParticleObject`: 2Dスプライトを放出するパーティクル。
+
+### ポストプロセッシング (`PostProcess`)
+- レンダーテクスチャに一度描画した後、画面全体に様々な画像効果を適用する機能。
+- **実装済みのポストエフェクトパス (`IPostProcessPass` 派生クラス)**:
+  - `GaussianBlurXPass` / `GaussianBlurYPass`: 高精度なガウシアンブラー
+  - `BoxFilterPass`: ボックスフィルタによる高速なぼかし
+  - `DepthOutlinePass`: デプス（深さ）情報を用いたエッジ検出（輪郭線描画）
+  - `RadialBlurPass`: 中心から放射状にぼかすラジアルブラー
+  - `GrayscalePass`: グレースケール化
+  - `SepiaPass`: セピア調化
+  - `VignettePass`: ビネット（画面の四隅を暗くする）効果
+  - `UnderwaterPass`: 水中にいるようなゆらぎと青みを加えるエフェクト
+
+---
+
+## 4. 入力システム (Input)
+DirectInputを使用したキーボードおよびマウスの入力制御。
+
+- **キーボード入力**:
+  - `Trigger(BYTE key) const`: 押された瞬間のみ `true`
+  - `Press(BYTE key) const`: 押されている間ずっと `true`
+  - `Release(BYTE key) const`: 離された瞬間のみ `true`
+- **マウス入力**:
+  - `MouseTrigger(int button) const`: 0=左, 1=右, 2=中ボタンが押された瞬間
+  - `MousePress(int button) const`: 押されている間ずっと
+  - `MouseRelease(int button) const`: 離された瞬間
+
+---
+
+## 5. オーディオシステム (Audio)
+XAudio2 と Windows Media Foundation を使用したオーディオ再生。
+
+- `.wav` および `.mp3` 形式に対応。
+- **主要関数**:
+  - `SoundData LoadSound(const std::string& filePath)`: 音声ファイルをロード。
+  - `void PlaySoundW(SoundData& soundData, float volume = 1.0f, bool loop = false)`: 再生。
+  - `void StopSound(SoundData& soundData)`: 再生停止。
+  - `void Unload(SoundData& soundData)`: リソース解放。
+
+---
+
+## 6. 数学および衝突判定 (Math & Collision)
+
+### 数学クラス/関数 (`Math` ネームスペース)
+- `Vector3`, `Matrix4x4` 等の構造体、および加減乗除や内積(`Dot`)、外積(`Cross`)、正規化(`Normalize`)、長さ(`Length`)などをサポート。
+- 各種変換行列（平行移動 `MakeTranslateMatrix`、回転 `MakeRotateMatrix`, `MakeRotateX/Y/ZMatrix`、拡大縮小 `MakeScaleMatrix`、アフィン変換 `MakeAffineMatrix`、プロジェクション `MakePerspectiveFovMatrix`/`MakeOrthographicMatrix`）の生成関数が利用可能。
+
+### 衝突判定 (`Collision` モジュール)
+- 3D空間における以下の衝突判定（交差判定）関数が定義されています：
+  - `IsCollision(const Sphere&, const Sphere&)`: 球同士
+  - `IsCollision(const Sphere&, const Plane&)`: 球と平面
+  - `IsCollision(const Segment&, const Plane&)`: 線分と平面
+  - `IsCollision(const Segment&, const Triangle&)`: 線分と三角形
+  - `IsCollision(const AABB&, const AABB&)`: AABB同士
+  - `IsCollision(const AABB&, const Vector3&)`: AABBと点
+  - `IsCollision(const AABB&, const Sphere&)`: AABBと球
+  - `IsCollision(const AABB&, const Segment&)`: AABBと線分
+  - `IsCollision(const OBB&, const Sphere&)`: OBBと球
+  - `IsCollision(const OBB&, const Segment&)`: OBBと線分
+
+---
+
+## 7. デバッグおよび開発支援機能 (Debug & Editor)
+`_USEIMGUI` マクロが有効な場合、強力なインゲームデバッグツールが動作します。
+
+- **`DebugEditor`**: 統合デバッグウィンドウ。シーンヒエラルキーの表示や、ゲームオブジェクトのパラメータを動的に変更するインスペクタ（`DrawInspector()`）を管理。
+- **`PerformanceMonitorWindow`**: リアルタイムFPSの測定やメモリ使用量のモニタリング。
+- **`ReplaySystem` (極めて強力なデバッグ機能)**:
+  - プレイ中のゲーム画面（レンダリング結果）を縮小テクスチャとしてリングバッファ（最大1800フレーム/約30〜60秒分）に常時キャプチャ・記録。
+  - ゲーム一時停止時に、ImGui上のシークバーを用いて過去の描画フレームへ時間を自在に巻き戻し・再生（Time Machineデバッグ）することが可能。
+  - 巻き戻した時点のFPSやメモリ使用状況もあわせて履歴から確認可能。

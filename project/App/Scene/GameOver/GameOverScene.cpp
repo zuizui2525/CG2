@@ -8,11 +8,8 @@
  * カメラ、ライト、Cubeオブジェクトの生成と初期パラメータ設定を行います。
  */
 void GameOverScene::Initialize() {
-    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、クリアカラーを赤に設定
+    // 0. ポストプロセスのポインタを取得してメンバ変数に保持
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
-    if (postProcess_) {
-        postProcess_->SetClearColorMode(PostClearColorMode::Red);
-    }
 
     // 1. 各マネージャへのポインタをリソース管理者から取得
     cameraMgr_ = CameraResource::GetCameraManager();
@@ -36,12 +33,6 @@ void GameOverScene::Initialize() {
     dirLight_ = std::make_unique<DirectionalLightObject>();
     dirLight_->Initialize();
     lightMgr_->AddDirectionalLight(dirLight_.get());
-
-    // 5. 描画テスト用 3D Cube の生成と初期座標、サイズの設定
-    cube_ = std::make_unique<CubeObject>();
-    cube_->Initialize();
-    cube_->SetPosition(kCubeInitialPosition);
-    cube_->SetSize(kCubeInitialScale);
 }
 
 /**
@@ -77,9 +68,8 @@ void GameOverScene::Update() {
         SceneManager::GetInstance()->ChangeScene("Title");
     }
 
-    // ライトパラメータとCubeの行列更新
+    // ライトパラメータの行列更新
     dirLight_->Update();
-    cube_->Update();
 
     // 現在アクティブなカメラを判定し、それぞれのカメラ種別に応じた更新処理を呼ぶ
     BaseCamera* activeCamera = cameraMgr_->GetActiveCamera();
@@ -100,6 +90,4 @@ void GameOverScene::Update() {
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void GameOverScene::Draw() {
-    // 3D Cubeの描画（指定のホワイトテクスチャを使用し、環境マップは指定しない）
-    cube_->Draw(kCubeTextureKey, kEmptyEnvMapKey);
 }
