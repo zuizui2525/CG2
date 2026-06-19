@@ -28,7 +28,7 @@ void GameScene::Initialize() {
     mainCamera_ = std::make_shared<BaseCamera>();
     mainCamera_->Initialize();
     mainCamera_->SetPosition(kDefaultCameraPos);
-	mainCamera_->SetRotation(kDefaultCameraRot);
+	mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
     cameraMgr_->AddCamera(kMainCameraName, mainCamera_);
 
     // 3. デバッグカメラの生成とマネージャへの登録
@@ -49,6 +49,12 @@ void GameScene::Initialize() {
     effectMgr->Initialize();
     EffectFactory::GetInstance()->RegisterAllEffects();
 
+    // 6. プレイヤーおよび敵オブジェクトの生成と初期化
+    player_ = std::make_unique<Player>();
+    player_->Initialize();
+
+    enemy_ = std::make_unique<Enemy>();
+    enemy_->Initialize();
 }
 
 /**
@@ -83,6 +89,61 @@ void GameScene::Update() {
     }
 #endif
 
+    // プレイヤーと敵の更新
+    player_->Update();
+    enemy_->Update();
+
+    // 衝突判定（3D AABB）
+    // 1. プレイヤーの弾と敵本体
+    const auto& playerBullets = player_->GetBullets();
+    for (const auto& bullet : playerBullets) {
+        if (bullet->IsActive()) {
+            if (IsCollidingAABB(bullet->GetPosition(), bullet->GetSize(), enemy_->GetPosition(), enemy_->GetSize())) {
+                bullet->Kill();
+
+                // 敵にダメージを適用
+                enemy_->Damage(1, kPlayerBulletHitEffectName);
+                shakeTimer_ = kShakeDuration; // カメラシェイク開始
+
+                // ヒットエフェクト再生（黄色炎）
+                EffectPlayParam hitParam;
+                hitParam.position = bullet->GetPosition();
+                hitParam.scale = { 1.5f, 1.5f, 1.5f };
+                EffectManager::GetInstance()->PlayEffect2D(kPlayerBulletHitEffectName, hitParam);
+
+                if (enemy_->IsDead()) {
+                    SceneManager::GetInstance()->ChangeScene(kClearSceneName);
+                }
+                break;
+            }
+        }
+    }
+
+    // 2. 敵の弾とプレイヤー本体
+    const auto& enemyBullets = enemy_->GetBullets();
+    for (const auto& bullet : enemyBullets) {
+        if (bullet->IsActive()) {
+            if (IsCollidingAABB(bullet->GetPosition(), bullet->GetSize(), player_->GetPosition(), player_->GetSize())) {
+                bullet->Kill();
+
+                // プレイヤーにダメージを適用
+                player_->Damage(1, kEnemyBulletHitEffectName);
+                shakeTimer_ = kShakeDuration; // カメラシェイク開始
+
+                // ヒットエフェクト再生（紫色炎）
+                EffectPlayParam hitParam;
+                hitParam.position = bullet->GetPosition();
+                hitParam.scale = { 1.5f, 1.5f, 1.5f };
+                EffectManager::GetInstance()->PlayEffect2D(kEnemyBulletHitEffectName, hitParam);
+
+                if (player_->IsDead()) {
+                    SceneManager::GetInstance()->ChangeScene(kGameOverSceneName);
+                }
+                break;
+            }
+        }
+    }
+
     // エフェクトの更新
     EffectManager::GetInstance()->Update();
 
@@ -100,7 +161,18 @@ void GameScene::Update() {
     } else {
         // 通常のメインカメラの更新処理
         debugCamera_->SetActive(false);
-        mainCamera_->SetPosition(kDefaultCameraPos);
+
+        // カメラシェイク更新
+        Vector3 camPos = kDefaultCameraPos;
+        if (shakeTimer_ > 0) {
+            shakeTimer_--;
+            float rx = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
+            float ry = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
+            float rz = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
+            camPos += Vector3{ rx, ry, rz };
+        }
+        mainCamera_->SetPosition(camPos);
+
         activeCamera->Update();
     }
 }
@@ -109,6 +181,37 @@ void GameScene::Update() {
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void GameScene::Draw() {
+    // プレイヤー（およびプレイヤーの弾）の描画
+    player_->Draw();
+
+    // 敵（および敵の弾）の描画
+    enemy_->Draw();
+
     // エフェクトの描画
     EffectManager::GetInstance()->Draw();
+}
+
+/**
+ * @brief 3D AABBによる衝突判定
+ */
+bool GameScene::IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const Vector3& pos2, const Vector3& size2) const {
+    static constexpr float kHalf = 0.5f;
+
+    float minX1 = pos1.x - size1.x * kHalf;
+    float maxX1 = pos1.x + size1.x * kHalf;
+    float minY1 = pos1.y - size1.y * kHalf;
+    float maxY1 = pos1.y + size1.y * kHalf;
+    float minZ1 = pos1.z - size1.z * kHalf;
+    float maxZ1 = pos1.z + size1.z * kHalf;
+
+    float minX2 = pos2.x - size2.x * kHalf;
+    float maxX2 = pos2.x + size2.x * kHalf;
+    float minY2 = pos2.y - size2.y * kHalf;
+    float maxY2 = pos2.y + size2.y * kHalf;
+    float minZ2 = pos2.z - size2.z * kHalf;
+    float maxZ2 = pos2.z + size2.z * kHalf;
+
+    return (minX1 <= maxX2 && maxX1 >= minX2) &&
+           (minY1 <= maxY2 && maxY1 >= minY2) &&
+           (minZ1 <= maxZ2 && maxZ1 >= minZ2);
 }
