@@ -11,6 +11,7 @@ void GameOverScene::Initialize() {
     // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、クリアカラーを赤に設定
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
     if (postProcess_) {
+        postProcess_->SetVignetteActive(true);
         postProcess_->SetClearColorMode(PostClearColorMode::Red);
     }
 

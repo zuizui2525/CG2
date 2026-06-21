@@ -2,6 +2,10 @@
 #include "Engine/Base/BaseResource.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Graphics/PostProcess/PostProcess.h"
+#include "Engine/Graphics/Objects/Effect/Manager/EffectFactory.h"
+#include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
+#include <cstdlib>
+
 /**
  * @brief クリアシーンの初期化処理
  * カメラ、ライト、Cubeオブジェクトの生成と初期パラメータ設定を行います。
@@ -41,6 +45,14 @@ void ClearScene::Initialize() {
     cube_->Initialize();
     cube_->SetPosition(kCubeInitialPosition);
     cube_->SetSize(kCubeInitialScale);
+
+    // 6. エフェクトシステムの初期化と全エフェクト登録
+    auto effectMgr = EffectManager::GetInstance();
+    effectMgr->Initialize();
+    EffectFactory::GetInstance()->RegisterAllEffects();
+
+    // タイマーの初期化
+    fireworkTimer_ = 0;
 }
 
 /**
@@ -76,9 +88,29 @@ void ClearScene::Update() {
         SceneManager::GetInstance()->ChangeScene("Title");
     }
 
+    // ランダムな花火の打ち上げ処理
+    if (--fireworkTimer_ <= 0) {
+        // 次回の打ち上げまでのフレーム数を決定
+        fireworkTimer_ = kFireworkMinInterval + rand() % kFireworkMaxIntervalRange;
+
+        EffectPlayParam param;
+        // ランダムな位置（X軸, Z軸, Y軸）を設定
+        float rx = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kFireworkRangeX;
+        float rz = (static_cast<float>(rand()) / RAND_MAX + 2.0f) * kFireworkRangeZ;
+        float ry = (static_cast<float>(rand()) / RAND_MAX + 3.0f) * kFireworkMinY;
+        param.position = { rx, ry, rz };
+        param.scale = { 1.0f, 1.0f, 1.0f };
+        param.isLoop = false;
+
+        EffectManager::GetInstance()->PlayEffect3D(kFireworkEffectName, param);
+    }
+
     // ライトパラメータとCubeの行列更新
     dirLight_->Update();
     cube_->Update();
+
+    // エフェクトの更新
+    EffectManager::GetInstance()->Update();
 
     // 現在アクティブなカメラを判定し、それぞれのカメラ種別に応じた更新処理を呼ぶ
     BaseCamera* activeCamera = cameraMgr_->GetActiveCamera();
@@ -101,4 +133,7 @@ void ClearScene::Update() {
 void ClearScene::Draw() {
     // 3D Cubeの描画（指定のホワイトテクスチャを使用し、環境マップは指定しない）
     cube_->Draw(kCubeTextureKey, kEmptyEnvMapKey);
+
+    // エフェクトの描画
+    EffectManager::GetInstance()->Draw();
 }

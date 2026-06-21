@@ -35,7 +35,7 @@ private:
     static inline const std::string kEmptyEnvMapKey = "";           // 環境マップなしを指定する空文字列
 
     // オブジェクトの初期トランスフォーム用定数（GameScene, ClearSceneと区別するためY座標を-1.0fに設定）
-    static inline const Vector3 kCubeInitialPosition = { 0.0f, -1.0f, 0.0f }; // キューブの初期位置
+    static inline const Vector3 kCubeInitialPosition = { 0.0f, -0.5f, 0.0f }; // キューブの初期位置
     static inline const Vector3 kCubeInitialScale = { 1.0f, 1.0f, 1.0f };     // キューブの初期サイズ
 
 private:

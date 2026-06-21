@@ -49,6 +49,13 @@ void GameScene::Initialize() {
     effectMgr->Initialize();
     EffectFactory::GetInstance()->RegisterAllEffects();
 
+    // 雨のエフェクト再生開始（ループ）
+    EffectPlayParam rainParam;
+    rainParam.isLoop = true;
+    rainParam.position = { 0.0f, 0.0f, 0.0f };
+    rainParam.scale = { 1.0f, 1.0f, 1.0f };
+    effectMgr->PlayEffect3D(kRainEffectName, rainParam);
+
     // 6. プレイヤーおよび敵オブジェクトの生成と初期化
     player_ = std::make_unique<Player>();
     player_->Initialize();
