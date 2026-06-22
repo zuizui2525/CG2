@@ -92,14 +92,11 @@
       <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
-if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
-  copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-) else (
-  if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" (
-    copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" "$(TargetDir)dxil.dll"
-  )
-)
+      <Command>set "SDK_BIN=$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64"
+set "SDK_BIN_ALT=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+copy "%SDK_BIN%\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+if exist "%SDK_BIN%\dxil.dll" copy "%SDK_BIN%\dxil.dll" "$(TargetDir)dxil.dll"
+if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_BIN_ALT%\dxil.dll" "$(TargetDir)dxil.dll"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -126,14 +123,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
       <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
-if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
-  copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-) else (
-  if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" (
-    copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" "$(TargetDir)dxil.dll"
-  )
-)
+      <Command>set "SDK_BIN=$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64"
+set "SDK_BIN_ALT=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+copy "%SDK_BIN%\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+if exist "%SDK_BIN%\dxil.dll" copy "%SDK_BIN%\dxil.dll" "$(TargetDir)dxil.dll"
+if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_BIN_ALT%\dxil.dll" "$(TargetDir)dxil.dll"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -160,14 +154,11 @@ if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
       <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
-if exist "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" (
-  copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-) else (
-  if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" (
-    copy "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\dxil.dll" "$(TargetDir)dxil.dll"
-  )
-)
+      <Command>set "SDK_BIN=$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64"
+set "SDK_BIN_ALT=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+copy "%SDK_BIN%\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+if exist "%SDK_BIN%\dxil.dll" copy "%SDK_BIN%\dxil.dll" "$(TargetDir)dxil.dll"
+if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_BIN_ALT%\dxil.dll" "$(TargetDir)dxil.dll"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
