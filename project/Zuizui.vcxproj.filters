@@ -21,9 +21,6 @@
     <ClCompile Include="App\\Scene\\Title\\TitleScene.cpp" />
     <ClCompile Include="App\\Scene\\Core\\SceneFactory.cpp" />
     <ClCompile Include="App\\Scene\\Game\\GameScene.cpp" />
-    <ClCompile Include="App\Scene\Game\Bullet.cpp" />
-    <ClCompile Include="App\Scene\Game\Player.cpp" />
-    <ClCompile Include="App\Scene\Game\Enemy.cpp" />
     <ClCompile Include="App\\Scene\\Clear\\ClearScene.cpp" />
     <ClCompile Include="App\\Scene\\GameOver\\GameOverScene.cpp" />
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
@@ -133,10 +130,6 @@
     <ClInclude Include="App\\Scene\\Title\\TitleScene.h" />
     <ClInclude Include="App\\Scene\\Core\\SceneFactory.h" />
     <ClInclude Include="App\\Scene\\Game\\GameScene.h" />
-    <ClInclude Include="App\Scene\Game\Shooter.h" />
-    <ClInclude Include="App\Scene\Game\Bullet.h" />
-    <ClInclude Include="App\Scene\Game\Player.h" />
-    <ClInclude Include="App\Scene\Game\Enemy.h" />
     <ClInclude Include="App\\Scene\\Clear\\ClearScene.h" />
     <ClInclude Include="App\\Scene\\GameOver\\GameOverScene.h" />
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />
