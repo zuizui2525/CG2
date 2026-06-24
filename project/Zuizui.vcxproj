@@ -86,10 +86,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <AdditionalLibraryDirectories>$(SolutionDir)externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificWarnings>4099;%(IgnoreSpecificWarnings)</IgnoreSpecificWarnings>
     </Link>
     <PostBuildEvent>
       <Command>set "SDK_BIN=$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64"
