@@ -17,7 +17,7 @@ void ResourceLoader::LoadAll() {
 	float elapsed = std::chrono::duration<float>(end - start).count();
 
 	// 登録されたリソース数をカウント（マジックナンバー排除）
-	constexpr int kTextureCount = 8;
+	constexpr int kTextureCount = 10;
 	constexpr int kModelCount = 5;
 
 	Log::Write(std::format(L" ├─ [リソース一括ロード完了] テクスチャ: {}枚 | モデル: {}個 | 総ロード時間: {:.4f}秒", kTextureCount, kModelCount, elapsed));
@@ -35,6 +35,9 @@ void ResourceLoader::LoadTextures() {
 	texMgr->LoadTexture("forestTex", "resources/Textures/forest.dds");
 	texMgr->LoadTexture("gradationLine", "resources/Textures/gradationLine.png");
 	texMgr->LoadTexture("slashTex", "resources/Textures/slashTex.png");
+	texMgr->LoadTexture("noise0", "resources/Textures/noise0.png");
+	texMgr->LoadTexture("noise1", "resources/Textures/noise1.png");
+	texMgr->LoadTexture("noise2", "resources/Textures/noise2.png");
 }
 
 void ResourceLoader::LoadModels() {
