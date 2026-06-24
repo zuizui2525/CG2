@@ -9,6 +9,7 @@
 #include "Engine/Graphics/PostProcess/UnderwaterPass.h"
 #include "Engine/Graphics/PostProcess/DepthOutlinePass.h"
 #include "Engine/Graphics/PostProcess/RadialBlurPass.h"
+#include "Engine/Graphics/PostProcess/DissolvePass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -33,6 +34,7 @@ namespace {
     constexpr size_t kPassIndexUnderwater = 7;
     constexpr size_t kPassIndexDepthOutline = 8;
     constexpr size_t kPassIndexRadialBlur = 9;
+    constexpr size_t kPassIndexDissolve = 10;
 }
 
 void PostProcess::Initialize() {
@@ -104,6 +106,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<UnderwaterPass>()); // 7: Underwater
     passes_.push_back(std::make_unique<DepthOutlinePass>()); // 8: DepthOutline
     passes_.push_back(std::make_unique<RadialBlurPass>());  // 9: RadialBlur
+    passes_.push_back(std::make_unique<DissolvePass>());    // 10: Dissolve
 
     // 全パスの初期化
     for (auto& pass : passes_) {
@@ -334,6 +337,11 @@ void PostProcess::ImGuiControl() {
         bool radialBlurActive = IsRadialBlurActive();
         if (ImGui::Checkbox("RadialBlur", &radialBlurActive)) {
             SetRadialBlurActive(radialBlurActive);
+        }
+
+        bool dissolveActive = IsDissolveActive();
+        if (ImGui::Checkbox("Dissolve", &dissolveActive)) {
+            SetDissolveActive(dissolveActive);
         }
         
         ImGui::Separator();
@@ -692,5 +700,78 @@ float PostProcess::GetRadialBlurWidth() const {
         }
     }
     return 0.0f;
+}
+
+void PostProcess::SetDissolveActive(bool active) {
+    if (passes_.size() > kPassIndexDissolve) {
+        if (passes_[kPassIndexDissolve]->IsActive() != active) {
+            passes_[kPassIndexDissolve]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 ディゾルブ を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsDissolveActive() const {
+    return (passes_.size() > kPassIndexDissolve) ? passes_[kPassIndexDissolve]->IsActive() : false;
+}
+
+void PostProcess::SetDissolveParams(float threshold, float edgeWidth, const Vector3& edgeColor) {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            dissolve->SetThreshold(threshold);
+            dissolve->SetEdgeWidth(edgeWidth);
+            dissolve->SetEdgeColor(edgeColor);
+        }
+    }
+}
+
+float PostProcess::GetDissolveThreshold() const {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            return dissolve->GetThreshold();
+        }
+    }
+    return 0.0f;
+}
+
+float PostProcess::GetDissolveEdgeWidth() const {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            return dissolve->GetEdgeWidth();
+        }
+    }
+    return 0.0f;
+}
+
+Vector3 PostProcess::GetDissolveEdgeColor() const {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            return dissolve->GetEdgeColor();
+        }
+    }
+    return Vector3{ 1.0f, 0.5f, 0.0f };
+}
+
+void PostProcess::SetDissolveActiveNoiseIndex(int32_t index) {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            dissolve->SetActiveNoiseIndex(index);
+        }
+    }
+}
+
+int32_t PostProcess::GetDissolveActiveNoiseIndex() const {
+    if (passes_.size() > kPassIndexDissolve) {
+        auto dissolve = dynamic_cast<DissolvePass*>(passes_[kPassIndexDissolve].get());
+        if (dissolve) {
+            return dissolve->GetActiveNoiseIndex();
+        }
+    }
+    return 0;
 }
 

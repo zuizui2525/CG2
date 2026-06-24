@@ -100,6 +100,9 @@ public:
     void SetRadialBlurActive(bool active);
     bool IsRadialBlurActive() const;
 
+    void SetDissolveActive(bool active);
+    bool IsDissolveActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -133,6 +136,14 @@ public:
     void SetRadialBlurParams(const Vector2& center, float blurWidth);
     Vector2 GetRadialBlurCenter() const;
     float GetRadialBlurWidth() const;
+
+    // Dissolveパラメータのアクセサ
+    void SetDissolveParams(float threshold, float edgeWidth, const Vector3& edgeColor);
+    float GetDissolveThreshold() const;
+    float GetDissolveEdgeWidth() const;
+    Vector3 GetDissolveEdgeColor() const;
+    void SetDissolveActiveNoiseIndex(int32_t index);
+    int32_t GetDissolveActiveNoiseIndex() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;
