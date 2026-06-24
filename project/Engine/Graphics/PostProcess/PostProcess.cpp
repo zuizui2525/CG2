@@ -10,6 +10,7 @@
 #include "Engine/Graphics/PostProcess/DepthOutlinePass.h"
 #include "Engine/Graphics/PostProcess/RadialBlurPass.h"
 #include "Engine/Graphics/PostProcess/DissolvePass.h"
+#include "Engine/Graphics/PostProcess/TVNoisePass.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/WindowApp/WindowApp.h"
@@ -35,6 +36,7 @@ namespace {
     constexpr size_t kPassIndexDepthOutline = 8;
     constexpr size_t kPassIndexRadialBlur = 9;
     constexpr size_t kPassIndexDissolve = 10;
+    constexpr size_t kPassIndexTVNoise = 11;
 }
 
 void PostProcess::Initialize() {
@@ -107,6 +109,7 @@ void PostProcess::Initialize() {
     passes_.push_back(std::make_unique<DepthOutlinePass>()); // 8: DepthOutline
     passes_.push_back(std::make_unique<RadialBlurPass>());  // 9: RadialBlur
     passes_.push_back(std::make_unique<DissolvePass>());    // 10: Dissolve
+    passes_.push_back(std::make_unique<TVNoisePass>());     // 11: TVNoise
 
     // 全パスの初期化
     for (auto& pass : passes_) {
@@ -342,6 +345,11 @@ void PostProcess::ImGuiControl() {
         bool dissolveActive = IsDissolveActive();
         if (ImGui::Checkbox("Dissolve", &dissolveActive)) {
             SetDissolveActive(dissolveActive);
+        }
+
+        bool tvNoiseActive = IsTVNoiseActive();
+        if (ImGui::Checkbox("TV Noise", &tvNoiseActive)) {
+            SetTVNoiseActive(tvNoiseActive);
         }
         
         ImGui::Separator();
@@ -773,5 +781,37 @@ int32_t PostProcess::GetDissolveActiveNoiseIndex() const {
         }
     }
     return 0;
+}
+
+void PostProcess::SetTVNoiseActive(bool active) {
+    if (passes_.size() > kPassIndexTVNoise) {
+        if (passes_[kPassIndexTVNoise]->IsActive() != active) {
+            passes_[kPassIndexTVNoise]->SetActive(active);
+            Log::Write(std::format(L" ├─ 【ポストエフェクト切替】 TVノイズ を {} にしました。", active ? L"有効" : L"無効"));
+        }
+    }
+}
+
+bool PostProcess::IsTVNoiseActive() const {
+    return (passes_.size() > kPassIndexTVNoise) ? passes_[kPassIndexTVNoise]->IsActive() : false;
+}
+
+void PostProcess::SetTVNoiseStrength(float strength) {
+    if (passes_.size() > kPassIndexTVNoise) {
+        auto tvNoise = dynamic_cast<TVNoisePass*>(passes_[kPassIndexTVNoise].get());
+        if (tvNoise) {
+            tvNoise->SetNoiseStrength(strength);
+        }
+    }
+}
+
+float PostProcess::GetTVNoiseStrength() const {
+    if (passes_.size() > kPassIndexTVNoise) {
+        auto tvNoise = dynamic_cast<TVNoisePass*>(passes_[kPassIndexTVNoise].get());
+        if (tvNoise) {
+            return tvNoise->GetNoiseStrength();
+        }
+    }
+    return 0.5f;
 }
 

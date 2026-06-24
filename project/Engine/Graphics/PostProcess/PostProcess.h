@@ -103,6 +103,9 @@ public:
     void SetDissolveActive(bool active);
     bool IsDissolveActive() const;
 
+    void SetTVNoiseActive(bool active);
+    bool IsTVNoiseActive() const;
+
     /// <summary>
     /// 全てのエフェクトを一括で無効化する
     /// </summary>
@@ -144,6 +147,10 @@ public:
     Vector3 GetDissolveEdgeColor() const;
     void SetDissolveActiveNoiseIndex(int32_t index);
     int32_t GetDissolveActiveNoiseIndex() const;
+
+    // TVNoiseパラメータのアクセサ
+    void SetTVNoiseStrength(float strength);
+    float GetTVNoiseStrength() const;
 
 private:
     std::unique_ptr<RenderTexture> renderTexture_;
