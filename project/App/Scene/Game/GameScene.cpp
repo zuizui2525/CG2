@@ -84,7 +84,7 @@ void GameScene::ImGuiControl() {
 }
 
 /**
- * @brief 毎フレーム更新処理（キー入力によるカメラ切り替え、オブジェクトの座標・パラメータ更新）
+ * @brief 毎フレーム更新処理（キー入力によるカメラ切り替え・オブジェクトの座標・パラメータ更新）
  */
 void GameScene::Update() {
 #ifdef _USEIMGUI
