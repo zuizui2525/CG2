@@ -7,7 +7,6 @@ class PostProcess;
 
 // エンジンコンポーネントのインクルード
 #include "Engine/Input/Input.h"
-#include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
@@ -31,12 +30,6 @@ private:
     // マジックナンバーを排除するための定数宣言
     static inline const std::string kMainCameraName = "Main";       // メインカメラの登録・選択用キー
     static inline const std::string kDebugCameraName = "Debug";     // デバッグカメラの登録・選択用キー
-    static inline const std::string kCubeTextureKey = "white";      // キューブの描画に使用する白テクスチャのキー
-    static inline const std::string kEmptyEnvMapKey = "";           // 環境マップなしを指定する空文字列
-
-    // オブジェクトの初期トランスフォーム用定数（GameSceneと区別するためY座標を+1.0fに設定）
-    static inline const Vector3 kCubeInitialPosition = { 0.0f, -0.5f, 0.0f }; // キューブの初期位置
-    static inline const Vector3 kCubeInitialScale = { 1.0f, 1.0f, 1.0f };    // キューブの初期サイズ
 
 private:
     // エンジンの各種マネージャへの生ポインタ（所有権は持たない）
@@ -49,16 +42,4 @@ private:
     std::shared_ptr<BaseCamera> mainCamera_;        // メインカメラ
     std::shared_ptr<DebugCamera> debugCamera_;      // デバッグ確認用フリーカメラ
     std::unique_ptr<DirectionalLightObject> dirLight_; // 平行光源
-    std::unique_ptr<CubeObject> cube_;              // 描画用の3D立方体モデル
-
-    // 花火関連の定数
-    static inline const std::string kFireworkEffectName = "FireworksSet";
-    static constexpr int kFireworkMinInterval = 30;         // 最小間隔（フレーム）
-    static constexpr int kFireworkMaxIntervalRange = 61;    // ランダム幅（フレーム）
-    static constexpr float kFireworkRangeX = 60.0f;         // 打ち上げ位置の左右幅
-    static constexpr float kFireworkRangeZ = 20.0f;         // 打ち上げ位置の前後幅
-    static constexpr float kFireworkMinY = -5.0f;           // 打ち上げ位置の高さの最小値
-
-    // 花火打ち上げタイマー
-    int fireworkTimer_ = 0;
 };

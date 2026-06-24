@@ -11,48 +11,36 @@
  * カメラ、ライト、Cubeオブジェクトの生成と初期パラメータ設定を行います。
  */
 void ClearScene::Initialize() {
-    // 0. ポストプロセスのポインタを取得してメンバ変数に保持し、ラジアルブラーをONにする
+    // ポストプロセスのポインタを取得してメンバ変数に保持
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
-    if (postProcess_) {
-        postProcess_->SetRadialBlurActive(true);
-    }
 
-    // 1. 各マネージャへのポインタをリソース管理者から取得
+    // 各マネージャへのポインタをリソース管理者から取得
     cameraMgr_ = CameraResource::GetCameraManager();
     lightMgr_ = LightResource::GetLightManager();
     input_ = InputResource::GetInput();
 
-    // 2. メインカメラの生成とマネージャへの登録
+    // メインカメラの生成とマネージャへの登録
     mainCamera_ = std::make_shared<BaseCamera>();
     mainCamera_->Initialize();
     cameraMgr_->AddCamera(kMainCameraName, mainCamera_);
 
-    // 3. デバッグカメラの生成とマネージャへの登録
+    // デバッグ確認用のフリーカメラの生成とマネージャへの登録
     debugCamera_ = std::make_shared<DebugCamera>();
     debugCamera_->Initialize();
     cameraMgr_->AddCamera(kDebugCameraName, debugCamera_);
 
-    // 初期状態はメインカメラをアクティブに設定
+    // シーン遷移時の初期カメラをメインカメラに指定
     cameraMgr_->SetActiveCamera(kMainCameraName);
 
-    // 4. 平行光源の生成、初期化、マネージャへの追加
+    // 平行光源の生成、初期化、マネージャへの追加
     dirLight_ = std::make_unique<DirectionalLightObject>();
     dirLight_->Initialize();
     lightMgr_->AddDirectionalLight(dirLight_.get());
 
-    // 5. 描画テスト用 3D Cube の生成と初期座標、サイズの設定
-    cube_ = std::make_unique<CubeObject>();
-    cube_->Initialize();
-    cube_->SetPosition(kCubeInitialPosition);
-    cube_->SetSize(kCubeInitialScale);
-
-    // 6. エフェクトシステムの初期化と全エフェクト登録
+    // エフェクト管理システムの初期化とエフェクトの全登録
     auto effectMgr = EffectManager::GetInstance();
     effectMgr->Initialize();
     EffectFactory::GetInstance()->RegisterAllEffects();
-
-    // タイマーの初期化
-    fireworkTimer_ = 0;
 }
 
 /**
@@ -88,26 +76,8 @@ void ClearScene::Update() {
         SceneManager::GetInstance()->ChangeScene("Title");
     }
 
-    // ランダムな花火の打ち上げ処理
-    if (--fireworkTimer_ <= 0) {
-        // 次回の打ち上げまでのフレーム数を決定
-        fireworkTimer_ = kFireworkMinInterval + rand() % kFireworkMaxIntervalRange;
-
-        EffectPlayParam param;
-        // ランダムな位置（X軸, Z軸, Y軸）を設定
-        float rx = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kFireworkRangeX;
-        float rz = (static_cast<float>(rand()) / RAND_MAX + 2.0f) * kFireworkRangeZ;
-        float ry = (static_cast<float>(rand()) / RAND_MAX + 3.0f) * kFireworkMinY;
-        param.position = { rx, ry, rz };
-        param.scale = { 1.0f, 1.0f, 1.0f };
-        param.isLoop = false;
-
-        EffectManager::GetInstance()->PlayEffect3D(kFireworkEffectName, param);
-    }
-
-    // ライトパラメータとCubeの行列更新
+    // ライトの更新
     dirLight_->Update();
-    cube_->Update();
 
     // エフェクトの更新
     EffectManager::GetInstance()->Update();
@@ -131,9 +101,7 @@ void ClearScene::Update() {
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void ClearScene::Draw() {
-    // 3D Cubeの描画（指定のホワイトテクスチャを使用し、環境マップは指定しない）
-    cube_->Draw(kCubeTextureKey, kEmptyEnvMapKey);
-
     // エフェクトの描画
     EffectManager::GetInstance()->Draw();
 }
+
