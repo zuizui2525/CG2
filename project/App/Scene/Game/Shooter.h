@@ -123,6 +123,28 @@ protected:
 
         // 燃焼エフェクト（全身炎）の更新処理
         if (burnTimer_ > 0) {
+            // 被弾した最初のフレーム（burnTimer_ が設定された瞬間）に足元にリングエフェクトを発生させる
+            if (burnTimer_ == kBurnDuration) {
+                Vector3 size = GetSize();
+                Vector3 ringPos = charPos;
+                // 足元の位置（Y軸方向の下端）に設定
+                static constexpr float kHalf = 0.5f;
+                ringPos.y -= size.y * kHalf;
+
+                EffectPlayParam ringParam;
+                ringParam.position = ringPos;
+                ringParam.scale = kRingEffectScale;
+
+                // 燃焼エフェクトの種類に応じてリングの色を設定
+                if (burnEffectName_ == kYellowFireEffectName) {
+                    ringParam.colorOverride = kYellowRingColor;
+                } else if (burnEffectName_ == kPurpleFireEffectName) {
+                    ringParam.colorOverride = kPurpleRingColor;
+                }
+
+                EffectManager::GetInstance()->PlayEffect2D(kRingEffectName, ringParam);
+            }
+
             burnTimer_--;
             for (int i = 0; i < kFireCountPerFrame; ++i) {
                 Vector3 size = GetSize();
@@ -168,6 +190,12 @@ protected:
     static inline const Vector3 kBurnEffectScale = { 1.5f, 1.5f, 1.5f };      // 炎エフェクトのスケール
     static inline const std::string kFireEffectName = "Fire";                 // 炎エフェクト名
     static inline const Vector3 kHpBarOffset = { 0.0f, 1.3f, 0.0f };         // キャラクター頭上へのオフセット
+    static inline const std::string kRingEffectName = "RingAura";              // 足元のリングエフェクト名
+    static inline const Vector3 kRingEffectScale = { 1.0f, 1.0f, 1.0f };      // リングエフェクトのスケール
+    static inline const Vector4 kYellowRingColor = { 1.0f, 0.9f, 0.2f, 1.0f }; // 黄色いリングの色
+    static inline const Vector4 kPurpleRingColor = { 0.8f, 0.1f, 1.0f, 1.0f }; // 紫色のリングの色
+    static inline const std::string kYellowFireEffectName = "YellowFire";     // 黄色い炎エフェクト名
+    static inline const std::string kPurpleFireEffectName = "PurpleFire";     // 紫色の炎エフェクト名
     static inline const Vector3 kHpBarScale = { 1.2f, 0.1f, 0.1f };           // バーの基本サイズ
     static inline const Vector4 kHpBarBgColor = { 0.3f, 0.0f, 0.0f, 1.0f };   // 背景（暗い赤）
     static inline const Vector4 kHpBarFillColor = { 0.0f, 0.8f, 0.0f, 1.0f }; // 前景（緑）
