@@ -1,5 +1,6 @@
-﻿#pragma once
+#pragma once
 #include "Engine/Math/MathStructs.h"
+#include <vector>
 
 namespace Math {
 	// ベクトルの加算を計算する関数
@@ -62,6 +63,10 @@ namespace Math {
 	Matrix4x4 Transpose(const Matrix4x4& m);
 	// 単位ベクトルの作成
 	Matrix4x4 MakeIdentity();
+	// Catmull-Romスプラインによる補間座標を計算する関数
+	Vector3 CatmullRomInterpolate(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
+	// 制御点配列からCatmull-Romスプラインを用いて細分化された滑らかな曲線座標の配列を生成する関数
+	std::vector<Vector3> GenerateCatmullRomPath(const std::vector<Vector3>& controlPoints, int division = 10);
 }
 
 // 二項演算子

@@ -1,9 +1,12 @@
 #include "App/Scene/Game/GameScene.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Zuizui.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Graphics/PostProcess/PostProcess.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectFactory.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
+#include "externals/imgui/imgui.h"
+#include "Engine/Debug/GameViewWindow.h"
 #include <cstdlib>
 
 // 不要になったヒットエフェクト名定数を削除
@@ -27,8 +30,8 @@ void GameScene::Initialize() {
     // 2. メインカメラの生成とマネージャへの登録
     mainCamera_ = std::make_shared<BaseCamera>();
     mainCamera_->Initialize();
-    mainCamera_->SetPosition(kDefaultCameraPos);
-	mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
+    mainCamera_->SetPosition(kTopDownCameraPos);
+    mainCamera_->SetRotation(kTopDownCameraRot);
     cameraMgr_->AddCamera(kMainCameraName, mainCamera_);
 
     // 3. デバッグカメラの生成とマネージャへの登録
@@ -62,6 +65,72 @@ void GameScene::Initialize() {
 
     enemy_ = std::make_unique<Enemy>();
     enemy_->Initialize();
+
+    // 7. 仮マップオブジェクト (交互に並ぶ柱Cube) の生成
+    mapObjects_.clear();
+    for (float z = -20.0f; z <= 20.0f; z += 10.0f) {
+        float x = (static_cast<int>(z) % 20 == 0) ? -12.0f : 12.0f;
+        auto pillar = std::make_unique<CubeObject>();
+        pillar->Initialize();
+        pillar->SetPosition({ x, 5.0f, z });
+        pillar->SetScale({ 2.0f, 10.0f, 2.0f });
+        pillar->SetColor({ 0.6f, 0.6f, 0.7f, 1.0f });
+        mapObjects_.push_back(std::move(pillar));
+    }
+
+    // 8. マップ外枠・スタート/ゴール枠のGizmoLine生成
+    editorGizmoLines_.clear();
+    auto AddGizmoRect = [this](const Vector3& center, float width, float depth, const Vector4& color) {
+        float hx = width * 0.5f;
+        float hz = depth * 0.5f;
+        
+        Vector3 corners[4] = {
+            { center.x - hx, 0.01f, center.z - hz },
+            { center.x + hx, 0.01f, center.z - hz },
+            { center.x + hx, 0.01f, center.z + hz },
+            { center.x - hx, 0.01f, center.z + hz }
+        };
+        
+        for (int i = 0; i < 4; ++i) {
+            auto line = std::make_unique<LineObject>();
+            line->Initialize(0);
+            line->SetStartPoint(corners[i]);
+            line->SetEndPoint(corners[(i + 1) % 4]);
+            const float kGizmoThickness = 0.15f;
+            line->SetThickness(kGizmoThickness);
+            line->SetColor(color);
+            editorGizmoLines_.push_back(std::move(line));
+        }
+    };
+
+    auto AddGizmoCircle = [this](const Vector3& center, float radius, const Vector4& color) {
+        std::vector<Vector3> points;
+        points.reserve(kCircleDivision);
+        for (int i = 0; i < kCircleDivision; ++i) {
+            float theta = (2.0f * kPi * i) / kCircleDivision;
+            float x = center.x + radius * std::cos(theta);
+            float z = center.z + radius * std::sin(theta);
+            points.push_back({ x, 0.01f, z });
+        }
+
+        for (int i = 0; i < kCircleDivision; ++i) {
+            auto line = std::make_unique<LineObject>();
+            line->Initialize(0);
+            line->SetStartPoint(points[i]);
+            line->SetEndPoint(points[(i + 1) % kCircleDivision]);
+            const float kGizmoThickness = 0.15f;
+            line->SetThickness(kGizmoThickness);
+            line->SetColor(color);
+            editorGizmoLines_.push_back(std::move(line));
+        }
+    };
+
+    // マップ外枠 (白)
+    AddGizmoRect({ 0.0f, 0.0f, 0.0f }, kMapBoundaryX * 2.0f, kMapBoundaryZ * 2.0f, { 1.0f, 1.0f, 1.0f, 1.0f });
+    // スタート枠 (黄・円形)
+    AddGizmoCircle({ 0.0f, 0.0f, kStartAreaZ }, kAreaRadius, { 1.0f, 1.0f, 0.0f, 1.0f });
+    // ゴール枠 (青・円形)
+    AddGizmoCircle({ 0.0f, 0.0f, kGoalAreaZ }, kAreaRadius, { 0.0f, 0.5f, 1.0f, 1.0f });
 }
 
 /**
@@ -69,9 +138,26 @@ void GameScene::Initialize() {
  */
 void GameScene::ImGuiControl() {
 #ifdef _USEIMGUI
+    if (mode_ == GameMode::DrawRoute) {
+        ImGui::Begin("Route Editor");
+        ImGui::Text("Mouse drag to draw route on ground.");
+        ImGui::Text("Points: %d", (int)rawPoints_.size());
+        
+        // 4点以上あればゲーム開始可能にする
+        const size_t kMinPointsToStart = 4;
+        if (rawPoints_.size() >= kMinPointsToStart) {
+            if (ImGui::Button("Start Game")) {
+                StartGame();
+            }
+        } else {
+            ImGui::TextDisabled("Need at least 4 points to start.");
+        }
+        ImGui::End();
+        return;
+    }
+
     // カメラ切り替え等のマネージャパラメータを表示
     cameraMgr_->ImGuiControl();
-    // ポストプロセスのパラメータ調整用ImGuiコントロール
 
     // ポストプロセスのパラメータ調整用ImGuiコントロール
     if (postProcess_) {
@@ -80,6 +166,59 @@ void GameScene::ImGuiControl() {
 
     // エフェクトのパラメータ調整用ImGuiコントロール
     EffectManager::GetInstance()->ImGuiControl("Effects");
+
+    // プレイモード中のミニマップ表示（オーバーレイ描画）
+    if (mode_ == GameMode::Play) {
+        // ゲーム画面の位置とサイズを取得して左上に重ねて描画する
+        Vector2 gameViewPosMin = GameViewWindow::GetGameViewPosMin();
+        Vector2 gameViewSize = GameViewWindow::GetGameViewSize();
+
+        // ミニマップの位置とサイズ（150x150ピクセル）
+        ImVec2 mapPosMin = ImVec2(gameViewPosMin.x + 15.0f, gameViewPosMin.y + 15.0f);
+        ImVec2 mapSize = ImVec2(150.0f, 150.0f);
+
+        ImDrawList* drawList = ImGui::GetForegroundDrawList(); // 最前面のDrawList
+
+        // マップ背景と白枠の描画
+        drawList->AddRectFilled(mapPosMin, ImVec2(mapPosMin.x + mapSize.x, mapPosMin.y + mapSize.y), IM_COL32(30, 30, 35, 180), 4.0f);
+        drawList->AddRect(mapPosMin, ImVec2(mapPosMin.x + mapSize.x, mapPosMin.y + mapSize.y), IM_COL32(240, 240, 240, 255), 4.0f, 0, 1.5f);
+
+        // 3D座標から2Dミニマップ座標へのマッピング関数
+        auto WorldToMap = [&](const Vector3& pos3D) -> ImVec2 {
+            float tx = (pos3D.x + kMapBoundaryX) / (kMapBoundaryX * 2.0f);
+            float tz = (kMapBoundaryZ - pos3D.z) / (kMapBoundaryZ * 2.0f); // Z+が奥（上）、Z-が手前（下）
+            
+            tx = std::clamp(tx, 0.0f, 1.0f);
+            tz = std::clamp(tz, 0.0f, 1.0f);
+            
+            return ImVec2(
+                mapPosMin.x + tx * mapSize.x,
+                mapPosMin.y + tz * mapSize.y
+            );
+        };
+
+        // スタート位置（黄円）
+        ImVec2 startMapPos = WorldToMap({ 0.0f, 0.0f, kStartAreaZ });
+        float mapAreaRadius = kAreaRadius * (mapSize.x / (kMapBoundaryX * 2.0f));
+        drawList->AddCircle(startMapPos, mapAreaRadius, IM_COL32(255, 255, 0, 220), 16, 1.5f);
+
+        // ゴール位置（青円）
+        ImVec2 goalMapPos = WorldToMap({ 0.0f, 0.0f, kGoalAreaZ });
+        drawList->AddCircle(goalMapPos, mapAreaRadius, IM_COL32(0, 128, 255, 220), 16, 1.5f);
+
+        // ルート線（白い折れ線）
+        if (pathPoints_.size() > 1) {
+            for (size_t i = 1; i < pathPoints_.size(); ++i) {
+                ImVec2 p1 = WorldToMap(pathPoints_[i - 1]);
+                ImVec2 p2 = WorldToMap(pathPoints_[i]);
+                drawList->AddLine(p1, p2, IM_COL32(255, 255, 255, 180), 2.0f);
+            }
+        }
+
+        // プレイヤーの現在位置（赤い円）
+        ImVec2 playerMapPos = WorldToMap(player_->GetPosition());
+        drawList->AddCircleFilled(playerMapPos, 5.0f, IM_COL32(255, 0, 0, 255));
+    }
 #endif
 }
 
@@ -87,6 +226,107 @@ void GameScene::ImGuiControl() {
  * @brief 毎フレーム更新処理（キー入力によるカメラ切り替え、オブジェクトの座標・パラメータ更新）
  */
 void GameScene::Update() {
+    // ルート描画モードの更新処理
+    if (mode_ == GameMode::DrawRoute) {
+        // 毎フレームカメラの位置・回転とTarget無効化を強制適用（エディタ等の上書き防止）
+        mainCamera_->SetPosition(kTopDownCameraPos);
+        mainCamera_->SetRotation(kTopDownCameraRot);
+        mainCamera_->DisableTarget();
+
+        // マウスの左ボタン押下状態
+        const int kLeftMouseButton = 0;
+        if (input_->MousePress(kLeftMouseButton)) {
+            if (GameViewWindow::IsMouseOnGameView()) {
+                Vector2 mousePos = GameViewWindow::GetMousePosition();
+                Vector2 viewSize = GameViewWindow::GetGameViewSize();
+
+                Vector3 rayStart, rayDir;
+                mainCamera_->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
+
+                // 地平面 Y = kPlaneIntersectY との交差判定
+                const float kZeroThreshold = 0.0001f;
+                if (std::abs(rayDir.y) > kZeroThreshold) {
+                    float t = (kPlaneIntersectY - rayStart.y) / rayDir.y;
+                    if (t >= 0.0f) {
+                        Vector3 intersectPos = rayStart + t * rayDir;
+
+                        if (!isDrawing_) {
+                            // 1. スタートエリア内からドラッグを開始したかチェック（ゴール後でも再描画可能）
+                            float diffX = intersectPos.x - 0.0f;
+                            float diffZ = intersectPos.z - kStartAreaZ;
+                            float distSq = diffX * diffX + diffZ * diffZ;
+                            if (distSq <= kAreaRadius * kAreaRadius) {
+                                // 新規ドラッグ開始時に以前の線をクリアする
+                                rawPoints_.clear();
+                                lineObjects_.clear();
+                                hasReachedGoal_ = false;
+
+                                isDrawing_ = true;
+                                rawPoints_.push_back(intersectPos);
+                            }
+                        } else {
+                            // まだゴールに到達していない場合のみ軌跡を更新
+                            if (!hasReachedGoal_) {
+                                Vector3 diff = Math::Subtract(intersectPos, rawPoints_.back());
+                                float dist = Math::Length(diff);
+                                if (dist >= kMinPointDistance) {
+                                    // 2. ゴールエリアに到達したかチェック
+                                    float toGoalX = intersectPos.x - 0.0f;
+                                    float toGoalZ = intersectPos.z - kGoalAreaZ;
+                                    float distToGoalSq = toGoalX * toGoalX + toGoalZ * toGoalZ;
+
+                                    rawPoints_.push_back(intersectPos);
+                                    
+                                    auto line = std::make_unique<LineObject>();
+                                    line->Initialize(0);
+                                    line->SetStartPoint(rawPoints_[rawPoints_.size() - 2]);
+                                    line->SetEndPoint(rawPoints_.back());
+                                    const float kLineThickness = 0.15f;
+                                    line->SetThickness(kLineThickness);
+                                    lineObjects_.push_back(std::move(line));
+
+                                    // ゴールエリア内に入ったらドラッグ自動終了
+                                    if (distToGoalSq <= kAreaRadius * kAreaRadius) {
+                                        hasReachedGoal_ = true;
+                                        isDrawing_ = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                isDrawing_ = false;
+            }
+        } else {
+            isDrawing_ = false;
+        }
+
+        // ラインの更新
+        for (auto& line : lineObjects_) {
+            line->Update();
+        }
+
+        // ギズモライン（マップ外枠・スタート/ゴール矩形）の更新
+        for (auto& line : editorGizmoLines_) {
+            line->Update();
+        }
+
+        // 仮マップオブジェクト（柱Cube）の更新
+        for (auto& pillar : mapObjects_) {
+            pillar->Update();
+        }
+
+        // ゴールまで到達している場合、SPACEキーでゲーム開始できるようにする
+        if (hasReachedGoal_ && input_->Trigger(DIK_SPACE)) {
+            StartGame();
+        }
+
+        dirLight_->Update();
+        mainCamera_->Update();
+        return;
+    }
+
 #ifdef _USEIMGUI
     // TABキーによりメインカメラとデバッグカメラを切り替える
     static constexpr int kCameraToggleKey = DIK_TAB; // カメラ切り替え用キー定数
@@ -96,59 +336,71 @@ void GameScene::Update() {
     }
 #endif
 
-    // プレイヤーと敵の更新
-    player_->Update();
-    enemy_->Update();
+    // プレイモード中の自動走行処理
+    if (mode_ == GameMode::Play) {
+        player_->SetAutoMoving(true);
 
-    // 衝突判定（3D AABB）
-    // 1. プレイヤーの弾と敵本体
-    const auto& playerBullets = player_->GetBullets();
-    for (const auto& bullet : playerBullets) {
-        if (bullet->IsActive()) {
-            if (IsCollidingAABB(bullet->GetPosition(), bullet->GetSize(), enemy_->GetPosition(), enemy_->GetSize())) {
-                bullet->Kill();
+        currentDistance_ += kPlayerSpeed;
+        if (currentDistance_ >= totalDistance_) {
+            // ゴール到達時にクリアシーンへ
+            SceneManager::GetInstance()->ChangeScene(kClearSceneName);
+            return;
+        }
 
-                // 敵にダメージを適用
-                enemy_->Damage(1, kPlayerBulletHitEffectName);
-                shakeTimer_ = kShakeDuration; // カメラシェイク開始
-
-                // ヒットエフェクト再生（黄色炎）
-                EffectPlayParam hitParam;
-                hitParam.position = bullet->GetPosition();
-                hitParam.scale = { 1.5f, 1.5f, 1.5f };
-                EffectManager::GetInstance()->PlayEffect2D(kPlayerBulletHitEffectName, hitParam);
-
-                if (enemy_->IsDead()) {
-                    SceneManager::GetInstance()->ChangeScene(kClearSceneName);
-                }
+        // 累積距離テーブルから現在のインデックスと補間率を算出
+        size_t idx = 0;
+        for (size_t i = 0; i < accumDistances_.size() - 1; ++i) {
+            if (accumDistances_[i] <= currentDistance_ && currentDistance_ < accumDistances_[i + 1]) {
+                idx = i;
                 break;
             }
         }
+
+        float tLocal = 0.0f;
+        float distDiff = accumDistances_[idx + 1] - accumDistances_[idx];
+        if (distDiff > 0.0001f) {
+            tLocal = (currentDistance_ - accumDistances_[idx]) / distDiff;
+        }
+
+        // 座標の線形補間
+        Vector3 playerPos = Math::Add(pathPoints_[idx], Math::Multiply(tLocal, Math::Subtract(pathPoints_[idx + 1], pathPoints_[idx])));
+        player_->SetPosition(playerPos);
+
+        // 接線方向（向き）の算出
+        Vector3 tangent = Math::Normalize(Math::Subtract(pathPoints_[idx + 1], pathPoints_[idx]));
+
+        // 回転の算出（ピッチ・ヨー）
+        float yaw = std::atan2(tangent.x, tangent.z);
+        float pitch = -std::atan2(tangent.y, std::sqrt(tangent.x * tangent.x + tangent.z * tangent.z));
+        player_->SetRotation({ pitch, yaw, 0.0f });
+        player_->SetDirection(tangent);
+
+        // カメラ位置・注視点の計算（一人称視点）
+        const float kCameraUpHeight = 1.8f;      // 目の高さのYオフセット
+        const float kCameraLookAhead = 8.0f;     // 前方への注視点オフセット
+
+        Vector3 camPos = Math::Add(playerPos, Vector3{ 0.0f, kCameraUpHeight, 0.0f });
+        Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraLookAhead, tangent));
+
+        mainCamera_->SetPosition(camPos);
+        mainCamera_->SetTarget(lookAtTarget);
     }
 
-    // 2. 敵の弾とプレイヤー本体
-    const auto& enemyBullets = enemy_->GetBullets();
-    for (const auto& bullet : enemyBullets) {
-        if (bullet->IsActive()) {
-            if (IsCollidingAABB(bullet->GetPosition(), bullet->GetSize(), player_->GetPosition(), player_->GetSize())) {
-                bullet->Kill();
+    // プレイモード中はカメラのビュー行列を武器に伝えて同期させる
+    if (mode_ == GameMode::Play) {
+        BaseCamera* activeCamera = cameraMgr_->GetActiveCamera();
+        player_->UpdateWeapon(activeCamera->GetViewMatrix());
+    }
 
-                // プレイヤーにダメージを適用
-                player_->Damage(1, kEnemyBulletHitEffectName);
-                shakeTimer_ = kShakeDuration; // カメラシェイク開始
+    // プレイヤーの更新 (自動走行位置同期後に呼び出すことで、弾の発射などが連動する)
+    player_->Update();
 
-                // ヒットエフェクト再生（紫色炎）
-                EffectPlayParam hitParam;
-                hitParam.position = bullet->GetPosition();
-                hitParam.scale = { 1.5f, 1.5f, 1.5f };
-                EffectManager::GetInstance()->PlayEffect2D(kEnemyBulletHitEffectName, hitParam);
+    // 敵 (Enemy) の更新と衝突判定は一時無効化
+    // enemy_->Update();
 
-                if (player_->IsDead()) {
-                    SceneManager::GetInstance()->ChangeScene(kGameOverSceneName);
-                }
-                break;
-            }
-        }
+    // 仮マップオブジェクト（柱Cube）の更新
+    for (auto& pillar : mapObjects_) {
+        pillar->Update();
     }
 
     // エフェクトの更新
@@ -170,15 +422,15 @@ void GameScene::Update() {
         debugCamera_->SetActive(false);
 
         // カメラシェイク更新
-        Vector3 camPos = kDefaultCameraPos;
+        Vector3 camPos = mainCamera_->GetPosition();
         if (shakeTimer_ > 0) {
             shakeTimer_--;
             float rx = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
             float ry = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
             float rz = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * kShakeIntensity;
             camPos += Vector3{ rx, ry, rz };
+            mainCamera_->SetPosition(camPos);
         }
-        mainCamera_->SetPosition(camPos);
 
         activeCamera->Update();
     }
@@ -188,11 +440,28 @@ void GameScene::Update() {
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void GameScene::Draw() {
+    // 仮マップオブジェクト（柱Cube）の描画
+    for (auto& pillar : mapObjects_) {
+        pillar->Draw();
+    }
+
+    if (mode_ == GameMode::DrawRoute) {
+        // マップ外枠・スタート/ゴール枠のデバッグ用補助枠線描画
+        for (auto& line : editorGizmoLines_) {
+            line->Draw();
+        }
+        // 描画モード時のみ手書きルート線を描画する
+        for (const auto& line : lineObjects_) {
+            line->Draw();
+        }
+        return; // 描画モード時はキャラやエフェクトを描画しない
+    }
+
     // プレイヤー（およびプレイヤーの弾）の描画
     player_->Draw();
 
-    // 敵（および敵の弾）の描画
-    enemy_->Draw();
+    // 敵（および敵の弾）の描画は一時無効化
+    // enemy_->Draw();
 
     // エフェクトの描画
     EffectManager::GetInstance()->Draw();
@@ -221,4 +490,37 @@ bool GameScene::IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const
     return (minX1 <= maxX2 && maxX1 >= minX2) &&
            (minY1 <= maxY2 && maxY1 >= minY2) &&
            (minZ1 <= maxZ2 && maxZ1 >= minZ2);
+}
+
+/**
+ * @brief プレイモードのゲーム開始処理
+ */
+void GameScene::StartGame() {
+    // 1. Catmull-Rom補間による滑らかなルートを生成
+    const int kPathDivision = 20;
+    pathPoints_ = Math::GenerateCatmullRomPath(rawPoints_, kPathDivision);
+    
+    // 2. 累積距離テーブルの構築（等速化用）
+    accumDistances_.clear();
+    accumDistances_.push_back(0.0f);
+    float accum = 0.0f;
+    for (size_t i = 1; i < pathPoints_.size(); ++i) {
+        float dist = Math::Length(Math::Subtract(pathPoints_[i], pathPoints_[i - 1]));
+        accum += dist;
+        accumDistances_.push_back(accum);
+    }
+    totalDistance_ = accum;
+    currentDistance_ = 0.0f;
+
+    // 3. モードをプレイに変更
+    mode_ = GameMode::Play;
+    
+    // 4. 自機(Player)の位置をルートの始点に設定
+    if (!pathPoints_.empty()) {
+        player_->SetPosition(pathPoints_.front());
+    }
+
+    // プレイ開始時にカメラ位置と回転をプレイ用の位置にリセット
+    mainCamera_->SetPosition(kDefaultCameraPos);
+    mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
 }

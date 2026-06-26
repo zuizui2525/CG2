@@ -451,6 +451,15 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             }
         }
 
+        // Playボタンの右側に左クリック一時停止有効・無効化のチェックボックスを表示
+        if (gameViewWindow_) {
+            ImGui::SameLine();
+            bool enable = gameViewWindow_->IsClickPauseEnabled();
+            if (ImGui::Checkbox("Click Pause", &enable)) {
+                gameViewWindow_->SetClickPauseEnabled(enable);
+            }
+        }
+
         ImGui::EndMainMenuBar();
     }
 }

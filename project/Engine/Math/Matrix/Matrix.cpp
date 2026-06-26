@@ -1,4 +1,4 @@
-﻿#include <cmath>
+#include <cmath>
 #include <assert.h>
 #include "Engine/Math/Matrix/Matrix.h"
 
@@ -447,6 +447,55 @@ namespace Math {
 			identity.m[i][i] = 1.0f;
 		}
 		return identity;
+	}
+
+	// Catmull-Romスプラインによる補間座標を計算する関数
+	Vector3 CatmullRomInterpolate(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) {
+		const float kHalf = 0.5f;
+		const float kTwo = 2.0f;
+		const float kThree = 3.0f;
+		const float kFour = 4.0f;
+		const float kFive = 5.0f;
+
+		float t2 = t * t;
+		float t3 = t2 * t;
+
+		Vector3 a = kTwo * p1;
+		Vector3 b = Subtract(p2, p0);
+		Vector3 c = Subtract(Add(kTwo * p0, kFour * p2), Add(kFive * p1, p3));
+		Vector3 d = Subtract(Add(Subtract(p3, p0), kThree * p1), kThree * p2);
+
+		Vector3 result = kHalf * Add(Add(a, Multiply(t, b)), Add(Multiply(t2, c), Multiply(t3, d)));
+		return result;
+	}
+
+	// 制御点配列からCatmull-Romスプラインを用いて細分化された滑らかな曲線座標の配列を生成する関数
+	std::vector<Vector3> GenerateCatmullRomPath(const std::vector<Vector3>& controlPoints, int division) {
+		std::vector<Vector3> path;
+		if (controlPoints.size() < 4) {
+			return controlPoints;
+		}
+
+		const int kMinDivision = 1;
+		int div = division < kMinDivision ? kMinDivision : division;
+		float step = 1.0f / static_cast<float>(div);
+
+		size_t n = controlPoints.size();
+		
+		for (size_t i = 0; i < n - 1; ++i) {
+			Vector3 p0 = (i == 0) ? Subtract(controlPoints[0], Subtract(controlPoints[1], controlPoints[0])) : controlPoints[i - 1];
+			Vector3 p1 = controlPoints[i];
+			Vector3 p2 = controlPoints[i + 1];
+			Vector3 p3 = (i == n - 2) ? Add(controlPoints[n - 1], Subtract(controlPoints[n - 1], controlPoints[n - 2])) : controlPoints[i + 2];
+
+			for (int j = 0; j < div; ++j) {
+				float t = static_cast<float>(j) * step;
+				path.push_back(CatmullRomInterpolate(p0, p1, p2, p3, t));
+			}
+		}
+
+		path.push_back(controlPoints.back());
+		return path;
 	}
 }
 
