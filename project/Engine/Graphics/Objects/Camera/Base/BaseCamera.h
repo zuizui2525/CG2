@@ -29,6 +29,9 @@ public:
     const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }  
     void UpdateProjection(float aspect);
 
+    // スクリーン座標からワールド空間へのレイを生成する
+    void CreateRay(const Vector2& screenPos, float windowWidth, float windowHeight, Vector3& rayStart, Vector3& rayDir) const;
+
 protected:  
     Transform transform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
     Matrix4x4 viewMatrix_ = Math::MakeIdentity();  

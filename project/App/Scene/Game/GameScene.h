@@ -12,6 +12,9 @@ class PostProcess;
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "App/Scene/Game/Player.h"
 #include "App/Scene/Game/Enemy.h"
+#include "Engine/Graphics/Objects/3d/Line/LineObject.h"
+#include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
+#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 
 /**
  * @brief ゲーム本編を管理するシーンクラス
@@ -29,11 +32,32 @@ public:
     void Draw() override;           // 毎フレーム描画処理
 
 private:
+    // ゲームモード定義
+    enum class GameMode {
+        DrawRoute, // ルート描画モード
+        Play       // 走行プレイモード
+    };
+
     // マジックナンバーを排除するための定数宣言
     static inline const std::string kMainCameraName = "Main";       // メインカメラの登録・選択用キー
     static inline const std::string kDebugCameraName = "Debug";     // デバッグカメラの登録・選択用キー
     static inline const std::string kClearSceneName = "Clear";       // クリアシーンへの遷移用キー
     static inline const std::string kGameOverSceneName = "GameOver"; // ゲームオーバーシーンへの遷移用キー
+    
+    // ルート描画・走行用の定数
+    static inline const float kMinPointDistance = 2.0f;              // 軌跡点間の最小距離
+    static inline const Vector3 kTopDownCameraPos = { 0.0f, 120.0f, 0.0f }; // 上空見下ろしカメラ位置（スタート・ゴールが画面内に確実に収まる高さ）
+    static inline const Vector3 kTopDownCameraRot = { 1.57079f, 0.0f, 0.0f }; // 真下を向く回転 (90度)
+    static inline const float kPlaneIntersectY = 0.0f;               // 地平面Y座標
+
+    // マップ境界・スタート/ゴール判定用定数
+    static inline const float kMapBoundaryX = 15.0f;                // マップの左右外枠 (X = -15 〜 15)
+    static inline const float kMapBoundaryZ = 25.0f;                // マップの前後外枠 (Z = -25 〜 25)
+    static inline const float kStartAreaZ = -20.0f;                 // スタートエリアの中心Z
+    static inline const float kGoalAreaZ = 20.0f;                   // ゴールエリアの中心Z
+    static inline const float kAreaRadius = 4.0f;                   // 円形判定エリアの半径
+    static inline const int kCircleDivision = 32;                   // 円形ギズモの描画分割数
+    static inline const float kPi = 3.14159265f;                    // 円周率
 
 private:
     // エンジンの各種マネージャへの生ポインタ（所有権は持たない）
@@ -49,8 +73,35 @@ private:
     std::unique_ptr<Player> player_;                // プレイヤーオブジェクト
     std::unique_ptr<Enemy> enemy_;                  // 敵オブジェクト
 
+    // ルート関連メンバ変数
+    GameMode mode_ = GameMode::DrawRoute;
+    std::vector<Vector3> rawPoints_;                 // 記録した軌跡の点配列
+    std::vector<Vector3> pathPoints_;                // 補間された滑らかなルート配列
+    std::vector<float> accumDistances_;              // 各補間点の累積距離テーブル（等速化用）
+    float currentDistance_ = 0.0f;                   // 現在の走行距離
+    float totalDistance_ = 0.0f;                     // ルートの総距離
+    std::vector<std::unique_ptr<LineObject>> lineObjects_; // 描画用ラインオブジェクト配列
+    bool isDrawing_ = false;                         // 描画中フラグ
+    bool hasReachedGoal_ = false;                    // ゴールエリア到達フラグ
+
+    // 仮マップオブジェクトおよびギズモ
+    std::vector<std::unique_ptr<CubeObject>> mapObjects_;          // 仮マップの柱
+    std::vector<std::unique_ptr<LineObject>> editorGizmoLines_;    // マップ枠・スタート/ゴール枠表示ライン
+
+    // スタート地点とゴール地点の視覚用球体
+    std::unique_ptr<SphereObject> startSphere_;
+    std::unique_ptr<SphereObject> goalSphere_;
+
+
+
+    // 移動速度定数
+    static inline const float kPlayerSpeed = 0.05f;  // 毎フレームの自機前進距離
+
     // AABB衝突判定関数
     bool IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const Vector3& pos2, const Vector3& size2) const;
+
+    // プレイモードのゲーム開始処理
+    void StartGame();
 
     // シェイク機能用変数と定数
     int shakeTimer_ = 0;

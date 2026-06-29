@@ -29,8 +29,7 @@ private:
     static inline const Vector3 kBulletScale = { 0.2f, 0.2f, 0.2f }; // 弾のサイズ
     static inline const std::string kTextureKey = "white";            // 描画テクスチャ
     static inline const std::string kEnvMapKey = "";                  // 環境マップ
-    static inline const int kMaxLifeTime = 300;                       // 最大寿命（フレーム数）
-    static inline const float kZBoundary = 15.0f;                      // 画面外とみなすZ座標の絶対値境界
+    static inline const int kMaxLifeTime = 60;                       // 最大寿命（フレーム数）
 
 private:
     std::unique_ptr<CubeObject> cube_;
