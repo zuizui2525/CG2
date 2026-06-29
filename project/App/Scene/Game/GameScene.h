@@ -14,6 +14,7 @@ class PostProcess;
 #include "App/Scene/Game/Enemy.h"
 #include "Engine/Graphics/Objects/3d/Line/LineObject.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
+#include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 
 /**
@@ -92,6 +93,8 @@ private:
     std::unique_ptr<SphereObject> startSphere_;
     std::unique_ptr<SphereObject> goalSphere_;
 
+	// 床の平面表示用四角形オブジェクト
+	std::unique_ptr<SquareObject> floorSquare_;
 
 
     // 移動速度定数

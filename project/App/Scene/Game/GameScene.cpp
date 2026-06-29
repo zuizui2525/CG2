@@ -143,6 +143,14 @@ void GameScene::Initialize() {
     goalSphere_->SetPosition({ 0.0f, 1.0f, kGoalAreaZ });
     goalSphere_->SetScale({ kAreaRadius * 2.0f, kAreaRadius * 2.0f, kAreaRadius * 2.0f });
     goalSphere_->SetColor({ 0.0f, 0.5f, 1.0f, 0.5f }); // 青色（半透明）
+
+	// 10. 地面用の平面オブジェクトの生成
+	floorSquare_ = std::make_unique<SquareObject>();
+    floorSquare_->Initialize();
+	floorSquare_->SetPosition({ 0.0f, 0.0f, 0.0f });
+    floorSquare_->SetSize({25.0f, 50.0f});
+	floorSquare_->SetRotate({ 1.57f, 0.0f, 0.0f }); // X軸で90度回転して水平にする
+    floorSquare_->SetColor({ 0.5f, 1.0f, 0.5f, 1.0f }); // 黄緑色
 }
 
 /**
@@ -399,12 +407,20 @@ void GameScene::Update() {
     // スタート・ゴール球体の更新
     startSphere_->Update();
     goalSphere_->Update();
+
+	// 床の更新
+    floorSquare_->Update();
 }
 
 /**
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void GameScene::Draw() {
+    // 床の描画
+    if (mode_ == GameMode::Play) {
+        floorSquare_->Draw();
+    }
+
     // 仮マップオブジェクト（柱Cube）の描画
     for (auto& pillar : mapObjects_) {
         pillar->Draw();
