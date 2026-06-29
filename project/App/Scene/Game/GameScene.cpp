@@ -131,6 +131,18 @@ void GameScene::Initialize() {
     AddGizmoCircle({ 0.0f, 0.0f, kStartAreaZ }, kAreaRadius, { 1.0f, 1.0f, 0.0f, 1.0f });
     // ゴール枠 (青・円形)
     AddGizmoCircle({ 0.0f, 0.0f, kGoalAreaZ }, kAreaRadius, { 0.0f, 0.5f, 1.0f, 1.0f });
+    // 9. スタート地点とゴール地点の視覚用球体オブジェクトの生成
+    startSphere_ = std::make_unique<SphereObject>();
+    startSphere_->Initialize();
+    startSphere_->SetPosition({ 0.0f, 1.0f, kStartAreaZ });
+    startSphere_->SetScale({ kAreaRadius * 2.0f, kAreaRadius * 2.0f, kAreaRadius * 2.0f });
+    startSphere_->SetColor({ 1.0f, 1.0f, 0.0f, 0.5f }); // 黄色（半透明）
+
+    goalSphere_ = std::make_unique<SphereObject>();
+    goalSphere_->Initialize();
+    goalSphere_->SetPosition({ 0.0f, 1.0f, kGoalAreaZ });
+    goalSphere_->SetScale({ kAreaRadius * 2.0f, kAreaRadius * 2.0f, kAreaRadius * 2.0f });
+    goalSphere_->SetColor({ 0.0f, 0.5f, 1.0f, 0.5f }); // 青色（半透明）
 }
 
 /**
@@ -167,58 +179,7 @@ void GameScene::ImGuiControl() {
     // エフェクトのパラメータ調整用ImGuiコントロール
     EffectManager::GetInstance()->ImGuiControl("Effects");
 
-    // プレイモード中のミニマップ表示（オーバーレイ描画）
-    if (mode_ == GameMode::Play) {
-        // ゲーム画面の位置とサイズを取得して左上に重ねて描画する
-        Vector2 gameViewPosMin = GameViewWindow::GetGameViewPosMin();
-        Vector2 gameViewSize = GameViewWindow::GetGameViewSize();
 
-        // ミニマップの位置とサイズ（150x150ピクセル）
-        ImVec2 mapPosMin = ImVec2(gameViewPosMin.x + 15.0f, gameViewPosMin.y + 15.0f);
-        ImVec2 mapSize = ImVec2(150.0f, 150.0f);
-
-        ImDrawList* drawList = ImGui::GetForegroundDrawList(); // 最前面のDrawList
-
-        // マップ背景と白枠の描画
-        drawList->AddRectFilled(mapPosMin, ImVec2(mapPosMin.x + mapSize.x, mapPosMin.y + mapSize.y), IM_COL32(30, 30, 35, 180), 4.0f);
-        drawList->AddRect(mapPosMin, ImVec2(mapPosMin.x + mapSize.x, mapPosMin.y + mapSize.y), IM_COL32(240, 240, 240, 255), 4.0f, 0, 1.5f);
-
-        // 3D座標から2Dミニマップ座標へのマッピング関数
-        auto WorldToMap = [&](const Vector3& pos3D) -> ImVec2 {
-            float tx = (pos3D.x + kMapBoundaryX) / (kMapBoundaryX * 2.0f);
-            float tz = (kMapBoundaryZ - pos3D.z) / (kMapBoundaryZ * 2.0f); // Z+が奥（上）、Z-が手前（下）
-            
-            tx = std::clamp(tx, 0.0f, 1.0f);
-            tz = std::clamp(tz, 0.0f, 1.0f);
-            
-            return ImVec2(
-                mapPosMin.x + tx * mapSize.x,
-                mapPosMin.y + tz * mapSize.y
-            );
-        };
-
-        // スタート位置（黄円）
-        ImVec2 startMapPos = WorldToMap({ 0.0f, 0.0f, kStartAreaZ });
-        float mapAreaRadius = kAreaRadius * (mapSize.x / (kMapBoundaryX * 2.0f));
-        drawList->AddCircle(startMapPos, mapAreaRadius, IM_COL32(255, 255, 0, 220), 16, 1.5f);
-
-        // ゴール位置（青円）
-        ImVec2 goalMapPos = WorldToMap({ 0.0f, 0.0f, kGoalAreaZ });
-        drawList->AddCircle(goalMapPos, mapAreaRadius, IM_COL32(0, 128, 255, 220), 16, 1.5f);
-
-        // ルート線（白い折れ線）
-        if (pathPoints_.size() > 1) {
-            for (size_t i = 1; i < pathPoints_.size(); ++i) {
-                ImVec2 p1 = WorldToMap(pathPoints_[i - 1]);
-                ImVec2 p2 = WorldToMap(pathPoints_[i]);
-                drawList->AddLine(p1, p2, IM_COL32(255, 255, 255, 180), 2.0f);
-            }
-        }
-
-        // プレイヤーの現在位置（赤い円）
-        ImVec2 playerMapPos = WorldToMap(player_->GetPosition());
-        drawList->AddCircleFilled(playerMapPos, 5.0f, IM_COL32(255, 0, 0, 255));
-    }
 #endif
 }
 
@@ -384,12 +345,12 @@ void GameScene::Update() {
 
         mainCamera_->SetPosition(camPos);
         mainCamera_->SetTarget(lookAtTarget);
+        mainCamera_->Update(); // デバッグカメラ起動中も武器位置を正しく同期するため、メインカメラの行列を強制的に更新する
     }
 
-    // プレイモード中はカメラのビュー行列を武器に伝えて同期させる
+    // プレイモード中は武器の位置と角度を更新する
     if (mode_ == GameMode::Play) {
-        BaseCamera* activeCamera = cameraMgr_->GetActiveCamera();
-        player_->UpdateWeapon(activeCamera->GetViewMatrix());
+        player_->UpdateWeapon(mainCamera_->GetViewMatrix());
     }
 
     // プレイヤーの更新 (自動走行位置同期後に呼び出すことで、弾の発射などが連動する)
@@ -434,6 +395,10 @@ void GameScene::Update() {
 
         activeCamera->Update();
     }
+
+    // スタート・ゴール球体の更新
+    startSphere_->Update();
+    goalSphere_->Update();
 }
 
 /**
@@ -465,6 +430,12 @@ void GameScene::Draw() {
 
     // エフェクトの描画
     EffectManager::GetInstance()->Draw();
+
+    // プレイモード中のみスタート・ゴール地点の球体を描画する
+    if (mode_ == GameMode::Play) {
+        startSphere_->Draw();
+        goalSphere_->Draw();
+    }
 }
 
 /**
@@ -523,4 +494,6 @@ void GameScene::StartGame() {
     // プレイ開始時にカメラ位置と回転をプレイ用の位置にリセット
     mainCamera_->SetPosition(kDefaultCameraPos);
     mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
+
+
 }

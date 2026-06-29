@@ -34,6 +34,13 @@ HRESULT PSOManager::Initialize(
     // 登録処理
     RegisterPreset("Skybox", skyboxPreset);
 
+    // Object2D用プリセット作成
+    PSOPreset object2DPreset = PSOPreset::CreateObject2DPreset(
+        device_, dxcUtils, dxcCompiler, includeHandler);
+
+    // 登録処理
+    RegisterPreset("Object2D", object2DPreset);
+
     return S_OK;
 }
 

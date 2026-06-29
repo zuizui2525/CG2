@@ -35,11 +35,6 @@ void Bullet::Update() {
         isActive_ = false;
     }
 
-    // Z軸の画面外境界による消滅判定
-    float z = cube_->GetPosition().z;
-    if (z > kZBoundary || z < -kZBoundary) {
-        isActive_ = false;
-    }
 }
 
 void Bullet::Draw() {

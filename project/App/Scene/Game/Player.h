@@ -14,7 +14,7 @@ public:
     void Initialize() override;
     void Update() override; // 継承元に合わせるため引数なし、Update内でInputResource等から取得
     void UpdateInput(Input* input); // インプットを明示的に受ける更新メソッド
-    void UpdateWeapon(const Matrix4x4& viewMatrix); // カメラのビュー行列基準の武器位置・角度更新
+    void UpdateWeapon(const Matrix4x4& viewMatrix); // 武器位置・角度更新
     void Draw() override;
 
     // 位置・回転の操作

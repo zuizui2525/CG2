@@ -48,6 +48,18 @@ void DebugScene::Initialize() {
     fireParam.position = { 5.0f, 0.0f, 0.0f };
     fireParam.isLoop = true;
     effectMgr->PlayEffect2D("Fire", fireParam);
+
+    // テスト用スプライトの初期化
+    testSprite_ = std::make_unique<SpriteObject>();
+    testSprite_->Initialize(0);
+    testSprite_->SetSize(200.0f, 200.0f);
+    testSprite_->SetPosition({ 100.0f, 100.0f, 0.0f });
+
+    testSprite2_ = std::make_unique<SpriteObject>();
+    testSprite2_->Initialize(0);
+    testSprite2_->SetSize(150.0f, 150.0f);
+    testSprite2_->SetPosition({ 400.0f, 150.0f, 0.0f });
+    testSprite2_->GetMaterialData()->color = { 0.0f, 1.0f, 0.5f, 0.8f }; // 緑がかった半透明
 }
 
 void DebugScene::ImGuiControl() {
@@ -191,8 +203,12 @@ void DebugScene::Update() {
         debugCamera_->SetActive(false);
         active->Update();
     }
+    testSprite_->Update();
+    testSprite2_->Update();
 }
 
 void DebugScene::Draw() {
     EffectManager::GetInstance()->Draw();
+    testSprite_->Draw("uvChecker");
+    testSprite2_->Draw("uvChecker");
 }

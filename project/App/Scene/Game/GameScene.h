@@ -14,6 +14,7 @@ class PostProcess;
 #include "App/Scene/Game/Enemy.h"
 #include "Engine/Graphics/Objects/3d/Line/LineObject.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
+#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 
 /**
  * @brief ゲーム本編を管理するシーンクラス
@@ -86,6 +87,12 @@ private:
     // 仮マップオブジェクトおよびギズモ
     std::vector<std::unique_ptr<CubeObject>> mapObjects_;          // 仮マップの柱
     std::vector<std::unique_ptr<LineObject>> editorGizmoLines_;    // マップ枠・スタート/ゴール枠表示ライン
+
+    // スタート地点とゴール地点の視覚用球体
+    std::unique_ptr<SphereObject> startSphere_;
+    std::unique_ptr<SphereObject> goalSphere_;
+
+
 
     // 移動速度定数
     static inline const float kPlayerSpeed = 0.05f;  // 毎フレームの自機前進距離

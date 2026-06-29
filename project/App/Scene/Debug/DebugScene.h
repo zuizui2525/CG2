@@ -12,6 +12,7 @@ class PostProcess;
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "Engine/Graphics/Objects/Light/Manager/LightManager.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
 
 #ifdef _USEIMGUI
 #include "imguiManager.h"
@@ -38,4 +39,6 @@ private:
     std::shared_ptr<BaseCamera> mainCamera_;
 
     std::unique_ptr<DirectionalLightObject> dirLight_;
+    std::unique_ptr<SpriteObject> testSprite_;
+    std::unique_ptr<SpriteObject> testSprite2_;
 };

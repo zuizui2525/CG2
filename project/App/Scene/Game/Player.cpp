@@ -83,8 +83,10 @@ void Player::UpdateInput(Input* input) {
 }
 
 void Player::Draw() {
-    // 一人称視点のためプレイヤー本体は非表示にする
-    // cube_->Draw(kTextureKey, kEnvMapKey);
+    // プレイヤー本体の描画
+    if (cube_) {
+        cube_->Draw(kTextureKey, kEnvMapKey);
+    }
     
     // 武器モデルの描画
     if (weaponCube_) {

@@ -1,11 +1,13 @@
-#ifdef _USEIMGUI
 #include "Engine/Debug/GameViewWindow.h"
 #include "Engine/Zuizui.h"
+#include "Engine/Base/WindowApp/WindowApp.h"
+#include <windows.h>
+
+#ifdef _USEIMGUI
 #include "Engine/Graphics/PostProcess/PostProcess.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Debug/ReplaySystem.h"
 #include "externals/imgui/imgui.h"
-#include <windows.h>
 
 GameViewWindow::GameViewWindow()
     : wasPaused_(false) {
