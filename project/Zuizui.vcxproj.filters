@@ -51,6 +51,7 @@
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.cpp" />
     <ClCompile Include="Engine\Base\DxCommon\DxCommon.cpp" />
+    <ClCompile Include="externals\imgui\ImGuizmo.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Engine\Graphics\PostProcess\TVNoisePass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
+    <ClInclude Include="externals\imgui\ImGuizmo.h" />
     <ClInclude Include="Engine\Zuizui.h" />
     <ClInclude Include="Engine\Debug\DebugEditor.h">
       <Filter>Engine</Filter>

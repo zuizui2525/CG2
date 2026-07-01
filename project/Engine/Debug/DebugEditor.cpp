@@ -9,6 +9,9 @@
 #include "Engine/Zuizui.h"
 #include "Engine/Base/Log/Log.h"
 #include "externals/imgui/imgui.h"
+#include "Engine/Base/BaseResource.h"
+#include "Engine/Input/Input.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 
 DebugEditor::DebugEditor()
     : showGameView_(true),
@@ -30,6 +33,7 @@ void DebugEditor::Initialize() {
 }
 
 void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
+
     // リプレイ自動送り再生の更新
     ReplaySystem::GetInstance()->UpdateReplayPlay(ImGui::GetIO().DeltaTime);
 
@@ -300,6 +304,8 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
         ImGui::End();
     }
 }
+
+
 
 void DebugEditor::DrawMenuBar(HWND hwnd) {
     if (ImGui::BeginMainMenuBar()) {

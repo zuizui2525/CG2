@@ -26,8 +26,30 @@ public:
     BaseCamera* GetActiveCamera() { return activeCamera_; }
 
     // --- 3D行列ゲッター (アクティブカメラから取得) ---
-    const Matrix4x4& GetViewMatrix3D() const { return activeCamera_->GetViewMatrix(); }
-    const Matrix4x4& GetProjectionMatrix3D() const { return activeCamera_->GetProjectionMatrix(); }
+    const Matrix4x4& GetViewMatrix3D() const {
+        if (!activeCamera_) {
+            static const Matrix4x4 identity = {
+                1,0,0,0,
+                0,1,0,0,
+                0,0,1,0,
+                0,0,0,1
+            };
+            return identity;
+        }
+        return activeCamera_->GetViewMatrix();
+    }
+    const Matrix4x4& GetProjectionMatrix3D() const {
+        if (!activeCamera_) {
+            static const Matrix4x4 identity = {
+                1,0,0,0,
+                0,1,0,0,
+                0,0,1,0,
+                0,0,0,1
+            };
+            return identity;
+        }
+        return activeCamera_->GetProjectionMatrix();
+    }
 
     // --- 2D行列ゲッター ---
     const Matrix4x4& GetViewMatrix2D() const { return viewMatrix2D_; }

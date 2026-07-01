@@ -15,12 +15,12 @@
 void App::Initialize() {
     // システム
     engine_ = Zuizui::GetInstance();
+    EngineResource::SetEngine(engine_);
 #ifdef _USEIMGUI
     engine_->Initialize(L"ZuizuiEngine");
 #else
     engine_->Initialize(L"LE3B_02_イトウカズイ");
 #endif
-    EngineResource::SetEngine(engine_);
 
     input_ = std::make_unique<Input>();
     input_->Initialize();
@@ -161,6 +161,8 @@ void App::Run() {
     postProcess_->PreDraw();
 
     SceneManager::GetInstance()->Draw();
+
+
 
     postProcess_->PostDraw();
 

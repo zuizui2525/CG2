@@ -217,6 +217,9 @@ if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_B
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\\Graphics\\Objects\\Camera\\Debug\DebugCamera.cpp" />
     <ClCompile Include="Engine\Base\DxCommon\DxCommon.cpp" />
+    <ClCompile Include="externals\imgui\ImGuizmo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -455,6 +458,7 @@ if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_B
     <ClInclude Include="Engine\Graphics\PostProcess\TVNoisePass.h" />
     <ClInclude Include="Engine\Base\Log\Log.h" />
     <ClInclude Include="externals\imgui\ImguiManager\ImguiManager.h" />
+    <ClInclude Include="externals\imgui\ImGuizmo.h" />
     <ClInclude Include="Engine\Zuizui.h" />
     <ClInclude Include="Engine\Debug\DebugEditor.h" />
     <ClInclude Include="Engine\Debug\GameViewWindow.h" />

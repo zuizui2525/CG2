@@ -79,7 +79,7 @@ void DebugScene::Update() {
     }
 
     // エフェクトのテスト呼び出し
-    if (input_->Trigger(DIK_SPACE)) {
+    if (input_->MousePress(0)) {
         // ヒットエフェクトをカメラ手前で発生させる
         EffectPlayParam hitParam;
         hitParam.position = { -2.0f, 0.0f, 2.0f };

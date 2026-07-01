@@ -8,6 +8,14 @@
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Debug/ReplaySystem.h"
 #include "externals/imgui/imgui.h"
+#include "externals/imgui/ImGuizmo.h"
+#include "Engine/Debug/SceneHierarchy.h"
+#include "Engine/Debug/IGameObject.h"
+#include "Engine/Base/BaseResource.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/3d/Object3D.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
+#include "Engine/Math/Matrix/Matrix.h"
 
 GameViewWindow::GameViewWindow()
     : wasPaused_(false) {
@@ -59,6 +67,52 @@ void GameViewWindow::Draw(bool* show, bool* isVisible) {
             
             ImVec2 imgPosMin = ImGui::GetCursorScreenPos();
             ImGui::Image(texID, ImVec2(width, height));
+
+            // ImGuizmo の描画・操作処理
+            IGameObject* selected = SceneHierarchy::GetInstance()->GetSelected();
+            BaseCamera* camera = CameraResource::GetCameraManager()->GetActiveCamera();
+            if (selected && camera) {
+                Object3D* target3D = dynamic_cast<Object3D*>(selected);
+                SpriteObject* targetSprite = dynamic_cast<SpriteObject*>(selected);
+
+                if (target3D || targetSprite) {
+                    ImGuizmo::BeginFrame();
+                    ImGuizmo::SetOrthographic(false);
+                    ImGuizmo::SetDrawlist();
+                    ImGuizmo::SetRect(imgPosMin.x, imgPosMin.y, width, height);
+
+                    // カメラの行列取得
+                    Matrix4x4 viewMat = CameraResource::GetCameraManager()->GetViewMatrix3D();
+                    Matrix4x4 projMat = CameraResource::GetCameraManager()->GetProjectionMatrix3D();
+
+                    // オブジェクトのパラメータを取得
+                    Vector3 scale = target3D ? target3D->GetScale() : targetSprite->GetScale();
+                    Vector3 rotate = target3D ? target3D->GetRotate() : targetSprite->GetRotate();
+                    Vector3 position = target3D ? target3D->GetPosition() : targetSprite->GetPosition();
+
+                    // ワールド行列を算出
+                    Matrix4x4 worldMat = Math::MakeAffineMatrix(scale, rotate, position);
+
+                    // ギズモ操作 (平行移動のみ)
+                    ImGuizmo::Manipulate(
+                        &viewMat.m[0][0],
+                        &projMat.m[0][0],
+                        ImGuizmo::TRANSLATE,
+                        ImGuizmo::LOCAL,
+                        &worldMat.m[0][0]
+                    );
+
+                    if (ImGuizmo::IsUsing()) {
+                        // 更新されたワールド行列から位置を取り出して再設定
+                        Vector3 newPos = { worldMat.m[3][0], worldMat.m[3][1], worldMat.m[3][2] };
+                        if (target3D) {
+                            target3D->SetPosition(newPos);
+                        } else if (targetSprite) {
+                            targetSprite->SetPosition(newPos);
+                        }
+                    }
+                }
+            }
 
             // マウスがゲーム描画画像上にあるか判定（ドラッグ中も判定を維持）
             sIsMouseOnGameView_ = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
