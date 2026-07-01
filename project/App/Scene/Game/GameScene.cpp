@@ -115,8 +115,22 @@ void GameScene::Update() {
                 // ヒットエフェクト再生（黄色炎）
                 EffectPlayParam hitParam;
                 hitParam.position = bullet->GetPosition();
-                hitParam.scale = { 1.5f, 1.5f, 1.5f };
+                const Vector3 baseHitScale = { 1.5f, 1.5f, 1.5f };
+                hitParam.scale = baseHitScale;
                 EffectManager::GetInstance()->PlayEffect2D(kPlayerBulletHitEffectName, hitParam);
+
+                // 追加：リングとシリンダーのエフェクト再生
+                const Vector3 ringScale = { 1.0f, 1.0f, 1.0f };
+                EffectPlayParam ringParam;
+                ringParam.position = bullet->GetPosition();
+                ringParam.scale = ringScale;
+                EffectManager::GetInstance()->PlayEffect3D(kRingEffectName, ringParam);
+
+                const Vector3 cylinderScale = { 1.0f, 1.0f, 1.0f };
+                EffectPlayParam cylinderParam;
+                cylinderParam.position = bullet->GetPosition();
+                cylinderParam.scale = cylinderScale;
+                EffectManager::GetInstance()->PlayEffect3D(kCylinderEffectName, cylinderParam);
 
                 if (enemy_->IsDead()) {
                     SceneManager::GetInstance()->ChangeScene(kClearSceneName);
@@ -140,8 +154,22 @@ void GameScene::Update() {
                 // ヒットエフェクト再生（紫色炎）
                 EffectPlayParam hitParam;
                 hitParam.position = bullet->GetPosition();
-                hitParam.scale = { 1.5f, 1.5f, 1.5f };
+                const Vector3 baseHitScale = { 1.5f, 1.5f, 1.5f };
+                hitParam.scale = baseHitScale;
                 EffectManager::GetInstance()->PlayEffect2D(kEnemyBulletHitEffectName, hitParam);
+
+                // 追加：リングとシリンダーのエフェクト再生
+                const Vector3 ringScale = { 1.0f, 1.0f, 1.0f };
+                EffectPlayParam ringParam;
+                ringParam.position = bullet->GetPosition();
+                ringParam.scale = ringScale;
+                EffectManager::GetInstance()->PlayEffect3D(kRingEffectName, ringParam);
+
+                const Vector3 cylinderScale = { 1.0f, 1.0f, 1.0f };
+                EffectPlayParam cylinderParam;
+                cylinderParam.position = bullet->GetPosition();
+                cylinderParam.scale = cylinderScale;
+                EffectManager::GetInstance()->PlayEffect3D(kCylinderEffectName, cylinderParam);
 
                 if (player_->IsDead()) {
                     SceneManager::GetInstance()->ChangeScene(kGameOverSceneName);

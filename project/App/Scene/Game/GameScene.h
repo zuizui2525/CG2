@@ -60,5 +60,7 @@ private:
     static inline const std::string kPlayerBulletHitEffectName = "YellowFire"; // プレイヤー弾ヒット時のエフェクト名（黄色炎）
     static inline const std::string kEnemyBulletHitEffectName = "PurpleFire"; // 敵弾ヒット時のエフェクト名（紫色炎）
     static inline const std::string kRainEffectName = "WaterDrop";            // 雨のエフェクト名
+    static inline const std::string kRingEffectName = "RingAura";             // リングエフェクト名
+    static inline const std::string kCylinderEffectName = "CylinderAura";     // シリンダーエフェクト名
 };
 
