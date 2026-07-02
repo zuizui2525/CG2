@@ -16,6 +16,7 @@ class PostProcess;
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
 #include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
 
 /**
  * @brief ゲーム本編を管理するシーンクラス
@@ -72,7 +73,11 @@ private:
     std::shared_ptr<DebugCamera> debugCamera_;      // デバッグ確認用フリーカメラ
     std::unique_ptr<DirectionalLightObject> dirLight_; // 平行光源
     std::unique_ptr<Player> player_;                // プレイヤーオブジェクト
-    std::unique_ptr<Enemy> enemy_;                  // 敵オブジェクト
+    std::vector<std::unique_ptr<Enemy>> enemies_;   // 複数敵オブジェクトリスト
+    std::unique_ptr<SpriteObject> reticleSprite_;   // 照準UIスプライト
+    int selectedEnemyIndex_ = -1;                   // ImGuiエディタで選択中の敵のインデックス
+    bool showStageEditor_ = true;                   // Stage Editorウィンドウの表示フラグ
+    bool showRouteEditor_ = true;                   // Route Editorウィンドウの表示フラグ
 
     // ルート関連メンバ変数
     GameMode mode_ = GameMode::DrawRoute;
@@ -106,6 +111,16 @@ private:
     // プレイモードのゲーム開始処理
     void StartGame();
 
+    // ステージ情報のセーブ・ロード処理
+    void SaveStage(const std::string& filepath);
+    void LoadStage(const std::string& filepath);
+
+public:
+    // エディタ表示フラグのポインタ取得ゲッター
+    bool* GetShowStageEditorPtr() { return &showStageEditor_; }
+    bool* GetShowRouteEditorPtr() { return &showRouteEditor_; }
+private:
+
     // シェイク機能用変数と定数
     int shakeTimer_ = 0;
     static inline const Vector3 kDefaultCameraPos = { 0.0f, 4.0f, -20.0f }; // メインカメラの基準位置
@@ -114,5 +129,6 @@ private:
     static inline const std::string kPlayerBulletHitEffectName = "YellowFire"; // プレイヤー弾ヒット時のエフェクト名（黄色炎）
     static inline const std::string kEnemyBulletHitEffectName = "PurpleFire"; // 敵弾ヒット時のエフェクト名（紫色炎）
     static inline const std::string kRainEffectName = "WaterDrop";            // 雨のエフェクト名
+    static inline const std::string kStageFilePath = "resources/stages/stage1.json"; // ステージ保存先パス
 };
 

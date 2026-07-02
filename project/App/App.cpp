@@ -98,12 +98,6 @@ void App::Run() {
     }
 
     // FPSおよび物理メモリの計測
-    float currentMem = 0.0f;
-    PROCESS_MEMORY_COUNTERS pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        currentMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
-    }
-
     static auto lastTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
@@ -112,6 +106,18 @@ void App::Run() {
     if (deltaTime < 0.0001f) { deltaTime = 0.0001f; }
     if (deltaTime > 1.0f) { deltaTime = 1.0f; }
     float currentFps = 1.0f / deltaTime;
+
+    static float cachedMem = 0.0f;
+    static float memTimer = 0.0f;
+    memTimer -= deltaTime;
+    if (memTimer <= 0.0f || cachedMem == 0.0f) {
+        PROCESS_MEMORY_COUNTERS pmc;
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+            cachedMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
+        }
+        memTimer = 0.5f; // 0.5秒ごとに更新
+    }
+    float currentMem = cachedMem;
 
     // 高負荷（スパイク）警告ログの出力処理（マジックナンバー排除）
     static float spikeWarningCooldown = 0.0f;

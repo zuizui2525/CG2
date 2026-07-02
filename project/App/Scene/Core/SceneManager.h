@@ -44,6 +44,7 @@ public:
 
     void ClearCurrentScene() { currentScene_.reset(); }
     const std::string& GetCurrentSceneName() const { return currentSceneName_; }
+    IScene* GetCurrentScene() const { return currentScene_.get(); }
 
 private:
     SceneManager() = default;

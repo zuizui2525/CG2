@@ -1,5 +1,9 @@
 #include "App/Scene/Game/GameScene.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Base/WindowApp/WindowApp.h"
+#include "Engine/Math/Collision/Collision.h"
+#include <algorithm>
+#include <fstream>
 #include "Engine/Zuizui.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "Engine/Graphics/PostProcess/PostProcess.h"
@@ -7,6 +11,7 @@
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
 #include "externals/imgui/imgui.h"
 #include "Engine/Debug/GameViewWindow.h"
+#include "Engine/Debug/SceneHierarchy.h"
 #include <cstdlib>
 
 // 不要になったヒットエフェクト名定数を削除
@@ -63,8 +68,14 @@ void GameScene::Initialize() {
     player_ = std::make_unique<Player>();
     player_->Initialize();
 
-    enemy_ = std::make_unique<Enemy>();
-    enemy_->Initialize();
+    enemies_.clear();
+
+    reticleSprite_ = std::make_unique<SpriteObject>();
+    reticleSprite_->Initialize(0); // ライティングなし
+    reticleSprite_->SetSize(128.0f, 128.0f);
+
+    // 保存されたステージがあればロードする
+    LoadStage(kStageFilePath);
 
     // 7. 仮マップオブジェクト (交互に並ぶ柱Cube) の生成
     mapObjects_.clear();
@@ -158,7 +169,7 @@ void GameScene::Initialize() {
  */
 void GameScene::ImGuiControl() {
 #ifdef _USEIMGUI
-    if (mode_ == GameMode::DrawRoute) {
+    if (showRouteEditor_ && mode_ == GameMode::DrawRoute) {
         ImGui::Begin("Route Editor");
         ImGui::Text("Mouse drag to draw route on ground.");
         ImGui::Text("Points: %d", (int)rawPoints_.size());
@@ -173,7 +184,65 @@ void GameScene::ImGuiControl() {
             ImGui::TextDisabled("Need at least 4 points to start.");
         }
         ImGui::End();
-        return;
+    }
+
+    if (showStageEditor_) {
+        // ステージエディタウィンドウ (ImGui)
+        ImGui::Begin("Stage Editor");
+        if (ImGui::Button("Add Enemy")) {
+            auto enemy = std::make_unique<Enemy>();
+            enemy->Initialize();
+            enemy->SetPosition({ 0.0f, 1.0f, 0.0f });
+            enemies_.push_back(std::move(enemy));
+            selectedEnemyIndex_ = (int)enemies_.size() - 1;
+            // ギズモのターゲットに設定
+            SceneHierarchy::GetInstance()->SetSelected(enemies_.back()->GetCube());
+        }
+
+        ImGui::Separator();
+        ImGui::Text("Enemies List:");
+        for (int i = 0; i < (int)enemies_.size(); ++i) {
+            std::string label = "Enemy " + std::to_string(i);
+            bool isSelected = (selectedEnemyIndex_ == i);
+            if (ImGui::Selectable(label.c_str(), isSelected)) {
+                selectedEnemyIndex_ = i;
+                SceneHierarchy::GetInstance()->SetSelected(enemies_[i]->GetCube());
+            }
+        }
+
+        if (selectedEnemyIndex_ >= 0 && selectedEnemyIndex_ < (int)enemies_.size()) {
+            ImGui::Separator();
+            ImGui::Text("Selected Enemy Transform:");
+            auto& enemy = enemies_[selectedEnemyIndex_];
+            Vector3 pos = enemy->GetPosition();
+            Vector3 size = enemy->GetSize();
+            
+            if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
+                enemy->SetPosition(pos);
+            }
+            if (ImGui::DragFloat3("Scale (Size)", &size.x, 0.1f, 0.1f, 10.0f)) {
+                enemy->SetSize(size);
+            }
+            
+            if (ImGui::Button("Delete Enemy")) {
+                // 選択中の敵を削除
+                if (SceneHierarchy::GetInstance()->GetSelected() == enemy->GetCube()) {
+                    SceneHierarchy::GetInstance()->SetSelected(nullptr);
+                }
+                enemies_.erase(enemies_.begin() + selectedEnemyIndex_);
+                selectedEnemyIndex_ = -1;
+            }
+        }
+
+        ImGui::Separator();
+        if (ImGui::Button("Save Stage")) {
+            SaveStage(kStageFilePath);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load Stage")) {
+            LoadStage(kStageFilePath);
+        }
+        ImGui::End();
     }
 
     // カメラ切り替え等のマネージャパラメータを表示
@@ -364,8 +433,62 @@ void GameScene::Update() {
     // プレイヤーの更新 (自動走行位置同期後に呼び出すことで、弾の発射などが連動する)
     player_->Update();
 
-    // 敵 (Enemy) の更新と衝突判定は一時無効化
-    // enemy_->Update();
+    // 敵 (Enemy) の更新と死後消滅判定
+    for (auto it = enemies_.begin(); it != enemies_.end();) {
+        (*it)->Update();
+        if ((*it)->IsDead()) {
+            it = enemies_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    if (mode_ == GameMode::Play) {
+        // プレイヤーの即時射撃（レイキャスト）判定
+        if (player_->HasFiredThisFrame()) {
+            Vector2 viewSize = GameViewWindow::GetGameViewSize();
+            Vector2 mouseCenter = { viewSize.x * 0.5f, viewSize.y * 0.5f };
+            Vector3 rayStart, rayDir;
+            mainCamera_->CreateRay(mouseCenter, viewSize.x, viewSize.y, rayStart, rayDir);
+
+            Segment raySegment;
+            raySegment.origin = rayStart;
+            raySegment.diff = Math::Multiply(100.0f, rayDir); // 射程 100.0f
+
+            Enemy* hitEnemy = nullptr;
+            float minDistance = FLT_MAX;
+            for (auto& enemy : enemies_) {
+                Vector3 pos = enemy->GetPosition();
+                Vector3 size = enemy->GetSize();
+                
+                AABB aabb;
+                aabb.min = { pos.x - size.x * 0.5f, pos.y - size.y * 0.5f, pos.z - size.z * 0.5f };
+                aabb.max = { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, pos.z + size.z * 0.5f };
+
+                if (IsCollision(aabb, raySegment)) {
+                    float dist = Math::Length(Math::Subtract(pos, rayStart));
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        hitEnemy = enemy.get();
+                    }
+                }
+            }
+
+            if (hitEnemy) {
+                // 10ダメージを与えて即時破壊（最大HP=10）
+                hitEnemy->Damage(10, kPlayerBulletHitEffectName);
+                
+                // ヒット時にカメラシェイク
+                shakeTimer_ = kShakeDuration;
+            }
+        }
+
+        // レティクルの更新 (解像度 1280x720 基準の2Dプロジェクション空間における中央に配置)
+        float centerX = static_cast<float>(WindowApp::kClientWidth);
+        float centerY = static_cast<float>(WindowApp::kClientHeight);
+        reticleSprite_->SetPosition({ (centerX - 128.0f) * 0.5f, (centerY - 128.0f) * 0.5f, 0.0f });
+        reticleSprite_->Update();
+    }
 
     // 仮マップオブジェクト（柱Cube）の更新
     for (auto& pillar : mapObjects_) {
@@ -441,8 +564,10 @@ void GameScene::Draw() {
     // プレイヤー（およびプレイヤーの弾）の描画
     player_->Draw();
 
-    // 敵（および敵の弾）の描画は一時無効化
-    // enemy_->Draw();
+    // 複数敵の描画
+    for (auto& enemy : enemies_) {
+        enemy->Draw();
+    }
 
     // エフェクトの描画
     EffectManager::GetInstance()->Draw();
@@ -451,6 +576,9 @@ void GameScene::Draw() {
     if (mode_ == GameMode::Play) {
         startSphere_->Draw();
         goalSphere_->Draw();
+
+        // レティクル（照準）の描画
+        reticleSprite_->Draw("reticle");
     }
 }
 
@@ -510,6 +638,67 @@ void GameScene::StartGame() {
     // プレイ開始時にカメラ位置と回転をプレイ用の位置にリセット
     mainCamera_->SetPosition(kDefaultCameraPos);
     mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
+}
 
+void GameScene::SaveStage(const std::string& filepath) {
+    CreateDirectoryA("resources", NULL);
+    CreateDirectoryA("resources/stages", NULL);
 
+    std::ofstream ofs(filepath);
+    if (!ofs.is_open()) {
+        return;
+    }
+
+    ofs << "[\n";
+    for (size_t i = 0; i < enemies_.size(); ++i) {
+        auto& enemy = enemies_[i];
+        Vector3 pos = enemy->GetPosition();
+        Vector3 size = enemy->GetSize();
+        ofs << "  {\"pos\": [" << pos.x << ", " << pos.y << ", " << pos.z << "], "
+            << "\"size\": [" << size.x << ", " << size.y << ", " << size.z << "]}";
+        if (i + 1 < enemies_.size()) {
+            ofs << ",";
+        }
+        ofs << "\n";
+    }
+    ofs << "]\n";
+}
+
+void GameScene::LoadStage(const std::string& filepath) {
+    std::ifstream ifs(filepath);
+    if (!ifs.is_open()) {
+        return;
+    }
+
+    enemies_.clear();
+    selectedEnemyIndex_ = -1;
+
+    std::string line;
+    while (std::getline(ifs, line)) {
+        size_t posIdx = line.find("\"pos\": [");
+        if (posIdx == std::string::npos) continue;
+
+        size_t posEnd = line.find("]", posIdx);
+        if (posEnd == std::string::npos) continue;
+
+        std::string posStr = line.substr(posIdx + 8, posEnd - (posIdx + 8));
+        float px = 0.0f, py = 0.0f, pz = 0.0f;
+        if (sscanf_s(posStr.c_str(), "%f, %f, %f", &px, &py, &pz) != 3) continue;
+
+        size_t sizeIdx = line.find("\"size\": [");
+        float sx = 1.0f, sy = 1.0f, sz = 1.0f;
+        if (sizeIdx != std::string::npos) {
+            size_t sizeEnd = line.find("]", sizeIdx);
+            if (sizeEnd != std::string::npos) {
+                std::string sizeStr = line.substr(sizeIdx + 9, sizeEnd - (sizeIdx + 9));
+                sscanf_s(sizeStr.c_str(), "%f, %f, %f", &sx, &sy, &sz);
+            }
+        }
+
+        auto enemy = std::make_unique<Enemy>();
+        enemy->Initialize();
+        enemy->SetPosition({ px, py, pz });
+        enemy->SetSize({ sx, sy, sz });
+        enemies_.push_back(std::move(enemy));
+    }
 }

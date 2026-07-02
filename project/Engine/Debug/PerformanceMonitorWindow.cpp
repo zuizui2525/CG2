@@ -77,11 +77,17 @@ void PerformanceMonitorWindow::Draw(bool* show) {
         float currentFps = 1.0f / realDeltaTime;
         float currentMs = realDeltaTime * 1000.0f;
 
-        float currentMem = 0.0f;
-        PROCESS_MEMORY_COUNTERS pmc;
-        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-            currentMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
+        static float cachedMem = 0.0f;
+        static float memTimer = 0.0f;
+        memTimer -= realDeltaTime;
+        if (memTimer <= 0.0f || cachedMem == 0.0f) {
+            PROCESS_MEMORY_COUNTERS pmc;
+            if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+                cachedMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
+            }
+            memTimer = 0.5f; // 0.5秒ごとに更新
         }
+        float currentMem = cachedMem;
 
         fpsHistory_[historyOffset_] = currentFps;
         memHistory_[historyOffset_] = currentMem;

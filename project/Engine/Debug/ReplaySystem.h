@@ -51,7 +51,7 @@ public:
     // リプレイ表示更新処理 (毎フレームのImGui描画等のタイミングでcommandListを渡して呼ぶ)
     void UpdateReplayDisplay(ID3D12GraphicsCommandList* commandList);
 
-    int32_t GetRecordCount() const { return static_cast<int32_t>(records_.size()); }
+    int32_t GetRecordCount() const { return activeCount_; }
 
 private:
     ReplaySystem() = default;
@@ -84,6 +84,7 @@ private:
     // 記録バッファ (60fpsで5秒分 = 300フレーム)
     std::vector<FrameRecord> records_;
     int32_t writeIndex_ = 0;
+    int32_t activeCount_ = 0;
     
     // マジックナンバー排除用の定数
     static constexpr int32_t kMaxFrames = 1800; // 記録する最大フレーム数 (30fps * 60秒 = 1800)
@@ -106,6 +107,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D12PipelineState> shrinkPipelineState_;
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeapShrink_; // 縮小描画用の一時RTVヒープ (サイズ1)
 
-
+    int32_t GetPhysicalIndex(int32_t logicalIdx) const;
 };
 #endif

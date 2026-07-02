@@ -33,9 +33,23 @@ public:
     Vector3 GetPosition() const override { return cube_->GetPosition(); }
     Vector3 GetSize() const override { return cube_->GetSize(); }
 
+    // 弾数・リロード情報の取得
+    int GetAmmo() const { return ammo_; }
+    bool IsReloading() const { return reloadTimer_ > 0; }
+    int GetReloadTimer() const { return reloadTimer_; }
+    static int GetMaxAmmo() { return kMaxAmmo; }
+    static int GetReloadTime() { return kReloadTime; }
+    bool HasFiredThisFrame() const { return hasFiredThisFrame_; }
+
 private:
     bool isAutoMoving_ = false; // 自動走行中かどうかのフラグ
     Vector3 direction_ = { 0.0f, 0.0f, 1.0f }; // プレイヤーの現在の進行方向（正面）
+
+    // 弾数・射撃制御用の変数
+    int ammo_ = kMaxAmmo;
+    int reloadTimer_ = 0;
+    int shotIntervalTimer_ = 0;
+    bool hasFiredThisFrame_ = false;
 
 private:
     // マジックナンバー排除のための定数
@@ -48,7 +62,8 @@ private:
     static inline const std::string kEnvMapKey = "";                        // 環境マップ
     static inline const int kMoveLeftKey = DIK_A;                           // 左移動キー
     static inline const int kMoveRightKey = DIK_D;                          // 右移動キー
-    static inline const int kShotKey = DIK_SPACE;                           // 射撃キー
+    static inline const int kReloadKey = DIK_R;                             // リロードキー
+    static inline const int kShotMouseKey = 0;                              // 射撃（左クリック）キー
     static inline const Vector4 kPlayerColor = { 0.0f, 0.3f, 1.0f, 1.0f };  // プレイヤーカラー（青）
     static inline const std::string kBulletEffectName = "YellowFire";       // 弾エフェクト名（黄色い炎）
     static inline const Vector3 kWeaponScale = { 0.18f, 0.12f, 1.2f };      // 武器のサイズ
@@ -56,6 +71,10 @@ private:
     static inline const Vector3 kWeaponLocalOffset = { 0.35f, -0.45f, 1.5f }; // カメラ基準の武器ローカルオフセット
     static inline const float kWeaponYawOffset = -0.08f;                     // 銃身を中央に向けるヨーオフセット
     static inline const float kBulletSpeed = 0.5f;                          // 弾の速度
+
+    static constexpr int kMaxAmmo = 6;                                      // 最大装填数
+    static constexpr int kReloadTime = 90;                                  // リロード時間 (1.5秒)
+    static constexpr int kShotInterval = 10;                                // 連射間隔 (0.16秒)
 
 private:
     std::unique_ptr<CubeObject> cube_;

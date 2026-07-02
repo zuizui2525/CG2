@@ -21,9 +21,14 @@ void Player::Initialize() {
     ClearBullets();
     InitializeHpBar(); // 体力と体力バーの初期化
     isAutoMoving_ = false; // 自動走行フラグをリセット
+
+    ammo_ = kMaxAmmo;
+    reloadTimer_ = 0;
+    shotIntervalTimer_ = 0;
 }
 
 void Player::Update() {
+    hasFiredThisFrame_ = false;
     Input* input = InputResource::GetInput();
     UpdateInput(input);
 }
@@ -58,21 +63,49 @@ void Player::UpdateInput(Input* input) {
     
     cube_->Update();
 
-    // 弾の発射処理 (SPACEキー)
-    if (input->Trigger(kShotKey)) {
-        // 武器先端（銃口）から発射する
-        static const float kMuzzleOffsetZ = 0.8f;
-        Vector3 muzzlePos = Math::Add(weaponPosition_, Math::Multiply(kMuzzleOffsetZ, direction_));
+    // 連射間隔タイマーの更新
+    if (shotIntervalTimer_ > 0) {
+        shotIntervalTimer_--;
+    }
 
-        // 画面中央（カメラの視線線上かつ十分前方）に弾を誘導する
-        static const float kTargetDistance = 50.0f;
-        Vector3 targetPos = Math::Add(cameraPosition_, Math::Multiply(kTargetDistance, direction_));
+    // リロードタイマーの更新
+    if (reloadTimer_ > 0) {
+        reloadTimer_--;
+        if (reloadTimer_ == 0) {
+            ammo_ = kMaxAmmo;
+        }
+    }
 
-        // 銃口から画面中央の照準先ターゲットへの方向ベクトル
-        Vector3 bulletDir = Math::Normalize(Math::Subtract(targetPos, muzzlePos));
-        Vector3 bulletVel = Math::Multiply(kBulletSpeed, bulletDir);
+    // リロード入力 (Rキー)
+    if (reloadTimer_ <= 0 && ammo_ < kMaxAmmo) {
+        if (input->Trigger(kReloadKey)) {
+            reloadTimer_ = kReloadTime;
+        }
+    }
 
-        bullets_.push_back(std::make_unique<Bullet>(muzzlePos, bulletVel, kBulletEffectName));
+    // 弾の発射処理 (マウス左クリック)
+    // ※リロード中でなく、連射間隔タイマーが終了しており、弾数が残っている場合のみ射撃可能
+    if (reloadTimer_ <= 0 && shotIntervalTimer_ <= 0 && ammo_ > 0) {
+        if (input->MouseTrigger(kShotMouseKey)) {
+            // 弾数を消費
+            ammo_--;
+            shotIntervalTimer_ = kShotInterval;
+            hasFiredThisFrame_ = true;
+
+            // 武器先端（銃口）から発射する (演出用)
+            static const float kMuzzleOffsetZ = 0.8f;
+            Vector3 muzzlePos = Math::Add(weaponPosition_, Math::Multiply(kMuzzleOffsetZ, direction_));
+
+            // 画面中央（カメラの視線線上かつ十分前方）に弾を誘導する
+            static const float kTargetDistance = 50.0f;
+            Vector3 targetPos = Math::Add(cameraPosition_, Math::Multiply(kTargetDistance, direction_));
+
+            // 銃口から画面中央 of 照準先ターゲットへの方向ベクトル
+            Vector3 bulletDir = Math::Normalize(Math::Subtract(targetPos, muzzlePos));
+            Vector3 bulletVel = Math::Multiply(kBulletSpeed, bulletDir);
+
+            bullets_.push_back(std::make_unique<Bullet>(muzzlePos, bulletVel, kBulletEffectName));
+        }
     }
 
     // 弾の更新

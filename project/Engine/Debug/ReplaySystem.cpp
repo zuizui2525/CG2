@@ -50,7 +50,10 @@ void ReplaySystem::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srvHea
     seekProgress_ = 1.0f;
     playSpeed_ = 1.0f;
     frameCounter_ = 0;
+    writeIndex_ = 0;
+    activeCount_ = 0;
     records_.clear();
+    records_.resize(kMaxFrames);
     lastPausedGpuHandle_ = {};
 
     // 縮小描画用の一時RTVヒープの生成
@@ -223,24 +226,19 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
     // 起動からの経過時間をLogクラスと同期して取得
     float timestamp = Log::GetElapsedTime();
 
-    FrameRecord newRecord;
-    
-    // リングバッファが最大数に達している場合、最古のテクスチャを再利用してアロケーションを回避
-    if (records_.size() >= static_cast<size_t>(kMaxFrames)) {
-        newRecord = std::move(records_[0]);
-        records_.erase(records_.begin());
+    // リングバッファの書き込み位置のレコードを取得
+    FrameRecord& record = records_[writeIndex_];
 
-        // 再利用するテクスチャのサイズが一致しているか確認（もしサイズ変更などで不一致なら再生成）
-        if (newRecord.texture) {
-            D3D12_RESOURCE_DESC desc = newRecord.texture->GetDesc();
-            if (desc.Width != static_cast<UINT64>(kShrinkWidth) || desc.Height != static_cast<UINT>(kShrinkHeight)) {
-                newRecord.texture.Reset();
-            }
+    // 再利用するテクスチャのサイズが一致しているか確認（もしサイズ変更などで不一致なら再生成）
+    if (record.texture) {
+        D3D12_RESOURCE_DESC desc = record.texture->GetDesc();
+        if (desc.Width != static_cast<UINT64>(kShrinkWidth) || desc.Height != static_cast<UINT>(kShrinkHeight)) {
+            record.texture.Reset();
         }
     }
 
     // テクスチャが無い場合は新規作成
-    if (!newRecord.texture) {
+    if (!record.texture) {
         D3D12_HEAP_PROPERTIES heapProps{};
         heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
 
@@ -261,7 +259,7 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
             &resDesc,
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, // 初期状態をサンプリング可能に
             nullptr,
-            IID_PPV_ARGS(&newRecord.texture)
+            IID_PPV_ARGS(&record.texture)
         );
         if (FAILED(hr)) {
             Log::Write(std::format("ReplaySystem: Record texture creation failed with HRESULT: 0x{:08X}", static_cast<uint32_t>(hr)));
@@ -273,8 +271,8 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
         UINT srvIndex = kReservedSrvIndexReplayStart + totalCreatedCount_;
         totalCreatedCount_++;
 
-        newRecord.srvCpuHandle = DxUtils::GetCPUDescriptorHandle(srvHeap_, descriptorSize, srvIndex);
-        newRecord.srvGpuHandle = DxUtils::GetGPUDescriptorHandle(srvHeap_, descriptorSize, srvIndex);
+        record.srvCpuHandle = DxUtils::GetCPUDescriptorHandle(srvHeap_, descriptorSize, srvIndex);
+        record.srvGpuHandle = DxUtils::GetGPUDescriptorHandle(srvHeap_, descriptorSize, srvIndex);
 
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
         srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -282,16 +280,16 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
         srvDesc.Texture2D.MipLevels = 1;
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        device_->CreateShaderResourceView(newRecord.texture.Get(), &srvDesc, newRecord.srvCpuHandle);
+        device_->CreateShaderResourceView(record.texture.Get(), &srvDesc, record.srvCpuHandle);
     }
 
-    newRecord.fps = fps;
-    newRecord.memory = memory;
-    newRecord.timestamp = timestamp;
+    record.fps = fps;
+    record.memory = memory;
+    record.timestamp = timestamp;
 
     // GPU上での縮小描画の実行
     // 1. 描画先のテクスチャを RENDER_TARGET 状態に遷移
-    TransitionBarrier(commandList, newRecord.texture.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    TransitionBarrier(commandList, record.texture.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     // 2. テンポラリRTVヒープにRTVを生成してバインド
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -301,7 +299,7 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
     rtvDesc.Texture2D.PlaneSlice = 0;
 
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeapShrink_->GetCPUDescriptorHandleForHeapStart();
-    device_->CreateRenderTargetView(newRecord.texture.Get(), &rtvDesc, rtvHandle);
+    device_->CreateRenderTargetView(record.texture.Get(), &rtvDesc, rtvHandle);
 
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
@@ -329,10 +327,14 @@ void ReplaySystem::RecordFrame(ID3D12GraphicsCommandList* commandList, ID3D12Res
     commandList->DrawInstanced(3, 1, 0, 0);
 
     // 6. コピー完了後、履歴テクスチャを常時状態である PIXEL_SHADER_RESOURCE へ戻す
-    TransitionBarrier(commandList, newRecord.texture.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    TransitionBarrier(commandList, record.texture.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-    // 新しいレコードを履歴末尾に追加
-    records_.push_back(std::move(newRecord));
+    // リングバッファのインデックスと有効数を更新
+    writeIndex_ = (writeIndex_ + 1) % kMaxFrames;
+    activeCount_ = activeCount_ + 1;
+    if (activeCount_ > kMaxFrames) {
+        activeCount_ = kMaxFrames;
+    }
 
     // 通常稼働中は常に最新を指すようにシーク位置を1.0に保つ
     seekProgress_ = 1.0f;
@@ -369,13 +371,13 @@ void ReplaySystem::SetSeekPos(float progress) {
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE ReplaySystem::GetReplaySrvGpuHandle() const {
-    if (records_.empty()) return {};
+    if (activeCount_ == 0) return {};
 
     // 通常動作中（一時停止していない）は、最後に一時停止した時点のフレーム（キャッシュ）を返す
     if (!isPaused_) {
         if (lastPausedGpuHandle_.ptr == 0) {
             // 起動後まだ一度も一時停止していない場合は、その時点の最新フレームで固定する
-            lastPausedGpuHandle_ = records_.back().srvGpuHandle;
+            lastPausedGpuHandle_ = records_[GetPhysicalIndex(activeCount_ - 1)].srvGpuHandle;
         }
         return lastPausedGpuHandle_;
     }
@@ -384,53 +386,51 @@ D3D12_GPU_DESCRIPTOR_HANDLE ReplaySystem::GetReplaySrvGpuHandle() const {
     int32_t activeCount = GetEffectiveRecordCount(&startIdx);
     if (activeCount == 0) return {};
 
-    int32_t targetIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
-    targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
-    return records_[targetIdx].srvGpuHandle;
+    int32_t targetLogicalIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
+    targetLogicalIdx = std::clamp(targetLogicalIdx, startIdx, startIdx + activeCount - 1);
+    return records_[GetPhysicalIndex(targetLogicalIdx)].srvGpuHandle;
 }
 
-
 float ReplaySystem::GetReplayFps(int32_t targetIdx) const {
-    if (records_.empty()) return 0.0f;
-    int32_t idx = std::clamp(targetIdx, 0, static_cast<int32_t>(records_.size() - 1));
-    return records_[idx].fps;
+    if (activeCount_ == 0) return 0.0f;
+    int32_t idx = std::clamp(targetIdx, 0, activeCount_ - 1);
+    return records_[GetPhysicalIndex(idx)].fps;
 }
 
 float ReplaySystem::GetReplayMemory(int32_t targetIdx) const {
-    if (records_.empty()) return 0.0f;
-    int32_t idx = std::clamp(targetIdx, 0, static_cast<int32_t>(records_.size() - 1));
-    return records_[idx].memory;
+    if (activeCount_ == 0) return 0.0f;
+    int32_t idx = std::clamp(targetIdx, 0, activeCount_ - 1);
+    return records_[GetPhysicalIndex(idx)].memory;
 }
 
 float ReplaySystem::GetReplayTimeOffset(int32_t targetIdx) const {
-    if (records_.empty()) return 0.0f;
-    int32_t idx = std::clamp(targetIdx, 0, static_cast<int32_t>(records_.size() - 1));
-    float currentTimestamp = records_.back().timestamp;
-    return currentTimestamp - records_[idx].timestamp;
+    if (activeCount_ == 0) return 0.0f;
+    int32_t idx = std::clamp(targetIdx, 0, activeCount_ - 1);
+    float currentTimestamp = records_[GetPhysicalIndex(activeCount_ - 1)].timestamp;
+    return currentTimestamp - records_[GetPhysicalIndex(idx)].timestamp;
 }
 
 float ReplaySystem::GetReplayMaxTimestamp() const {
-    if (!isPaused_ || records_.empty()) {
+    if (!isPaused_ || activeCount_ == 0) {
         return -1.0f; // 無制限
     }
     int32_t startIdx = 0;
     int32_t activeCount = GetEffectiveRecordCount(&startIdx);
     if (activeCount == 0) return -1.0f;
 
-    int32_t targetIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
-    targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
-    return records_[targetIdx].timestamp;
+    int32_t targetLogicalIdx = startIdx + static_cast<int32_t>(seekProgress_ * (activeCount - 1));
+    targetLogicalIdx = std::clamp(targetLogicalIdx, startIdx, startIdx + activeCount - 1);
+    return records_[GetPhysicalIndex(targetLogicalIdx)].timestamp;
 }
 
 void ReplaySystem::GetReplayHistory(int32_t targetIdx, float* outFpsHistory, float* outMemHistory, int32_t historySize) {
-    int32_t numRecords = static_cast<int32_t>(records_.size());
-    if (numRecords == 0) {
+    if (activeCount_ == 0) {
         std::fill_n(outFpsHistory, historySize, 0.0f);
         std::fill_n(outMemHistory, historySize, 0.0f);
         return;
     }
 
-    int32_t baseIdx = std::clamp(targetIdx, 0, numRecords - 1);
+    int32_t baseIdx = std::clamp(targetIdx, 0, activeCount_ - 1);
 
     for (int32_t i = 0; i < historySize; ++i) {
         // historySize のぶんだけ過去のインデックスを計算する
@@ -439,13 +439,14 @@ void ReplaySystem::GetReplayHistory(int32_t targetIdx, float* outFpsHistory, flo
         if (idx < 0) {
             idx = 0; // 過去の記録が足りない場合は最古の値で埋める
         }
-        outFpsHistory[i] = records_[idx].fps;
-        outMemHistory[i] = records_[idx].memory;
+        int32_t physIdx = GetPhysicalIndex(idx);
+        outFpsHistory[i] = records_[physIdx].fps;
+        outMemHistory[i] = records_[physIdx].memory;
     }
 }
 
 void ReplaySystem::UpdateReplayPlay(float deltaTime) {
-    if (!isReplayPlaying_ || records_.empty()) {
+    if (!isReplayPlaying_ || activeCount_ == 0) {
         return;
     }
 
@@ -467,7 +468,7 @@ void ReplaySystem::UpdateReplayPlay(float deltaTime) {
 }
 
 void ReplaySystem::SeekToTimestamp(float timestamp) {
-    if (records_.empty()) return;
+    if (activeCount_ == 0) return;
 
     // 1. ゲーム全体を強制的に一時停止（ポーズ）状態にする
     SetPause(true);
@@ -475,8 +476,9 @@ void ReplaySystem::SeekToTimestamp(float timestamp) {
     // 2. 指定されたタイムスタンプに最も近い記録フレーム（時間差最小）を線形探索
     size_t targetIdx = 0;
     float minDiff = 10000.0f;
-    for (size_t i = 0; i < records_.size(); ++i) {
-        float diff = std::abs(timestamp - records_[i].timestamp);
+    for (int32_t i = 0; i < activeCount_; ++i) {
+        int32_t physIdx = GetPhysicalIndex(i);
+        float diff = std::abs(timestamp - records_[physIdx].timestamp);
         if (diff < minDiff) {
             minDiff = diff;
             targetIdx = i;
@@ -484,9 +486,8 @@ void ReplaySystem::SeekToTimestamp(float timestamp) {
     }
 
     // 3. 探索したインデックスからシーク位置の比率 (0.0f 〜 1.0f) を算出
-    int32_t numRecords = static_cast<int32_t>(records_.size());
-    if (numRecords > 1) {
-        seekProgress_ = static_cast<float>(targetIdx) / static_cast<float>(numRecords - 1);
+    if (activeCount_ > 1) {
+        seekProgress_ = static_cast<float>(targetIdx) / static_cast<float>(activeCount_ - 1);
     } else {
         seekProgress_ = 1.0f;
     }
@@ -497,27 +498,35 @@ void ReplaySystem::SeekToTimestamp(float timestamp) {
 }
 
 int32_t ReplaySystem::GetEffectiveRecordCount(int32_t* outStartIdx) const {
-    if (records_.empty()) {
+    if (activeCount_ == 0) {
         if (outStartIdx) *outStartIdx = 0;
         return 0;
     }
-    float currentTimestamp = records_.back().timestamp;
+    float currentTimestamp = records_[GetPhysicalIndex(activeCount_ - 1)].timestamp;
     constexpr float kMaxReplayTimeRange = 60.0f; // 最大60秒前までに制限
 
     int32_t startIdx = 0;
-    for (size_t i = 0; i < records_.size(); ++i) {
-        if (currentTimestamp - records_[i].timestamp <= kMaxReplayTimeRange) {
-            startIdx = static_cast<int32_t>(i);
+    for (int32_t i = 0; i < activeCount_; ++i) {
+        int32_t physIdx = GetPhysicalIndex(i);
+        if (currentTimestamp - records_[physIdx].timestamp <= kMaxReplayTimeRange) {
+            startIdx = i;
             break;
         }
     }
 
     if (outStartIdx) *outStartIdx = startIdx;
-    return static_cast<int32_t>(records_.size()) - startIdx;
+    return activeCount_ - startIdx;
 }
 
 float ReplaySystem::GetLatestRecordTimestamp() const {
-    if (records_.empty()) return -1.0f;
-    return records_.back().timestamp;
+    if (activeCount_ == 0) return -1.0f;
+    return records_[GetPhysicalIndex(activeCount_ - 1)].timestamp;
+}
+
+int32_t ReplaySystem::GetPhysicalIndex(int32_t logicalIdx) const {
+    if (activeCount_ < kMaxFrames) {
+        return logicalIdx;
+    }
+    return (writeIndex_ + logicalIdx) % kMaxFrames;
 }
 #endif

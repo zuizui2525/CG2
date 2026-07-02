@@ -18,6 +18,9 @@ public:
     // 衝突判定用インターフェース実装
     Vector3 GetPosition() const override { return cube_->GetPosition(); }
     Vector3 GetSize() const override { return cube_->GetSize(); }
+    void SetPosition(const Vector3& pos) { cube_->SetPosition(pos); }
+    void SetSize(const Vector3& size) { cube_->SetSize(size); }
+    CubeObject* GetCube() const { return cube_.get(); }
 
 private:
     // マジックナンバー排除のための定数

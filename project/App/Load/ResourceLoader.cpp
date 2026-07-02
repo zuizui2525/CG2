@@ -30,6 +30,7 @@ void ResourceLoader::LoadTextures() {
 	texMgr->LoadTexture("white", "resources/Textures/white.png");
 	texMgr->LoadTexture("monsterBall", "resources/Textures/monsterBall.png");
 	texMgr->LoadTexture("circle", "resources/Textures/circle.png");
+	texMgr->LoadTexture("reticle", "resources/Textures/reticle.png");
 	texMgr->LoadTexture("uvChecker", "resources/Textures/uvChecker.png");
 	texMgr->LoadTexture("skyboxTex", "resources/Textures/skybox.dds");
 	texMgr->LoadTexture("forestTex", "resources/Textures/forest.dds");

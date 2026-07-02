@@ -14,8 +14,7 @@ bool Log::isInitialized_ = false;
 std::chrono::steady_clock::time_point Log::startTime_;
 float Log::activeElapsedTime_ = 0.0f;
 
-std::vector<std::string> Log::logMessages_;
-std::vector<float> Log::logTimestamps_;
+std::deque<LogEntry> Log::logEntries_;
 bool Log::showConsole_ = true;
 size_t Log::lastLogSize_ = 0;
 
@@ -103,15 +102,28 @@ void Log::Write(const std::string& message) {
     std::string timeStr = std::format("[real|{:7.3f}s] [game|{:02d}h:{:02d}m:{:02d}.{:03d}s] ", realElapsedTime, h, m, s, ms);
     std::string fullMessage = timeStr + cleanMessage;
 
-    // バッファへの蓄積（リングバッファ処理）
-    if (logMessages_.size() >= kMaxLogLines) {
-        logMessages_.erase(logMessages_.begin());
-        if (!logTimestamps_.empty()) {
-            logTimestamps_.erase(logTimestamps_.begin());
-        }
+    // ログタイプ判定
+    LogType type = LogType::Info;
+    if (cleanMessage.find("error") != std::string::npos || cleanMessage.find("failed") != std::string::npos || 
+        cleanMessage.find("Error") != std::string::npos || cleanMessage.find("エラー") != std::string::npos || 
+        cleanMessage.find("ERROR") != std::string::npos) {
+        type = LogType::Error;
+    } else if (cleanMessage.find("warning") != std::string::npos || cleanMessage.find("Warning") != std::string::npos || 
+               cleanMessage.find("警告") != std::string::npos || cleanMessage.find("WARNING") != std::string::npos || 
+               cleanMessage.find("★") != std::string::npos) {
+        type = LogType::Warning;
     }
-    logMessages_.push_back(fullMessage);
-    logTimestamps_.push_back(elapsedSeconds);
+
+    LogEntry entry;
+    entry.fullMessage = fullMessage;
+    entry.timestamp = elapsedSeconds;
+    entry.type = type;
+
+    // バッファへの蓄積（リングバッファ処理。dequeにより先頭削除は O(1)）
+    if (logEntries_.size() >= kMaxLogLines) {
+        logEntries_.pop_front();
+    }
+    logEntries_.push_back(entry);
 
     if (logStream_.is_open()) {
         logStream_ << fullMessage << std::endl;
@@ -139,13 +151,17 @@ void Log::Write(std::ostream& os, const std::wstring& message) {
     Write(os, ConvertString(message));
 }
 
-const std::vector<std::string>& Log::GetLogMessages() {
-    return logMessages_;
+std::vector<std::string> Log::GetLogMessages() {
+    std::vector<std::string> messages;
+    messages.reserve(logEntries_.size());
+    for (const auto& entry : logEntries_) {
+        messages.push_back(entry.fullMessage);
+    }
+    return messages;
 }
 
 void Log::ClearLog() {
-    logMessages_.clear();
-    logTimestamps_.clear();
+    logEntries_.clear();
 }
 
 void Log::DrawConsoleWindow(float maxTimestamp) {
@@ -242,9 +258,9 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
         // 最も近いログ行の検索
         size_t nearestIdx = static_cast<size_t>(-1);
         float minDiff = 10000.0f;
-        if (!logTimestamps_.empty()) {
-            for (size_t i = 0; i < logTimestamps_.size(); ++i) {
-                float diff = std::abs(currentTime - logTimestamps_[i]);
+        if (!logEntries_.empty()) {
+            for (size_t i = 0; i < logEntries_.size(); ++i) {
+                float diff = std::abs(currentTime - logEntries_[i].timestamp);
                 if (diff < minDiff) {
                     minDiff = diff;
                     nearestIdx = i;
@@ -257,14 +273,14 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
         bool isOverlapped = (nearestIdx != static_cast<size_t>(-1) && (isPaused || minDiff <= kOverlapThreshold));
 
         // 仮想タイマー行の挿入位置決定
-        // logTimestamps_[i] <= currentTime < logTimestamps_[i+1] となる i
+        // logEntries_[i].timestamp <= currentTime < logEntries_[i+1].timestamp となる i
         size_t insertAfterIdx = static_cast<size_t>(-1);
-        if (!logTimestamps_.empty()) {
-            if (currentTime < logTimestamps_[0]) {
+        if (!logEntries_.empty()) {
+            if (currentTime < logEntries_[0].timestamp) {
                 insertAfterIdx = static_cast<size_t>(-2); // 最初のログの前に挿入する特殊フラグ
             } else {
-                for (size_t i = 0; i < logTimestamps_.size(); ++i) {
-                    if (logTimestamps_[i] <= currentTime) {
+                for (size_t i = 0; i < logEntries_.size(); ++i) {
+                    if (logEntries_[i].timestamp <= currentTime) {
                         insertAfterIdx = i;
                     } else {
                         break;
@@ -284,8 +300,8 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
         bool drawnStartBoundary = false;
         bool drawnEndBoundary = false;
 
-        for (size_t i = 0; i < logMessages_.size(); ++i) {
-            const auto& log = logMessages_[i];
+        for (size_t i = 0; i < logEntries_.size(); ++i) {
+            const auto& entry = logEntries_[i];
             
             // リプレイジャンプ（シーク）の可否を判定
             float earliestReplayTime = latestReplayTime - kMaxReplayTimeRange;
@@ -295,11 +311,11 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
             // リプレイデータが存在し、かつログタイムスタンプが有効な過去のリプレイ範囲内であること
             // (※ゲームを止めた後のログや、一時停止中の新規ログ (time >= latestReplayTime) はシーク不可とする)
             bool canSeek = (latestReplayTime >= 0.0f && 
-                            logTimestamps_[i] >= earliestReplayTime && 
-                            logTimestamps_[i] <= latestReplayTime);
+                            entry.timestamp >= earliestReplayTime && 
+                            entry.timestamp <= latestReplayTime);
 
             // リプレイ開始境界線の挿入
-            if (isPaused && !drawnStartBoundary && logTimestamps_[i] >= earliestReplayTime) {
+            if (isPaused && !drawnStartBoundary && entry.timestamp >= earliestReplayTime) {
                 std::string boundaryStr = "--> ------ 【リプレイ開始地点: " + FormatPlainGameTimestamp(earliestReplayTime) + "】 ------";
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 1.0f, 1.0f));
                 ImGui::TextUnformatted(boundaryStr.c_str());
@@ -314,7 +330,7 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
             }
 
             // リプレイ終了境界線の挿入
-            if (isPaused && !drawnEndBoundary && logTimestamps_[i] > latestReplayTime) {
+            if (isPaused && !drawnEndBoundary && entry.timestamp > latestReplayTime) {
                 std::string boundaryStr = "--> ------ 【リプレイ終了地点: " + FormatPlainGameTimestamp(latestReplayTime) + "】 ------";
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 1.0f, 1.0f));
                 ImGui::TextUnformatted(boundaryStr.c_str());
@@ -339,17 +355,13 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
             if (latestReplayTime >= 0.0f) {
                 shouldFade = !canSeek;
             } else {
-                shouldFade = (currentTime - logTimestamps_[i] > kMaxReplayTimeRange);
+                shouldFade = (currentTime - entry.timestamp > kMaxReplayTimeRange);
             }
 
-            // 1. ログ内容に応じた基本色の決定
-            if (log.find("error") != std::string::npos || log.find("failed") != std::string::npos || 
-                log.find("Error") != std::string::npos || log.find("エラー") != std::string::npos || 
-                log.find("ERROR") != std::string::npos) {
+            // 1. 事前に分類されたログタイプに応じた基本色の決定（find の毎フレーム実行を完全に排除！）
+            if (entry.type == LogType::Error) {
                 color = ImVec4(1.0f, 0.3f, 0.3f, 1.0f); // エラー：マイルドレッド
-            } else if (log.find("warning") != std::string::npos || log.find("Warning") != std::string::npos || 
-                       log.find("警告") != std::string::npos || log.find("WARNING") != std::string::npos || 
-                       log.find("★") != std::string::npos) {
+            } else if (entry.type == LogType::Warning) {
                 color = ImVec4(1.0f, 0.8f, 0.2f, 1.0f); // 警告：マイルドイエロー
             } else {
                 color = ImVec4(0.4f, 1.0f, 0.4f, 1.0f); // 一般・システム：マイルドグリーン
@@ -366,7 +378,7 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
             
             if (isCurrentActive) {
                 // 現在被っている行には目立つ矢印マーカーを付加して描画
-                std::string markedLog = "--> " + log;
+                std::string markedLog = "--> " + entry.fullMessage;
                 ImGui::TextUnformatted(markedLog.c_str());
 
                 // 被ったログ位置が前フレームから変化した瞬間に、画面中央に自動スクロール
@@ -376,7 +388,7 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
                     lastActiveIndex = nearestIdx;
                 }
             } else {
-                ImGui::TextUnformatted(log.c_str());
+                ImGui::TextUnformatted(entry.fullMessage.c_str());
             }
 
             // 各実ログ行が左ダブルクリックされた際、リプレイ映像をそのログの出力時間に自動ジャンプさせる
@@ -386,7 +398,7 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
                 } else {
                     ImGui::SetTooltip("Double-click to seek Replay to this log's time\n[左ダブルクリックでリプレイをこのログの時間にジャンプ]");
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        ReplaySystem::GetInstance()->SeekToTimestamp(logTimestamps_[i]);
+                        ReplaySystem::GetInstance()->SeekToTimestamp(entry.timestamp);
                     }
                 }
             }
@@ -428,9 +440,9 @@ void Log::DrawConsoleWindow(float maxTimestamp) {
         // 通常動作中（maxTimestamp < 0.0f）か、ポーズ中であってもシークProgressがほぼ最新（1.0f）かつフィルターOFFの場合
         bool isAtLatestSeek = (ReplaySystem::GetInstance()->GetSeekPos() >= 0.99f);
         bool shouldScroll = (maxTimestamp < 0.0f) || (isPaused && isAtLatestSeek && !filterReplayRangeOnly);
-        if (shouldScroll && !isOverlapped && logMessages_.size() > lastLogSize_) {
+        if (shouldScroll && !isOverlapped && logEntries_.size() > lastLogSize_) {
             ImGui::SetScrollHereY(1.0f);
-            lastLogSize_ = logMessages_.size();
+            lastLogSize_ = logEntries_.size();
         }
         
         ImGui::EndChild();

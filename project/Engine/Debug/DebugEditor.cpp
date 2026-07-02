@@ -7,6 +7,8 @@
 #include "Engine/Debug/SceneHierarchy.h"
 #include "Engine/Debug/IGameObject.h"
 #include "Engine/Zuizui.h"
+#include "App/Scene/Core/SceneManager.h"
+#include "App/Scene/Game/GameScene.h"
 #include "Engine/Base/Log/Log.h"
 #include "externals/imgui/imgui.h"
 #include "Engine/Base/BaseResource.h"
@@ -335,6 +337,14 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             ImGui::MenuItem("Console", nullptr, Log::GetShowConsolePtr());
             ImGui::MenuItem("Performance Monitor", nullptr, &showPerfMonitor_);
             ImGui::MenuItem("Replay View", nullptr, &showReplayView_);
+            
+            GameScene* gameScene = dynamic_cast<GameScene*>(SceneManager::GetInstance()->GetCurrentScene());
+            if (gameScene) {
+                ImGui::Separator();
+                ImGui::MenuItem("Stage Editor", nullptr, gameScene->GetShowStageEditorPtr());
+                ImGui::MenuItem("Route Editor", nullptr, gameScene->GetShowRouteEditorPtr());
+            }
+
             ImGui::EndMenu();
         }
         

@@ -123,23 +123,18 @@ void DxCommon::FrameEnd(int targetFps) {
 
 	if (targetFps <= 0) { targetFps = 60; }
 
-	// 目標フレーム時間（例: 16.666ms）
+	// 目標フレーム時間（60FPS ＝ 16666マイクロ秒）
 	const microseconds targetFrameTime(1000000 / targetFps);
 
-	// フレーム終了時刻
-	auto endTime = steady_clock::now();
-
-	// 経過時間を計算
-	auto elapsed = duration_cast<microseconds>(endTime - frameStartTime_);
-
-	// deltaTime_を秒単位で更新（実測）
-	deltaTime_ = static_cast<float>(elapsed.count()) / 1'000'000.0f;
-
-	// もし目標より短ければスリープして調整
-	if (elapsed < targetFrameTime) {
-		std::this_thread::sleep_for(targetFrameTime - elapsed);
-		deltaTime_ = static_cast<float>(targetFrameTime.count()) / 1'000'000.0f;
+	// 60FPS以上出ている（＝フレーム時間が16.66msより短い）場合のみ、空ループで精密に待機してクランプする
+	while (duration_cast<microseconds>(steady_clock::now() - frameStartTime_) < targetFrameTime) {
+		// スリープや yield を使わず、純粋にループを回して待つ（スレッドの休止遅延による30FPS低下を防ぐため）
 	}
+
+	// 待機完了後の経過時間で deltaTime_ を更新
+	auto finalTime = steady_clock::now();
+	auto finalElapsed = duration_cast<microseconds>(finalTime - frameStartTime_);
+	deltaTime_ = static_cast<float>(finalElapsed.count()) / 1'000'000.0f;
 }
 
 void DxCommon::InitializeViewport(int32_t width, int32_t height) {
