@@ -23,6 +23,8 @@ public:
 
     // GameViewWindow が表示されているかどうかを取得（App.cppのバッチング制御用）
     bool IsGameViewVisible() const { return isGameViewVisible_; }
+    bool IsReplayViewVisible() const { return isReplayViewVisible_; }
+    bool IsReplayEnabled() const { return enableReplay_; }
 
 private:
     void DrawMenuBar(HWND hwnd);
@@ -37,6 +39,8 @@ private:
     bool showPerfMonitor_ = true;
     bool showReplayView_ = true;
     bool isGameViewVisible_ = false;
+    bool isReplayViewVisible_ = false;
+    bool enableReplay_ = true;
 
     // ウィンドウ状態管理のメンバ変数
     bool isFullscreen_ = false;

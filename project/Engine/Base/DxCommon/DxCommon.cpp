@@ -2,6 +2,8 @@
 #include "Engine/Base/Utils/DxUtils.h"
 #include "Engine/Base/Log/Log.h"
 #include "Engine/Base/Utils/StringUtility.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
 #include <iostream>
 #include <thread>
 #include <format>
@@ -164,8 +166,27 @@ void DxCommon::EnableDebugLayer() {
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf())))) {
 		// デバッグレイヤーを有効にする
 		debugController->EnableDebugLayer();
-		// コンプライアンスのチェックを行う
-		debugController->SetEnableGPUBasedValidation(TRUE);
+
+		// 起動引数に "-gpu-validation" が指定されているかチェック
+		bool enableGpuVal = false;
+		int numArgs = 0;
+		LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &numArgs);
+		if (argv) {
+			for (int i = 0; i < numArgs; ++i) {
+				if (wcscmp(argv[i], L"-gpu-validation") == 0) {
+					enableGpuVal = true;
+					break;
+				}
+			}
+			LocalFree(argv);
+		}
+
+		// コンプライアンスのチェック（指定時のみ高負荷検証を有効化）
+		debugController->SetEnableGPUBasedValidation(enableGpuVal ? TRUE : FALSE);
+
+		if (enableGpuVal) {
+			Log::Write(L" ├─ 【警告】 GPU-Based Validation を有効化して起動しました（高負荷検証モード）。");
+		}
 	}
 #endif
 }

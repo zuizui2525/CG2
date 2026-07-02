@@ -24,6 +24,17 @@ public:
     void AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera);
     void SetActiveCamera(const std::string& name);
     BaseCamera* GetActiveCamera() { return activeCamera_; }
+    std::string GetActiveCameraName() const {
+        for (const auto& [name, camera] : cameras_) {
+            if (camera.get() == activeCamera_) {
+                return name;
+            }
+        }
+        return "";
+    }
+    bool HasCamera(const std::string& name) const {
+        return cameras_.find(name) != cameras_.end();
+    }
 
     // --- 3D行列ゲッター (アクティブカメラから取得) ---
     const Matrix4x4& GetViewMatrix3D() const {

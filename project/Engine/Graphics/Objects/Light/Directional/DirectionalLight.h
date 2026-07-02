@@ -35,6 +35,16 @@ public:
     // 実体の参照を返す
     DirectionalLight& GetLightData() { return data_; }
 
+    // デバッグ・エディット用トランスフォーム
+    Vector3& GetPosition() { return position_; }
+    void SetPosition(const Vector3& pos) { position_ = pos; }
+    Vector3& GetRotate() { return rotation_; }
+    void SetRotate(const Vector3& rot) { rotation_ = rot; }
+    Vector3 GetScale() const { return {1.0f, 1.0f, 1.0f}; } // ギズモ互換用
+    void SetScale(const Vector3& scale) { (void)scale; }
+
 private:
     DirectionalLight data_ = { {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, 1.0f };
+    Vector3 position_ = { 0.0f, 10.0f, 0.0f };
+    Vector3 rotation_ = { 0.0f, 0.0f, 0.0f };
 };

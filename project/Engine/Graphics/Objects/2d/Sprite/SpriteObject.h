@@ -19,7 +19,7 @@ public:
     void Initialize(int lightingMode = 0);
 
     // 更新処理
-    void Update();
+    void Update() override;
 
     // 描画処理
     void Draw(const std::string& textureKey, bool draw = true);

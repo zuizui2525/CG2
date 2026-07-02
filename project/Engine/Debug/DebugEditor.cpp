@@ -10,7 +10,6 @@
 #include "Engine/Base/Log/Log.h"
 #include "externals/imgui/imgui.h"
 #include "Engine/Base/BaseResource.h"
-#include "Engine/Input/Input.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 
 DebugEditor::DebugEditor()
@@ -33,9 +32,8 @@ void DebugEditor::Initialize() {
 }
 
 void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
-
-    // リプレイ自動送り再生の更新
-    ReplaySystem::GetInstance()->UpdateReplayPlay(ImGui::GetIO().DeltaTime);
+    // 描画開始時に可視性フラグを初期化
+    isReplayViewVisible_ = false;
 
     HWND hwnd = Zuizui::GetInstance()->GetWindow()->GetHWND();
 
@@ -80,8 +78,16 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
 
             // 選択状態
             bool isSelected = (obj == selected);
-            if (ImGui::Selectable(obj->GetName().c_str(), isSelected)) {
+            ImGui::Selectable(obj->GetName().c_str(), isSelected);
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                 SceneHierarchy::GetInstance()->SetSelected(obj);
+                gameViewWindow_->SetGizmoOperation(7); // TRANSLATE
+            } else if (ImGui::IsItemClicked(ImGuiMouseButton_Middle)) {
+                SceneHierarchy::GetInstance()->SetSelected(obj);
+                gameViewWindow_->SetGizmoOperation(120); // ROTATE
+            } else if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                SceneHierarchy::GetInstance()->SetSelected(obj);
+                gameViewWindow_->SetGizmoOperation(896); // SCALE
             }
         }
     }
@@ -109,9 +115,14 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
     }
     ImGui::End();
 
-    // Replay View (表示フラグ showReplayView_ に連動)
+    // Replay View (表示フラグ showReplayView_ に连動)
     if (showReplayView_) {
         if (ImGui::Begin("Replay View", &showReplayView_)) {
+            isReplayViewVisible_ = true;
+
+            // リプレイ自動送り再生の更新（可視な場合のみ実行）
+            ReplaySystem::GetInstance()->UpdateReplayPlay(ImGui::GetIO().DeltaTime);
+
             bool isPaused = ReplaySystem::GetInstance()->IsPaused();
 
             if (!isPaused) {
@@ -464,6 +475,15 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             if (ImGui::Checkbox("Click Pause", &enable)) {
                 gameViewWindow_->SetClickPauseEnabled(enable);
             }
+
+            ImGui::SameLine();
+            bool showGizmo = gameViewWindow_->IsShowGizmo();
+            if (ImGui::Checkbox("Use Gizmo", &showGizmo)) {
+                gameViewWindow_->SetShowGizmo(showGizmo);
+            }
+
+            ImGui::SameLine();
+            ImGui::Checkbox("Enable Replay", &enableReplay_);
         }
 
         ImGui::EndMainMenuBar();

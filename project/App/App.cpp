@@ -4,6 +4,10 @@
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
+#include "Engine/Debug/SceneHierarchy.h"
+#include "Engine/Graphics/Objects/3d/Object3D.h"
+#include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
+#include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
 #include "Engine/Base/Log/Log.h"
 #include <psapi.h> // メモリ取得用（追加）
@@ -142,42 +146,96 @@ void App::Run() {
     }
 #endif
 
+    // ポーズのON/OFFに応じてカメラを自動で切り替える
+    static bool sWasPaused = false;
+    static std::string sPrevActiveCamera = "";
+
+    if (isPaused != sWasPaused) {
+        if (isPaused) {
+            // ポーズになった瞬間に、現在アクティブなカメラの名前を記憶し、"Editor" をアクティブにする
+            sPrevActiveCamera = cameraMgr_->GetActiveCameraName();
+            if (cameraMgr_->HasCamera("Editor")) {
+                cameraMgr_->SetActiveCamera("Editor");
+                if (auto* dc = dynamic_cast<DebugCamera*>(cameraMgr_->GetActiveCamera())) {
+                    dc->SetActive(true);
+                }
+            }
+        } else {
+            // ポーズが解除された瞬間に、記憶していたカメラに戻す
+            if (!sPrevActiveCamera.empty() && cameraMgr_->HasCamera(sPrevActiveCamera)) {
+                if (auto* dc = dynamic_cast<DebugCamera*>(cameraMgr_->GetActiveCamera())) {
+                    dc->SetActive(false);
+                }
+                cameraMgr_->SetActiveCamera(sPrevActiveCamera);
+            }
+        }
+        sWasPaused = isPaused;
+    }
+
     // --- 更新 ---
     input_->Update();
-    cameraMgr_->Update();
-    lightMgr_->Update();
     
-
     if (!isPaused) {
+        cameraMgr_->Update();
+        lightMgr_->Update();
         Log::Update(deltaTime);
         SceneManager::GetInstance()->Update();
+    } else {
+        // ポーズ中の更新処理：
+        // Game View が表示されている場合のみ、オブジェクト編集やカメラ見回しを反映させる
+        if (isGameViewVisible) {
+            cameraMgr_->Update();
+            lightMgr_->Update();
+
+            // もしアクティブカメラが DebugCamera であれば、ポーズ中も入力操作で飛び回れるように更新する
+            BaseCamera* activeCam = cameraMgr_->GetActiveCamera();
+            if (auto* dc = dynamic_cast<DebugCamera*>(activeCam)) {
+                dc->Update(input_.get());
+            }
+
+            // シーン内のすべてのオブジェクトを更新して行列再計算（位置・色変更）を即座に反映させる
+            const auto& objects = SceneHierarchy::GetInstance()->GetObjects();
+            for (auto* obj : objects) {
+                if (obj) {
+                    obj->Update();
+                }
+            }
+        }
     }
 
 
     // --- 描画 ---
     engine_->BeginFrame();
 
-    // 1. ポストプロセス（RenderTexture）への描画パス
-    postProcess_->PreDraw();
+    // ポーズ中かつ Game View が非表示の場合は、本編 3D レンダリングを完全にスキップして負荷を最小にする
+    bool shouldDraw = !(isPaused && !isGameViewVisible);
 
-    SceneManager::GetInstance()->Draw();
+    if (shouldDraw) {
+        // 1. ポストプロセス（RenderTexture）への描画パス
+        postProcess_->PreDraw();
 
+        SceneManager::GetInstance()->Draw();
 
+        postProcess_->PostDraw();
 
-    postProcess_->PostDraw();
-
-    // 2. エフェクト適用およびスワップチェーンへのコピー処理
-    if (isGameViewVisible) {
-        // Game Viewが表示されている場合、エフェクト適用のみを行い、スワップチェーンへのコピーは不要
-        postProcess_->ProcessEffects();
-    } else {
-        // Game Viewが表示されていない場合、通常どおりエフェクト適用＆スワップチェーン全体への描画コピーを行う
-        postProcess_->Draw();
+        // 2. エフェクト適用およびスワップチェーンへのコピー処理
+        if (isGameViewVisible) {
+            // Game Viewが表示されている場合、エフェクト適用のみを行い、スワップチェーンへのコピーは不要
+            postProcess_->ProcessEffects();
+        } else {
+            // Game Viewが表示されていない場合、通常どおりエフェクト適用＆スワップチェーン全体への描画コピーを行う
+            postProcess_->Draw();
+        }
     }
 
 #ifdef _USEIMGUI
-    // 一時停止中でない場合のみリプレイバッファを記録
-    if (!isPaused) {
+    // 一時停止中でなく、かつリプレイ機能が有効な場合のみリプレイバッファを記録
+    bool isReplayEnabled = true;
+    if (auto debugEditor = engine_->GetDebugEditor()) {
+        isReplayEnabled = debugEditor->IsReplayEnabled();
+    }
+
+    if (!isPaused && isReplayEnabled) {
         ReplaySystem::GetInstance()->RecordFrame(
             engine_->GetDxCommon()->GetCommandList(),
             postProcess_->GetFinalResource(),
@@ -186,7 +244,6 @@ void App::Run() {
             currentMem
         );
     }
-
 #endif
 
     engine_->EndFrame();

@@ -19,6 +19,9 @@ public:
     // インスペクター描画用（各派生オブジェクトでデバッグUIコードを呼び出す）
     virtual void DrawInspector() = 0;
 
+    // 更新処理の共通インターフェース（ポーズ中エディットなどでの一括更新用）
+    virtual void Update() {}
+
 protected:
     // 派生クラスの Initialize() で呼び出す初期化ヘルパー
     void InitializeGameObject(const std::string& defaultName);

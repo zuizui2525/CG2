@@ -1,4 +1,5 @@
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "Engine/Zuizui.h"
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Base/Utils/DxUtils.h"
@@ -29,6 +30,13 @@ void CameraManager::Initialize() {
     resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
     Log::Write(L" ├─ 【カメラ用バッファ初期化】 GPU転送用カメラ定数バッファの確保・マッピングに成功しました。");
+
+    // --- 3. ポーズ専用 Editor カメラの自動生成と登録 ---
+    auto editorCam = std::make_shared<DebugCamera>();
+    editorCam->Initialize();
+    editorCam->SetPosition({ 0.0f, 10.0f, -20.0f });
+    editorCam->SetRotation({ 0.4f, 0.0f, 0.0f });
+    AddCamera("Editor", editorCam);
 }
 
 void CameraManager::Update() {
@@ -71,11 +79,23 @@ void CameraManager::ImGuiControl() {
 }
 
 void CameraManager::Clear() {
-    if (!cameras_.empty()) {
+    // "Editor" カメラを一時的に退避させる
+    std::shared_ptr<BaseCamera> editorCam = nullptr;
+    auto it = cameras_.find("Editor");
+    if (it != cameras_.end()) {
+        editorCam = it->second;
+    }
+
+    if (cameras_.size() > (editorCam ? 1 : 0)) {
         Log::Write(L" ├─ 【カメラシステムクリア】 登録されていたすべてのカメラリソースを破棄しました。");
     }
     cameras_.clear();
     activeCamera_ = nullptr;
+
+    // 退避させた "Editor" を再格納して温存する
+    if (editorCam) {
+        cameras_["Editor"] = editorCam;
+    }
 }
 
 void CameraManager::AddCamera(const std::string& name, std::shared_ptr<BaseCamera> camera) {
@@ -85,8 +105,11 @@ void CameraManager::AddCamera(const std::string& name, std::shared_ptr<BaseCamer
     Log::Write(std::format(L" ├─ 【カメラ登録成功】 名前:「{}」 | 初期座標: ({:.2f}, {:.2f}, {:.2f})", 
         ConvertString(name), pos.x, pos.y, pos.z));
  
-    // 最初の1つ目が登録されたら、自動的にそれをアクティブにする
-    if (!activeCamera_) {
+    // 最初の登録、または仮に "Editor" が設定されている状態から新しいゲームカメラが登録された場合は上書きする
+    bool isEditor = (name == "Editor");
+    std::string currentActiveName = GetActiveCameraName();
+
+    if (!activeCamera_ || (currentActiveName == "Editor" && !isEditor)) {
         activeCamera_ = camera.get();
         Log::Write(std::format(L" ├─ 【アクティブカメラ設定】 「{}」カメラを起動用カメラに設定しました。", ConvertString(name)));
     }

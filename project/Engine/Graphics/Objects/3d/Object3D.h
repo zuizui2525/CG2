@@ -11,6 +11,7 @@ class Zuizui;
 class Object3D : public Base3D, public IGameObject {
 public:
     virtual void Initialize(int lightingMode = 1);
+    void Update() override {}
 
     /// @brief WVP(World, View, Projection)行列の定数バッファを取得します
     ID3D12Resource* GetWVPResource() const { return wvpResource_.Get(); }

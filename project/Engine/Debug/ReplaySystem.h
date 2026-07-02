@@ -87,7 +87,7 @@ private:
     
     // マジックナンバー排除用の定数
     static constexpr int32_t kMaxFrames = 1800; // 記録する最大フレーム数 (30fps * 60秒 = 1800)
-    static constexpr int32_t kRecordInterval = 2; // 2フレームに1回記録 (30fps)
+    static constexpr int32_t kRecordInterval = 4; // 4フレームに1回記録 (15fps)
     static constexpr UINT kReservedSrvIndexReplayStart = 200; // Replay用SRVの開始スロットインデックス
     static constexpr int32_t kShrinkWidth = 640;  // 縮小録画時の幅
     static constexpr int32_t kShrinkHeight = 360; // 縮小録画時の高さ
