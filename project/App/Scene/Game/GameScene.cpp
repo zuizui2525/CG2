@@ -430,6 +430,11 @@ void GameScene::Update() {
         player_->UpdateWeapon(mainCamera_->GetViewMatrix());
     }
 
+    // 雨のエフェクトの位置をメインカメラの位置に追従させる（走行中も常に自分の周りに雨を降らせ、エディタカメラの移動には影響されないようにする）
+    if (auto rainEffect = EffectManager::GetInstance()->GetEffect(kRainEffectName)) {
+        rainEffect->GetTransform().translate = mainCamera_->GetPosition();
+    }
+
     // プレイヤーの更新 (自動走行位置同期後に呼び出すことで、弾の発射などが連動する)
     player_->Update();
 

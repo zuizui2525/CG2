@@ -50,6 +50,7 @@ public:
 
     virtual void Initialize(int lightingMode = 0);
     virtual void Update();
+    void UpdateMatrices(); // ポーズ中に行列再計算のみを行うメソッド
     virtual void Draw(const std::string& textureKey = "white", bool draw = true) = 0;
 
     void ImGuiControl(const std::string& name);

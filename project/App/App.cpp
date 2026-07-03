@@ -206,6 +206,9 @@ void App::Run() {
                     obj->Update();
                 }
             }
+
+            // エフェクトの行列（WVP）もポーズ中に再計算して、デバッグカメラの移動を反映させる
+            EffectManager::GetInstance()->UpdateMatrices();
         }
     }
 

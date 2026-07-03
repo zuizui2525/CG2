@@ -32,6 +32,12 @@ void EffectManager::Update() {
     }
 }
 
+void EffectManager::UpdateMatrices() {
+    for (auto& pair : effectMap_) {
+        pair.second->UpdateMatrices();
+    }
+}
+
 void EffectManager::Draw() {
     for (auto& pair : effectMap_) {
         const std::string& texName = pair.second->GetSetting().textureName;

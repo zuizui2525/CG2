@@ -81,18 +81,15 @@ void SceneManager::Draw() {
     // ポーズ専用 "Editor" カメラが作動中の場合、他のカメラやライトの位置を 3D 可視化する
     auto cameraMgr = CameraResource::GetCameraManager();
     if (cameraMgr && cameraMgr->GetActiveCameraName() == "Editor") {
-        static std::unique_ptr<PyramidObject> dbgCameraModel = nullptr;
-        static std::unique_ptr<SphereObject> dbgLightModel = nullptr;
-
-        if (!dbgCameraModel) {
-            dbgCameraModel = std::make_unique<PyramidObject>();
-            dbgCameraModel->Initialize(0); // ライティング無効
-            dbgCameraModel->GetMaterialData()->color = { 0.2f, 0.6f, 1.0f, 1.0f }; // 青系の色
+        if (!dbgCameraModel_) {
+            dbgCameraModel_ = std::make_unique<PyramidObject>();
+            dbgCameraModel_->Initialize(0); // ライティング無効
+            dbgCameraModel_->GetMaterialData()->color = { 0.2f, 0.6f, 1.0f, 1.0f }; // 青系の色
         }
-        if (!dbgLightModel) {
-            dbgLightModel = std::make_unique<SphereObject>();
-            dbgLightModel->Initialize(0); // ライティング無効
-            dbgLightModel->GetMaterialData()->color = { 1.0f, 0.9f, 0.2f, 1.0f }; // 黄色
+        if (!dbgLightModel_) {
+            dbgLightModel_ = std::make_unique<SphereObject>();
+            dbgLightModel_->Initialize(0); // ライティング無効
+            dbgLightModel_->GetMaterialData()->color = { 1.0f, 0.9f, 0.2f, 1.0f }; // 黄色
         }
 
         const auto& objects = SceneHierarchy::GetInstance()->GetObjects();
@@ -102,18 +99,18 @@ void SceneManager::Draw() {
                 if (cam == cameraMgr->GetActiveCamera()) continue;
 
                 // カメラの位置に四角錐モデルを描画
-                dbgCameraModel->SetPosition(cam->GetPosition());
-                dbgCameraModel->SetRotate(cam->GetRotation());
-                dbgCameraModel->SetScale({ 1.0f, 1.0f, 1.0f });
-                dbgCameraModel->Update();
-                dbgCameraModel->Draw("white");
+                dbgCameraModel_->SetPosition(cam->GetPosition());
+                dbgCameraModel_->SetRotate(cam->GetRotation());
+                dbgCameraModel_->SetScale({ 1.0f, 1.0f, 1.0f });
+                dbgCameraModel_->Update();
+                dbgCameraModel_->Draw("white");
             } else if (auto* light = dynamic_cast<DirectionalLightObject*>(obj)) {
                 // ライトの位置に球体モデルを描画
-                dbgLightModel->SetPosition(light->GetPosition());
-                dbgLightModel->SetRotate(light->GetRotate());
-                dbgLightModel->SetScale({ 1.0f, 1.0f, 1.0f });
-                dbgLightModel->Update();
-                dbgLightModel->Draw("white");
+                dbgLightModel_->SetPosition(light->GetPosition());
+                dbgLightModel_->SetRotate(light->GetRotate());
+                dbgLightModel_->SetScale({ 1.0f, 1.0f, 1.0f });
+                dbgLightModel_->Update();
+                dbgLightModel_->Draw("white");
             }
         }
     }

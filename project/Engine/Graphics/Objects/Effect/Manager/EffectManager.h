@@ -12,6 +12,7 @@ public:
     void Initialize();
     void Finalize();
     void Update();
+    void UpdateMatrices(); // ポーズ中の行列再計算用
     void Draw();
 
     void ImGuiControl(const std::string& name);

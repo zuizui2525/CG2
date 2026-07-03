@@ -3,6 +3,8 @@
 #include <string>
 #include "App/Scene/Core/IScene.h"
 #include "App/Scene/Core/AbstractSceneFactory.h"
+#include "Engine/Graphics/Objects/3d/Pyramid/PyramidObject.h"
+#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 
 class PostProcess;
 
@@ -42,7 +44,11 @@ public:
         sceneFactory_ = factory;
     }
 
-    void ClearCurrentScene() { currentScene_.reset(); }
+    void ClearCurrentScene() { 
+        currentScene_.reset(); 
+        dbgCameraModel_.reset();
+        dbgLightModel_.reset();
+    }
     const std::string& GetCurrentSceneName() const { return currentSceneName_; }
     IScene* GetCurrentScene() const { return currentScene_.get(); }
 
@@ -61,4 +67,8 @@ private:
     std::string nextSceneName_ = "";
 
     PostProcess* postProcess_ = nullptr;
+
+    // デバッグ用表示モデル（リーク対策としてメンバ変数で管理）
+    std::unique_ptr<PyramidObject> dbgCameraModel_ = nullptr;
+    std::unique_ptr<SphereObject> dbgLightModel_ = nullptr;
 };

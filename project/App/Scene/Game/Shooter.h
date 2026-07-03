@@ -142,7 +142,7 @@ protected:
                     ringParam.colorOverride = kPurpleRingColor;
                 }
 
-                EffectManager::GetInstance()->PlayEffect2D(kRingEffectName, ringParam);
+                EffectManager::GetInstance()->PlayEffect3D(kRingEffectName, ringParam);
             }
 
             burnTimer_--;
@@ -156,7 +156,7 @@ protected:
                 EffectPlayParam burnParam;
                 burnParam.position = firePos;
                 burnParam.scale = kBurnEffectScale;
-                EffectManager::GetInstance()->PlayEffect2D(burnEffectName_, burnParam);
+                EffectManager::GetInstance()->PlayEffect3D(burnEffectName_, burnParam);
             }
         }
     }

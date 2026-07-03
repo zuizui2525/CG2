@@ -47,12 +47,13 @@ void Zuizui::Finalize() {
     ReplaySystem::GetInstance()->Finalize();
     imGui->Shutdown();
 #endif
-    // COMの終了処理
-    CoUninitialize();
-
-    // 明示的に開放
+    // 明示的に開放 (COM オブジェクトをすべて先に破棄する)
     delete instance;
     instance = nullptr;
+
+    // COMの終了処理 (すべての COM オブジェクト破棄後に呼ぶ)
+    CoUninitialize();
+
     Log::Write(L"========================================= [エンジン終了処理完了] =========================================");
 }
 

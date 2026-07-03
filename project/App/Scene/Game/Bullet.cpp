@@ -27,7 +27,7 @@ void Bullet::Update() {
     // 炎エフェクトを毎フレーム再生して弾の軌跡を作る
     EffectPlayParam fireParam;
     fireParam.position = cube_->GetPosition();
-    EffectManager::GetInstance()->PlayEffect2D(effectName_, fireParam);
+    EffectManager::GetInstance()->PlayEffect3D(effectName_, fireParam);
 
     // 寿命タイマーによる消滅判定
     lifeTimer_++;

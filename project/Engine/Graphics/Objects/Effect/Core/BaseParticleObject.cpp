@@ -398,3 +398,49 @@ std::vector<Particle> BaseParticleObject::Emit(const Emitter& emitter, std::mt19
 void BaseParticleObject::ImGuiControl(const std::string& name) {
     // 省略 (必要に応じて後で実装)
 }
+
+void BaseParticleObject::UpdateMatrices() {
+    numInstance_ = 0;
+
+    auto cameraMgr = CameraResource::GetCameraManager();
+    Matrix4x4 managerWorldMatrix = Math::MakeAffineMatrix(emitter_.transform.scale, emitter_.transform.rotate, emitter_.transform.translate);
+
+    Matrix4x4 billBoardMatrix = Math::MakeIdentity();
+    if (setting_.isBillboard) {
+        billBoardMatrix = Math::Inverse(cameraMgr->GetViewMatrix3D());
+        billBoardMatrix.m[3][0] = 0.0f;
+        billBoardMatrix.m[3][1] = 0.0f;
+        billBoardMatrix.m[3][2] = 0.0f;
+    }
+
+    for (size_t i = 0; i < particles_.size(); ++i) {
+        auto& p = particles_[i];
+
+        Vector3 currentScale = p.transform.scale;
+        Vector3 currentRotate = p.transform.rotate;
+
+        Matrix4x4 particleWorldMatrix;
+        if (setting_.isBillboard) {
+            Matrix4x4 scaleMatrix = Math::MakeScaleMatrix(currentScale);
+            Matrix4x4 rotateMatrix = Math::MakeRotateMatrix(currentRotate.x, currentRotate.y, currentRotate.z);
+            Matrix4x4 translateMatrix = Math::MakeTranslateMatrix(p.transform.translate);
+            
+            particleWorldMatrix = Math::Multiply(scaleMatrix, rotateMatrix);
+            particleWorldMatrix = Math::Multiply(particleWorldMatrix, billBoardMatrix);
+            particleWorldMatrix = Math::Multiply(particleWorldMatrix, translateMatrix);
+        } else {
+            particleWorldMatrix = Math::MakeAffineMatrix(currentScale, currentRotate, p.transform.translate);
+        }
+
+        particleWorldMatrix = Math::Multiply(particleWorldMatrix, managerWorldMatrix);
+
+        Matrix4x4 worldViewProjection = Math::Multiply(particleWorldMatrix, Math::Multiply(cameraMgr->GetViewMatrix3D(), cameraMgr->GetProjectionMatrix3D()));
+
+        if (numInstance_ < numMaxInstance_) {
+            instanceData_[numInstance_].world = particleWorldMatrix;
+            instanceData_[numInstance_].WVP = worldViewProjection;
+            instanceData_[numInstance_].color = p.color;
+            numInstance_++;
+        }
+    }
+}
