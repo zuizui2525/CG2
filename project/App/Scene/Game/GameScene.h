@@ -12,10 +12,10 @@ class PostProcess;
 #include "Engine/Graphics/Objects/Camera/Debug/DebugCamera.h"
 #include "App/Scene/Game/Player.h"
 #include "App/Scene/Game/Enemy.h"
-#include "Engine/Graphics/Objects/3d/Line/LineObject.h"
+#include "App/Scene/Game/Route.h"
+#include "App/Scene/Game/StageEditor.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
 #include "Engine/Graphics/Objects/3d/Square/SquareObject.h"
-#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
 #include "Engine/Graphics/Objects/2d/Sprite/SpriteObject.h"
 
 /**
@@ -75,32 +75,19 @@ private:
     std::unique_ptr<Player> player_;                // プレイヤーオブジェクト
     std::vector<std::unique_ptr<Enemy>> enemies_;   // 複数敵オブジェクトリスト
     std::unique_ptr<SpriteObject> reticleSprite_;   // 照準UIスプライト
-    int selectedEnemyIndex_ = -1;                   // ImGuiエディタで選択中の敵のインデックス
-    bool showStageEditor_ = true;                   // Stage Editorウィンドウの表示フラグ
     bool showRouteEditor_ = true;                   // Route Editorウィンドウの表示フラグ
+
+    // リファクタリングによる新設コンポーネント
+    std::unique_ptr<Route> route_;
+    std::unique_ptr<StageEditor> stageEditor_;
 
     // ルート関連メンバ変数
     GameMode mode_ = GameMode::DrawRoute;
-    std::vector<Vector3> rawPoints_;                 // 記録した軌跡の点配列
-    std::vector<Vector3> pathPoints_;                // 補間された滑らかなルート配列
-    std::vector<float> accumDistances_;              // 各補間点の累積距離テーブル（等速化用）
     float currentDistance_ = 0.0f;                   // 現在の走行距離
-    float totalDistance_ = 0.0f;                     // ルートの総距離
-    std::vector<std::unique_ptr<LineObject>> lineObjects_; // 描画用ラインオブジェクト配列
-    bool isDrawing_ = false;                         // 描画中フラグ
-    bool hasReachedGoal_ = false;                    // ゴールエリア到達フラグ
 
-    // 仮マップオブジェクトおよびギズモ
+    // 仮マップオブジェクトおよび床
     std::vector<std::unique_ptr<CubeObject>> mapObjects_;          // 仮マップの柱
-    std::vector<std::unique_ptr<LineObject>> editorGizmoLines_;    // マップ枠・スタート/ゴール枠表示ライン
-
-    // スタート地点とゴール地点の視覚用球体
-    std::unique_ptr<SphereObject> startSphere_;
-    std::unique_ptr<SphereObject> goalSphere_;
-
-	// 床の平面表示用四角形オブジェクト
-	std::unique_ptr<SquareObject> floorSquare_;
-
+    std::unique_ptr<SquareObject> floorSquare_;                    // 床
 
     // 移動速度定数
     static inline const float kPlayerSpeed = 0.05f;  // 毎フレームの自機前進距離
@@ -111,13 +98,9 @@ private:
     // プレイモードのゲーム開始処理
     void StartGame();
 
-    // ステージ情報のセーブ・ロード処理
-    void SaveStage(const std::string& filepath);
-    void LoadStage(const std::string& filepath);
-
 public:
     // エディタ表示フラグのポインタ取得ゲッター
-    bool* GetShowStageEditorPtr() { return &showStageEditor_; }
+    bool* GetShowStageEditorPtr() { return stageEditor_->GetShowEditorPtr(); }
     bool* GetShowRouteEditorPtr() { return &showRouteEditor_; }
 private:
 
@@ -129,6 +112,5 @@ private:
     static inline const std::string kPlayerBulletHitEffectName = "YellowFire"; // プレイヤー弾ヒット時のエフェクト名（黄色炎）
     static inline const std::string kEnemyBulletHitEffectName = "PurpleFire"; // 敵弾ヒット時のエフェクト名（紫色炎）
     static inline const std::string kRainEffectName = "WaterDrop";            // 雨のエフェクト名
-    static inline const std::string kStageFilePath = "resources/stages/stage1.json"; // ステージ保存先パス
 };
 

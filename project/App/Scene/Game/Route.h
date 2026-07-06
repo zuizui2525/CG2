@@ -1,0 +1,83 @@
+#pragma once
+#include <vector>
+#include <memory>
+#include <string>
+#include "Engine/Math/MathStructs.h"
+#include "Engine/Graphics/Objects/3d/Line/LineObject.h"
+#include "Engine/Graphics/Objects/3d/Sphere/SphereObject.h"
+
+class Input;
+class CameraManager;
+class BaseCamera;
+
+/**
+ * @brief 手書きルートの記録、補間、および等速走行制御を管理するクラス
+ */
+class Route {
+public:
+    Route();
+    ~Route() = default;
+
+    void Initialize(Input* input, CameraManager* cameraMgr);
+    void Update(BaseCamera* activeCamera);
+    void UpdateSpheres();
+    void Draw();
+    void DrawSpheres();
+
+    // 走行モード開始時の補間計算
+    void FinalizeRoute();
+
+    // 走行距離に応じた補間座標・向き・回転の算出
+    Vector3 GetPositionAtDistance(float distance) const;
+    Vector3 GetTangentAtDistance(float distance) const;
+    Vector3 GetRotationAtDistance(float distance) const;
+
+    // ゲッター/セッター
+    float GetTotalDistance() const { return totalDistance_; }
+    const std::vector<float>& GetAccumDistances() const { return accumDistances_; }
+    bool IsDrawing() const { return isDrawing_; }
+    bool HasReachedGoal() const { return hasReachedGoal_; }
+    void Reset();
+
+private:
+    // 補間計算ヘルパー
+    Vector3 CatmullRomInterpolate(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) const;
+    void BuildEqualSpacingTable();
+
+    // ギズモ枠生成ヘルパー
+    void AddGizmoRect(const Vector3& center, float width, float depth, const Vector4& color);
+    void AddGizmoCircle(const Vector3& center, float radius, const Vector4& color);
+
+private:
+    // マジックナンバー排除のための定数
+    static inline const float kMinPointDistance = 2.0f;              // 軌跡点間の最小距離
+    static inline const float kPlaneIntersectY = 0.0f;               // 地平面Y座標
+    static inline const float kGoalAreaZ = 20.0f;                   // ゴールエリアの中心Z
+    static inline const float kStartAreaZ = -20.0f;                 // スタートエリアの中心Z
+    static inline const float kAreaRadius = 4.0f;                   // 円形判定エリアの半径
+    static inline const float kMapBoundaryX = 15.0f;                // マップの左右外枠
+    static inline const float kMapBoundaryZ = 25.0f;                // マップの前後外枠
+    static inline const int kCircleDivision = 32;                   // 円形ギズモの描画分割数
+    static inline const float kPi = 3.14159265f;                    // 円周率
+    static inline const float kLineThickness = 0.15f;               // ルート線の太さ
+    static inline const float kGizmoThickness = 0.15f;              // ギズモ線の太さ
+    static inline const float kHalf = 0.5f;
+
+private:
+    Input* input_ = nullptr;
+    CameraManager* cameraMgr_ = nullptr;
+
+    std::vector<Vector3> rawPoints_;                 // 記録した軌跡 of 点配列
+    std::vector<Vector3> pathPoints_;                // 補間された滑らかなルート配列
+    std::vector<float> accumDistances_;              // 各補間点の累積距離テーブル（等速化用）
+    float totalDistance_ = 0.0f;                     // ルートの総距離
+
+    std::vector<std::unique_ptr<LineObject>> lineObjects_; // 描画用ラインオブジェクト配列
+    std::vector<std::unique_ptr<LineObject>> editorGizmoLines_;    // マップ枠・スタート/ゴール枠表示ライン
+
+    std::unique_ptr<SphereObject> startSphere_;
+    std::unique_ptr<SphereObject> goalSphere_;
+
+    bool isDrawing_ = false;                         // 描画中フラグ
+    bool hasReachedGoal_ = false;                    // ゴールエリア到達フラグ
+};
