@@ -24,6 +24,11 @@ public:
     void Initialize(Type type, const Vector3& localSize);
 
     /**
+     * @brief 行列更新処理
+     */
+    void Update() override;
+
+    /**
      * @brief ワールド空間でのAABBを取得する
      */
     AABB GetWorldAABB() const;

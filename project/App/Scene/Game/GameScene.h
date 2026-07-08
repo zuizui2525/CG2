@@ -4,6 +4,7 @@
 #include <string>
 
 class PostProcess;
+class LineObject;
 
 // エンジンコンポーネントのインクルード
 #include "Engine/Input/Input.h"
@@ -77,6 +78,14 @@ private:
     // 仮マップオブジェクトおよび床
     std::vector<std::unique_ptr<CubeObject>> mapObjects_;          // 仮マップの柱
     std::unique_ptr<SquareObject> floorSquare_;                    // 床
+    std::vector<std::unique_ptr<LineObject>> pillarGizmoLines_;    // 柱の警告リングギズモ（描画モード用）
+
+    struct SpawnTrigger {
+        float z;
+        int count;
+        bool triggered;
+    };
+    std::vector<SpawnTrigger> spawnTriggers_;
 
     // AABB衝突判定関数
     bool IsCollidingAABB(const Vector3& pos1, const Vector3& size1, const Vector3& pos2, const Vector3& size2) const;
@@ -91,10 +100,23 @@ public:
 private:
 
     // シェイク機能用変数と定数
+    bool isEnemyEnabled_ = true; // 敵の有効化フラグ（不要になったら削除可能）
     int shakeTimer_ = 0;
+    float cameraYawOffset_ = 0.0f; // A/Dキーでのカメラ首振りヨー角オフセット
+    float lastSpawnZ_ = -480.0f;   // 前回の敵の湧きZ座標
+    bool hasBossSpawned_ = false;  // ボスがすでに湧いたか
     static inline const Vector3 kDefaultCameraPos = { 0.0f, 4.0f, -20.0f }; // メインカメラの基準位置
     static inline const int kShakeDuration = 15;                             // シェイクフレーム数
     static inline const float kShakeIntensity = 0.2f;                        // シェイクの強さ
     static inline const std::string kRainEffectName = "WaterDrop";            // 雨のエフェクト名
+
+    // カメラ首振り用定数
+    static inline const float kCameraYawLimit = 0.35f;                       // 最大首振りヨー角（ラジアン）
+    static inline const float kCameraYawSpeed = 0.015f;                      // 首振り速度
+    static inline const float kCameraYawReturnSpeed = 0.02f;                 // 正面復帰速度
+
+    // 敵湧き制御用定数
+    static inline const float kSpawnIntervalZ = 15.0f;                      // 敵の湧くZ間隔
+    static inline const float kBossSpawnZ = 360.0f;                          // ボスが湧くZ座標
 };
 

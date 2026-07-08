@@ -44,3 +44,12 @@ AABB PartCollider::GetWorldAABB() const {
     aabb.max = { worldPos.x + halfSize.x, worldPos.y + halfSize.y, worldPos.z + halfSize.z };
     return aabb;
 }
+
+void PartCollider::Update() {
+    // 親オブジェクトがある場合は親のワールド行列を乗算してワールド行列を更新
+    Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    if (parent_) {
+        world = Math::Multiply(world, parent_->GetWorldMatrix());
+    }
+    matWorld_ = world;
+}

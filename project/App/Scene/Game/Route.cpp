@@ -17,35 +17,21 @@ void Route::Initialize(Input* input, CameraManager* cameraMgr) {
     input_ = input;
     cameraMgr_ = cameraMgr;
 
-    Reset();
-
-    // ギズモ矩形（マップ外枠: 白）
-    AddGizmoRect({ 0.0f, 0.0f, 0.0f }, kMapBoundaryX * 2.0f, kMapBoundaryZ * 2.0f, { 1.0f, 1.0f, 1.0f, 1.0f });
-    // スタート枠 (黄・円形)
-    AddGizmoCircle({ 0.0f, 0.0f, kStartAreaZ }, kAreaRadius, { 1.0f, 1.0f, 0.0f, 1.0f });
-    // ゴール枠 (青・円形)
-    AddGizmoCircle({ 0.0f, 0.0f, kGoalAreaZ }, kAreaRadius, { 0.0f, 0.5f, 1.0f, 1.0f });
-
     // スタート地点とゴール地点の視覚用球体オブジェクトの初期化
     startSphere_->Initialize();
-    startSphere_->SetPosition({ 0.0f, 1.0f, kStartAreaZ });
     startSphere_->SetScale({ kAreaRadius * 2.0f, kAreaRadius * 2.0f, kAreaRadius * 2.0f });
     startSphere_->SetColor({ 1.0f, 1.0f, 0.0f, 0.5f }); // 黄色（半透明）
 
     goalSphere_->Initialize();
-    goalSphere_->SetPosition({ 0.0f, 1.0f, kGoalAreaZ });
     goalSphere_->SetScale({ kAreaRadius * 2.0f, kAreaRadius * 2.0f, kAreaRadius * 2.0f });
     goalSphere_->SetColor({ 0.0f, 0.5f, 1.0f, 0.5f }); // 青色（半透明）
+
+    Reset();
 }
 
 void Route::Reset() {
-    rawPoints_.clear();
-    pathPoints_.clear();
-    accumDistances_.clear();
-    lineObjects_.clear();
-    totalDistance_ = 0.0f;
-    isDrawing_ = false;
-    hasReachedGoal_ = false;
+    ClearForNewArea();
+    SetupArea(0);
 }
 
 void Route::Update(BaseCamera* activeCamera) {
@@ -63,15 +49,15 @@ void Route::Update(BaseCamera* activeCamera) {
                 Vector3 intersectPos = Math::Add(rayStart, Math::Multiply(t, rayDir));
 
                 // マップ範囲内に入っているかチェック
-                if (std::abs(intersectPos.x) <= kMapBoundaryX && std::abs(intersectPos.z) <= kMapBoundaryZ) {
+                if (std::abs(intersectPos.x) <= kMapBoundaryX && intersectPos.z >= currentAreaStartZ_ && intersectPos.z <= currentAreaGoalZ_) {
                     if (rawPoints_.empty()) {
                         // 最初の一点はスタートエリア付近のみ許可
                         float toStartX = intersectPos.x - 0.0f;
-                        float toStartZ = intersectPos.z - kStartAreaZ;
+                        float toStartZ = intersectPos.z - currentAreaStartZ_;
                         float distToStartSq = toStartX * toStartX + toStartZ * toStartZ;
 
                         if (distToStartSq <= kAreaRadius * kAreaRadius) {
-                            Reset();
+                            ClearForNewArea();
                             isDrawing_ = true;
                             rawPoints_.push_back(intersectPos);
                         }
@@ -82,7 +68,7 @@ void Route::Update(BaseCamera* activeCamera) {
                             if (dist >= kMinPointDistance) {
                                 // ゴールエリアに到達したかチェック
                                 float toGoalX = intersectPos.x - 0.0f;
-                                float toGoalZ = intersectPos.z - kGoalAreaZ;
+                                float toGoalZ = intersectPos.z - currentAreaGoalZ_;
                                 float distToGoalSq = toGoalX * toGoalX + toGoalZ * toGoalZ;
 
                                 rawPoints_.push_back(intersectPos);
@@ -248,4 +234,57 @@ void Route::AddGizmoCircle(const Vector3& center, float radius, const Vector4& c
         line->SetColor(color);
         editorGizmoLines_.push_back(std::move(line));
     }
+}
+
+void Route::SetupArea(int areaIndex) {
+    currentAreaIndex_ = areaIndex;
+    
+    // エリアごとの定数
+    static const float kAreaLength = 240.0f;
+    currentAreaStartZ_ = kStartAreaZ + static_cast<float>(areaIndex) * kAreaLength;
+    currentAreaGoalZ_ = currentAreaStartZ_ + kAreaLength;
+
+    // スタート地点とゴール地点の球体座標更新
+    startSphere_->SetPosition({ 0.0f, 1.0f, currentAreaStartZ_ });
+    goalSphere_->SetPosition({ 0.0f, 1.0f, currentAreaGoalZ_ });
+
+    SetupAreaGizmos();
+}
+
+void Route::SetupAreaGizmos() {
+    editorGizmoLines_.clear();
+
+    // エリア境界枠（白）: Xはマップ左右外枠、Zは現在のエリア範囲
+    float centerZ = (currentAreaStartZ_ + currentAreaGoalZ_) * kHalf;
+    float lengthZ = currentAreaGoalZ_ - currentAreaStartZ_;
+    AddGizmoRect({ 0.0f, 0.0f, centerZ }, kMapBoundaryX * 2.0f, lengthZ, { 1.0f, 1.0f, 1.0f, 1.0f });
+
+    // スタート枠 (黄・円形)
+    AddGizmoCircle({ 0.0f, 0.0f, currentAreaStartZ_ }, kAreaRadius, { 1.0f, 1.0f, 0.0f, 1.0f });
+    // ゴール枠 (青・円形)
+    AddGizmoCircle({ 0.0f, 0.0f, currentAreaGoalZ_ }, kAreaRadius, { 0.0f, 0.5f, 1.0f, 1.0f });
+
+    // ボス出現ライン (エリア3のZ=360fに配置)
+    static const float kBossSpawnLineZ = 360.0f;
+    if (currentAreaIndex_ == 3) {
+        // 赤い太めの横線を引く
+        auto line = std::make_unique<LineObject>();
+        line->Initialize(0);
+        line->SetStartPoint({ -kMapBoundaryX, 0.01f, kBossSpawnLineZ });
+        line->SetEndPoint({ kMapBoundaryX, 0.01f, kBossSpawnLineZ });
+        static const float kBossLineThickness = 0.5f;
+        line->SetThickness(kBossLineThickness);
+        line->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f }); // 赤色
+        editorGizmoLines_.push_back(std::move(line));
+    }
+}
+
+void Route::ClearForNewArea() {
+    rawPoints_.clear();
+    pathPoints_.clear();
+    accumDistances_.clear();
+    lineObjects_.clear();
+    totalDistance_ = 0.0f;
+    isDrawing_ = false;
+    hasReachedGoal_ = false;
 }

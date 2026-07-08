@@ -13,6 +13,7 @@
 #include "Engine/Debug/GameViewWindow.h"
 #include "Engine/Debug/SceneHierarchy.h"
 #include <cstdlib>
+#include "Engine/Graphics/Objects/3d/Line/LineObject.h"
 
 // 不要になったヒットエフェクト名定数を削除
 
@@ -86,7 +87,7 @@ void GameScene::Initialize() {
 
     // 7. 仮マップオブジェクト (交互に並ぶ柱Cube) の生成
     mapObjects_.clear();
-    for (float z = -20.0f; z <= 20.0f; z += 10.0f) {
+    for (float z = -480.0f; z <= 480.0f; z += 10.0f) {
         float x = (static_cast<int>(z) % 20 == 0) ? -12.0f : 12.0f;
         auto pillar = std::make_unique<CubeObject>();
         pillar->Initialize();
@@ -100,9 +101,39 @@ void GameScene::Initialize() {
 	floorSquare_ = std::make_unique<SquareObject>();
     floorSquare_->Initialize();
 	floorSquare_->SetPosition({ 0.0f, 0.0f, 0.0f });
-    floorSquare_->SetSize({25.0f, 50.0f});
+    floorSquare_->SetSize({25.0f, 1000.0f});
 	floorSquare_->SetRotate({ 1.57f, 0.0f, 0.0f }); // X軸で90度回転して水平にする
     floorSquare_->SetColor({ 0.5f, 1.0f, 0.5f, 1.0f }); // 黄緑色
+
+    // 9. 柱の警告リングギズモ（描画モード用）の生成
+    pillarGizmoLines_.clear();
+    static const int kGizmoCircleDivision = 16; // 分割数を16にし描画負荷を低減
+    static const float kGizmoRadius = 4.0f;     // 柱にぶつからないための安全警告半径
+    static const float kPiVal = 3.14159265f;
+    static const float kGizmoThickness = 0.2f;
+    static const Vector4 kWarningColor = { 1.0f, 0.3f, 0.0f, 1.0f }; // オレンジの警告色
+
+    for (const auto& pillar : mapObjects_) {
+        Vector3 center = pillar->GetPosition();
+        std::vector<Vector3> points;
+        points.reserve(kGizmoCircleDivision);
+        for (int i = 0; i < kGizmoCircleDivision; ++i) {
+            float theta = (2.0f * kPiVal * static_cast<float>(i)) / static_cast<float>(kGizmoCircleDivision);
+            float x = center.x + kGizmoRadius * std::cos(theta);
+            float z = center.z + kGizmoRadius * std::sin(theta);
+            points.push_back({ x, 0.01f, z });
+        }
+
+        for (int i = 0; i < kGizmoCircleDivision; ++i) {
+            auto line = std::make_unique<LineObject>();
+            line->Initialize(0);
+            line->SetStartPoint(points[i]);
+            line->SetEndPoint(points[(i + 1) % kGizmoCircleDivision]);
+            line->SetThickness(kGizmoThickness);
+            line->SetColor(kWarningColor);
+            pillarGizmoLines_.push_back(std::move(line));
+        }
+    }
 }
 
 /**
@@ -147,7 +178,11 @@ void GameScene::Update() {
     // ルート描画モードの更新処理
     if (mode_ == GameMode::DrawRoute) {
         // 毎フレームカメラの位置・回転とTarget無効化を強制適用（エディタ等の上書き防止）
-        mainCamera_->SetPosition(kTopDownCameraPos);
+        // カメラの高さYを530.0fとし、Zは現在のエリアのZ中心にする
+        static const float kDrawCameraHeight = 530.0f;
+        static const float kHalfScale = 0.5f;
+        float areaCenterZ = (route_->GetCurrentAreaStartZ() + route_->GetCurrentAreaGoalZ()) * kHalfScale;
+        mainCamera_->SetPosition({ 0.0f, kDrawCameraHeight, areaCenterZ });
         mainCamera_->SetRotation(kTopDownCameraRot);
         mainCamera_->DisableTarget();
 
@@ -157,6 +192,11 @@ void GameScene::Update() {
         // 仮マップオブジェクト（柱Cube）の更新
         for (auto& pillar : mapObjects_) {
             pillar->Update();
+        }
+
+        // 柱の警告リングギズモの更新
+        for (auto& line : pillarGizmoLines_) {
+            line->Update();
         }
 
         // ゴールまで到達している場合、SPACEキーでゲーム開始できるようにする
@@ -184,9 +224,48 @@ void GameScene::Update() {
 
         currentDistance_ += Player::GetAutoSpeed();
         if (currentDistance_ >= route_->GetTotalDistance()) {
-            // ゴール到達時にクリアシーンへ
-            SceneManager::GetInstance()->ChangeScene(kClearSceneName);
-            return;
+            int currentArea = route_->GetCurrentAreaIndex();
+            static const int kMaxAreaIndex = 3;
+
+            if (currentArea < kMaxAreaIndex) {
+                // 次のエリアへ移行
+                mode_ = GameMode::DrawRoute;
+                player_->SetAutoMoving(false);
+                route_->ClearForNewArea();
+                route_->SetupArea(currentArea + 1);
+                currentDistance_ = 0.0f;
+                return;
+            } else {
+                // 最終エリアのゴール到達時にクリアシーンへ
+                SceneManager::GetInstance()->ChangeScene(kClearSceneName);
+                return;
+            }
+        }
+
+        // A/Dキーによるカメラ首振り制御
+        if (input_->Press(DIK_A)) {
+            cameraYawOffset_ -= kCameraYawSpeed;
+        } else if (input_->Press(DIK_D)) {
+            cameraYawOffset_ += kCameraYawSpeed;
+        } else {
+            // キーを離した際は正面（0.0f）に徐々に戻す
+            if (cameraYawOffset_ > 0.0f) {
+                cameraYawOffset_ -= kCameraYawReturnSpeed;
+                if (cameraYawOffset_ < 0.0f) {
+                    cameraYawOffset_ = 0.0f;
+                }
+            } else if (cameraYawOffset_ < 0.0f) {
+                cameraYawOffset_ += kCameraYawReturnSpeed;
+                if (cameraYawOffset_ > 0.0f) {
+                    cameraYawOffset_ = 0.0f;
+                }
+            }
+        }
+        // 限界角にクランプ
+        if (cameraYawOffset_ > kCameraYawLimit) {
+            cameraYawOffset_ = kCameraYawLimit;
+        } else if (cameraYawOffset_ < -kCameraYawLimit) {
+            cameraYawOffset_ = -kCameraYawLimit;
         }
 
         // Routeクラスから現在の位置・接線方向・回転を取得
@@ -198,12 +277,101 @@ void GameScene::Update() {
         player_->SetRotation(rot);
         player_->SetDirection(tangent);
 
+        // 敵の動的湧き・ボス戦湧き処理 (isEnemyEnabled_ 時のみ)
+        if (isEnemyEnabled_) {
+            // 1. エディタトリガーによる湧き判定
+            for (auto& trigger : spawnTriggers_) {
+                if (!trigger.triggered && playerPos.z >= trigger.z) {
+                    trigger.triggered = true;
+
+                    // 指定数（trigger.count）の敵を湧かせる
+                    for (int i = 0; i < trigger.count; ++i) {
+                        Vector3 rightVec = { tangent.z, 0.0f, -tangent.x };
+                        // 複数湧き対応のため、位置をずらす
+                        float spawnDistBack = -10.0f - static_cast<float>(i) * 3.0f;
+                        float spawnDistSide = (i % 2 == 0 ? 10.0f : -10.0f) + (static_cast<float>(i / 2) * 1.5f);
+                        
+                        Vector3 spawnPos = Math::Add(
+                            playerPos, 
+                            Math::Add(
+                                Math::Multiply(spawnDistBack, tangent),
+                                Math::Multiply(spawnDistSide, rightVec)
+                            )
+                        );
+
+                        auto enemy = std::make_unique<Enemy>();
+                        enemy->Initialize();
+                        enemy->SetSpawnPoint(false); // 実体化
+                        enemy->SetPosition(spawnPos);
+                        enemy->SetTargetPlayer(player_.get());
+                        enemy->SetAiState(Enemy::AiState::Approach);
+                        
+                        enemies_.push_back(std::move(enemy));
+                    }
+                }
+            }
+
+            // 2. 通常の定期的な敵の湧き判定 (120.0f ごと)
+            if (playerPos.z - lastSpawnZ_ >= kSpawnIntervalZ) {
+                lastSpawnZ_ = playerPos.z;
+                
+                Vector3 rightVec = { tangent.z, 0.0f, -tangent.x };
+                static const float kSpawnDistBack = -10.0f;
+                static const float kSpawnDistSide = 10.0f;
+                
+                Vector3 spawnPos = Math::Add(
+                    playerPos, 
+                    Math::Add(
+                        Math::Multiply(kSpawnDistBack, tangent),
+                        Math::Multiply((rand() % 2 == 0 ? kSpawnDistSide : -kSpawnDistSide), rightVec)
+                    )
+                );
+
+                auto enemy = std::make_unique<Enemy>();
+                enemy->Initialize();
+                enemy->SetSpawnPoint(false);
+                enemy->SetPosition(spawnPos);
+                enemy->SetTargetPlayer(player_.get());
+                enemy->SetAiState(Enemy::AiState::Approach);
+                
+                enemies_.push_back(std::move(enemy));
+            }
+
+            // 3. ボス戦の湧き判定 (エリア3のZ=360f以降に1回だけ)
+            if (playerPos.z >= kBossSpawnZ && !hasBossSpawned_) {
+                hasBossSpawned_ = true;
+
+                // ボスをプレイヤーの正面少し先から出現させる
+                Vector3 bossSpawnPos = Math::Add(playerPos, Math::Multiply(20.0f, tangent));
+                bossSpawnPos.x = 0.0f; // 正面中央
+
+                auto boss = std::make_unique<Enemy>();
+                boss->Initialize();
+                boss->SetBoss(true);
+                boss->SetPosition(bossSpawnPos);
+                boss->SetTargetPlayer(player_.get());
+                boss->SetAiState(Enemy::AiState::Approach);
+
+                enemies_.push_back(std::move(boss));
+            }
+        }
+
         // カメラ位置・注視点の計算（一人称視点）
         const float kCameraUpHeight = 1.8f;      // 目の高さのYオフセット
         const float kCameraLookAhead = 8.0f;     // 前方への注視点オフセット
 
         Vector3 camPos = Math::Add(playerPos, Vector3{ 0.0f, kCameraUpHeight, 0.0f });
-        Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraLookAhead, tangent));
+
+        // 首振りを適用した注視方向ベクトルの計算
+        float cosTheta = std::cos(cameraYawOffset_);
+        float sinTheta = std::sin(cameraYawOffset_);
+        Vector3 lookTangent;
+        lookTangent.x = tangent.x * cosTheta + tangent.z * sinTheta;
+        lookTangent.y = tangent.y; // Y軸回転なので上下は変更なし
+        lookTangent.z = -tangent.x * sinTheta + tangent.z * cosTheta;
+        lookTangent = Math::Normalize(lookTangent);
+
+        Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraLookAhead, lookTangent));
 
         mainCamera_->SetPosition(camPos);
         mainCamera_->SetTarget(lookAtTarget);
@@ -226,14 +394,29 @@ void GameScene::Update() {
     // プレイヤーの更新 (自動走行位置同期後に呼び出すことで、弾の発射などが連動する)
     player_->Update();
 
-    // 敵 (Enemy) の更新と死後消滅判定
-    for (auto it = enemies_.begin(); it != enemies_.end();) {
-        (*it)->SetTargetPlayer(player_.get()); // 射撃の誘導用にプレイヤーポインタを渡す
-        (*it)->Update();
-        if ((*it)->IsDead()) {
-            it = enemies_.erase(it);
-        } else {
-            ++it;
+    // 敵 (Enemy) の更新と死後消滅判定 (カリング適用)
+    if (isEnemyEnabled_) {
+        Vector3 pPos = player_->GetPosition();
+        for (auto it = enemies_.begin(); it != enemies_.end();) {
+            float distZ = std::abs((*it)->GetPosition().z - pPos.z);
+            static const float kCullingDistance = 60.0f;
+            if (distZ > kCullingDistance) {
+                // はるか後方に置き去りにされた敵は、追いつけないため消滅させてリソース節約
+                if ((*it)->GetPosition().z < pPos.z - kCullingDistance) {
+                    it = enemies_.erase(it);
+                } else {
+                    ++it;
+                }
+                continue;
+            }
+
+            (*it)->SetTargetPlayer(player_.get()); // 射撃の誘導用にプレイヤーポインタを渡す
+            (*it)->Update();
+            if ((*it)->IsDead()) {
+                it = enemies_.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 
@@ -249,24 +432,26 @@ void GameScene::Update() {
         playerAABB.min = { playerPos.x - playerSize.x * kHalf, playerPos.y - playerSize.y * kHalf, playerPos.z - playerSize.z * kHalf };
         playerAABB.max = { playerPos.x + playerSize.x * kHalf, playerPos.y + playerSize.y * kHalf, playerPos.z + playerSize.z * kHalf };
 
-        for (auto& enemy : enemies_) {
-            const auto& enemyBullets = enemy->GetBullets();
-            for (auto& bullet : enemyBullets) {
-                if (!bullet->IsActive()) continue;
+        if (isEnemyEnabled_) {
+            for (auto& enemy : enemies_) {
+                const auto& enemyBullets = enemy->GetBullets();
+                for (auto& bullet : enemyBullets) {
+                    if (!bullet->IsActive()) continue;
 
-                // 敵の弾を球体と見なして当たり判定
-                Sphere bulletSphere;
-                bulletSphere.center = bullet->GetPosition();
-                static constexpr float kBulletCollisionRadius = 0.5f;
-                bulletSphere.radius = kBulletCollisionRadius;
+                    // 敵の弾を球体と見なして当たり判定
+                    Sphere bulletSphere;
+                    bulletSphere.center = bullet->GetPosition();
+                    static constexpr float kBulletCollisionRadius = 0.5f;
+                    bulletSphere.radius = kBulletCollisionRadius;
 
-                if (IsCollision(playerAABB, bulletSphere)) {
-                    static constexpr int kEnemyDamage = 10;
-                    player_->Damage(kEnemyDamage, bullet->GetEffectName());
-                    bullet->Kill(); // 被弾した弾を非アクティブ化
+                    if (IsCollision(playerAABB, bulletSphere)) {
+                        static constexpr int kEnemyDamage = 10;
+                        player_->Damage(kEnemyDamage, bullet->GetEffectName());
+                        bullet->Kill(); // 被弾した弾を非アクティブ化
 
-                    // 被弾時にカメラシェイク
-                    shakeTimer_ = kShakeDuration;
+                        // 被弾時にカメラシェイク
+                        shakeTimer_ = kShakeDuration;
+                    }
                 }
             }
         }
@@ -277,65 +462,52 @@ void GameScene::Update() {
             return;
         }
 
-        // プレイヤーの即時射撃（レイキャスト）判定
-        if (player_->HasFiredThisFrame()) {
-            Vector2 viewSize = GameViewWindow::GetGameViewSize();
-            Vector2 mousePos = GameViewWindow::GetMousePosition();
-            Vector3 rayStart, rayDir;
-            mainCamera_->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
+        // プレイヤーの弾と敵の衝突判定 (即時レイキャストから物理弾判定へ置き換え)
+        if (isEnemyEnabled_) {
+            const auto& playerBullets = player_->GetBullets();
+            for (auto& bullet : playerBullets) {
+                if (!bullet->IsActive()) continue;
 
-            Segment raySegment;
-            raySegment.origin = rayStart;
-            raySegment.diff = Math::Multiply(100.0f, rayDir); // 射程 100.0f
+                Sphere bulletSphere;
+                bulletSphere.center = bullet->GetPosition();
+                static constexpr float kBulletCollisionRadius = 0.4f;
+                bulletSphere.radius = kBulletCollisionRadius;
 
-            Enemy* hitEnemy = nullptr;
-            PartCollider::Type hitType = PartCollider::Type::Body;
-            float minDistance = FLT_MAX;
+                for (auto& enemy : enemies_) {
+                    if (enemy->IsSpawnPoint() || enemy->IsDead()) continue;
 
-            for (auto& enemy : enemies_) {
-                // 部位別コライダー（AABB）の取得
-                AABB headAABB = enemy->GetHeadCollider()->GetWorldAABB();
-                AABB bodyAABB = enemy->GetBodyCollider()->GetWorldAABB();
+                    AABB headAABB = enemy->GetHeadCollider()->GetWorldAABB();
+                    AABB bodyAABB = enemy->GetBodyCollider()->GetWorldAABB();
 
-                // 頭部判定（クリティカル）を優先
-                if (IsCollision(headAABB, raySegment)) {
-                    float dist = Math::Length(Math::Subtract(enemy->GetPosition(), rayStart));
-                    if (dist < minDistance) {
-                        minDistance = dist;
-                        hitEnemy = enemy.get();
-                        hitType = PartCollider::Type::Head;
+                    // 頭部（クリティカル）優先
+                    if (IsCollision(headAABB, bulletSphere)) {
+                        static constexpr int kCriticalDamage = 2;
+                        enemy->Damage(kCriticalDamage, player_->GetBulletEffectName());
+                        bullet->Kill(); // 弾を非アクティブ化
+                        shakeTimer_ = kShakeDuration;
+                        break;
+                    }
+                    // 胴体判定
+                    else if (IsCollision(bodyAABB, bulletSphere)) {
+                        static constexpr int kNormalDamage = 1;
+                        enemy->Damage(kNormalDamage, player_->GetBulletEffectName());
+                        bullet->Kill();
+                        shakeTimer_ = kShakeDuration;
+                        break;
                     }
                 }
-                // 胴体判定
-                else if (IsCollision(bodyAABB, raySegment)) {
-                    float dist = Math::Length(Math::Subtract(enemy->GetPosition(), rayStart));
-                    if (dist < minDistance) {
-                        minDistance = dist;
-                        hitEnemy = enemy.get();
-                        hitType = PartCollider::Type::Body;
-                    }
-                }
-            }
-
-            if (hitEnemy) {
-                static constexpr int kNormalDamage = 5;
-                static constexpr int kCriticalDamage = 10;
-                
-                int damage = kNormalDamage;
-                if (hitType == PartCollider::Type::Head) {
-                    damage = kCriticalDamage; // クリティカル！
-                }
-
-                hitEnemy->Damage(damage, player_->GetBulletEffectName());
-                
-                // ヒット時にカメラシェイク
-                shakeTimer_ = kShakeDuration;
             }
         }
 
-        // レティクルの更新 (マウスカーソルの位置に追従)
+        // レティクルの更新 (マウスカーソルの位置に追従。ゲームビューの拡縮に対応)
+        Vector2 viewSize = GameViewWindow::GetGameViewSize();
         Vector2 mousePos = GameViewWindow::GetMousePosition();
-        reticleSprite_->SetPosition({ mousePos.x - 64.0f, mousePos.y - 64.0f, 0.0f });
+        
+        float scaleX = static_cast<float>(WindowApp::kClientWidth) / viewSize.x;
+        float scaleY = static_cast<float>(WindowApp::kClientHeight) / viewSize.y;
+        Vector2 scaledMousePos = { mousePos.x * scaleX, mousePos.y * scaleY };
+
+        reticleSprite_->SetPosition({ scaledMousePos.x - 64.0f, scaledMousePos.y - 64.0f, 0.0f });
         reticleSprite_->Update();
     }
 
@@ -389,12 +561,23 @@ void GameScene::Draw() {
         floorSquare_->Draw();
     }
 
-    // 仮マップオブジェクト（柱Cube）の描画
+    // 仮マップオブジェクト（柱Cube）の描画 (プレイモード時のみ60.0fカリング)
+    Vector3 playerPos = player_->GetPosition();
+    static const float kCullingDistance = 60.0f;
     for (auto& pillar : mapObjects_) {
+        if (mode_ == GameMode::Play) {
+            float distZ = std::abs(pillar->GetPosition().z - playerPos.z);
+            if (distZ > kCullingDistance) {
+                continue;
+            }
+        }
         pillar->Draw();
     }
 
     if (mode_ == GameMode::DrawRoute) {
+        for (auto& line : pillarGizmoLines_) {
+            line->Draw();
+        }
         route_->Draw();
         return; // 描画モード時はキャラやエフェクトを描画しない
     }
@@ -402,9 +585,16 @@ void GameScene::Draw() {
     // プレイヤー（およびプレイヤーの弾）の描画
     player_->Draw();
 
-    // 複数敵の描画
-    for (auto& enemy : enemies_) {
-        enemy->Draw();
+    // 複数敵の描画 (60.0fカリング)
+    if (isEnemyEnabled_) {
+        Vector3 playerPos = player_->GetPosition();
+        static const float kCullingDistance = 60.0f;
+        for (auto& enemy : enemies_) {
+            float distZ = std::abs(enemy->GetPosition().z - playerPos.z);
+            if (distZ <= kCullingDistance) {
+                enemy->Draw();
+            }
+        }
     }
 
     // エフェクトの描画
@@ -455,9 +645,37 @@ void GameScene::StartGame() {
     mode_ = GameMode::Play;
     
     // 3. 自機(Player)の位置をルートの始点に設定
-    player_->SetPosition(route_->GetPositionAtDistance(0.0f));
+    Vector3 startPlayerPos = route_->GetPositionAtDistance(0.0f);
+    player_->SetPosition(startPlayerPos);
+
+    // 4. 動的湧きデータの初期設定 (最初のエリア開始時のみ一括構築)
+    if (route_->GetCurrentAreaIndex() == 0) {
+        spawnTriggers_.clear();
+        for (const auto& enemy : enemies_) {
+            if (enemy->IsSpawnPoint()) {
+                SpawnTrigger trigger;
+                trigger.z = enemy->GetPosition().z;
+                trigger.count = static_cast<int>(enemy->GetSize().x);
+                if (trigger.count < 1) trigger.count = 1;
+                if (trigger.count > 5) trigger.count = 5;
+                trigger.triggered = false;
+                spawnTriggers_.push_back(trigger);
+            }
+        }
+        enemies_.clear(); // エディタ用サークル（ダミー）をクリアして動的湧きにする
+        hasBossSpawned_ = false;
+    }
+    lastSpawnZ_ = startPlayerPos.z;
 
     // プレイ開始時にカメラ位置と回転をプレイ用の位置にリセット
-    mainCamera_->SetPosition(kDefaultCameraPos);
+    static const float kCameraStartUpHeight = 1.8f;      // 目の高さのYオフセット
+    static const float kCameraStartLookAhead = 8.0f;     // 前方への注視点オフセット
+    Vector3 startTangent = route_->GetTangentAtDistance(0.0f);
+
+    Vector3 camPos = Math::Add(startPlayerPos, Vector3{ 0.0f, kCameraStartUpHeight, 0.0f });
+    Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraStartLookAhead, startTangent));
+
+    mainCamera_->SetPosition(camPos);
+    mainCamera_->SetTarget(lookAtTarget);
     mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
 }

@@ -38,6 +38,11 @@ public:
     bool IsDrawing() const { return isDrawing_; }
     bool HasReachedGoal() const { return hasReachedGoal_; }
     void Reset();
+    void SetupArea(int areaIndex);
+    int GetCurrentAreaIndex() const { return currentAreaIndex_; }
+    float GetCurrentAreaStartZ() const { return currentAreaStartZ_; }
+    float GetCurrentAreaGoalZ() const { return currentAreaGoalZ_; }
+    void ClearForNewArea();
 
 private:
     // 補間計算ヘルパー
@@ -52,11 +57,11 @@ private:
     // マジックナンバー排除のための定数
     static inline const float kMinPointDistance = 2.0f;              // 軌跡点間の最小距離
     static inline const float kPlaneIntersectY = 0.0f;               // 地平面Y座標
-    static inline const float kGoalAreaZ = 20.0f;                   // ゴールエリアの中心Z
-    static inline const float kStartAreaZ = -20.0f;                 // スタートエリアの中心Z
+    static inline const float kGoalAreaZ = 480.0f;                  // ゴールエリアの中心Z
+    static inline const float kStartAreaZ = -480.0f;                // スタートエリアの中心Z
     static inline const float kAreaRadius = 4.0f;                   // 円形判定エリアの半径
     static inline const float kMapBoundaryX = 15.0f;                // マップの左右外枠
-    static inline const float kMapBoundaryZ = 25.0f;                // マップの前後外枠
+    static inline const float kMapBoundaryZ = 500.0f;               // マップの前後外枠
     static inline const int kCircleDivision = 32;                   // 円形ギズモの描画分割数
     static inline const float kPi = 3.14159265f;                    // 円周率
     static inline const float kLineThickness = 0.15f;               // ルート線の太さ
@@ -80,4 +85,11 @@ private:
 
     bool isDrawing_ = false;                         // 描画中フラグ
     bool hasReachedGoal_ = false;                    // ゴールエリア到達フラグ
+
+private:
+    void SetupAreaGizmos();
+
+    int currentAreaIndex_ = 0;                       // 現在のエリアインデックス (0〜3)
+    float currentAreaStartZ_ = -480.0f;              // 現在のエリアの開始Z座標
+    float currentAreaGoalZ_ = -240.0f;               // 現在のエリアの目標Z座標
 };

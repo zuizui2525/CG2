@@ -46,6 +46,8 @@ void StageEditor::ImGuiControl() {
         auto enemy = std::make_unique<Enemy>();
         enemy->Initialize();
         enemy->SetPosition({ 0.0f, 1.0f, 0.0f });
+        enemy->SetSpawnPoint(true);
+        enemy->SetSize({ 1.0f, 0.1f, 3.0f }); // size.xに出現数1を設定
         enemies_->push_back(std::move(enemy));
         selectedEnemyIndex_ = (int)enemies_->size() - 1;
         
@@ -69,7 +71,7 @@ void StageEditor::ImGuiControl() {
     // 選択中の敵の編集
     if (selectedEnemyIndex_ >= 0 && selectedEnemyIndex_ < (int)enemies_->size()) {
         ImGui::Separator();
-        ImGui::Text("Selected Enemy Transform:");
+        ImGui::Text("Selected Spawn Point:");
         auto& enemy = (*enemies_)[selectedEnemyIndex_];
         Vector3 pos = enemy->GetPosition();
         Vector3 size = enemy->GetSize();
@@ -77,11 +79,14 @@ void StageEditor::ImGuiControl() {
         if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
             enemy->SetPosition(pos);
         }
-        if (ImGui::DragFloat3("Scale (Size)", &size.x, 0.1f, 0.1f, 10.0f)) {
+        
+        int spawnCount = static_cast<int>(size.x);
+        if (ImGui::SliderInt("Spawn Count", &spawnCount, 1, 5)) {
+            size.x = static_cast<float>(spawnCount);
             enemy->SetSize(size);
         }
         
-        if (ImGui::Button("Delete Enemy")) {
+        if (ImGui::Button("Delete Point")) {
             if (SceneHierarchy::GetInstance()->GetSelected() == enemy->GetCube()) {
                 SceneHierarchy::GetInstance()->SetSelected(nullptr);
             }
@@ -163,6 +168,7 @@ void StageEditor::LoadStage(const std::string& filepath) {
         auto enemy = std::make_unique<Enemy>();
         enemy->Initialize();
         enemy->SetPosition({ px, py, pz });
+        enemy->SetSpawnPoint(true);
         enemy->SetSize({ sx, sy, sz });
         enemies_->push_back(std::move(enemy));
     }

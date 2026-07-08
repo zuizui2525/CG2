@@ -20,15 +20,34 @@ public:
 
     // 衝突判定用インターフェース実装
     Vector3 GetPosition() const override { return cube_->GetPosition(); }
-    Vector3 GetSize() const override { return cube_->GetSize(); }
+    Vector3 GetSize() const override { return size_; }
     void SetPosition(const Vector3& pos) { cube_->SetPosition(pos); }
-    void SetSize(const Vector3& size) { cube_->SetSize(size); }
+    void SetSize(const Vector3& size);
     CubeObject* GetCube() const { return cube_.get(); }
 
     // コライダーおよびターゲット関連
     PartCollider* GetBodyCollider() const { return bodyCollider_.get(); }
     PartCollider* GetHeadCollider() const { return headCollider_.get(); }
     void SetTargetPlayer(Player* player) { targetPlayer_ = player; }
+
+public:
+    enum class AiState {
+        Approach,          // プレイヤーの視界に入るように接近
+        TargetLock,        // 視界に入り、画面中央へ移動するためのチャージ蓄積
+        MoveToCenter,      // プレイヤーの進行方向真正面ラインへ素早く移動
+        AttackCharge,      // 中央到達後、攻撃チャージ
+        UnavoidableAttack  // 回避困難な弾を発射
+    };
+
+    void SetAiState(AiState state) { aiState_ = state; }
+    AiState GetAiState() const { return aiState_; }
+    float GetToCenterGauge() const { return toCenterGauge_; }
+    float GetAttackGauge() const { return attackGauge_; }
+    void SetBoss(bool isBoss);
+    bool IsBoss() const { return isBoss_; }
+    void SetSpawnPoint(bool active);
+    bool IsSpawnPoint() const { return isSpawnPoint_; }
+    void Damage(int amount, const std::string& effectName);
 
 private:
     // マジックナンバー排除のための定数
@@ -65,6 +84,29 @@ private:
     int moveTimer_ = 0;
     int shotTimer_ = 0;
 
+    // AIステート関連のメンバ変数
+    AiState aiState_ = AiState::Approach;
+    float toCenterGauge_ = 0.0f;
+    float attackGauge_ = 0.0f;
+    bool isBoss_ = false;
+    bool isSpawnPoint_ = false;                      // エディタ用の出現サークルかどうか
+    int hitFlashTimer_ = 0;                          // 被弾時の黄色フラッシュタイマー
+
+    // AI用定数
+    static inline const float kApproachLookDistance = 15.0f; // プレイヤーの何メートル前方に入ったら視界内とするか
+    static inline const float kApproachSpeedZ = 0.12f;       // 接近速度
+    static inline const float kCenterSpeedX = 0.15f;         // 中央へのスライド速度
+    static inline const float kToCenterGaugeMax = 1.0f;
+    static inline const float kAttackGaugeMax = 1.0f;
+    static inline const float kGaugeIncreaseRate = 0.001f;    // 1フレームあたりのゲージ増加量
+    static inline const float kBossHpMultiplier = 10.0f;     // ボスのHP倍率
+    static inline const int kNormalEnemyHp = 3;              // 敵の通常HP
+    static inline const int kBossEnemyHp = 30;               // ボスのHP
+
     // 乱数生成器
     std::mt19937 randomEngine_;
+
+    int maxHp_ = 10;
+    Vector3 size_ = kEnemyScale;
+    void UpdateHpBar(const Vector3& charPos);
 };
