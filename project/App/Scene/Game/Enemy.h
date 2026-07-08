@@ -2,6 +2,9 @@
 #include <random>
 #include "App/Scene/Game/Shooter.h"
 #include "Engine/Graphics/Objects/3d/Cube/CubeObject.h"
+#include "App/Scene/Game/PartCollider.h"
+
+class Player;
 
 /**
  * @brief 敵キャラクタークラス
@@ -22,6 +25,11 @@ public:
     void SetSize(const Vector3& size) { cube_->SetSize(size); }
     CubeObject* GetCube() const { return cube_.get(); }
 
+    // コライダーおよびターゲット関連
+    PartCollider* GetBodyCollider() const { return bodyCollider_.get(); }
+    PartCollider* GetHeadCollider() const { return headCollider_.get(); }
+    void SetTargetPlayer(Player* player) { targetPlayer_ = player; }
+
 private:
     // マジックナンバー排除のための定数
     static inline const Vector3 kInitialPosition = { 0.0f, 0.0f, 6.0f };    // 初期位置
@@ -38,8 +46,19 @@ private:
     static inline const Vector4 kEnemyColor = { 1.0f, 0.1f, 0.1f, 1.0f };    // 敵のカラー（赤）
     static inline const std::string kBulletEffectName = "PurpleFire";       // 弾エフェクト名（紫の炎）
 
+    // 頭部およびコライダーのローカル定数
+    static inline const Vector3 kHeadLocalPos = { 0.0f, 1.0f, 0.0f };
+    static inline const Vector3 kHeadLocalScale = { 0.6f, 0.6f, 0.6f };
+    static inline const Vector4 kHeadColor = { 1.0f, 0.8f, 0.8f, 1.0f };
+    static inline const Vector3 kBodyColliderSize = { 1.0f, 1.0f, 1.0f };
+    static inline const Vector3 kHeadColliderSize = { 0.6f, 0.6f, 0.6f };
+
 private:
-    std::unique_ptr<CubeObject> cube_;
+    std::unique_ptr<CubeObject> cube_;                 // 胴体モデル
+    std::unique_ptr<CubeObject> headCube_;             // 頭部モデル
+    std::unique_ptr<PartCollider> bodyCollider_;       // 胴体コライダー
+    std::unique_ptr<PartCollider> headCollider_;       // 頭部コライダー
+    Player* targetPlayer_ = nullptr;                   // 自機へのポインタ
 
     // 移動および射撃の制御用タイマーと状態
     float moveDirection_ = 1.0f; // 1.0f または -1.0f

@@ -90,3 +90,7 @@ void Object3D::DrawInspector() {
     ImGuiLightingControl(name_);
 #endif
 }
+
+Vector3 Object3D::GetWorldPosition() const {
+    return { matWorld_.m[3][0], matWorld_.m[3][1], matWorld_.m[3][2] };
+}

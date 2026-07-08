@@ -24,6 +24,11 @@ void SphereObject::Update() {
 
     // 行列更新
     Matrix4x4 world = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    if (parent_) {
+        world = Math::Multiply(world, parent_->GetWorldMatrix());
+    }
+    matWorld_ = world;
+
     Matrix4x4 wvp = Math::Multiply(Math::Multiply(world, CameraResource::GetCameraManager()->GetViewMatrix3D()), CameraResource::GetCameraManager()->GetProjectionMatrix3D());
 
     Matrix4x4 worldForNormal = world;

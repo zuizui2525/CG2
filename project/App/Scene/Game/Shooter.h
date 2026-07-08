@@ -56,6 +56,8 @@ public:
         return bullets_;
     }
 
+    const std::string& GetBulletEffectName() const { return bulletEffectName_; }
+
     // 衝突判定および位置調整用の仮想関数
     virtual Vector3 GetPosition() const = 0;
     virtual Vector3 GetSize() const = 0;

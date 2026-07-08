@@ -176,6 +176,7 @@ if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_B
     <ClCompile Include="App\Scene\Game\Enemy.cpp" />
     <ClCompile Include="App\Scene\Game\Route.cpp" />
     <ClCompile Include="App\Scene\Game\StageEditor.cpp" />
+    <ClCompile Include="App\Scene\Game\PartCollider.cpp" />
     <ClCompile Include="App\\Scene\\Clear\\ClearScene.cpp" />
     <ClCompile Include="App\\Scene\\GameOver\\GameOverScene.cpp" />
     <ClCompile Include="Engine\Base\Utils\DxUtils.cpp" />
@@ -359,6 +360,7 @@ if not exist "%SDK_BIN%\dxil.dll" if exist "%SDK_BIN_ALT%\dxil.dll" copy "%SDK_B
     <ClInclude Include="App\Scene\Game\Enemy.h" />
     <ClInclude Include="App\Scene\Game\Route.h" />
     <ClInclude Include="App\Scene\Game\StageEditor.h" />
+    <ClInclude Include="App\Scene\Game\PartCollider.h" />
     <ClInclude Include="App\\Scene\\Clear\\ClearScene.h" />
     <ClInclude Include="App\\Scene\\GameOver\\GameOverScene.h" />
     <ClInclude Include="Engine\Base\Utils\DxUtils.h" />

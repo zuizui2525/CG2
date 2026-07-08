@@ -77,6 +77,11 @@ public:
         }
     }
 
+    void SetParent(Object3D* parent) { parent_ = parent; }
+    Object3D* GetParent() const { return parent_; }
+    const Matrix4x4& GetWorldMatrix() const { return matWorld_; }
+    Vector3 GetWorldPosition() const;
+
     void DrawInspector() override;
 
 protected:
@@ -93,4 +98,13 @@ protected:
     Transform uvTransform_{};
     Material* materialData_ = nullptr;
     TransformationMatrix* wvpData_ = nullptr;
+
+    // 親オブジェクトとワールド行列
+    Object3D* parent_ = nullptr;
+    Matrix4x4 matWorld_ = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
 };

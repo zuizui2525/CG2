@@ -20,6 +20,7 @@ public:
     bool IsActive() const { return isActive_; }
     Vector3 GetPosition() const { return cube_->GetPosition(); }
     Vector3 GetSize() const { return cube_->GetSize(); }
+    const std::string& GetEffectName() const { return effectName_; }
 
     // Setter
     void Kill() { isActive_ = false; }

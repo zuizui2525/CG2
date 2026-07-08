@@ -1,6 +1,8 @@
 #include "App/Scene/Game/Player.h"
 #include "Engine/Math/Matrix/Matrix.h"
 #include "Engine/Base/BaseResource.h"
+#include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
+#include "Engine/Debug/GameViewWindow.h"
 
 Player::Player() {
     cube_ = std::make_unique<CubeObject>();
@@ -96,11 +98,21 @@ void Player::UpdateInput(Input* input) {
             static const float kMuzzleOffsetZ = 0.8f;
             Vector3 muzzlePos = Math::Add(weaponPosition_, Math::Multiply(kMuzzleOffsetZ, direction_));
 
-            // 画面中央（カメラの視線線上かつ十分前方）に弾を誘導する
-            static const float kTargetDistance = 50.0f;
-            Vector3 targetPos = Math::Add(cameraPosition_, Math::Multiply(kTargetDistance, direction_));
+            // マウスカーソル位置へのレイをカメラから計算して弾を誘導する
+            auto camera = CameraResource::GetCameraManager()->GetActiveCamera();
+            Vector2 viewSize = GameViewWindow::GetGameViewSize();
+            Vector2 mousePos = GameViewWindow::GetMousePosition();
+            Vector3 rayStart = cameraPosition_;
+            Vector3 rayDir = direction_;
+            if (camera) {
+                camera->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
+            }
 
-            // 銃口から画面中央 of 照準先ターゲットへの方向ベクトル
+            // レイの方向に十分進んだ目標地点
+            static const float kTargetDistance = 50.0f;
+            Vector3 targetPos = Math::Add(rayStart, Math::Multiply(kTargetDistance, rayDir));
+
+            // 銃口から照準先ターゲットへの方向ベクトル
             Vector3 bulletDir = Math::Normalize(Math::Subtract(targetPos, muzzlePos));
             Vector3 bulletVel = Math::Multiply(kBulletSpeed, bulletDir);
 

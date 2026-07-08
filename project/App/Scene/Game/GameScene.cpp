@@ -182,7 +182,7 @@ void GameScene::Update() {
     if (mode_ == GameMode::Play) {
         player_->SetAutoMoving(true);
 
-        currentDistance_ += kPlayerSpeed;
+        currentDistance_ += Player::GetAutoSpeed();
         if (currentDistance_ >= route_->GetTotalDistance()) {
             // ゴール到達時にクリアシーンへ
             SceneManager::GetInstance()->ChangeScene(kClearSceneName);
@@ -228,6 +228,7 @@ void GameScene::Update() {
 
     // 敵 (Enemy) の更新と死後消滅判定
     for (auto it = enemies_.begin(); it != enemies_.end();) {
+        (*it)->SetTargetPlayer(player_.get()); // 射撃の誘導用にプレイヤーポインタを渡す
         (*it)->Update();
         if ((*it)->IsDead()) {
             it = enemies_.erase(it);
@@ -240,49 +241,101 @@ void GameScene::Update() {
     stageEditor_->Update();
 
     if (mode_ == GameMode::Play) {
+        // 自機（プレイヤー）の被弾判定
+        Vector3 playerPos = player_->GetPosition();
+        Vector3 playerSize = player_->GetSize();
+        AABB playerAABB;
+        static constexpr float kHalf = 0.5f;
+        playerAABB.min = { playerPos.x - playerSize.x * kHalf, playerPos.y - playerSize.y * kHalf, playerPos.z - playerSize.z * kHalf };
+        playerAABB.max = { playerPos.x + playerSize.x * kHalf, playerPos.y + playerSize.y * kHalf, playerPos.z + playerSize.z * kHalf };
+
+        for (auto& enemy : enemies_) {
+            const auto& enemyBullets = enemy->GetBullets();
+            for (auto& bullet : enemyBullets) {
+                if (!bullet->IsActive()) continue;
+
+                // 敵の弾を球体と見なして当たり判定
+                Sphere bulletSphere;
+                bulletSphere.center = bullet->GetPosition();
+                static constexpr float kBulletCollisionRadius = 0.5f;
+                bulletSphere.radius = kBulletCollisionRadius;
+
+                if (IsCollision(playerAABB, bulletSphere)) {
+                    static constexpr int kEnemyDamage = 10;
+                    player_->Damage(kEnemyDamage, bullet->GetEffectName());
+                    bullet->Kill(); // 被弾した弾を非アクティブ化
+
+                    // 被弾時にカメラシェイク
+                    shakeTimer_ = kShakeDuration;
+                }
+            }
+        }
+
+        // プレイヤーの死亡（ゲームオーバー）判定
+        if (player_->IsDead()) {
+            SceneManager::GetInstance()->ChangeScene(kGameOverSceneName);
+            return;
+        }
+
         // プレイヤーの即時射撃（レイキャスト）判定
         if (player_->HasFiredThisFrame()) {
             Vector2 viewSize = GameViewWindow::GetGameViewSize();
-            Vector2 mouseCenter = { viewSize.x * 0.5f, viewSize.y * 0.5f };
+            Vector2 mousePos = GameViewWindow::GetMousePosition();
             Vector3 rayStart, rayDir;
-            mainCamera_->CreateRay(mouseCenter, viewSize.x, viewSize.y, rayStart, rayDir);
+            mainCamera_->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
 
             Segment raySegment;
             raySegment.origin = rayStart;
             raySegment.diff = Math::Multiply(100.0f, rayDir); // 射程 100.0f
 
             Enemy* hitEnemy = nullptr;
+            PartCollider::Type hitType = PartCollider::Type::Body;
             float minDistance = FLT_MAX;
-            for (auto& enemy : enemies_) {
-                Vector3 pos = enemy->GetPosition();
-                Vector3 size = enemy->GetSize();
-                
-                AABB aabb;
-                aabb.min = { pos.x - size.x * 0.5f, pos.y - size.y * 0.5f, pos.z - size.z * 0.5f };
-                aabb.max = { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, pos.z + size.z * 0.5f };
 
-                if (IsCollision(aabb, raySegment)) {
-                    float dist = Math::Length(Math::Subtract(pos, rayStart));
+            for (auto& enemy : enemies_) {
+                // 部位別コライダー（AABB）の取得
+                AABB headAABB = enemy->GetHeadCollider()->GetWorldAABB();
+                AABB bodyAABB = enemy->GetBodyCollider()->GetWorldAABB();
+
+                // 頭部判定（クリティカル）を優先
+                if (IsCollision(headAABB, raySegment)) {
+                    float dist = Math::Length(Math::Subtract(enemy->GetPosition(), rayStart));
                     if (dist < minDistance) {
                         minDistance = dist;
                         hitEnemy = enemy.get();
+                        hitType = PartCollider::Type::Head;
+                    }
+                }
+                // 胴体判定
+                else if (IsCollision(bodyAABB, raySegment)) {
+                    float dist = Math::Length(Math::Subtract(enemy->GetPosition(), rayStart));
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        hitEnemy = enemy.get();
+                        hitType = PartCollider::Type::Body;
                     }
                 }
             }
 
             if (hitEnemy) {
-                // 10ダメージを与えて即時破壊（最大HP=10）
-                hitEnemy->Damage(10, kPlayerBulletHitEffectName);
+                static constexpr int kNormalDamage = 5;
+                static constexpr int kCriticalDamage = 10;
+                
+                int damage = kNormalDamage;
+                if (hitType == PartCollider::Type::Head) {
+                    damage = kCriticalDamage; // クリティカル！
+                }
+
+                hitEnemy->Damage(damage, player_->GetBulletEffectName());
                 
                 // ヒット時にカメラシェイク
                 shakeTimer_ = kShakeDuration;
             }
         }
 
-        // レティクルの更新 (解像度 1280x720 基準の2Dプロジェクション空間における中央に配置)
-        float centerX = static_cast<float>(WindowApp::kClientWidth);
-        float centerY = static_cast<float>(WindowApp::kClientHeight);
-        reticleSprite_->SetPosition({ (centerX - 128.0f) * 0.5f, (centerY - 128.0f) * 0.5f, 0.0f });
+        // レティクルの更新 (マウスカーソルの位置に追従)
+        Vector2 mousePos = GameViewWindow::GetMousePosition();
+        reticleSprite_->SetPosition({ mousePos.x - 64.0f, mousePos.y - 64.0f, 0.0f });
         reticleSprite_->Update();
     }
 
