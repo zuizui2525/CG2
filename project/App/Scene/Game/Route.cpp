@@ -40,50 +40,55 @@ void Route::Update(BaseCamera* activeCamera) {
         Vector2 mousePos = GameViewWindow::GetMousePosition();
         Vector2 viewSize = GameViewWindow::GetGameViewSize();
 
-        Vector3 rayStart, rayDir;
-        activeCamera->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
+        // 画面全体の30%の左側領域のみ操作を受け付ける
+        static const float kLeftAreaRate = 0.3f;
+        if (mousePos.x <= viewSize.x * kLeftAreaRate) {
+            Vector3 rayStart, rayDir;
+            activeCamera->CreateRay(mousePos, viewSize.x * kLeftAreaRate, viewSize.y, rayStart, rayDir);
 
-        if (std::abs(rayDir.y) > 0.0001f) {
-            float t = (kPlaneIntersectY - rayStart.y) / rayDir.y;
-            if (t >= 0.0f) {
-                Vector3 intersectPos = Math::Add(rayStart, Math::Multiply(t, rayDir));
+            if (std::abs(rayDir.y) > 0.0001f) {
+                float t = (kPlaneIntersectY - rayStart.y) / rayDir.y;
+                if (t >= 0.0f) {
+                    Vector3 intersectPos = Math::Add(rayStart, Math::Multiply(t, rayDir));
 
-                // マップ範囲内に入っているかチェック
-                if (std::abs(intersectPos.x) <= kMapBoundaryX && intersectPos.z >= currentAreaStartZ_ && intersectPos.z <= currentAreaGoalZ_) {
-                    if (rawPoints_.empty()) {
-                        // 最初の一点はスタートエリア付近のみ許可
-                        float toStartX = intersectPos.x - 0.0f;
-                        float toStartZ = intersectPos.z - currentAreaStartZ_;
-                        float distToStartSq = toStartX * toStartX + toStartZ * toStartZ;
+                    // マップ範囲内に入っているかチェック
+                    if (std::abs(intersectPos.x) <= kMapBoundaryX && intersectPos.z >= currentAreaStartZ_ && intersectPos.z <= currentAreaGoalZ_) {
+                        if (rawPoints_.empty()) {
+                            // 最初の一点はスタートエリア付近のみ許可
+                            float toStartX = intersectPos.x - 0.0f;
+                            float toStartZ = intersectPos.z - currentAreaStartZ_;
+                            float distToStartSq = toStartX * toStartX + toStartZ * toStartZ;
 
-                        if (distToStartSq <= kAreaRadius * kAreaRadius) {
-                            ClearForNewArea();
-                            isDrawing_ = true;
-                            rawPoints_.push_back(intersectPos);
-                        }
-                    } else {
-                        if (!hasReachedGoal_) {
-                            Vector3 diff = Math::Subtract(intersectPos, rawPoints_.back());
-                            float dist = Math::Length(diff);
-                            if (dist >= kMinPointDistance) {
-                                // ゴールエリアに到達したかチェック
-                                float toGoalX = intersectPos.x - 0.0f;
-                                float toGoalZ = intersectPos.z - currentAreaGoalZ_;
-                                float distToGoalSq = toGoalX * toGoalX + toGoalZ * toGoalZ;
-
+                            if (distToStartSq <= kAreaRadius * kAreaRadius) {
+                                ClearForNewArea();
+                                isDrawing_ = true;
                                 rawPoints_.push_back(intersectPos);
+                            }
+                        } else {
+                            if (!hasReachedGoal_) {
+                                Vector3 diff = Math::Subtract(intersectPos, rawPoints_.back());
+                                float dist = Math::Length(diff);
+                                if (dist >= kMinPointDistance) {
+                                    // ゴールエリアに到達したかチェック
+                                    float toGoalX = intersectPos.x - 0.0f;
+                                    float toGoalZ = intersectPos.z - currentAreaGoalZ_;
+                                    float distToGoalSq = toGoalX * toGoalX + toGoalZ * toGoalZ;
 
-                                auto line = std::make_unique<LineObject>();
-                                line->Initialize(0);
-                                line->SetStartPoint(rawPoints_[rawPoints_.size() - 2]);
-                                line->SetEndPoint(rawPoints_.back());
-                                line->SetThickness(kLineThickness);
-                                lineObjects_.push_back(std::move(line));
+                                    rawPoints_.push_back(intersectPos);
 
-                                // ゴールエリアに入ったら終了
-                                if (distToGoalSq <= kAreaRadius * kAreaRadius) {
-                                    hasReachedGoal_ = true;
-                                    isDrawing_ = false;
+                                    auto line = std::make_unique<LineObject>();
+                                    line->Initialize(0);
+                                    line->SetStartPoint(rawPoints_[rawPoints_.size() - 2]);
+                                    line->SetEndPoint(rawPoints_.back());
+                                    line->SetThickness(kLineThickness);
+                                    line->SetColor(kLineColor);
+                                    lineObjects_.push_back(std::move(line));
+
+                                    // ゴールエリアに入ったら終了
+                                    if (distToGoalSq <= kAreaRadius * kAreaRadius) {
+                                        hasReachedGoal_ = true;
+                                        isDrawing_ = false;
+                                    }
                                 }
                             }
                         }
@@ -94,18 +99,66 @@ void Route::Update(BaseCamera* activeCamera) {
     } else {
         isDrawing_ = false;
     }
+}
 
-    // ラインオブジェクトの更新
+void Route::Update2D(const Vector3& intersectPos) {
+    if (input_->MousePress(0)) {
+        if (std::abs(intersectPos.x) <= kMapBoundaryX && intersectPos.z >= currentAreaStartZ_ && intersectPos.z <= currentAreaGoalZ_) {
+            if (rawPoints_.empty()) {
+                ClearForNewArea();
+                isDrawing_ = true;
+                
+                // 1点目はスタート地点固定
+                Vector3 startPos = { 0.0f, 0.0f, currentAreaStartZ_ };
+                rawPoints_.push_back(startPos);
+                
+                // 2点目として現在のドラッグ位置を追加
+                rawPoints_.push_back(intersectPos);
+
+                auto line = std::make_unique<LineObject>();
+                line->Initialize(0);
+                line->SetStartPoint(startPos);
+                line->SetEndPoint(intersectPos);
+                line->SetThickness(kLineThickness);
+                line->SetColor(kLineColor);
+                lineObjects_.push_back(std::move(line));
+            } else {
+                if (!hasReachedGoal_) {
+                    Vector3 diff = Math::Subtract(intersectPos, rawPoints_.back());
+                    float dist = Math::Length(diff);
+                    if (dist >= kMinPointDistance) {
+                        float toGoalX = intersectPos.x - 0.0f;
+                        float toGoalZ = intersectPos.z - currentAreaGoalZ_;
+                        float distToGoalSq = toGoalX * toGoalX + toGoalZ * toGoalZ;
+
+                        rawPoints_.push_back(intersectPos);
+
+                        auto line = std::make_unique<LineObject>();
+                        line->Initialize(0);
+                        line->SetStartPoint(rawPoints_[rawPoints_.size() - 2]);
+                        line->SetEndPoint(rawPoints_.back());
+                        line->SetThickness(kLineThickness);
+                        line->SetColor(kLineColor);
+                        lineObjects_.push_back(std::move(line));
+
+                        if (distToGoalSq <= kAreaRadius * kAreaRadius) {
+                            hasReachedGoal_ = true;
+                            isDrawing_ = false;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        isDrawing_ = false;
+    }
+
     for (auto& line : lineObjects_) {
         line->Update();
     }
-
-    // ギズモラインの更新
     for (auto& line : editorGizmoLines_) {
         line->Update();
     }
-
-    // 球体の更新
     startSphere_->Update();
     goalSphere_->Update();
 }
@@ -130,8 +183,23 @@ void Route::DrawSpheres() {
 }
 
 void Route::FinalizeRoute() {
-    const int kPathDivision = 20;
-    pathPoints_ = Math::GenerateCatmullRomPath(rawPoints_, kPathDivision);
+    const int kPathDivision = 40; // 視覚的なカクつきをなくすため分割数を40に増加
+
+    // rawPoints_のコピーを作成し、移動平均フィルタを複数回（5回）適用して急激なジグザグ・手ブレ角を丸める
+    std::vector<Vector3> smoothedPoints = rawPoints_;
+    if (smoothedPoints.size() >= 3) {
+        for (int iter = 0; iter < 5; ++iter) {
+            std::vector<Vector3> temp = smoothedPoints;
+            for (size_t i = 1; i < smoothedPoints.size() - 1; ++i) {
+                temp[i].x = (smoothedPoints[i - 1].x + smoothedPoints[i].x + smoothedPoints[i + 1].x) / 3.0f;
+                temp[i].y = (smoothedPoints[i - 1].y + smoothedPoints[i].y + smoothedPoints[i + 1].y) / 3.0f;
+                temp[i].z = (smoothedPoints[i - 1].z + smoothedPoints[i].z + smoothedPoints[i + 1].z) / 3.0f;
+            }
+            smoothedPoints = temp;
+        }
+    }
+
+    pathPoints_ = Math::GenerateCatmullRomPath(smoothedPoints, kPathDivision);
 
     BuildEqualSpacingTable();
 }
@@ -240,7 +308,7 @@ void Route::SetupArea(int areaIndex) {
     currentAreaIndex_ = areaIndex;
     
     // エリアごとの定数
-    static const float kAreaLength = 240.0f;
+    static const float kAreaLength = 120.0f;
     currentAreaStartZ_ = kStartAreaZ + static_cast<float>(areaIndex) * kAreaLength;
     currentAreaGoalZ_ = currentAreaStartZ_ + kAreaLength;
 
@@ -265,7 +333,7 @@ void Route::SetupAreaGizmos() {
     AddGizmoCircle({ 0.0f, 0.0f, currentAreaGoalZ_ }, kAreaRadius, { 0.0f, 0.5f, 1.0f, 1.0f });
 
     // ボス出現ライン (エリア3のZ=360fに配置)
-    static const float kBossSpawnLineZ = 360.0f;
+    static const float kBossSpawnLineZ = 180.0f;
     if (currentAreaIndex_ == 3) {
         // 赤い太めの横線を引く
         auto line = std::make_unique<LineObject>();
@@ -287,4 +355,46 @@ void Route::ClearForNewArea() {
     totalDistance_ = 0.0f;
     isDrawing_ = false;
     hasReachedGoal_ = false;
+}
+
+void Route::UpdateLines() {
+    for (auto& line : lineObjects_) {
+        line->Update();
+    }
+    for (auto& line : editorGizmoLines_) {
+        line->Update();
+    }
+}
+
+void Route::SyncFrom(const Route* other) {
+    currentAreaIndex_ = other->currentAreaIndex_;
+    currentAreaStartZ_ = other->currentAreaStartZ_;
+    currentAreaGoalZ_ = other->currentAreaGoalZ_;
+    isDrawing_ = other->isDrawing_;
+    hasReachedGoal_ = other->hasReachedGoal_;
+    rawPoints_ = other->rawPoints_;
+    pathPoints_ = other->pathPoints_;
+    accumDistances_ = other->accumDistances_;
+    totalDistance_ = other->totalDistance_;
+
+    // LineObject 群 (手書きルート線) の同期
+    if (lineObjects_.size() != other->lineObjects_.size()) {
+        lineObjects_.clear();
+        for (size_t i = 0; i < other->lineObjects_.size(); ++i) {
+            auto line = std::make_unique<LineObject>();
+            line->Initialize();
+            line->SetColor(kLineColor);
+            line->SetThickness(kLineThickness);
+            lineObjects_.push_back(std::move(line));
+        }
+    }
+    // 座標の同期
+    for (size_t i = 0; i < lineObjects_.size(); ++i) {
+        lineObjects_[i]->SetStartPoint(other->lineObjects_[i]->GetStartPoint());
+        lineObjects_[i]->SetEndPoint(other->lineObjects_[i]->GetEndPoint());
+    }
+
+    // 球体の同期
+    startSphere_->SetPosition(other->startSphere_->GetPosition());
+    goalSphere_->SetPosition(other->goalSphere_->GetPosition());
 }

@@ -20,9 +20,12 @@ public:
 
     void Initialize(Input* input, CameraManager* cameraMgr);
     void Update(BaseCamera* activeCamera);
+    void Update2D(const Vector3& intersectPos);
     void UpdateSpheres();
+    void UpdateLines();
     void Draw();
     void DrawSpheres();
+    void SyncFrom(const Route* other);
 
     // 走行モード開始時の補間計算
     void FinalizeRoute();
@@ -35,6 +38,7 @@ public:
     // ゲッター/セッター
     float GetTotalDistance() const { return totalDistance_; }
     const std::vector<float>& GetAccumDistances() const { return accumDistances_; }
+    const std::vector<Vector3>& GetRawPoints() const { return rawPoints_; } // ★追加
     bool IsDrawing() const { return isDrawing_; }
     bool HasReachedGoal() const { return hasReachedGoal_; }
     void Reset();
@@ -44,35 +48,35 @@ public:
     float GetCurrentAreaGoalZ() const { return currentAreaGoalZ_; }
     void ClearForNewArea();
 
+    void AddGizmoRect(const Vector3& center, float width, float depth, const Vector4& color);
+    void AddGizmoCircle(const Vector3& center, float radius, const Vector4& color);
+
 private:
     // 補間計算ヘルパー
     Vector3 CatmullRomInterpolate(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) const;
     void BuildEqualSpacingTable();
 
-    // ギズモ枠生成ヘルパー
-    void AddGizmoRect(const Vector3& center, float width, float depth, const Vector4& color);
-    void AddGizmoCircle(const Vector3& center, float radius, const Vector4& color);
-
 private:
     // マジックナンバー排除のための定数
-    static inline const float kMinPointDistance = 2.0f;              // 軌跡点間の最小距離
+    static inline const float kMinPointDistance = 0.2f;              // 軌跡点間の最小距離
     static inline const float kPlaneIntersectY = 0.0f;               // 地平面Y座標
-    static inline const float kGoalAreaZ = 480.0f;                  // ゴールエリアの中心Z
-    static inline const float kStartAreaZ = -480.0f;                // スタートエリアの中心Z
+    static inline const float kGoalAreaZ = 240.0f;                  // ゴールエリアの中心Z
+    static inline const float kStartAreaZ = -240.0f;                // スタートエリアの中心Z
     static inline const float kAreaRadius = 4.0f;                   // 円形判定エリアの半径
     static inline const float kMapBoundaryX = 15.0f;                // マップの左右外枠
     static inline const float kMapBoundaryZ = 500.0f;               // マップの前後外枠
     static inline const int kCircleDivision = 32;                   // 円形ギズモの描画分割数
     static inline const float kPi = 3.14159265f;                    // 円周率
-    static inline const float kLineThickness = 0.15f;               // ルート線の太さ
+    static inline const float kLineThickness = 0.4f;                // ルート線の太さ
     static inline const float kGizmoThickness = 0.15f;              // ギズモ線の太さ
+    static inline const Vector4 kLineColor = { 1.0f, 1.0f, 0.0f, 1.0f }; // ルート線の色（目立つ黄色）
     static inline const float kHalf = 0.5f;
 
 private:
     Input* input_ = nullptr;
     CameraManager* cameraMgr_ = nullptr;
 
-    std::vector<Vector3> rawPoints_;                 // 記録した軌跡 of 点配列
+    std::vector<Vector3> rawPoints_;                 // 記録した軌跡の点配列
     std::vector<Vector3> pathPoints_;                // 補間された滑らかなルート配列
     std::vector<float> accumDistances_;              // 各補間点の累積距離テーブル（等速化用）
     float totalDistance_ = 0.0f;                     // ルートの総距離
@@ -90,6 +94,6 @@ private:
     void SetupAreaGizmos();
 
     int currentAreaIndex_ = 0;                       // 現在のエリアインデックス (0〜3)
-    float currentAreaStartZ_ = -480.0f;              // 現在のエリアの開始Z座標
-    float currentAreaGoalZ_ = -240.0f;               // 現在のエリアの目標Z座標
+    float currentAreaStartZ_ = -240.0f;              // 現在のエリアの開始Z座標
+    float currentAreaGoalZ_ = -120.0f;               // 現在のエリアの目標Z座標
 };

@@ -3,6 +3,7 @@
 #include "Engine/Base/BaseResource.h"
 #include "Engine/Graphics/Objects/Camera/Manager/CameraManager.h"
 #include "Engine/Debug/GameViewWindow.h"
+#include "Engine/Base/WindowApp/WindowApp.h"
 
 Player::Player() {
     cube_ = std::make_unique<CubeObject>();
@@ -42,27 +43,6 @@ void Player::UpdateInput(Input* input) {
 
     Vector3 pos = cube_->GetPosition();
 
-    // 自動走行中でない場合のみ手動での左右移動を有効化する
-    if (!isAutoMoving_) {
-        // 左右移動処理 (ADキー)
-        if (input->Press(kMoveLeftKey)) {
-            pos.x -= kSpeed;
-        }
-        if (input->Press(kMoveRightKey)) {
-            pos.x += kSpeed;
-        }
-
-        // 移動制限
-        if (pos.x < -kMoveLimitX) {
-            pos.x = -kMoveLimitX;
-        }
-        if (pos.x > kMoveLimitX) {
-            pos.x = kMoveLimitX;
-        }
-
-        cube_->SetPosition(pos);
-    }
-    
     cube_->Update();
 
     // 連射間隔タイマーの更新
@@ -100,12 +80,22 @@ void Player::UpdateInput(Input* input) {
 
             // マウスカーソル位置へのレイをカメラから計算して弾を誘導する
             auto camera = CameraResource::GetCameraManager()->GetActiveCamera();
+            float clientW = static_cast<float>(WindowApp::kClientWidth);
+            float clientH = static_cast<float>(WindowApp::kClientHeight);
             Vector2 viewSize = GameViewWindow::GetGameViewSize();
             Vector2 mousePos = GameViewWindow::GetMousePosition();
+
+            // 1280x720の固定解像度スケールに変換する
+            Vector2 scaledMousePos = mousePos;
+            if (viewSize.x > 0.0f && viewSize.y > 0.0f) {
+                scaledMousePos.x = (mousePos.x / viewSize.x) * clientW;
+                scaledMousePos.y = (mousePos.y / viewSize.y) * clientH;
+            }
+
             Vector3 rayStart = cameraPosition_;
             Vector3 rayDir = direction_;
             if (camera) {
-                camera->CreateRay(mousePos, viewSize.x, viewSize.y, rayStart, rayDir);
+                camera->CreateRay(scaledMousePos, clientW, clientH, rayStart, rayDir);
             }
 
             // レイの方向に十分進んだ目標地点

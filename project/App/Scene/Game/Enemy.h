@@ -98,7 +98,7 @@ private:
     static inline const float kCenterSpeedX = 0.15f;         // 中央へのスライド速度
     static inline const float kToCenterGaugeMax = 1.0f;
     static inline const float kAttackGaugeMax = 1.0f;
-    static inline const float kGaugeIncreaseRate = 0.001f;    // 1フレームあたりのゲージ増加量
+    static inline const float kGaugeIncreaseRate = 0.008f;    // 1フレームあたりのゲージ増加量
     static inline const float kBossHpMultiplier = 10.0f;     // ボスのHP倍率
     static inline const int kNormalEnemyHp = 3;              // 敵の通常HP
     static inline const int kBossEnemyHp = 30;               // ボスのHP

@@ -5,6 +5,7 @@
 
 class PostProcess;
 class LineObject;
+class Stage;
 
 // エンジンコンポーネントのインクルード
 #include "Engine/Input/Input.h"
@@ -25,8 +26,8 @@ class LineObject;
 class GameScene : public IScene {
 public:
     // コンストラクタ・デストラクタ
-    GameScene() = default;
-    ~GameScene() override = default;
+    GameScene();
+    ~GameScene() override;
 
     // IScene インターフェースの仮想関数オーバーライド
     void Initialize() override;     // 初期化処理
@@ -60,7 +61,11 @@ private:
 
     // シーン内で作成・管理するオブジェクト
     std::shared_ptr<BaseCamera> mainCamera_;        // メインカメラ
+    std::shared_ptr<BaseCamera> cameraZoom_;        // ズームカメラ（拡大3Dビュー用）
     std::shared_ptr<DebugCamera> debugCamera_;      // デバッグ確認用フリーカメラ
+    Vector3 targetZoom_ = { 0.0f, 0.0f, 0.0f };      // ズームカメラの注視点
+    std::vector<std::unique_ptr<LineObject>> zoomFrameLines_; // 左画面に描画するカメラ視野可視化枠線
+    void UpdateZoomCamera();                        // ズームカメラの更新制御関数
     std::unique_ptr<DirectionalLightObject> dirLight_; // 平行光源
     std::unique_ptr<Player> player_;                // プレイヤーオブジェクト
     std::vector<std::unique_ptr<Enemy>> enemies_;   // 複数敵オブジェクトリスト
@@ -75,10 +80,24 @@ private:
     GameMode mode_ = GameMode::DrawRoute;
     float currentDistance_ = 0.0f;                   // 現在の走行距離
 
-    // 仮マップオブジェクトおよび床
-    std::vector<std::unique_ptr<CubeObject>> mapObjects_;          // 仮マップの柱
-    std::unique_ptr<SquareObject> floorSquare_;                    // 床
-    std::vector<std::unique_ptr<LineObject>> pillarGizmoLines_;    // 柱の警告リングギズモ（描画モード用）
+    // マップステージ
+    std::unique_ptr<Stage> stage_;
+
+    // 2Dミニマップ用のメンバ変数 (左画面 2D 描画用)
+    std::unique_ptr<SpriteObject> minimapBg_;
+    std::unique_ptr<SpriteObject> startIcon_;
+    std::unique_ptr<SpriteObject> goalIcon_;
+    std::unique_ptr<SpriteObject> indicatorIcon_;
+    std::vector<std::unique_ptr<SpriteObject>> pillarIcons_;
+    std::vector<std::unique_ptr<SpriteObject>> routeLineSprites_;
+    std::unique_ptr<SpriteObject> zoomFrame2D_[4];   // ズームカメラの視野範囲枠線 (2D)
+    std::unique_ptr<SpriteObject> minimapBorderFrame2D_[4]; // ミニマップの外枠線 (2D)
+    size_t activeMiniMapLineCount_ = 0;              // 有効なルート手書き線スプライト数
+
+
+
+    // 右画面用 3D インジケータ (ズームカメラ 3D 空間用)
+    std::unique_ptr<SphereObject> cursorIndicatorZoom_;
 
     struct SpawnTrigger {
         float z;
@@ -103,9 +122,11 @@ private:
     bool isEnemyEnabled_ = true; // 敵の有効化フラグ（不要になったら削除可能）
     int shakeTimer_ = 0;
     float cameraYawOffset_ = 0.0f; // A/Dキーでのカメラ首振りヨー角オフセット
-    float lastSpawnZ_ = -480.0f;   // 前回の敵の湧きZ座標
+    float lastSpawnZ_ = -240.0f;   // 前回の敵の湧きZ座標
     bool hasBossSpawned_ = false;  // ボスがすでに湧いたか
     static inline const Vector3 kDefaultCameraPos = { 0.0f, 4.0f, -20.0f }; // メインカメラの基準位置
+    static inline const Vector3 kZoomCameraOffset = { 0.0f, 25.0f, -20.0f }; // ズームカメラの注視点からのオフセット
+    static inline const float kZoomScrollSpeed = 0.15f;                      // ズームカメラの右ドラッグスクロール速度
     static inline const int kShakeDuration = 15;                             // シェイクフレーム数
     static inline const float kShakeIntensity = 0.2f;                        // シェイクの強さ
     static inline const std::string kRainEffectName = "WaterDrop";            // 雨のエフェクト名
@@ -117,6 +138,6 @@ private:
 
     // 敵湧き制御用定数
     static inline const float kSpawnIntervalZ = 15.0f;                      // 敵の湧くZ間隔
-    static inline const float kBossSpawnZ = 360.0f;                          // ボスが湧くZ座標
+    static inline const float kBossSpawnZ = 180.0f;                          // ボスが湧くZ座標
 };
 

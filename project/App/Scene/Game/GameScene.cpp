@@ -14,6 +14,7 @@
 #include "Engine/Debug/SceneHierarchy.h"
 #include <cstdlib>
 #include "Engine/Graphics/Objects/3d/Line/LineObject.h"
+#include "App/Scene/Game/Stage/Stage.h"
 
 // 不要になったヒットエフェクト名定数を削除
 
@@ -25,7 +26,7 @@ void GameScene::Initialize() {
     // 0. ポストプロセスのポインタを取得してメンバ変数に保持
     postProcess_ = SceneManager::GetInstance()->GetPostProcess();
     if (postProcess_) {
-        postProcess_->SetUnderwaterActive(true);
+        //postProcess_->SetUnderwaterActive(true);
     }
 
     // 1. 各マネージャへのポインタをリソース管理者から取得
@@ -79,60 +80,82 @@ void GameScene::Initialize() {
     route_ = std::make_unique<Route>();
     route_->Initialize(input_, cameraMgr_);
 
+    // ズームカメラの生成とマネージャへの登録（ルート初期化後に配置）
+    cameraZoom_ = std::make_shared<BaseCamera>();
+    cameraZoom_->Initialize();
+    float startZ = route_->GetCurrentAreaStartZ();
+    targetZoom_ = { 0.0f, 0.0f, startZ };
+    cameraZoom_->SetPosition(Math::Add(targetZoom_, kZoomCameraOffset));
+    cameraZoom_->SetTarget(targetZoom_);
+    cameraMgr_->AddCamera("Zoom", cameraZoom_);
+
+    // 視野可視化用枠線の初期化（緑のライン）
+    zoomFrameLines_.clear();
+    for (int i = 0; i < 4; ++i) {
+        auto line = std::make_unique<LineObject>();
+        line->Initialize(0);
+        static const float kFrameLineThickness = 0.3f;
+        line->SetThickness(kFrameLineThickness);
+        line->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
+        zoomFrameLines_.push_back(std::move(line));
+    }
+
     stageEditor_ = std::make_unique<StageEditor>();
     stageEditor_->Initialize(&enemies_);
 
     // 保存されたステージがあればロードする
     stageEditor_->LoadStage("resources/stages/stage1.json");
 
-    // 7. 仮マップオブジェクト (交互に並ぶ柱Cube) の生成
-    mapObjects_.clear();
-    for (float z = -480.0f; z <= 480.0f; z += 10.0f) {
-        float x = (static_cast<int>(z) % 20 == 0) ? -12.0f : 12.0f;
-        auto pillar = std::make_unique<CubeObject>();
-        pillar->Initialize();
-        pillar->SetPosition({ x, 5.0f, z });
-        pillar->SetScale({ 2.0f, 10.0f, 2.0f });
-        pillar->SetColor({ 0.6f, 0.6f, 0.7f, 1.0f });
-        mapObjects_.push_back(std::move(pillar));
+    // 7. マップステージの初期化
+    stage_ = std::make_unique<Stage>();
+    stage_->Initialize();
+
+    // 2Dミニマップ用の背景スプライトの初期化
+    minimapBg_ = std::make_unique<SpriteObject>();
+    minimapBg_->Initialize(0); // ライティングなし
+    minimapBg_->GetMaterialData()->color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白背景
+
+    // スタート・ゴール・カーソル赤丸インジケータ (2D)
+    startIcon_ = std::make_unique<SpriteObject>();
+    startIcon_->Initialize(0);
+    startIcon_->GetMaterialData()->color = { 0.1f, 0.8f, 0.1f, 1.0f }; // 緑色（白背景で見やすい色）
+
+    goalIcon_ = std::make_unique<SpriteObject>();
+    goalIcon_->Initialize(0);
+    goalIcon_->GetMaterialData()->color = { 0.0f, 0.5f, 1.0f, 1.0f }; // 青色
+
+    indicatorIcon_ = std::make_unique<SpriteObject>();
+    indicatorIcon_->Initialize(0);
+    indicatorIcon_->GetMaterialData()->color = { 1.0f, 0.0f, 0.0f, 1.0f }; // 赤色
+
+    // 柱アイコンの初期化
+    pillarIcons_.clear();
+    const auto& pillars = stage_->GetPillars();
+    for (size_t i = 0; i < pillars.size(); ++i) {
+        auto icon = std::make_unique<SpriteObject>();
+        icon->Initialize(0);
+        icon->GetMaterialData()->color = { 0.9f, 0.2f, 0.2f, 1.0f }; // 赤っぽい色
+        pillarIcons_.push_back(std::move(icon));
     }
 
-	// 8. 地面用の平面オブジェクトの生成
-	floorSquare_ = std::make_unique<SquareObject>();
-    floorSquare_->Initialize();
-	floorSquare_->SetPosition({ 0.0f, 0.0f, 0.0f });
-    floorSquare_->SetSize({25.0f, 1000.0f});
-	floorSquare_->SetRotate({ 1.57f, 0.0f, 0.0f }); // X軸で90度回転して水平にする
-    floorSquare_->SetColor({ 0.5f, 1.0f, 0.5f, 1.0f }); // 黄緑色
+    // 右画面用 3D 赤丸インジケータ (ズーム3D空間用)
+    cursorIndicatorZoom_ = std::make_unique<SphereObject>();
+    cursorIndicatorZoom_->Initialize();
+    cursorIndicatorZoom_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+    cursorIndicatorZoom_->SetScale({ 1.2f, 1.2f, 1.2f });
 
-    // 9. 柱の警告リングギズモ（描画モード用）の生成
-    pillarGizmoLines_.clear();
-    static const int kGizmoCircleDivision = 16; // 分割数を16にし描画負荷を低減
-    static const float kGizmoRadius = 4.0f;     // 柱にぶつからないための安全警告半径
-    static const float kPiVal = 3.14159265f;
-    static const float kGizmoThickness = 0.2f;
-    static const Vector4 kWarningColor = { 1.0f, 0.3f, 0.0f, 1.0f }; // オレンジの警告色
+    // 視野範囲枠線スプライトの初期化 (2D)
+    for (int i = 0; i < 4; ++i) {
+        zoomFrame2D_[i] = std::make_unique<SpriteObject>();
+        zoomFrame2D_[i]->Initialize(0);
+        zoomFrame2D_[i]->GetMaterialData()->color = { 0.0f, 0.8f, 0.0f, 1.0f }; // 緑色
+    }
 
-    for (const auto& pillar : mapObjects_) {
-        Vector3 center = pillar->GetPosition();
-        std::vector<Vector3> points;
-        points.reserve(kGizmoCircleDivision);
-        for (int i = 0; i < kGizmoCircleDivision; ++i) {
-            float theta = (2.0f * kPiVal * static_cast<float>(i)) / static_cast<float>(kGizmoCircleDivision);
-            float x = center.x + kGizmoRadius * std::cos(theta);
-            float z = center.z + kGizmoRadius * std::sin(theta);
-            points.push_back({ x, 0.01f, z });
-        }
-
-        for (int i = 0; i < kGizmoCircleDivision; ++i) {
-            auto line = std::make_unique<LineObject>();
-            line->Initialize(0);
-            line->SetStartPoint(points[i]);
-            line->SetEndPoint(points[(i + 1) % kGizmoCircleDivision]);
-            line->SetThickness(kGizmoThickness);
-            line->SetColor(kWarningColor);
-            pillarGizmoLines_.push_back(std::move(line));
-        }
+    // ミニマップ外枠線スプライトの初期化 (2D)
+    for (int i = 0; i < 4; ++i) {
+        minimapBorderFrame2D_[i] = std::make_unique<SpriteObject>();
+        minimapBorderFrame2D_[i]->Initialize(0);
+        minimapBorderFrame2D_[i]->GetMaterialData()->color = { 0.5f, 0.5f, 0.5f, 1.0f }; // 中間グレー（白背景で見やすい）
     }
 }
 
@@ -177,27 +200,316 @@ void GameScene::ImGuiControl() {
 void GameScene::Update() {
     // ルート描画モードの更新処理
     if (mode_ == GameMode::DrawRoute) {
-        // 毎フレームカメラの位置・回転とTarget無効化を強制適用（エディタ等の上書き防止）
-        // カメラの高さYを530.0fとし、Zは現在のエリアのZ中心にする
-        static const float kDrawCameraHeight = 530.0f;
-        static const float kHalfScale = 0.5f;
-        float areaCenterZ = (route_->GetCurrentAreaStartZ() + route_->GetCurrentAreaGoalZ()) * kHalfScale;
-        mainCamera_->SetPosition({ 0.0f, kDrawCameraHeight, areaCenterZ });
-        mainCamera_->SetRotation(kTopDownCameraRot);
-        mainCamera_->DisableTarget();
+        // 1. 固定のDirectX12バックバッファ解像度を取得
+        float clientW = static_cast<float>(WindowApp::kClientWidth);
+        float clientH = static_cast<float>(WindowApp::kClientHeight);
 
-        // ルートエディタの更新
-        route_->Update(mainCamera_.get());
-
-        // 仮マップオブジェクト（柱Cube）の更新
-        for (auto& pillar : mapObjects_) {
-            pillar->Update();
+        // ImGuiのGame Viewウィンドウのサイズを取得し、マウス座標を1280x720スケールに変換する
+        Vector2 mousePos = GameViewWindow::GetMousePosition();
+        Vector2 viewSize = GameViewWindow::GetGameViewSize();
+        Vector2 scaledMousePos = mousePos;
+        if (viewSize.x > 0.0f && viewSize.y > 0.0f) {
+            scaledMousePos.x = (mousePos.x / viewSize.x) * clientW;
+            scaledMousePos.y = (mousePos.y / viewSize.y) * clientH;
         }
 
-        // 柱の警告リングギズモの更新
-        for (auto& line : pillarGizmoLines_) {
-            line->Update();
+        float vpWidth = clientW * 0.3f;
+        float vpHeight = clientH;
+
+        // マップのアスペクト比フィット計算 (臨機応変に太く表示するため 0.45f に変更)
+        static const float kAspect3D = 0.45f;
+        float aspect2D = vpWidth / vpHeight;
+
+        float mapW = 0.0f;
+        float mapH = 0.0f;
+        if (aspect2D > kAspect3D) {
+            // ビューポートが横長 -> 高さフィット
+            mapH = vpHeight;
+            mapW = mapH * kAspect3D;
+        } else {
+            // ビューポートが縦長 -> 幅フィット
+            mapW = vpWidth;
+            mapH = mapW / kAspect3D;
         }
+
+        float offsetX = (vpWidth - mapW) * 0.5f;
+        float offsetY = (vpHeight - mapH) * 0.5f;
+
+        float startZ = route_->GetCurrentAreaStartZ();
+        float goalZ = route_->GetCurrentAreaGoalZ();
+
+        // 2. 左画面マウス位置からの2D->3D座標逆変換（ドラッグによるルート描画）
+        bool isClickStarted = input_->MouseTrigger(0);
+        bool isPressing = input_->MousePress(0);
+
+        // 手書き中であるか、またはミニマップ白枠内でクリックが開始された場合
+        if (isPressing && (route_->IsDrawing() || (isClickStarted && scaledMousePos.x <= vpWidth))) {
+            float marginX = mapW * 0.1f;
+            float tX = (scaledMousePos.x - (offsetX + marginX)) / (mapW - 2.0f * marginX);
+            tX = std::clamp(tX, 0.0f, 1.0f); // 枠外にはみ出しても境界クランプでドラッグを継続
+
+            float marginY = mapH * 0.1f;
+            float tZ = ((offsetY + mapH - marginY) - scaledMousePos.y) / (mapH - 2.0f * marginY);
+            tZ = std::clamp(tZ, 0.0f, 1.0f); // 枠外にはみ出しても境界クランプでドラッグを継続
+
+            Vector3 dragWorldPos;
+            dragWorldPos.x = -15.0f + tX * 30.0f;
+            dragWorldPos.z = startZ + tZ * (goalZ - startZ);
+            dragWorldPos.y = 0.0f;
+
+            // ★追加: マウス手ブレ防止用ローパスフィルタ（平滑化）
+            static Vector3 s_smoothedDragPos = dragWorldPos;
+            if (isClickStarted) {
+                s_smoothedDragPos = dragWorldPos;
+            } else {
+                s_smoothedDragPos.x = s_smoothedDragPos.x * 0.6f + dragWorldPos.x * 0.4f;
+                s_smoothedDragPos.y = s_smoothedDragPos.y * 0.6f + dragWorldPos.y * 0.4f;
+                s_smoothedDragPos.z = s_smoothedDragPos.z * 0.6f + dragWorldPos.z * 0.4f;
+            }
+
+            // 2D入力でルートを更新
+            route_->Update2D(s_smoothedDragPos);
+
+            // ★追加: 線を引いているときにカメラの注視点をその位置に即座に追従させる
+            targetZoom_ = s_smoothedDragPos;
+        } else {
+            // マウスドラッグしていない時は描画停止処理
+            route_->Update2D({ 9999.0f, 0.0f, 0.0f }); // 範囲外のダミー値で手書き停止を誘発
+        }
+
+        // ★追加: 右クリック（または右ドラッグ）によるカメラのLoL風ミニマップ移動
+        if (input_->MousePress(1) && scaledMousePos.x <= vpWidth) {
+            float marginX = mapW * 0.1f;
+            float tX = (scaledMousePos.x - (offsetX + marginX)) / (mapW - 2.0f * marginX);
+            tX = std::clamp(tX, 0.0f, 1.0f);
+
+            float marginY = mapH * 0.1f;
+            float tZ = ((offsetY + mapH - marginY) - scaledMousePos.y) / (mapH - 2.0f * marginY);
+            tZ = std::clamp(tZ, 0.0f, 1.0f);
+
+            targetZoom_.x = -15.0f + tX * 30.0f;
+            targetZoom_.z = startZ + tZ * (goalZ - startZ);
+        }
+
+        // 3. ズームカメラの更新（右ドラッグによるスクロール等）
+        UpdateZoomCamera();
+
+        // 4. 右画面（Zoomカメラ 3D空間用）のWVP計算・更新
+        cameraMgr_->SetActiveCamera("Zoom");
+        cameraZoom_->UpdateProjection((clientW * 0.7f) / clientH); // 右70%用アスペクト比を設定
+        stage_->Update();
+        route_->UpdateSpheres();
+        route_->UpdateLines();
+
+        // 3D赤丸インジケータ（右画面の床用）の更新
+        Vector3 indicatorPos = { targetZoom_.x, 0.1f, targetZoom_.z };
+        cursorIndicatorZoom_->SetPosition(indicatorPos);
+        cursorIndicatorZoom_->Update();
+
+        // アクティブカメラをMainに戻しておく
+        cameraMgr_->SetActiveCamera(kMainCameraName);
+
+        // 5. 2Dミニマップ表示用スプライトの座標計算・更新
+        // 一時的に2Dプロジェクション行列を左画面（vpWidth×vpHeight）に適合させる
+        cameraMgr_->SetProjectionMatrix2D(Math::MakeOrthographicMatrix(0.0f, 0.0f, vpWidth, vpHeight, 0.0f, 100.0f));
+
+        float marginX = mapW * 0.1f;
+        float marginY = mapH * 0.1f;
+
+        // 背景スプライトは左画面全体を白で埋める
+        minimapBg_->SetSize(vpWidth, vpHeight);
+        minimapBg_->SetPosition({ 0.0f, 0.0f });
+        minimapBg_->Update();
+
+        // スタートアイコン
+        float startIconX = offsetX + marginX + 0.5f * (mapW - 2.0f * marginX); // X=0 (中央)
+        float startIconY = offsetY + mapH - marginY; // Z=StartZ (一番手前)
+        startIcon_->SetSize(24.0f, 24.0f);
+        startIcon_->SetPosition({ startIconX - 12.0f, startIconY - 12.0f });
+        startIcon_->Update();
+
+        // ゴールアイコン
+        float goalIconX = offsetX + marginX + 0.5f * (mapW - 2.0f * marginX); // X=0 (中央)
+        float goalIconY = offsetY + marginY; // Z=GoalZ (一番奥)
+        goalIcon_->SetSize(24.0f, 24.0f);
+        goalIcon_->SetPosition({ goalIconX - 12.0f, goalIconY - 12.0f });
+        goalIcon_->Update();
+
+        // 柱アイコン
+        const auto& pillars = stage_->GetPillars();
+        for (size_t i = 0; i < pillars.size(); ++i) {
+            Vector3 pPos = pillars[i]->GetPosition();
+            float tX = (pPos.x - (-15.0f)) / 30.0f;
+            float px = offsetX + marginX + tX * (mapW - 2.0f * marginX);
+
+            float tZ = (pPos.z - startZ) / (goalZ - startZ);
+            float py = (offsetY + mapH - marginY) - tZ * (mapH - 2.0f * marginY);
+
+            // 柱サイズに応じた大きさに設定
+            pillarIcons_[i]->SetSize(16.0f, 16.0f);
+            pillarIcons_[i]->SetPosition({ px - 8.0f, py - 8.0f });
+            pillarIcons_[i]->Update();
+        }
+
+        // 赤丸インジケータ（左画面のカーソル現在位置用）
+        float indTX = (targetZoom_.x - (-15.0f)) / 30.0f;
+        float indPX = offsetX + marginX + indTX * (mapW - 2.0f * marginX);
+        float indTZ = (targetZoom_.z - startZ) / (goalZ - startZ);
+        float indPY = (offsetY + mapH - marginY) - indTZ * (mapH - 2.0f * marginY);
+        indicatorIcon_->SetSize(24.0f, 24.0f);
+        indicatorIcon_->SetPosition({ indPX - 12.0f, indPY - 12.0f });
+        indicatorIcon_->Update();
+
+        // 手書きルート軌跡線の更新（プールによる高速使い回し＋Catmull-Rom補間による超滑らか描画！）
+        const auto& rawPoints = route_->GetRawPoints();
+        activeMiniMapLineCount_ = 0;
+        if (rawPoints.size() >= 2) {
+            // 1. 手書き点の平滑化（3回移動平均）
+            std::vector<Vector3> smoothedPoints = rawPoints;
+            if (smoothedPoints.size() >= 3) {
+                for (int iter = 0; iter < 3; ++iter) {
+                    std::vector<Vector3> temp = smoothedPoints;
+                    for (size_t i = 1; i < smoothedPoints.size() - 1; ++i) {
+                        temp[i].x = (smoothedPoints[i - 1].x + smoothedPoints[i].x + smoothedPoints[i + 1].x) / 3.0f;
+                        temp[i].y = (smoothedPoints[i - 1].y + smoothedPoints[i].y + smoothedPoints[i + 1].y) / 3.0f;
+                        temp[i].z = (smoothedPoints[i - 1].z + smoothedPoints[i].z + smoothedPoints[i + 1].z) / 3.0f;
+                    }
+                    smoothedPoints = temp;
+                }
+            }
+
+            // 2. 平滑化した制御点から、Catmull-Rom補間で滑らかな高密度線分配列を生成
+            std::vector<Vector3> densePoints = Math::GenerateCatmullRomPath(smoothedPoints, 5); // 各区間を5分割
+
+            size_t neededLines = 0;
+            if (densePoints.size() >= 2) {
+                neededLines = densePoints.size() - 1;
+            }
+
+            // 不足分をプールに新規追加
+            while (routeLineSprites_.size() < neededLines) {
+                auto lineSprite = std::make_unique<SpriteObject>();
+                lineSprite->Initialize(0);
+                routeLineSprites_.push_back(std::move(lineSprite));
+            }
+
+            activeMiniMapLineCount_ = neededLines;
+
+            for (size_t i = 0; i < neededLines; ++i) {
+                Vector3 pt0 = densePoints[i];
+                Vector3 pt1 = densePoints[i + 1];
+
+                // 2Dミニマップ上の座標に変換
+                float tX0 = (pt0.x - (-15.0f)) / 30.0f;
+                float px0 = offsetX + marginX + tX0 * (mapW - 2.0f * marginX);
+                float tZ0 = (pt0.z - startZ) / (goalZ - startZ);
+                float py0 = (offsetY + mapH - marginY) - tZ0 * (mapH - 2.0f * marginY);
+
+                float tX1 = (pt1.x - (-15.0f)) / 30.0f;
+                float px1 = offsetX + marginX + tX1 * (mapW - 2.0f * marginX);
+                float tZ1 = (pt1.z - startZ) / (goalZ - startZ);
+                float py1 = (offsetY + mapH - marginY) - tZ1 * (mapH - 2.0f * marginY);
+
+                float dx = px1 - px0;
+                float dy = py1 - py0;
+                float dist = sqrtf(dx * dx + dy * dy);
+                if (dist < 0.001f) {
+                    dist = 0.001f;
+                }
+
+                float angle = atan2f(dy, dx);
+
+                // プール内の既存スプライトを再利用してパラメータ設定
+                auto& lineSprite = routeLineSprites_[i];
+                lineSprite->GetMaterialData()->color = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黒色
+                lineSprite->SetSize(dist, 1.2f); // ギザギザを減らしスマートに見せるため、太さを1.2fに細くする
+                lineSprite->GetTransform().rotate.z = angle;
+                lineSprite->SetPosition({ px0, py0 });
+                lineSprite->Update();
+            }
+        }
+
+        // ★追加: ズームカメラの視野範囲を表記する四角 (2D)
+        // ズームカメラの視野サイズ定数（Y=24.0f の高さから見た地平面上の視野サイズ）
+        static const float kZoomViewWidth3D = 24.0f;
+        static const float kZoomViewHeight3D = 18.0f;
+
+        float vpRightAspect = (clientW * 0.7f) / clientH;
+        float viewH3D = kZoomViewHeight3D;
+        float viewW3D = viewH3D * vpRightAspect;
+
+        float minX3D = targetZoom_.x - viewW3D * 0.5f;
+        float maxX3D = targetZoom_.x + viewW3D * 0.5f;
+        float minZ3D = targetZoom_.z - viewH3D * 0.5f;
+        float maxZ3D = targetZoom_.z + viewH3D * 0.5f;
+
+        auto to2D = [&](float wx, float wz) -> Vector2 {
+            float tX = (wx - (-15.0f)) / 30.0f;
+            float px = offsetX + marginX + tX * (mapW - 2.0f * marginX);
+
+            float tZ = (wz - startZ) / (goalZ - startZ);
+            float py = (offsetY + mapH - marginY) - tZ * (mapH - 2.0f * marginY);
+            return { px, py };
+        };
+
+        Vector2 pMin = to2D(minX3D, minZ3D);
+        Vector2 pMax = to2D(maxX3D, maxZ3D);
+
+        float x0 = pMin.x;
+        float x1 = pMax.x;
+        float y0 = pMax.y; // 2DではYが小さい方が上
+        float y1 = pMin.y; // Yが大きい方が下
+        float frameThickness = 2.0f;
+
+        // 0: 上辺
+        zoomFrame2D_[0]->SetPosition({ x0, y0 });
+        zoomFrame2D_[0]->SetSize(x1 - x0, frameThickness);
+        zoomFrame2D_[0]->Update();
+
+        // 1: 下辺
+        zoomFrame2D_[1]->SetPosition({ x0, y1 - frameThickness });
+        zoomFrame2D_[1]->SetSize(x1 - x0, frameThickness);
+        zoomFrame2D_[1]->Update();
+
+        // 2: 左辺
+        zoomFrame2D_[2]->SetPosition({ x0, y0 });
+        zoomFrame2D_[2]->SetSize(frameThickness, y1 - y0);
+        zoomFrame2D_[2]->Update();
+
+        // 3: 右辺
+        zoomFrame2D_[3]->SetPosition({ x1 - frameThickness, y0 });
+        zoomFrame2D_[3]->SetSize(frameThickness, y1 - y0);
+        zoomFrame2D_[3]->Update();
+
+        // ★追加: ミニマップの有効サイズを示す四角い外枠 (2D)
+        float borderThickness = 2.0f;
+        float bx0 = offsetX + marginX;
+        float bx1 = offsetX + mapW - marginX;
+        float by0 = offsetY + marginY;
+        float by1 = offsetY + mapH - marginY;
+
+        // 0: 上辺
+        minimapBorderFrame2D_[0]->SetPosition({ bx0, by0 });
+        minimapBorderFrame2D_[0]->SetSize(bx1 - bx0, borderThickness);
+        minimapBorderFrame2D_[0]->Update();
+
+        // 1: 下辺
+        minimapBorderFrame2D_[1]->SetPosition({ bx0, by1 - borderThickness });
+        minimapBorderFrame2D_[1]->SetSize(bx1 - bx0, borderThickness);
+        minimapBorderFrame2D_[1]->Update();
+
+        // 2: 左辺
+        minimapBorderFrame2D_[2]->SetPosition({ bx0, by0 });
+        minimapBorderFrame2D_[2]->SetSize(borderThickness, by1 - by0);
+        minimapBorderFrame2D_[2]->Update();
+
+        // 3: 右辺
+        minimapBorderFrame2D_[3]->SetPosition({ bx1 - borderThickness, by0 });
+        minimapBorderFrame2D_[3]->SetSize(borderThickness, by1 - by0);
+        minimapBorderFrame2D_[3]->Update();
+
+        // 2Dプロジェクション行列を全画面解像度に復元する
+        cameraMgr_->SetProjectionMatrix2D(Math::MakeOrthographicMatrix(0.0f, 0.0f, clientW, clientH, 0.0f, 100.0f));
 
         // ゴールまで到達している場合、SPACEキーでゲーム開始できるようにする
         if (route_->HasReachedGoal() && input_->Trigger(DIK_SPACE)) {
@@ -205,7 +517,6 @@ void GameScene::Update() {
         }
 
         dirLight_->Update();
-        mainCamera_->Update();
         return;
     }
 
@@ -234,6 +545,11 @@ void GameScene::Update() {
                 route_->ClearForNewArea();
                 route_->SetupArea(currentArea + 1);
                 currentDistance_ = 0.0f;
+
+                // ズームカメラの注視点を新しいエリアのスタート位置にリセット
+                targetZoom_ = { 0.0f, 0.0f, route_->GetCurrentAreaStartZ() };
+                cameraZoom_->SetPosition(Math::Add(targetZoom_, kZoomCameraOffset));
+                cameraZoom_->SetTarget(targetZoom_);
                 return;
             } else {
                 // 最終エリアのゴール到達時にクリアシーンへ
@@ -365,13 +681,25 @@ void GameScene::Update() {
         // 首振りを適用した注視方向ベクトルの計算
         float cosTheta = std::cos(cameraYawOffset_);
         float sinTheta = std::sin(cameraYawOffset_);
-        Vector3 lookTangent;
-        lookTangent.x = tangent.x * cosTheta + tangent.z * sinTheta;
-        lookTangent.y = tangent.y; // Y軸回転なので上下は変更なし
-        lookTangent.z = -tangent.x * sinTheta + tangent.z * cosTheta;
-        lookTangent = Math::Normalize(lookTangent);
+        Vector3 targetLookTangent;
+        targetLookTangent.x = tangent.x * cosTheta + tangent.z * sinTheta;
+        targetLookTangent.y = tangent.y; // Y軸回転なので上下は変更なし
+        targetLookTangent.z = -tangent.x * sinTheta + tangent.z * cosTheta;
+        targetLookTangent = Math::Normalize(targetLookTangent);
 
-        Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraLookAhead, lookTangent));
+        // ★追加: 前フレームの注視方向ベクトルと Lerp し、急激な首振りを平滑化する！
+        static Vector3 s_prevLookTangent = targetLookTangent;
+        if (currentDistance_ <= 0.1f) {
+            s_prevLookTangent = targetLookTangent;
+        } else {
+            // 85%は前フレームを維持、15%だけ新しい方向を向く（ローパスフィルタ）
+            s_prevLookTangent.x = s_prevLookTangent.x * 0.85f + targetLookTangent.x * 0.15f;
+            s_prevLookTangent.y = s_prevLookTangent.y * 0.85f + targetLookTangent.y * 0.15f;
+            s_prevLookTangent.z = s_prevLookTangent.z * 0.85f + targetLookTangent.z * 0.15f;
+            s_prevLookTangent = Math::Normalize(s_prevLookTangent);
+        }
+
+        Vector3 lookAtTarget = Math::Add(camPos, Math::Multiply(kCameraLookAhead, s_prevLookTangent));
 
         mainCamera_->SetPosition(camPos);
         mainCamera_->SetTarget(lookAtTarget);
@@ -511,10 +839,8 @@ void GameScene::Update() {
         reticleSprite_->Update();
     }
 
-    // 仮マップオブジェクト（柱Cube）の更新
-    for (auto& pillar : mapObjects_) {
-        pillar->Update();
-    }
+    // マップステージの更新
+    stage_->Update();
 
     // エフェクトの更新
     EffectManager::GetInstance()->Update();
@@ -548,39 +874,107 @@ void GameScene::Update() {
         activeCamera->Update();
     }
 
-	// 床の更新
-    floorSquare_->Update();
+
 }
 
 /**
  * @brief 毎フレーム描画処理（3Dオブジェクトのレンダリングコマンド発行）
  */
 void GameScene::Draw() {
-    // 床の描画
-    if (mode_ == GameMode::Play) {
-        floorSquare_->Draw();
-    }
-
-    // 仮マップオブジェクト（柱Cube）の描画 (プレイモード時のみ60.0fカリング)
+    // マップステージの描画
     Vector3 playerPos = player_->GetPosition();
-    static const float kCullingDistance = 60.0f;
-    for (auto& pillar : mapObjects_) {
-        if (mode_ == GameMode::Play) {
-            float distZ = std::abs(pillar->GetPosition().z - playerPos.z);
-            if (distZ > kCullingDistance) {
-                continue;
-            }
-        }
-        pillar->Draw();
-    }
+    bool showWarning = (mode_ == GameMode::DrawRoute);
+    bool isPlayMode = (mode_ == GameMode::Play);
 
     if (mode_ == GameMode::DrawRoute) {
-        for (auto& line : pillarGizmoLines_) {
-            line->Draw();
+        // --- 画面分割（スプリットビュー）の描画 ---
+        
+        // 1. 固定のDirectX12バックバッファ解像度を取得
+        float clientW = static_cast<float>(WindowApp::kClientWidth);
+        float clientH = static_cast<float>(WindowApp::kClientHeight);
+
+        // 2. ビューポート・シザーの定義
+        // 左側 (30%)
+        D3D12_VIEWPORT vpLeft{};
+        vpLeft.Width = clientW * 0.3f;
+        vpLeft.Height = clientH;
+        vpLeft.TopLeftX = 0.0f;
+        vpLeft.TopLeftY = 0.0f;
+        vpLeft.MinDepth = 0.0f;
+        vpLeft.MaxDepth = 1.0f;
+
+        D3D12_RECT scLeft{};
+        scLeft.left = 0;
+        scLeft.right = static_cast<LONG>(vpLeft.Width);
+        scLeft.top = 0;
+        scLeft.bottom = static_cast<LONG>(clientH);
+
+        // 右側 (70%)
+        D3D12_VIEWPORT vpRight{};
+        vpRight.Width = clientW * 0.7f;
+        vpRight.Height = clientH;
+        vpRight.TopLeftX = clientW * 0.3f;
+        vpRight.TopLeftY = 0.0f;
+        vpRight.MinDepth = 0.0f;
+        vpRight.MaxDepth = 1.0f;
+
+        D3D12_RECT scRight{};
+        scRight.left = static_cast<LONG>(vpRight.TopLeftX);
+        scRight.right = static_cast<LONG>(clientW);
+        scRight.top = 0;
+        scRight.bottom = static_cast<LONG>(clientH);
+
+        auto dxCommon = Zuizui::GetInstance()->GetDxCommon();
+        auto commandList = dxCommon->GetCommandList();
+
+        // 3. 左画面の描画（2Dミニマップ）
+        commandList->RSSetViewports(1, &vpLeft);
+        commandList->RSSetScissorRects(1, &scLeft);
+
+        // 2Dスプライトの描画
+        minimapBg_->Draw("white");
+
+        for (auto& icon : pillarIcons_) {
+            icon->Draw("white");
         }
+
+        startIcon_->Draw("circle_solid");
+        goalIcon_->Draw("circle_solid");
+
+        // 有効な線分のみ描画
+        for (size_t i = 0; i < activeMiniMapLineCount_; ++i) {
+            routeLineSprites_[i]->Draw("white");
+        }
+
+        indicatorIcon_->Draw("circle_solid");
+
+        // ズームカメラ視野範囲の枠線を描画 (2D)
+        for (int i = 0; i < 4; ++i) {
+            zoomFrame2D_[i]->Draw("white");
+        }
+
+        // ミニマップの外枠線を描画 (2D)
+        for (int i = 0; i < 4; ++i) {
+            minimapBorderFrame2D_[i]->Draw("white");
+        }
+
+        // 4. 右画面の描画（Zoomカメラ 3Dビュー）
+        cameraZoom_->UpdateProjection(vpRight.Width / vpRight.Height);
+        cameraMgr_->SetActiveCamera("Zoom");
+
+        // 右画面のビューポートを設定して描画
+        commandList->RSSetViewports(1, &vpRight);
+        commandList->RSSetScissorRects(1, &scRight);
+
+        stage_->Draw(showWarning, isPlayMode, playerPos);
         route_->Draw();
+        cursorIndicatorZoom_->Draw();
+
         return; // 描画モード時はキャラやエフェクトを描画しない
     }
+
+    // プレイモードの通常描画
+    stage_->Draw(showWarning, isPlayMode, playerPos);
 
     // プレイヤー（およびプレイヤーの弾）の描画
     player_->Draw();
@@ -603,6 +997,7 @@ void GameScene::Draw() {
     // プレイモード中のみレティクル（照準）およびスタート/ゴール球体の描画
     if (mode_ == GameMode::Play) {
         route_->DrawSpheres();
+        reticleSprite_->Update(); // ★重要: 描画直前にカメラの確定したビュー・プロジェクションで行列を再計算し遅延を完璧にゼロにする
         reticleSprite_->Draw("reticle");
     }
 }
@@ -678,4 +1073,42 @@ void GameScene::StartGame() {
     mainCamera_->SetPosition(camPos);
     mainCamera_->SetTarget(lookAtTarget);
     mainCamera_->SetRotation({ 0.2f, 0.0f, 0.0f });
+    mainCamera_->Update(); // ★追加！開始直後のカメラ表示バグを防ぐため行列を即時更新する
+    cameraMgr_->SetActiveCamera("Main"); // ★追加！アクティブカメラをプレイ用のMainカメラに設定する
 }
+
+void GameScene::UpdateZoomCamera() {
+    Vector2 mousePos = GameViewWindow::GetMousePosition();
+    Vector2 viewSize = GameViewWindow::GetGameViewSize();
+    float clientW = static_cast<float>(WindowApp::kClientWidth);
+    float clientH = static_cast<float>(WindowApp::kClientHeight);
+    
+    Vector2 scaledMousePos = mousePos;
+    if (viewSize.x > 0.0f && viewSize.y > 0.0f) {
+        scaledMousePos.x = (mousePos.x / viewSize.x) * clientW;
+        scaledMousePos.y = (mousePos.y / viewSize.y) * clientH;
+    }
+    
+    float vpWidth = clientW * 0.3f;
+
+    // 右クリックかつマウスが右側の3Dビューポートにある場合は、既存の自由スクロールを残す
+    if (input_->MousePress(1) && scaledMousePos.x > vpWidth) {
+        float dx = input_->GetMouseDeltaX();
+        float dy = input_->GetMouseDeltaY();
+
+        targetZoom_.x += dx * kZoomScrollSpeed;
+        targetZoom_.z -= dy * kZoomScrollSpeed;
+
+        static const float kMapLimitX = 15.0f;
+        targetZoom_.x = std::clamp(targetZoom_.x, -kMapLimitX, kMapLimitX);
+        targetZoom_.z = std::clamp(targetZoom_.z, route_->GetCurrentAreaStartZ(), route_->GetCurrentAreaGoalZ());
+    }
+
+    // ズームカメラの位置と注視点を反映
+    cameraZoom_->SetPosition(Math::Add(targetZoom_, kZoomCameraOffset));
+    cameraZoom_->SetTarget(targetZoom_);
+    cameraZoom_->Update();
+}
+
+GameScene::GameScene() = default;
+GameScene::~GameScene() = default;

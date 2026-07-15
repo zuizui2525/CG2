@@ -62,9 +62,10 @@ public:
         return activeCamera_->GetProjectionMatrix();
     }
 
-    // --- 2D行列ゲッター ---
+    // --- 2D行列ゲッター/セッター ---
     const Matrix4x4& GetViewMatrix2D() const { return viewMatrix2D_; }
     const Matrix4x4& GetProjectionMatrix2D() const { return projectionMatrix2D_; }
+    void SetProjectionMatrix2D(const Matrix4x4& projection) { projectionMatrix2D_ = projection; }
 
     // GPUアドレス取得
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const { return resource_->GetGPUVirtualAddress(); }

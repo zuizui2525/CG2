@@ -39,7 +39,7 @@ public:
     int GetReloadTimer() const { return reloadTimer_; }
     static int GetMaxAmmo() { return kMaxAmmo; }
     static int GetReloadTime() { return kReloadTime; }
-    static float GetAutoSpeed() { return kAutoSpeed; }
+    static float GetAutoSpeed() { return kSpeed; }
     bool HasFiredThisFrame() const { return hasFiredThisFrame_; }
 
 private:
@@ -57,13 +57,10 @@ private:
     static inline const Vector3 kInitialPosition = { 0.0f, 0.0f, -6.0f };   // 初期位置
     static inline const Vector3 kPlayerScale = { 1.0f, 1.0f, 1.0f };        // サイズ
     static inline const Vector3 kBulletVelocity = { 0.0f, 0.0f, 0.25f };    // 弾の初速度
-    static inline const float kSpeed = 0.1f;                                // 移動速度
-    static inline const float kAutoSpeed = 0.05f;                           // 自動走行速度
+    static inline const float kSpeed = 0.05f;                                 // 移動速度（自動走行速度）
     static inline const float kMoveLimitX = 8.0f;                           // 左右移動限界
     static inline const std::string kTextureKey = "white";                  // テクスチャ
     static inline const std::string kEnvMapKey = "";                        // 環境マップ
-    static inline const int kMoveLeftKey = DIK_A;                           // 左移動キー
-    static inline const int kMoveRightKey = DIK_D;                          // 右移動キー
     static inline const int kReloadKey = DIK_R;                             // リロードキー
     static inline const int kShotMouseKey = 0;                              // 射撃（左クリック）キー
     static inline const Vector4 kPlayerColor = { 0.0f, 0.3f, 1.0f, 1.0f };  // プレイヤーカラー（青）
