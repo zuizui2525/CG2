@@ -32,6 +32,7 @@ public:
 
     float GetMouseDeltaX() const { return static_cast<float>(mouseState_.lX); }
     float GetMouseDeltaY() const { return static_cast<float>(mouseState_.lY); }
+    float GetMouseWheel() const { return static_cast<float>(mouseState_.lZ); }
 
 private:
     Microsoft::WRL::ComPtr<IDirectInput8> directInput_;

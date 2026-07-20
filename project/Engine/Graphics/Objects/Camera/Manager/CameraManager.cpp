@@ -115,12 +115,17 @@ void CameraManager::AddCamera(const std::string& name, std::shared_ptr<BaseCamer
     }
 }
  
-void CameraManager::SetActiveCamera(const std::string& name) {
+void CameraManager::SetActiveCamera(const std::string& name, bool log) {
+    // 既にそのカメラがアクティブなら何もしない
+    if (GetActiveCameraName() == name) return;
+
     // 指定された名前のカメラがマップに存在するか確認
     auto it = cameras_.find(name);
     if (it != cameras_.end()) {
         activeCamera_ = it->second.get();
-        Log::Write(std::format(L" ├─ 【アクティブカメラ切替】 「{}」カメラがアクティブになりました。", ConvertString(name)));
+        if (log) {
+            Log::Write(std::format(L" ├─ 【アクティブカメラ切替】 「{}」カメラがアクティブになりました。", ConvertString(name)));
+        }
     }
 }
 

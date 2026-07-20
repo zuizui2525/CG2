@@ -104,6 +104,16 @@ void Route::Update(BaseCamera* activeCamera) {
 void Route::Update2D(const Vector3& intersectPos) {
     if (input_->MousePress(0)) {
         if (std::abs(intersectPos.x) <= kMapBoundaryX && intersectPos.z >= currentAreaStartZ_ && intersectPos.z <= currentAreaGoalZ_) {
+            // ドラッグ開始時にスタート位置の近くをクリックした場合は線をクリアして書き直す
+            if (input_->MouseTrigger(0)) {
+                float toStartX = intersectPos.x - 0.0f;
+                float toStartZ = intersectPos.z - currentAreaStartZ_;
+                float distToStartSq = toStartX * toStartX + toStartZ * toStartZ;
+                if (distToStartSq <= kAreaRadius * kAreaRadius) {
+                    ClearForNewArea();
+                }
+            }
+
             if (rawPoints_.empty()) {
                 ClearForNewArea();
                 isDrawing_ = true;

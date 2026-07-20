@@ -1,6 +1,5 @@
 #include "App/App.h"
 #include "Engine/Debug/DebugEditor.h"
-#include "Engine/Debug/ReplaySystem.h"
 #include "App/Scene/Core/SceneManager.h"
 #include "App/Scene/Core/SceneFactory.h"
 #include "App/Load/ResourceLoader.h"
@@ -11,6 +10,8 @@
 #include "Engine/Graphics/Objects/Effect/Manager/EffectManager.h"
 #include "Engine/Base/Log/Log.h"
 #include <psapi.h> // メモリ取得用（追加）
+#include "Engine/Debug/PerformanceReporter/PerformanceReporter.h"
+
 
 #pragma comment(lib, "psapi.lib") // 追加
 
@@ -58,13 +59,18 @@ void App::Initialize() {
     postProcess_->Initialize();
 
     SceneManager::GetInstance()->SetPostProcess(postProcess_.get());
+
+    // パフォーマンスレポーターの初期化
+    auto dxCommon = engine_->GetDxCommon();
+    PerformanceReporter::Initialize(
+        dxCommon->GetDevice(),
+        dxCommon->GetCommandQueue(),
+        static_cast<UINT>(WindowApp::kClientWidth),
+        static_cast<UINT>(WindowApp::kClientHeight)
+    );
 }
 
 void App::Run() {
-#ifdef _USEIMGUI
-    ReplaySystem::GetInstance()->ClearGarbage();
-#endif
-
     // 現在のウィンドウの実際のクライアント領域サイズを取得し、サイズ変更を検知
     HWND hwnd = engine_->GetWindow()->GetHWND();
     RECT clientRect{};
@@ -88,10 +94,6 @@ void App::Run() {
         float aspect = static_cast<float>(currentWidth) / static_cast<float>(currentHeight);
         cameraMgr_->UpdateAllProjection(aspect);
 
-#ifdef _USEIMGUI
-        // 4. リプレイシステムのリサイズ通知
-        ReplaySystem::GetInstance()->OnResize(currentWidth, currentHeight);
-#endif
 
         lastWidth = currentWidth;
         lastHeight = currentHeight;
@@ -127,17 +129,15 @@ void App::Run() {
     constexpr float kSpikeFpsThreshold = 30.0f;
     constexpr float kSpikeWarningCooldownMax = 5.0f; // クールタイムは5秒間
 
+#ifdef _USEIMGUI
     if (currentFps < kSpikeFpsThreshold && spikeWarningCooldown <= 0.0f) {
         Log::Write(std::format("[警告] ★高負荷スパイク検知: FPSが一時的に低下しました ({:.1f} FPS) | 物理メモリ使用量: {:.2f} MB | フレーム時間: {:.4f} 秒", currentFps, currentMem, deltaTime));
         spikeWarningCooldown = kSpikeWarningCooldownMax;
     }
-
-    bool isGameViewVisible = false;
-    bool isPaused = false;
-
-#ifdef _USEIMGUI
-    isPaused = ReplaySystem::GetInstance()->IsPaused();
 #endif
+
+    bool isPaused = false;
+    bool isGameViewVisible = false;
 
     // --- ImGui ---
 #ifdef _USEIMGUI
@@ -149,6 +149,7 @@ void App::Run() {
     engine_->ImGuiEnd();
     if (auto debugEditor = engine_->GetDebugEditor()) {
         isGameViewVisible = debugEditor->IsGameViewVisible();
+        isPaused = debugEditor->IsPaused();
     }
 #endif
 
@@ -178,7 +179,16 @@ void App::Run() {
         sWasPaused = isPaused;
     }
 
+
     // --- 更新 ---
+    // パフォーマンスレポーターの更新
+    PerformanceReporter::Update(deltaTime, currentFps, currentMem);
+
+    // デバッグキー（0キー）による手動トリガー
+    if (input_->Trigger(DIK_0)) {
+        PerformanceReporter::TriggerReport("MANUAL_TRIGGER", "User triggered report via '0' key");
+    }
+
     input_->Update();
     
     if (!isPaused) {
@@ -236,29 +246,22 @@ void App::Run() {
             postProcess_->Draw();
         }
     }
-
-#ifdef _USEIMGUI
-    // 一時停止中でなく、かつリプレイ機能が有効な場合のみリプレイバッファを記録
-    bool isReplayEnabled = true;
-    if (auto debugEditor = engine_->GetDebugEditor()) {
-        isReplayEnabled = debugEditor->IsReplayEnabled();
-    }
-
-    if (!isPaused && isReplayEnabled) {
-        ReplaySystem::GetInstance()->RecordFrame(
-            engine_->GetDxCommon()->GetCommandList(),
-            postProcess_->GetFinalResource(),
-            postProcess_->GetFinalSrvGpuHandle(),
-            currentFps,
-            currentMem
+    // 描画完了後の最終ポストプロセスリソースをキャプチャ (PIXEL_SHADER_RESOURCE 状態)
+    // ※EndFrame() の前に呼ぶことで、同一のコマンドリスト上で安全かつ正確に画像コピーを実行できます。
+    if (shouldDraw) {
+        auto dxCommon = engine_->GetDxCommon();
+        PerformanceReporter::CaptureFrame(
+            dxCommon->GetCommandList(), 
+            postProcess_->GetFinalResource(), 
+            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
         );
     }
-#endif
 
     engine_->EndFrame();
 }
 
 void App::Finalize() {
+    PerformanceReporter::Finalize();
     SceneManager::GetInstance()->ClearCurrentScene();
     EffectManager::GetInstance()->Finalize();
 	engine_->Finalize();

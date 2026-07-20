@@ -3,7 +3,6 @@
 #include "Engine/Debug/GameViewWindow.h"
 #include "Engine/Debug/PerformanceMonitorWindow.h"
 #include "Engine/Debug/SceneManagerWindow.h"
-#include "Engine/Debug/ReplaySystem.h"
 #include "Engine/Debug/SceneHierarchy.h"
 #include "Engine/Debug/IGameObject.h"
 #include "Engine/Zuizui.h"
@@ -17,11 +16,10 @@
 DebugEditor::DebugEditor()
     : showGameView_(true),
       showPerfMonitor_(true),
-      showReplayView_(true),
       isGameViewVisible_(false),
       isFullscreen_(false),
       currentAspect_(AspectType::Aspect16_9_Low),
-      wasReplayPlaying_(false) {
+      isPaused_(false) {
     wpPrev_.length = sizeof(wpPrev_);
 }
 
@@ -35,8 +33,6 @@ void DebugEditor::Initialize() {
 
 void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
     // 描画開始時に可視性フラグを初期化
-    isReplayViewVisible_ = false;
-
     HWND hwnd = Zuizui::GetInstance()->GetWindow()->GetHWND();
 
     // メインメニューバーの描画
@@ -52,9 +48,8 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
         isGameViewVisible_ = false;
     }
 
-    // Console (リプレイ中はタイムスタンプの上限を渡す)
-    float maxTimestamp = ReplaySystem::GetInstance()->GetReplayMaxTimestamp();
-    Log::DrawConsoleWindow(maxTimestamp);
+    // Console
+    Log::DrawConsoleWindow(-1.0f);
 
     // Performance Monitor
     if (showPerfMonitor_) {
@@ -116,209 +111,7 @@ void DebugEditor::Draw(ID3D12GraphicsCommandList* commandList) {
         }
     }
     ImGui::End();
-
-    // Replay View (表示フラグ showReplayView_ に连動)
-    if (showReplayView_) {
-        if (ImGui::Begin("Replay View", &showReplayView_)) {
-            isReplayViewVisible_ = true;
-
-            // リプレイ自動送り再生の更新（可視な場合のみ実行）
-            ReplaySystem::GetInstance()->UpdateReplayPlay(ImGui::GetIO().DeltaTime);
-
-            bool isPaused = ReplaySystem::GetInstance()->IsPaused();
-
-            if (!isPaused) {
-                // 通常再生中は操作不可として警告を表示し、全体をグレーアウト
-                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "Replay is only available while PAUSED.");
-                ImGui::Text("Click 'Pause ||' at the top main menu bar.");
-                ImGui::Separator();
-            }
-
-            if (!isPaused) {
-                ImGui::BeginDisabled();
-            }
-
-            int32_t recordCount = ReplaySystem::GetInstance()->GetRecordCount();
-            float progress = ReplaySystem::GetInstance()->GetSeekPos();
-            
-            int32_t startIdx = 0;
-            int32_t activeCount = ReplaySystem::GetInstance()->GetEffectiveRecordCount(&startIdx);
-
-            float secondsAgo = 0.0f;
-            if (activeCount > 0) {
-                // 現在のシーク位置に対応するインデックスを計算
-                int32_t targetIdx = startIdx + static_cast<int32_t>(progress * (activeCount - 1));
-                targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
-                
-                // 実際のタイムスタンプ差分から、正確な経過秒数を取得（FPSハードコードを完全排除）
-                secondsAgo = ReplaySystem::GetInstance()->GetReplayTimeOffset(targetIdx);
-            }
-
-            char sliderLabel[64];
-            if (recordCount == 0) {
-                sprintf_s(sliderLabel, "No Replay Data");
-            } else if (secondsAgo <= 0.0f) {
-                sprintf_s(sliderLabel, "Current (0.0s ago)");
-            } else {
-                sprintf_s(sliderLabel, "-%.1fs ago", secondsAgo);
-            }
-
-            // シークバーの左に Play / Pause ボタンを配置
-            if (recordCount > 0 && isPaused) {
-                bool isReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
-                if (isReplayPlaying) {
-                    if (ImGui::Button("Pause ||")) {
-                        ReplaySystem::GetInstance()->SetReplayPlaying(false);
-                    }
-                } else {
-                    if (ImGui::Button("Play ▶")) {
-                        // シークバーが最後まで達している場合は、最初から再生するために 0 に戻す
-                        if (progress >= 1.0f) {
-                            ReplaySystem::GetInstance()->SetSeekPos(0.0f);
-                        }
-                        ReplaySystem::GetInstance()->SetReplayPlaying(true);
-                    }
-                }
-                ImGui::SameLine();
-
-                // 再生速度選択UI (Combo)
-                float currentSpeed = ReplaySystem::GetInstance()->GetPlaySpeed();
-                const char* previewLabel = "1.0x";
-                
-                constexpr float kSpeeds[] = { 0.25f, 0.5f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f };
-                constexpr const char* kSpeedLabels[] = { "0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x", "8.0x" };
-                constexpr int32_t kSpeedCount = static_cast<int32_t>(std::size(kSpeeds));
-
-                for (int32_t i = 0; i < kSpeedCount; ++i) {
-                    if (std::abs(currentSpeed - kSpeeds[i]) < 0.01f) {
-                        previewLabel = kSpeedLabels[i];
-                        break;
-                    }
-                }
-
-                // コンボボックスの横幅を固定 (80ピクセル)
-                ImGui::SetNextItemWidth(80.0f);
-                if (ImGui::BeginCombo("##Speed", previewLabel)) {
-                    for (int32_t i = 0; i < kSpeedCount; ++i) {
-                        const bool isSelected = (std::abs(currentSpeed - kSpeeds[i]) < 0.01f);
-                        if (ImGui::Selectable(kSpeedLabels[i], isSelected)) {
-                            ReplaySystem::GetInstance()->SetPlaySpeed(kSpeeds[i]);
-                        }
-                        if (isSelected) {
-                            ImGui::SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui::EndCombo();
-                }
-                ImGui::SameLine();
-            }
-
-            // シークバーの描画 (残りの横幅いっぱいにフィットさせる)
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            if (ImGui::SliderFloat("##Seek", &progress, 0.0f, 1.0f, sliderLabel)) {
-                ReplaySystem::GetInstance()->SetSeekPos(progress);
-            }
-
-            // 画像のタップクリック判定を有効化するため、ここで操作制限（Disabled）を解除
-            if (!isPaused) {
-                ImGui::EndDisabled();
-            }
-
-            ImGui::Separator();
-
-            // リプレイ画像
-            if (recordCount > 0) {
-                D3D12_GPU_DESCRIPTOR_HANDLE srvGpu = ReplaySystem::GetInstance()->GetReplaySrvGpuHandle();
-                
-                // アスペクト比を保って描画領域にフィットさせる (デフォルト16:9)
-                float contentWidth = ImGui::GetContentRegionAvail().x;
-                float contentHeight = ImGui::GetContentRegionAvail().y;
-                
-                constexpr float kDefaultAspect = 16.0f / 9.0f;
-                float drawWidth = contentWidth;
-                float drawHeight = contentWidth / kDefaultAspect;
-
-                if (drawHeight > contentHeight) {
-                    drawHeight = contentHeight;
-                    drawWidth = contentHeight * kDefaultAspect;
-                }
-
-                ImVec2 imgPosMin = ImGui::GetCursorScreenPos();
-                ImGui::Image((ImTextureID)srvGpu.ptr, ImVec2(drawWidth, drawHeight));
-
-                // 中央座標の計算
-                ImVec2 center = ImVec2(imgPosMin.x + drawWidth * 0.5f, imgPosMin.y + drawHeight * 0.5f);
-
-                // リプレイ再生状態の監視とトリガー
-                bool currentReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
-                if (currentReplayPlaying != wasReplayPlaying_) {
-                    if (isPaused) {
-                        replayPopAnim_.Trigger(currentReplayPlaying ? PopAnimation::Type::Play : PopAnimation::Type::Pause);
-                    }
-                    wasReplayPlaying_ = currentReplayPlaying;
-                }
-
-                // アニメーションの更新と描画
-                replayPopAnim_.Update(ImGui::GetIO().DeltaTime);
-                replayPopAnim_.Draw(ImGui::GetWindowDrawList(), center);
-
-                // 画像領域のタップ（左クリック）で再生/一時停止をトグル
-                if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-                    if (isPaused) {
-                        // 一時停止中はリプレイの自動再生/一時停止をトグル
-                        bool isReplayPlaying = ReplaySystem::GetInstance()->IsReplayPlaying();
-                        if (!isReplayPlaying) {
-                            // シーク位置が最後まで達している場合は、最初から再生するため0に戻す
-                            if (progress >= 1.0f) {
-                                ReplaySystem::GetInstance()->SetSeekPos(0.0f);
-                            }
-                        }
-                        ReplaySystem::GetInstance()->SetReplayPlaying(!isReplayPlaying);
-                    } else {
-                        // 通常動作中はゲームを一時停止にする
-                        ReplaySystem::GetInstance()->SetPause(true);
-                    }
-                }
-
-                // ゲーム実行中（未ポーズ）で、かつリプレイ映像が静止している場合のみ、中央に▶マークを常時表示（クリックによる自動一時停止ガイド）
-                if (!ReplaySystem::GetInstance()->IsReplayPlaying() && !isPaused) {
-                    ImVec2 rectMin = ImGui::GetItemRectMin();
-                    ImVec2 rectMax = ImGui::GetItemRectMax();
-
-                    // 1. 半透明グレーのオーバーレイ（透明度を下げて視認性を向上：120 ➡ 80）
-                    constexpr ImU32 kOverlayColor = IM_COL32(20, 20, 20, 80);
-                    ImGui::GetWindowDrawList()->AddRectFilled(rectMin, rectMax, kOverlayColor);
-
-                    // 中央座標
-                    ImVec2 center = ImVec2((rectMin.x + rectMax.x) * 0.5f, (rectMin.y + rectMax.y) * 0.5f);
-
-                    // 2. YouTube風の円形背景（透明度を下げてゲーム画面に馴染むように：160 ➡ 110）
-                    constexpr float kCircleRadius = 40.0f;
-                    constexpr ImU32 kCircleColor = IM_COL32(0, 0, 0, 110);
-                    constexpr int32_t kCircleSegments = 36;
-                    ImGui::GetWindowDrawList()->AddCircleFilled(center, kCircleRadius, kCircleColor, kCircleSegments);
-
-                    // 3. 白い再生三角形（▶）の描画（透明度を下げて落ち着いた半透明白に：240 ➡ 170）
-                    // 視覚的重心ズレ（右向き三角形特有の右寄りの偏り）を補正するため、X軸補正を -1.5f に変更し完全なセンタリングを行います。
-                    constexpr float kTriangleSize = 30.0f;
-                    constexpr float kH = kTriangleSize * 0.866f;
-                    constexpr float kXOffset = -1.5f; 
-                    constexpr float kYOffset = -1.0f;
-                    ImVec2 p1(center.x - kH * 0.333f + kXOffset, center.y - kTriangleSize * 0.5f + kYOffset);
-                    ImVec2 p2(center.x - kH * 0.333f + kXOffset, center.y + kTriangleSize * 0.5f + kYOffset);
-                    ImVec2 p3(center.x + kH * 0.667f + kXOffset, center.y + kYOffset);
-                    constexpr ImU32 kTriangleColor = IM_COL32(255, 255, 255, 170);
-                    ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, kTriangleColor);
-                }
-            } else {
-                ImGui::Text("No replay data buffered yet.");
-            }
-        }
-        ImGui::End();
-    }
 }
-
-
 
 void DebugEditor::DrawMenuBar(HWND hwnd) {
     if (ImGui::BeginMainMenuBar()) {
@@ -336,7 +129,6 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             ImGui::MenuItem("Game View", nullptr, &showGameView_);
             ImGui::MenuItem("Console", nullptr, Log::GetShowConsolePtr());
             ImGui::MenuItem("Performance Monitor", nullptr, &showPerfMonitor_);
-            ImGui::MenuItem("Replay View", nullptr, &showReplayView_);
             
             GameScene* gameScene = dynamic_cast<GameScene*>(SceneManager::GetInstance()->GetCurrentScene());
             if (gameScene) {
@@ -462,23 +254,22 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             ImGui::EndMenu();
         }
 
-        // 画面中央付近に再生/一時停止ボタンを配置 (マジックナンバー排除)
+        // 画面中央付近に再生/一時停止ボタンを配置
         float menuBarWidth = ImGui::GetWindowWidth();
         constexpr float kPlayPauseBtnWidth = 70.0f;
         float centerPos = (menuBarWidth - kPlayPauseBtnWidth) * 0.5f;
         ImGui::SameLine(centerPos);
 
-        if (ReplaySystem::GetInstance()->IsPaused()) {
+        if (isPaused_) {
             if (ImGui::Button("Play ▶")) {
-                ReplaySystem::GetInstance()->SetPause(false);
+                isPaused_ = false;
             }
         } else {
             if (ImGui::Button("Pause ||")) {
-                ReplaySystem::GetInstance()->SetPause(true);
+                isPaused_ = true;
             }
         }
 
-        // Playボタンの右側に左クリック一時停止有効・無効化のチェックボックスを表示
         if (gameViewWindow_) {
             ImGui::SameLine();
             bool enable = gameViewWindow_->IsClickPauseEnabled();
@@ -491,9 +282,6 @@ void DebugEditor::DrawMenuBar(HWND hwnd) {
             if (ImGui::Checkbox("Use Gizmo", &showGizmo)) {
                 gameViewWindow_->SetShowGizmo(showGizmo);
             }
-
-            ImGui::SameLine();
-            ImGui::Checkbox("Enable Replay", &enableReplay_);
         }
 
         ImGui::EndMainMenuBar();

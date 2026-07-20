@@ -6,7 +6,6 @@
 #ifdef _USEIMGUI
 #include "Engine/Graphics/PostProcess/PostProcess.h"
 #include "App/Scene/Core/SceneManager.h"
-#include "Engine/Debug/ReplaySystem.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/ImGuizmo.h"
 #include "Engine/Debug/SceneHierarchy.h"
@@ -408,37 +407,12 @@ void GameViewWindow::Draw(bool* show, bool* isVisible) {
             // 中央座標の計算
             ImVec2 center = ImVec2(imgPosMin.x + width * 0.5f, imgPosMin.y + height * 0.5f);
 
-            // ポーズ状態の監視と演出トリガー
-            bool currentPaused = ReplaySystem::GetInstance()->IsPaused();
-            if (currentPaused != wasPaused_) {
-                if (ReplaySystem::GetInstance()->GetRecordCount() > 0) {
-                    popAnim_.Trigger(currentPaused ? PopAnimation::Type::Pause : PopAnimation::Type::Play);
-                }
-                wasPaused_ = currentPaused;
-            }
-
             // アニメーションの更新と描画
             popAnim_.Update(ImGui::GetIO().DeltaTime);
             popAnim_.Draw(ImGui::GetWindowDrawList(), center);
 
-            // 画像領域のタップ（左クリック）でゲームの再生/一時停止をトグル
-            // 左クリックでの一時停止機能が有効な場合のみ実行する
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-                if (isClickPauseEnabled_) {
-                    bool isPaused = ReplaySystem::GetInstance()->IsPaused();
-                    ReplaySystem::GetInstance()->SetPause(!isPaused);
-                }
-            }
+            // リプレイシステム削除に伴い、クリックポーズおよびポーズ中オーバーレイ表示は無効化されました
 
-            // 一時停止中はYouTube風のポーズ画面（半透明グレーアウト）を表示
-            if (ReplaySystem::GetInstance()->IsPaused()) {
-                ImVec2 rectMin = ImGui::GetItemRectMin();
-                ImVec2 rectMax = ImGui::GetItemRectMax();
-
-                // 1. 半透明グレーのオーバーレイ（透明度を下げて視認性を向上：120 ➡ 80）
-                constexpr ImU32 kOverlayColor = IM_COL32(20, 20, 20, 80);
-                ImGui::GetWindowDrawList()->AddRectFilled(rectMin, rectMax, kOverlayColor);
-            }
         } else {
             ImGui::Text("No Active PostProcess");
         }
@@ -479,13 +453,24 @@ Vector2 GameViewWindow::GetGameViewSize() {
 Vector2 GameViewWindow::GetMousePosition() {
 #ifdef _USEIMGUI
     ImVec2 mousePos = ImGui::GetMousePos();
-    return Vector2{ mousePos.x - sGameViewPosMin_.x, mousePos.y - sGameViewPosMin_.y };
+    Vector2 localPos = Vector2{ mousePos.x - sGameViewPosMin_.x, mousePos.y - sGameViewPosMin_.y };
+    if (sGameViewSize_.x > 0.0f && sGameViewSize_.y > 0.0f) {
+        localPos.x = std::clamp(localPos.x, 0.0f, sGameViewSize_.x);
+        localPos.y = std::clamp(localPos.y, 0.0f, sGameViewSize_.y);
+    }
+    return localPos;
 #else
     // ウィンドウのクライアント領域上のマウス座標を取得
     HWND hwnd = Zuizui::GetInstance()->GetWindow()->GetHWND();
     POINT point;
     if (GetCursorPos(&point) && ScreenToClient(hwnd, &point)) {
-        return Vector2{ static_cast<float>(point.x), static_cast<float>(point.y) };
+        Vector2 localPos = Vector2{ static_cast<float>(point.x), static_cast<float>(point.y) };
+        Vector2 viewSize = GetGameViewSize();
+        if (viewSize.x > 0.0f && viewSize.y > 0.0f) {
+            localPos.x = std::clamp(localPos.x, 0.0f, viewSize.x);
+            localPos.y = std::clamp(localPos.y, 0.0f, viewSize.y);
+        }
+        return localPos;
     }
     return Vector2{ 0.0f, 0.0f };
 #endif

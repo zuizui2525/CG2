@@ -1,6 +1,5 @@
 #ifdef _USEIMGUI
 #include "Engine/Debug/PerformanceMonitorWindow.h"
-#include "Engine/Debug/ReplaySystem.h"
 #include "externals/imgui/imgui.h"
 #include <windows.h>
 #include <psapi.h>
@@ -32,98 +31,63 @@ void PerformanceMonitorWindow::Draw(bool* show) {
     float maxFpsVal = -1.0f;
     float midpointFpsVal = 0.0f;
 
-    bool isPaused = ReplaySystem::GetInstance()->IsPaused();
-    if (isPaused) {
-        // --- リプレイ・一時停止中の描画 ---
-        int32_t startIdx = 0;
-        int32_t activeCount = ReplaySystem::GetInstance()->GetEffectiveRecordCount(&startIdx);
-        float progress = ReplaySystem::GetInstance()->GetSeekPos();
-        
-        int32_t targetIdx = 0;
-        if (activeCount > 0) {
-            targetIdx = startIdx + static_cast<int32_t>(progress * (activeCount - 1));
-            targetIdx = std::clamp(targetIdx, startIdx, startIdx + activeCount - 1);
+    // --- 通常稼働時の更新・描画 ---
+    auto currentFrameTime = std::chrono::steady_clock::now();
+    float realDeltaTime = std::chrono::duration<float>(currentFrameTime - lastFrameTime_).count();
+    lastFrameTime_ = currentFrameTime;
+
+    if (realDeltaTime < 0.0001f) { realDeltaTime = 0.0001f; }
+    if (realDeltaTime > 1.0f) { realDeltaTime = 1.0f; }
+
+    float currentFps = 1.0f / realDeltaTime;
+    float currentMs = realDeltaTime * 1000.0f;
+
+    static float cachedMem = 0.0f;
+    static float memTimer = 0.0f;
+    memTimer -= realDeltaTime;
+    if (memTimer <= 0.0f || cachedMem == 0.0f) {
+        PROCESS_MEMORY_COUNTERS pmc;
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+            cachedMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
         }
-
-        // 過去120フレームのデータをReplaySystemから取得
-        ReplaySystem::GetInstance()->GetReplayHistory(targetIdx, fpsHistoryLocal, memHistoryLocal, kHistorySize);
-        drawOffset = 0; // すでにソート済みの履歴が返るのでオフセットは0固定
-
-        displayFps = ReplaySystem::GetInstance()->GetReplayFps(targetIdx);
-        displayMs = (displayFps > 0.0f) ? (1000.0f / displayFps) : 0.0f;
-        displayMem = ReplaySystem::GetInstance()->GetReplayMemory(targetIdx);
-
-        // この120フレーム履歴から最高/最低/中央値を算出
-        for (int i = 0; i < kHistorySize; ++i) {
-            float val = fpsHistoryLocal[i];
-            if (val > 0.0f) {
-                if (minFpsVal < 0.0f || val < minFpsVal) minFpsVal = val;
-                if (maxFpsVal < 0.0f || val > maxFpsVal) maxFpsVal = val;
-            }
-        }
-        midpointFpsVal = (minFpsVal >= 0.0f && maxFpsVal >= 0.0f) ? (minFpsVal + maxFpsVal) * 0.5f : displayFps;
-        for (int i = 0; i < kHistorySize; ++i) {
-            midpointFpsHistoryLocal[i] = midpointFpsVal;
-        }
-    } else {
-        // --- 通常稼働時の更新・描画 ---
-        auto currentFrameTime = std::chrono::steady_clock::now();
-        float realDeltaTime = std::chrono::duration<float>(currentFrameTime - lastFrameTime_).count();
-        lastFrameTime_ = currentFrameTime;
-
-        if (realDeltaTime < 0.0001f) { realDeltaTime = 0.0001f; }
-        if (realDeltaTime > 1.0f) { realDeltaTime = 1.0f; }
-
-        float currentFps = 1.0f / realDeltaTime;
-        float currentMs = realDeltaTime * 1000.0f;
-
-        static float cachedMem = 0.0f;
-        static float memTimer = 0.0f;
-        memTimer -= realDeltaTime;
-        if (memTimer <= 0.0f || cachedMem == 0.0f) {
-            PROCESS_MEMORY_COUNTERS pmc;
-            if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-                cachedMem = static_cast<float>(pmc.WorkingSetSize) / (1024.0f * 1024.0f);
-            }
-            memTimer = 0.5f; // 0.5秒ごとに更新
-        }
-        float currentMem = cachedMem;
-
-        fpsHistory_[historyOffset_] = currentFps;
-        memHistory_[historyOffset_] = currentMem;
-
-        frameCount_++;
-        if (frameCount_ > 60) {
-            if (minObservedFps_ < 0.0f || currentFps < minObservedFps_) {
-                minObservedFps_ = currentFps;
-            }
-            if (maxObservedFps_ < 0.0f || currentFps > maxObservedFps_) {
-                maxObservedFps_ = currentFps;
-            }
-        }
-
-        float midpointFps = currentFps;
-        if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
-            midpointFps = (maxObservedFps_ + minObservedFps_) * 0.5f;
-        }
-        int lastWriteIdx = (historyOffset_ + kHistorySize - 1) % kHistorySize;
-        midpointFpsHistory_[lastWriteIdx] = midpointFps;
-
-        historyOffset_ = (historyOffset_ + 1) % kHistorySize;
-
-        // ローカル配列へコピーして描画に使用
-        std::copy(std::begin(fpsHistory_), std::end(fpsHistory_), std::begin(fpsHistoryLocal));
-        std::copy(std::begin(memHistory_), std::end(memHistory_), std::begin(memHistoryLocal));
-        std::copy(std::begin(midpointFpsHistory_), std::end(midpointFpsHistory_), std::begin(midpointFpsHistoryLocal));
-        drawOffset = historyOffset_;
-
-        displayFps = currentFps;
-        displayMs = currentMs;
-        displayMem = currentMem;
-        minFpsVal = minObservedFps_;
-        maxFpsVal = maxObservedFps_;
-        midpointFpsVal = midpointFps;
+        memTimer = 0.5f; // 0.5秒ごとに更新
     }
+    float currentMem = cachedMem;
+
+    fpsHistory_[historyOffset_] = currentFps;
+    memHistory_[historyOffset_] = currentMem;
+
+    frameCount_++;
+    if (frameCount_ > 60) {
+        if (minObservedFps_ < 0.0f || currentFps < minObservedFps_) {
+            minObservedFps_ = currentFps;
+        }
+        if (maxObservedFps_ < 0.0f || currentFps > maxObservedFps_) {
+            maxObservedFps_ = currentFps;
+        }
+    }
+
+    float midpointFps = currentFps;
+    if (minObservedFps_ >= 0.0f && maxObservedFps_ >= 0.0f) {
+        midpointFps = (maxObservedFps_ + minObservedFps_) * 0.5f;
+    }
+    int lastWriteIdx = (historyOffset_ + kHistorySize - 1) % kHistorySize;
+    midpointFpsHistory_[lastWriteIdx] = midpointFps;
+
+    historyOffset_ = (historyOffset_ + 1) % kHistorySize;
+
+    // ローカル配列へコピーして描画に使用
+    std::copy(std::begin(fpsHistory_), std::end(fpsHistory_), std::begin(fpsHistoryLocal));
+    std::copy(std::begin(memHistory_), std::end(memHistory_), std::begin(memHistoryLocal));
+    std::copy(std::begin(midpointFpsHistory_), std::end(midpointFpsHistory_), std::begin(midpointFpsHistoryLocal));
+    drawOffset = historyOffset_;
+
+    displayFps = currentFps;
+    displayMs = currentMs;
+    displayMem = currentMem;
+    minFpsVal = minObservedFps_;
+    maxFpsVal = maxObservedFps_;
+    midpointFpsVal = midpointFps;
 
     // テキスト表示（最高・最低・中央値の数値をカラーで文字表記）
     ImGui::Text("FPS: %.1f", displayFps);

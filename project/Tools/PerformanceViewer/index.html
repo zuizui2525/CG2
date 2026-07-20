@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Report Viewer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN for premium graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-icon">⚡</span>
+                <h1>Zuizui Performance Analyzer</h1>
+            </div>
+            <div class="meta-info">
+                <span id="trigger-reason" class="badge">PENDING</span>
+                <span id="trigger-time" class="time-stamp">Loading report...</span>
+                <button id="exit-btn" class="exit-button">CLOSE</button>
+            </div>
+        </header>
+
+        <!-- メイングリッド -->
+        <main class="app-main">
+            <!-- 左：リプレイ動画プレイヤー -->
+            <section class="panel glass-panel player-panel">
+                <div class="panel-header">
+                    <h2>Instant Replay (直前3秒)</h2>
+                    <span id="frame-counter" class="counter">0 / 0</span>
+                </div>
+                <div class="video-container">
+                    <video id="replay-video" poster="/data/screenshot.png" controls loop style="width: 100%; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);"></video>
+                    <div id="no-replay-msg" class="centered-message hidden">No replay video found</div>
+                </div>
+            </section>
+
+            <!-- 右：パフォーマンス統計グラフ -->
+            <section class="panel glass-panel chart-panel">
+                <div class="panel-header">
+                    <h2>Performance Metrics</h2>
+                    <div class="stat-summary">
+                        <span id="avg-fps" class="stat-item">Avg FPS: --</span>
+                        <span id="max-mem" class="stat-item">Peak Mem: -- MB</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="metricsChart"></canvas>
+                </div>
+                <div class="detail-info">
+                    <strong>Detail:</strong> <span id="report-detail">No details available.</span>
+                </div>
+            </section>
+
+            <!-- 下：AI連携用プロンプトパッケージ -->
+            <section class="panel glass-panel prompt-panel">
+                <div class="panel-header">
+                    <h2>AI Diagnostics Assistant (LLM用プロンプト)</h2>
+                    <button id="copy-btn" class="glow-btn">Copy Prompt</button>
+                </div>
+                <div class="prompt-content">
+                    <textarea id="prompt-text" readonly placeholder="Generating prompt..."></textarea>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
